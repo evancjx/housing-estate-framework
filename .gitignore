@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Conversation logs
+CONVERSATION-TRANSCRIPT.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large raw downloads (reproducible via pipeline)
+data/bus_services.json
+data/bus_stops_raw.json

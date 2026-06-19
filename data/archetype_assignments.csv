@@ -1,0 +1,33 @@
+estate,archetype,confidence,rationale
+WOODLANDS,A,High,Explicit URA North Regional Centre; multi-line NSL+TEL interchange; 700000 sqm commercial GFA planned
+JURONG EAST,A,High,Explicit URA Regional Centre (Jurong Lake District); NSL+EWL interchange; JEM/Westgate/IMM malls; dominant office GFA
+TAMPINES,A,High,URA Regional Centre since 1992; EWL+DTL interchange; three malls >=100k sqft each; Our Tampines Hub at regional scale
+TAMPINES WEST,A,Medium,Subzone of confirmed URA Regional Centre; residents access full Tampines A suite; own DTL MRT station (DT31)
+TAMPINES EAST,A,Medium,Subzone of confirmed URA Regional Centre; own DTL station (DT33 opened 2017); full Tampines A amenity access
+TOA PAYOH,B,High,Singapore's first purpose-built HDB town (1960s); single NSL MRT; no URA Regional Centre; fully mature self-contained estate
+BISHAN,B,High,Mature HDB town completed ~1989; NSL+CCL interchange present but no URA Regional Centre; Junction 8 is local-scale only
+ANG MO KIO,B,High,Large mature HDB town from 1973; single NSL at T0 (CRL ~2030); no URA Regional Centre designation
+SERANGOON,B,High,Mature HDB town; NEX + NEL+CCL interchange but no office/civic anchor and no URA Regional Centre designation
+BEDOK,B,High,One of Singapore's oldest and largest HDB towns (from 1975); no URA Regional Centre; coastal park is amenity not defining identity
+HOUGANG,B,High,Established NEL HDB town; CRL interchange not operational at T0 (2026); integrated hub under construction (~2030)
+SENGKANG,B,High,Masterplan 1994 first flats 1997 — pre-2010 genesis confirmed; majority of 66k units now >=15 years old; all amenities fully operational
+SEMBAWANG,B,Medium,Core amenities operational (MRT bus interchange Bukit Canberra polyclinic/hawker by 2023); Sembawang North BTO is additive not greenfield redefining
+YISHUN,B,High,Large mature HDB town from 1983; Northpoint City ITH large but no URA Regional/Sub-Regional Centre designation; Woodlands holds North anchor
+QUEENSTOWN,B,High,Singapore's first satellite town (1950s); mature HDB dominant; Buona Vista sub-regional node is a subzone not the whole planning area
+CLEMENTI,B,High,Mature HDB town with 24000 flats; Clementi ITH (EWL) operational; CRL not open until 2032; no URA Regional Centre designation
+BUKIT MERAH,B,High,Mature city-fringe HDB town (1950s-70s); multi-MRT access distributed not hub-concentrated; no coastal/seafront defining identity
+GEYLANG,B,High,Large mature HDB planning area (94200 residents); multi-MRT across 3 lines; no dominant coastal or private-housing character
+BUKIT TIMAH,D,High,GCB-dominant minimal public housing; Bukit Timah Nature Reserve + Rail Corridor frontage; top school cluster including GEP/SAP feeders
+BUKIT BATOK,B,High,Mature HDB town from 1981; full complement (polyclinic schools bus interchange West Mall); not post-2010; no coastal or private dominance
+BUKIT PANJANG,B,Medium,Large standalone HDB town (~130000 residents); DTL+LRT; Hillion ITH opened 2017; fully self-contained; development from 1990s not post-2010
+CANBERRA,B,Medium,Post-2010 BTO (2013) non-mature; but Canberra MRT has no co-located bus interchange — E hub co-location criterion not met; all amenities open
+CHOA CHU KANG,B,High,Mature HDB town from 1980s-90s; NSL+LRT interchange; full amenity suite; no URA Regional/Sub-Regional Centre designation
+PASIR RIS,C,Medium,HDB explicitly designed as coastal residential area; clam/lighthouse architecture; Downtown East Wild Wild Wet 70ha park; white sand identity primary
+MARINE PARADE,D,Medium,Private housing dominant (161 condos vs 82 HDB blocks); Tao Nan School is SAP+GEP feeder; East Coast Park frontage; Katong lifestyle premium
+PUNGGOL,E,High,Singapore's first eco-town; post-2010 master plan; Punggol MRT+LRT+bus hub operational; Punggol Coast ITH opened June 2025
+WOODLEIGH,E,High,Post-2010 Bidadari master plan (2013 greenfield); Woodleigh ITH operational at T0 (bus interchange April 2025 mall 2023 MRT long operational)
+DOVER,F,High,Subzone of Queenstown; 1.38 sq km; single EWL station; no town identity; residents commute to Queenstown/Clementi for amenities
+BOON KENG,F,High,Subzone of Kallang; ~12000 residents; single NEL station; no standalone town infrastructure; residents rely on adjacent towns
+LENTOR,F,High,Subzone of AMK planning area; single TEL station; private-condo dominated; no BTO component no hawker/polyclinic/bus interchange
+TENGAH,G,High,JRL delayed to 2028 (not operational at T0); active construction across multiple districts; Tengah Polyclinic opened Feb 2026 but MRT absent
+CENTRAL AREA,X,High,CBD/Orchard/Marina Bay core; majority non-residential zoning; minimal HDB; exits provision pipeline as N/R

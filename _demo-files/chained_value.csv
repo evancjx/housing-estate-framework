@@ -1,0 +1,3 @@
+estate,segment,n,resid_raw,resid_shrunk,trust,conn,amen,green,sch,hlth,infra,dens,env,mom,provision,weight_covered,score,measured_only,band,value_score,value_band,mult,reported
+BISHAN,hdb_resale,77,-0.000768914263430176,-0.0005533308250679191,band_only,5.0,5.0,5.0,4.4,4.45,5.0,4.0,4.0,3.0,4.61,1.0,4.61,False,A,4.612551560967129,A,1.0005534839408088,"A (band only, n<100)"
+TENGAH,hdb_resale,119,0.007176808727104245,0.005731813681391015,decimal,4.4,3.1,4.0,3.6,2.55,1.0,3.0,4.0,,3.1,0.935,3.1,True,C,3.082282203649338,C,0.994284581822367,3.08
