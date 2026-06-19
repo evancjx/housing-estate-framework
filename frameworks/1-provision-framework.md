@@ -54,7 +54,7 @@ Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (s
 | 6 | Healthcare | 0.0850 | Primary-care-first: GP/CHAS/pharmacy, polyclinic, eldercare, THEN A&E time |
 | 7 | Momentum (+) | 0.0645 | Confirmed *additions* only, time-discounted (positive only — losses live in D) |
 | 8 | Infrastructure readiness | 0.1709 | Trunk infra *operational now* (LiveNow horizon). Distinct from S1: S1 = quality-when-present; S8 = operational-at-horizon. |
-| 9 | Environmental comfort | 0.0645 | Heat/shade, road-rail-aircraft noise, expressway exposure, construction disruption, flood-prone routes |
+| 9 | Environmental comfort | 0.0645 | Heat/shade (`env`), expressway exposure (`noise`), aircraft-corridor proximity (`air_noise`, v1.2: split out as MEASURED — geometric proxy of runway centerlines + 12 km approach corridors for Changi / Seletar / Paya Lebar), construction disruption, flood-prone routes (`flood`) |
 |10 | *(reserved — estate stewardship; NOT "social mix")* | — | See Appendix on the permanent social-mix exclusion |
 
 ### 1.2 S11 — conditional car-mobility (provision side)

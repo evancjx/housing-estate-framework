@@ -6,12 +6,21 @@ Computes the Provision score per estate from ACTUAL spatial data, instead of
 analyst judgement. Emits the scores.csv that value_model.py consumes.
 
 HONEST SCOPE (read this — the model enforces it in output):
-  MEASURED        (11): connectivity, amenities, green, schools, healthcare,
-                        infra, childcare, community, sport, flood_risk, noise
+  MEASURED        (12): connectivity, amenities, green, schools, healthcare,
+                        infra, childcare, community, sport, flood_risk, noise,
+                        air_noise (geometric corridor proxy — see note)
   PARTLY_MEASURED  (2): density (dwelling density yes; "feel" no),
-                        env_comfort (temp/flood yes; shade/noise/construction no)
+                        env_comfort (heat/shade only; air-noise + expressway now
+                        split out as siblings — see audit §2d)
   JUDGED           (2): momentum (requires reading announcements — not a query),
                         hawker (fame/reputation — not a query)
+
+Note on `air_noise`: this is a geometric distance to runway centerlines + 12 km
+approach/departure corridor extensions for Changi, Seletar, and Paya Lebar
+(decommissioning ~2030). It is a PROXY for aircraft-noise exposure, NOT a real
+CAAS noise contour. Estates under flight paths (Pasir Ris, Tampines, Marine
+Parade) discriminate sharply; West / North estates saturate at 5. Replace the
+corridor CSV when verified CAAS flight-track data is available.
 
 Every component output carries a provenance tag. A future reviewer can see at a
 glance which numbers are measurement and which are opinion. The model NEVER
@@ -38,7 +47,9 @@ import argparse, sys, math
 import numpy as np, pandas as pd
 
 # ----------------------------------------------------------------------
-# v1.1 weights (sum=1.000). Added noise (4%); trimmed env/community/sport/flood.
+# v1.2 weights (sum=1.000). Added air_noise (3%); carved from env (0.05→0.02),
+# the first step of the audit §2d env split. air_noise = distance to runway
+# centerlines + 12km approach corridors for Changi / Seletar / Paya Lebar.
 # noise = distance to nearest expressway motorway, OSM-sourced.
 # ----------------------------------------------------------------------
 W = {
@@ -50,13 +61,14 @@ W = {
     'hlth':      0.07,
     'mom':       0.04,
     'infra':     0.15,
-    'env':       0.05,
+    'env':       0.02,
     'childcare': 0.06,
     'community': 0.03,
     'sport':     0.02,
     'flood':     0.01,
     'hawker':    0.04,
     'noise':     0.04,
+    'air_noise': 0.03,
 }
 assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
 
@@ -72,6 +84,7 @@ PROVENANCE = {
     'sport':     'MEASURED',
     'flood':     'MEASURED',
     'noise':     'MEASURED',
+    'air_noise': 'MEASURED',
     'dens':      'PARTLY_MEASURED',
     'env':       'PARTLY_MEASURED',
     'mom':       'JUDGED',
@@ -125,6 +138,9 @@ A_SPORT    = [(500,5),(1000,4),(1500,3),(2500,2),(99999,1)]   # sport centres
 A_FLOOD    = [(250,1),(500,2),(1000,3),(1500,4),(99999,5)]
 # noise: INVERSE — farther from expressway is quieter (score 5)
 A_NOISE    = [(500,1),(1000,2),(1500,3),(2000,4),(99999,5)]
+# air_noise: INVERSE — aircraft noise propagates further than expressway noise,
+# so anchors are wider. Distance is to nearest runway/approach-corridor point.
+A_AIR_NOISE = [(1000,1),(2000,2),(3500,3),(5000,4),(99999,5)]
 
 # count anchors
 C_CLINIC   = [(8,5),(5,4),(3,3),(1,2),(0,1)]
@@ -198,6 +214,11 @@ def score_noise(lat, lon, expressways):
     # inverted: farther from expressway = quieter = higher score
     return float(score_by_distance(d, A_NOISE)), {'nearest_expressway_m': round(d) if d != np.inf else None}
 
+def score_air_noise(lat, lon, air_noise_corridors):
+    d = nearest_m(lat, lon, pts_of(air_noise_corridors))
+    # inverted: farther from runway/approach corridor = quieter = higher score
+    return float(score_by_distance(d, A_AIR_NOISE)), {'nearest_air_corridor_m': round(d) if d != np.inf else None}
+
 # ----------------------------------------------------------------------
 # Assemble
 # ----------------------------------------------------------------------
@@ -217,6 +238,7 @@ def run(estates, layers, judged):
         s['sport'],_     = score_sport(lat, lon, layers['sport'])
         s['flood'],_     = score_flood_risk(lat, lon, layers['flood'])
         s['noise'],_     = score_noise(lat, lon, layers['noise'])
+        s['air_noise'],_ = score_air_noise(lat, lon, layers['air_noise'])
 
         # PARTLY/JUDGED: from judged_inputs.csv if provided, else NaN-flag
         jr = judged[judged['estate'] == name] if judged is not None else pd.DataFrame()
@@ -249,7 +271,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--estates', required=True)
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
-              'supermarkets','childcare','community','sport','flood','noise']:
+              'supermarkets','childcare','community','sport','flood','noise',
+              'air_noise']:
         ap.add_argument(f'--{L}')
     ap.add_argument('--judged', help='CSV: estate,dens,env,mom,hawker (the 4 non-geospatial)')
     ap.add_argument('--out', default='provision_scores.csv')
@@ -260,7 +283,8 @@ def main():
     def load(p): return pd.read_csv(p) if p else None
     layers = {L: load(getattr(a, L)) for L in
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
-               'supermarkets','childcare','community','sport','flood','noise']}
+               'supermarkets','childcare','community','sport','flood','noise',
+               'air_noise']}
     judged = load(a.judged)
 
     df = run(estates, layers, judged)
@@ -268,7 +292,7 @@ def main():
     df.to_csv(a.out, index=False)
 
     cols = ['estate','conn','amen','green','sch','dens','hlth','mom','hawker','infra','env',
-            'childcare','community','sport','flood','noise',
+            'childcare','community','sport','flood','noise','air_noise',
             'provision','band','weight_covered','measured_only']
     print(df[cols].to_string(index=False))
     print("\nProvenance:", {k: PROVENANCE[k] for k in W})
@@ -280,7 +304,7 @@ if __name__ == '__main__':
     main()
 
 # ======================================================================
-# INPUT CONTRACT — provision_model.py v1.0
+# INPUT CONTRACT — provision_model.py v1.2
 # ======================================================================
 # REQUIRED:
 #   --estates estates.csv     columns: estate,lat,lon
@@ -298,21 +322,27 @@ if __name__ == '__main__':
 #   --community community.csv lat,lon               (PA community clubs; d_f706de1427279e61fe41e89e24d440fa)
 #   --sport sport.csv         lat,lon               (SportSG/ActiveSG centres; d_9b87bab59d036a60fad2a91530e10773)
 #   --flood flood_risk.csv    lat,lon               (PUB flood-prone areas, Nov 2025, 36 locations)
+#   --noise expressways.csv   lat,lon               (OSM expressway centerline points)
+#   --air_noise air_noise_corridors.csv  lat,lon,corridor
+#                             (geometric proxy: runway centerlines + 12 km
+#                              approach corridors for Changi, Seletar, Paya Lebar)
 #
 # NON-GEOSPATIAL (judgement) COMPONENTS:
 #   --judged judged.csv       columns: estate,dens,env,mom,hawker   (each 1-5)
 #       If omitted, those 4 components are left MISSING and provision is
-#       computed from the 10 measured components only (measured_only=True).
+#       computed from the 12 measured components only (measured_only=True).
 #       NEVER auto-fill these — they are opinion by construction.
 #
-# WEIGHTS (v1.1, 14 components):
-#   conn 15%, infra 15%, amen 10%, green 9%, dens 8%, childcare 6%,
-#   sch 7%, hlth 7%, community 4%, env 6%, mom 4%, hawker 4%, sport 3%, flood 2%
+# WEIGHTS (v1.2, 16 components, sum=1.000):
+#   conn 15%, infra 15%, amen 10%, green 9%, dens 8%, sch 7%, hlth 7%,
+#   childcare 6%, mom 4%, hawker 4%, noise 4%, air_noise 3%, community 3%,
+#   env 2%, sport 2%, flood 1%
 #
 # PIPELINE:
 #   python provision_model.py --estates e.csv --mrt mrt.csv ... \
 #       --childcare childcare.csv --community community.csv \
-#       --sport sport.csv --flood flood_risk.csv \
+#       --sport sport.csv --flood flood_risk.csv --noise expressways.csv \
+#       --air_noise air_noise_corridors.csv \
 #       --judged judged_inputs.csv --out provision_scores.csv
 #   python value_model.py --scores provision_scores.csv --hdb hdb.csv
 # ======================================================================
