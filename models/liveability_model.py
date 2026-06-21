@@ -11,10 +11,7 @@ SECONDARY:       Gap = Liveability_cell − Provision_band (the headline signal)
 
 === COMPUTED PERSONA WEIGHTS (audit table) ===
 
-Base weights (from provision_model.py W dict, sum = 1.000):
-  conn=0.15  amen=0.13  green=0.09  sch=0.07  dens=0.08
-  hlth=0.04  eldercare=0.03  mom=0.05   infra=0.15  env=0.02
-  childcare=0.06  community=0.04  sport=0.03  flood=0.03  air_noise=0.03
+Base weights are imported from provision_model.W (17 components); see that file.
 
 v1.3 change: eldercare carved from hlth (0.07→0.04). eldercare joins S6.
 v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
@@ -121,36 +118,23 @@ import pandas as pd
 # ---------------------------------------------------------------------------
 # 1. Base provision weights (must mirror provision_model.py W dict exactly)
 # ---------------------------------------------------------------------------
-BASE_W: Dict[str, float] = {
-    "conn":      0.15,
-    "amen":      0.13,
-    "green":     0.09,
-    "sch":       0.07,
-    "dens":      0.08,
-    "hlth":      0.04,
-    "eldercare": 0.03,
-    "mom":       0.05,
-    "infra":     0.15,
-    "env":       0.02,
-    "childcare": 0.06,
-    "community": 0.04,
-    "sport":     0.03,
-    "flood":     0.03,
-    "air_noise": 0.03,
-}
+from provision_model import W as _PROV_W  # single source of truth (invariant)
+
+BASE_W: Dict[str, float] = dict(_PROV_W)
 assert abs(sum(BASE_W.values()) - 1.0) < 1e-9, "BASE_W must sum to 1.0"
+assert set(BASE_W) == set(_PROV_W), "BASE_W must mirror provision_model.W exactly"
 
 # S-group → component membership (for proportional delta distribution)
 S_GROUPS: Dict[str, list] = {
     "S1": ["conn"],
-    "S2": ["amen", "community"],
+    "S2": ["amen", "community", "hawker"],
     "S3": ["green", "sport"],
     "S4": ["sch", "childcare"],
     "S5": ["dens"],
     "S6": ["hlth", "eldercare"],
     "S7": ["mom"],
     "S8": ["infra"],
-    "S9": ["env", "flood", "air_noise"],
+    "S9": ["env", "flood", "air_noise", "noise"],
 }
 
 # Persona delta table: S-group → delta in percentage points
