@@ -33,29 +33,11 @@ See INPUT CONTRACT at the bottom of this file for exact column names.
 import argparse, sys, json
 import numpy as np
 import pandas as pd
+from aliases import ESTATE_TOWN_ALIAS, PRIVATE_DOMINANT_PROXIES
 
 # ----------------------------------------------------------------------
 # 1. CONFIG — the only knobs. Documented so a future run can challenge them.
 # ----------------------------------------------------------------------
-# Estate name → HDB town alias (for estates that are sub-areas of a larger HDB town)
-ESTATE_TOWN_ALIAS = {
-    "CANBERRA":        "SEMBAWANG",        # Canberra BTOs have no MOP yet; fold into Sembawang town data
-    "BOON KENG":       "KALLANG/WHAMPOA",  # Boon Keng is part of Kallang/Whampoa HDB town
-    "KALLANG":         "KALLANG/WHAMPOA",  # Kallang estate — HDB town is KALLANG/WHAMPOA
-    "WOODLEIGH":       "TOA PAYOH",        # Bidadari/Woodleigh is under Toa Payoh HDB town
-    "DOVER":           "QUEENSTOWN",       # Dover Road area is in Queenstown HDB town
-    "TAMPINES WEST":   "TAMPINES",         # Tampines West is part of Tampines HDB town
-    "TAMPINES EAST":   "TAMPINES",         # Tampines East is part of Tampines HDB town
-    "LENTOR":          "ANG MO KIO",       # Lentor private; proxy via AMK HDB town (indicative only)
-    "HOLLAND VILLAGE": "QUEENSTOWN",       # Holland Village HDB proxy via Queenstown (private-dominant; no direct HDB town)
-    # TENGAH: no MOP resale data yet — excluded from value model
-    # JURONG WEST: direct HDB town name match — no alias needed
-    # All other estate names match HDB town names directly — no alias needed
-}
-
-# Estates that are private-dominant: must NOT borrow an HDB-resale residual.
-PRIVATE_DOMINANT_PROXIES = {"HOLLAND VILLAGE", "LENTOR"}
-
 CFG = {
     "adj_cap_low": 0.75,        # min Value adjustment multiplier (framework lock)
     "adj_cap_high": 1.25,       # max Value adjustment multiplier

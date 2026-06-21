@@ -136,26 +136,7 @@ ESTATE_NAMES = [
     'CLEMENTI','CENTRAL AREA','BUKIT TIMAH',
 ]
 
-# Non-canonical names the workflow used → canonical mapping
-ALIAS_MAP = {
-    'BIDADARI':        'WOODLEIGH',
-    'MARSILING':       'WOODLANDS',
-    'KAKI BUKIT':      'BEDOK',
-    'EAST COAST':      'MARINE PARADE',
-    'BOON LAY':        'JURONG EAST',
-    'TAMAN JURONG':    'JURONG EAST',
-    'JURONG WEST':     'JURONG EAST',
-    'BUONA VISTA':     'QUEENSTOWN',
-    'NOVENA':          'TOA PAYOH',
-    'KALLANG':         'BOON KENG',
-    'WEST COAST':      'CLEMENTI',
-    'TAMPINES NORTH':  'TAMPINES',
-    'YEW TEE':         'CHOA CHU KANG',
-}
-
-def canonical(name):
-    n = name.upper().strip()
-    return ALIAS_MAP.get(n, n)
+from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP, canonicalise_pipeline_name as canonical
 
 def build_canonical_sums(pipeline_data):
     sums = {}

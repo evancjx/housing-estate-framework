@@ -20,20 +20,7 @@ RUN:
 import os, sys
 import pandas as pd
 import numpy as np
-
-# ---------------------------------------------------------------------------
-# Estate -> HDB town mapping (estates that are sub-areas of a larger HDB town)
-# ---------------------------------------------------------------------------
-ESTATE_TOWN_ALIAS = {
-    "CANBERRA":        "SEMBAWANG",
-    "BOON KENG":       "KALLANG/WHAMPOA",
-    "KALLANG":         "KALLANG/WHAMPOA",
-    "WOODLEIGH":       "TOA PAYOH",
-    "DOVER":           "QUEENSTOWN",
-    "TAMPINES WEST":   "TAMPINES",
-    "TAMPINES EAST":   "TAMPINES",
-    "HOLLAND VILLAGE": "QUEENSTOWN",   # private dominant; proxy for lease context only
-}
+from aliases import ESTATE_TOWN_ALIAS
 
 # Manual overrides: estates with no (or meaningless) HDB resale data
 # These are new BTOs or new private estates with ~94-99yr leases remaining

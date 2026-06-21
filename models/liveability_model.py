@@ -240,27 +240,7 @@ def get_d(estate: str, horizon: str = "T0",
 # ---------------------------------------------------------------------------
 # 3. Alias map — pipeline estate names → provision_scores.csv estate names
 # ---------------------------------------------------------------------------
-ALIAS_MAP: Dict[str, str] = {
-    "BIDADARI":      "WOODLEIGH",
-    "MARSILING":     "WOODLANDS",
-    "KAKI BUKIT":    "BEDOK",
-    "EAST COAST":    "MARINE PARADE",
-    "BOON LAY":      "JURONG WEST",    # Boon Lay is the town centre of Jurong West
-    "TAMAN JURONG":  "JURONG WEST",
-    "BUONA VISTA":   "HOLLAND VILLAGE",
-    "NOVENA":        "TOA PAYOH",
-    "WEST COAST":    "CLEMENTI",
-    "TAMPINES NORTH":"TAMPINES",
-    "YEW TEE":       "CHOA CHU KANG",
-    # JURONG WEST: now a real estate — removed from alias map
-    # KALLANG: now a real estate — removed from alias map
-}
-
-
-def canonicalise_estate(name: str) -> str:
-    """Map pipeline estate name to canonical provision_scores.csv estate name."""
-    u = name.strip().upper()
-    return ALIAS_MAP.get(u, u)
+from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP, canonicalise_pipeline_name as canonicalise_estate
 
 
 # ---------------------------------------------------------------------------
