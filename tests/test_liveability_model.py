@@ -11,3 +11,10 @@ def test_base_w_mirrors_provision_w():
 def test_every_base_component_in_an_s_group():
     grouped = {c for comps in liveability_model.S_GROUPS.values() for c in comps}
     assert set(liveability_model.BASE_W) <= grouped, set(liveability_model.BASE_W) - grouped
+
+
+def test_gap_label_dead_band():
+    assert liveability_model.gap_label(0.2) == "matched"
+    assert liveability_model.gap_label(0.8) == "punches_above"
+    assert liveability_model.gap_label(-0.8) == "over_equipped"
+    assert liveability_model.gap_label(0.5) == "matched"   # boundary inclusive

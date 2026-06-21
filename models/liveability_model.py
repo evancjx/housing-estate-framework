@@ -284,6 +284,16 @@ CAP_B   = 3.99    # <= B means band B or lower → score must be < 4.0 (below B+
 CAP_C   = 3.49    # <= C means band C or lower → score must be < 3.5 (below B threshold)
 CAP_D   = 2.99    # <= D means band D or lower → score must be < 3.0 (below C threshold)
 
+GAP_DEAD_BAND = 0.5  # ~1σ of two ±0.3 inputs combined; below this = "matched"
+
+
+def gap_label(g: float) -> str:
+    if g > GAP_DEAD_BAND:
+        return "punches_above"
+    if g < -GAP_DEAD_BAND:
+        return "over_equipped"
+    return "matched"
+
 
 def band(score: float) -> str:
     """Convert numeric score to band label. Applies soft floor 1.5."""
@@ -692,11 +702,12 @@ def run(
         d_t15 = 1.00
 
         record: Dict = {
-            "estate":         estate,
-            "provision_band": prov_band,
-            "D_T0":           d_t0,
-            "D_T5":           d_t5,
-            "D_T15":          d_t15,
+            "estate":          estate,
+            "provision_band":  prov_band,
+            "provision_score": round(prov_score, 3),
+            "D_T0":            d_t0,
+            "D_T5":            d_t5,
+            "D_T15":           d_t15,
         }
 
         prefix_map = {
@@ -726,13 +737,13 @@ def run(
 
     results = pd.DataFrame(records)
 
-    # -- Gap columns: Liveability_cell_band_numeric − Provision_band_numeric
-    # This is the primary deliverable: positive = estate punches above its provision
-    prov_num = results["provision_band"].map(BAND_NUMERIC)
+    # -- Gap on CONTINUOUS scores (both on the 1-5 scale). Band ladders are non-linear.
+    prov_score_col = results["provision_score"]
     for pre in ["yf", "sp", "ret", "ls"]:
         for hz in ["T0", "T5", "T15"]:
-            num = results[f"{pre}_{hz}_band"].map(BAND_NUMERIC)
-            results[f"gap_{pre}_{hz}"] = (num - prov_num).round(1)
+            g = (results[f"{pre}_{hz}"] - prov_score_col).round(2)
+            results[f"gap_{pre}_{hz}"] = g
+            results[f"gap_{pre}_{hz}_label"] = g.map(gap_label)
 
     # -- Save
     results.to_csv(out_path, index=False)
