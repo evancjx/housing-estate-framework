@@ -1,64 +1,184 @@
-lat,lon,name,type
-1.3062806,103.7608104,Sasco Integrated Eldercare Centre,day_centre
-1.35153,103.8372966,Sparkle Care,ambulatory_care
-1.3290433,103.7948932,Soo's Nursing Home,nursing_home
-1.318117,103.7692259,Lions Befrienders,day_care
-1.3187085,103.8883323,Thong Teck Home for Senior Citizens,nursing_home
-1.4412339,103.7753359,Christalite Methodist Home,nursing_home
-1.4399992,103.8239599,Sunshine Welfare Action Mission Home,nursing_home
-1.3497498,103.8876269,Society For The Aged Sick,nursing_home
-1.285875,103.84185,Pearl's Hill Care Home,nursing_home
-1.2765179,103.8309822,Lee Ah Mooi Old Age Home,nursing_home
-1.4299856,103.8310185,Sree Narayana Mission,nursing_home
-1.4295388,103.7744208,Orange Valley Nursing Home (Marsiling),nursing_home
-1.3823633,103.7392406,Bethany Methodist Nursing Home,nursing_home
-1.4436856,103.7904338,Man Fut Tong Nursing Home,nursing_home
-1.3827802,103.7607557,Pacific Healthcare Nursing Home II,nursing_home
-1.3111225,103.7594582,Jamiyah Nursing Home,nursing_home
-1.3244439,103.8505836,Orange Valley Care Centre Balestier,assisted_living
-1.3741482,103.8880671,THK Nursing Home @ Hougang,nursing_home
-1.2710407,103.8120764,St. Andrew's Nursing Home,nursing_home
-1.3538905,103.7406769,Bukit Batok Care Home,nursing_home
-1.3491573,103.7102031,Gift of Love Home,nursing_home
-1.3145551,103.9138927,Paean Nursing Home,nursing_home
-1.3269138,103.851608,Tai Pei Old People House,nursing_home
-1.3144714,103.9411637,Econ Medicare Centre (Upper East Coast),nursing_home
-1.3154294,103.8569188,Anglican Care Centre,nursing_home
-1.4461396,103.8045688,Woodlands Care Home,nursing_home
-1.3409642,103.6915449,NTUC Health Nursing Home,nursing_home
-1.3493586,103.8534983,Lions Home for the Elders,nursing_home
-1.2981495,103.8080354,St. Andrew's Nursing Home,nursing_home
-1.3467419,103.8367949,St. Theresa's Home,nursing_home
-1.3417332,103.7408203,All Saints Home (Jurong East),nursing_home
-1.3499771,103.7083374,,nursing_home
-1.3956032,103.7520484,MWS Nursing Home - Yew Tee,nursing_home
-1.3805171,103.8851858,Sunlove Home,nursing_home
-1.32655,103.7259875,Saint Andrew's Nursing Home,nursing_home
-1.3632742,103.9370931,Tampines Care Home,nursing_home
-1.3598382,103.8282328,Allium Healthcare,nursing_home
-1.3480694,103.7181729,NTUC Health,nursing_home
-1.4397228,103.8234669,THK Home For Disabled,nursing_home
-1.4325368,103.8477825,SNM Nursing Home@Riverwalk,nursing_home
-1.3478421,103.8880008,Lentor Health Nursing Home (Hougang) and Lentor Senior Care Centre (Hougang),nursing_home
-1.3500966,103.7083414,St. Joseph's Home,nursing_home
-1.3944109,103.8720811,,nursing_home
-1.3941597,103.8720508,,nursing_home
-1.3945135,103.8724496,,nursing_home
-1.394757,103.8721096,,nursing_home
-1.3944515,103.8718705,,nursing_home
-1.3944733,103.8720954,,nursing_home
-1.3012917,103.764002,Lentor Health Nursing Home (West Coast),nursing_home
-1.3653264,103.9654316,,nursing_home
-1.3701488,103.964562,NTUC Health Nursing Home (Pasir Ris),nursing_home
-1.4245235,103.7933768,Ren Ci @ Woodlands,nursing_home
-1.30642,103.78172,St. John's - St. Margaret's Nursing Home,nursing_home
-1.369348,103.8403439,St Luke’s ElderCare Residence @ Ang Mo Kio,nursing_home
-1.3693686,103.8403385,,nursing_home
-1.3669131,103.9422406,St. Andrew's Nursing Home (Tampines North),nursing_home
-1.3327233,103.8874028,Lentor Health Nursing Home (MacPherson),nursing_home
-1.3496939,103.9513912,NTUC Health (Tampines),nursing_home
-1.3045146,103.8968905,THK Nursing Home @ Tanjong Katong,nursing_home
-1.4030362,103.8941939,St Luke’s Eldercare Residence @ Punggol,nursing_home
-1.3359171,103.8550821,United Medicare Centre - Toa Payoh,nursing_home
-1.4436674,103.7904142,,nursing_home
-1.3218199,103.8808987,,nursing_home
+lat,lon,name,postal,type,source
+1.3062806,103.7608104,Sasco Integrated Eldercare Centre,,day_centre,pre-existing repo data/eldercare.csv
+1.3515300,103.8372966,Sparkle Care,,ambulatory_care,pre-existing repo data/eldercare.csv
+1.3290433,103.7948932,Soo's Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3181170,103.7692259,Lions Befrienders,,day_care,pre-existing repo data/eldercare.csv
+1.3187085,103.8883323,Thong Teck Home for Senior Citizens,,nursing_home,pre-existing repo data/eldercare.csv
+1.4412339,103.7753359,Christalite Methodist Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.4399992,103.8239599,Sunshine Welfare Action Mission Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3497498,103.8876269,Society For The Aged Sick,,nursing_home,pre-existing repo data/eldercare.csv
+1.2858750,103.8418500,Pearl's Hill Care Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.2765179,103.8309822,Lee Ah Mooi Old Age Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.4299856,103.8310185,Sree Narayana Mission,,nursing_home,pre-existing repo data/eldercare.csv
+1.4295388,103.7744208,Orange Valley Nursing Home (Marsiling),,nursing_home,pre-existing repo data/eldercare.csv
+1.3823633,103.7392406,Bethany Methodist Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.4436856,103.7904338,Man Fut Tong Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3827802,103.7607557,Pacific Healthcare Nursing Home II,,nursing_home,pre-existing repo data/eldercare.csv
+1.3111225,103.7594582,Jamiyah Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3244439,103.8505836,Orange Valley Care Centre Balestier,,assisted_living,pre-existing repo data/eldercare.csv
+1.3741482,103.8880671,THK Nursing Home @ Hougang,,nursing_home,pre-existing repo data/eldercare.csv
+1.2710407,103.8120764,St. Andrew's Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3538905,103.7406769,Bukit Batok Care Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3491573,103.7102031,Gift of Love Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3145551,103.9138927,Paean Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3269138,103.8516080,Tai Pei Old People House,,nursing_home,pre-existing repo data/eldercare.csv
+1.3144714,103.9411637,Econ Medicare Centre (Upper East Coast),,nursing_home,pre-existing repo data/eldercare.csv
+1.3154294,103.8569188,Anglican Care Centre,,nursing_home,pre-existing repo data/eldercare.csv
+1.4461396,103.8045688,Woodlands Care Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3409642,103.6915449,NTUC Health Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3493586,103.8534983,Lions Home for the Elders,,nursing_home,pre-existing repo data/eldercare.csv
+1.2981495,103.8080354,St. Andrew's Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3467419,103.8367949,St. Theresa's Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3417332,103.7408203,All Saints Home (Jurong East),,nursing_home,pre-existing repo data/eldercare.csv
+1.3499771,103.7083374,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3956032,103.7520484,MWS Nursing Home - Yew Tee,,nursing_home,pre-existing repo data/eldercare.csv
+1.3805171,103.8851858,Sunlove Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3265500,103.7259875,Saint Andrew's Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3632742,103.9370931,Tampines Care Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3598382,103.8282328,Allium Healthcare,,nursing_home,pre-existing repo data/eldercare.csv
+1.3480694,103.7181729,NTUC Health,,nursing_home,pre-existing repo data/eldercare.csv
+1.4397228,103.8234669,THK Home For Disabled,,nursing_home,pre-existing repo data/eldercare.csv
+1.4325368,103.8477825,SNM Nursing Home@Riverwalk,,nursing_home,pre-existing repo data/eldercare.csv
+1.3478421,103.8880008,Lentor Health Nursing Home (Hougang) and Lentor Senior Care Centre (Hougang),,nursing_home,pre-existing repo data/eldercare.csv
+1.3500966,103.7083414,St. Joseph's Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3944109,103.8720811,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3941597,103.8720508,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3945135,103.8724496,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3947570,103.8721096,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3944515,103.8718705,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3944733,103.8720954,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3012917,103.7640020,Lentor Health Nursing Home (West Coast),,nursing_home,pre-existing repo data/eldercare.csv
+1.3653264,103.9654316,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3701488,103.9645620,NTUC Health Nursing Home (Pasir Ris),,nursing_home,pre-existing repo data/eldercare.csv
+1.4245235,103.7933768,Ren Ci @ Woodlands,,nursing_home,pre-existing repo data/eldercare.csv
+1.3064200,103.7817200,St. John's - St. Margaret's Nursing Home,,nursing_home,pre-existing repo data/eldercare.csv
+1.3693480,103.8403439,St Luke’s ElderCare Residence @ Ang Mo Kio,,nursing_home,pre-existing repo data/eldercare.csv
+1.3693686,103.8403385,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3669131,103.9422406,St. Andrew's Nursing Home (Tampines North),,nursing_home,pre-existing repo data/eldercare.csv
+1.3327233,103.8874028,Lentor Health Nursing Home (MacPherson),,nursing_home,pre-existing repo data/eldercare.csv
+1.3496939,103.9513912,NTUC Health (Tampines),,nursing_home,pre-existing repo data/eldercare.csv
+1.3045146,103.8968905,THK Nursing Home @ Tanjong Katong,,nursing_home,pre-existing repo data/eldercare.csv
+1.4030362,103.8941939,St Luke’s Eldercare Residence @ Punggol,,nursing_home,pre-existing repo data/eldercare.csv
+1.3359171,103.8550821,United Medicare Centre - Toa Payoh,,nursing_home,pre-existing repo data/eldercare.csv
+1.4436674,103.7904142,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3218199,103.8808987,,,nursing_home,pre-existing repo data/eldercare.csv
+1.3476235,103.7310091,Yuhua Senior Activity Centre,601318,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3336934,103.9303969,THK SAC @ Kaki Bukit,462509,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3450768,103.7118504,THK SAC @ Boon Lay,640190,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3043462,103.8648158,PEACE-Connect Senior Activity Centre@5,190005,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2888092,103.8262951,THK SAC @ Beo Crescent,160044,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2817070,103.8268395,Silver ACE @ Bukit Merah,160117,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3595403,103.9561088,Lions Befrienders Senior Activity Centre @ Tampines Blk 499C,523499,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4301219,103.7897183,Care Corner Senior Activity Centre (WL569),731569,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3454285,103.7508359,Fei Yue Senior Activity Centre (Bukit Batok Branch),651210,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3904713,103.9092158,COMNET Senior Activity Centre @ 182 Rivervale Crescent,540182,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3028774,103.8471991,Abdullah Shooker Jewish Welfare Home,228080,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3300810,103.8583546,Adventist Home For The Elders,310195,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3705105,103.8446523,AWWA Community Home for Senior Citizens,560123,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3313124,103.7189001,Bo Tien Home For The Aged,619708,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3780260,103.7454669,"Evergreen Place, Home @Hong San",688246,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3212967,103.8856680,Geylang East Home For The Aged,380097,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2843476,103.8217727,Henderson Senior Citizens' Home,151117,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3563229,103.9466638,Kheng Chiu Loke Tin Kee Home,529681,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3417731,103.8560398,PERTAPIS Senior Citizens Fellowship Home,310222,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2755962,103.8423932,SBWS Happy Villa (Females),082001,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3203689,103.8683408,Singapore Baptist Convention Golden Age Home,330064,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3191690,103.7690540,St Andrew's Cathedral Home For The Aged,120341,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3330648,103.8736061,St John's Home for the Aged,347601,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2986089,103.8522670,St Vincent Home,180263,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3269796,103.9281307,Zion Home For The Aged,460419,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3358035,103.7203137,NTUC Health Cluster Support @ Taman Jurong,610361,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2830847,103.8228037,NTUC Health Cluster Support @ Bt Merah,151121,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3204051,103.9367412,THK Cluster Support @ Bedok,460013,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3227348,103.8881032,THK Cluster Support @ Pipit,370093,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3776912,103.8427452,THK Cluster Support @ AMK,560650,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3645203,103.8566320,AMKFSC Cluster Support,560469,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3358399,103.8512783,Carecorner Cluster Suppport,312062,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3496124,103.7325480,SACS Cluster Support@Jurong East,600374,cluster_support,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3701701,103.8357825,THK Senior Group Home @ AMK257,560257,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2910746,103.8286902,THK Senior Group Home @ Indus,161079,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3045862,103.8640040,PEACE-Connect Senior Group Home@8,190008,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3223113,103.8692631,TOUCH Senior Group Home@Geylang Bahru,330061,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2945710,103.8030418,Lions Befrienders Senior Group Home (Mei Ling),140151,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3493489,103.7323559,SACS Senior Group Home @ 373 JE,600373,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3491222,103.8890933,Fei Yue Senior Group Home @ Hougang,533174,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3827370,103.7535171,Fei Yue Senior Group Home @ Teck Whye Crescent,681165,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4395607,103.7785878,Care Corner SGH @ WL180C,733180,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3231953,103.8884568,THK Senior Group Home @ Pipit Road,370094,senior_group_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3453155,103.8539851,Econ Health and Wellness Centre,572152,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3381820,103.7226026,Thye Hua Kwan Moral Charities Limited,610337,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2939978,103.8109792,Econ Health and Wellness Centre,141061,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4308669,103.7895547,Econ Health and Wellness Centre,731572,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2899462,103.8276797,Econ Health and Wellness Centre,161051,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2734768,103.8068103,Thye Hua Kwan Moral Charities Limited,102080,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4375527,103.7946982,Pacific Activity Centres Pte Ltd,730887,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3944149,103.7451427,Econ Health and Wellness Centre,680574,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3452359,103.9461976,Econ Health and Wellness Centre,521117,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3952563,103.8886134,Econ Health and Wellness Centre,541327,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4059770,103.8985441,Pacific Activity Centres Pte Ltd,821264,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4341688,103.8429504,Pacific Activity Centres Pte Ltd,762317,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3475515,103.7557831,Econ Health and Wellness Centre,651230,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4319578,103.8453791,Pacific Activity Centres Pte Ltd,762333,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4011699,103.8999209,Pacific Activity Centres Pte Ltd,822211,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3558578,103.9333344,Pacific Activity Centres Pte Ltd,523868,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4390562,103.7781449,NTUC Eldercare Co-operative Ltd,731180,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3857293,103.8925954,Pacific Activity Centres Pte Ltd,543279,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2863369,103.8292048,Pacific Activity Centres Pte Ltd,164010,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3479362,103.7156911,Adventist Home for the Elders,641530,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3313049,103.8590192,Adventist Home for the Elders,310196,welfare_home,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3978597,103.8812328,Methodist Welfare Services,791473,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3381320,103.7719863,Presbyterian Community Services,590021,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4230808,103.8464194,Singapore Anglican Community Services,761426,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3486386,103.7250867,Singapore Anglican Community Services,640499,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3773468,103.7379129,Unicare Services Pte Ltd,683476,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3211031,103.9369002,THK Bedok Radiance Senior Activity Centre,460012,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3386595,103.8558065,Care Corner Senior Activity Centre (TP5),310005,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3337849,103.8437607,Care Corner Senior Activity Centre (TP149),310149,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3313193,103.8426687,Care Corner Senior Activity Centre (TP170),310170,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3291590,103.8860103,CARElderly Senior Activity Centre,370035,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3277309,103.8843617,CARElderly Senior Activity Centre (Merpati),370012,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3649992,103.8531116,COMNET @ Teck Ghee Senior Activity Centre,560420,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3148451,103.8501181,Chong Hua Tong Senior Activity Centre,210047,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3558009,103.8405459,COMNET@Sin Ming Senior Activity Centre,570026,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3092194,103.7967324,Fei Yue Senior Activity Centre (Holland Close),271001,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3078625,103.7993123,Fei Yue SAC (Commonwealth Branch),140107,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3800350,103.7541455,Fei Yue Senior Activity Centre (Teck Whye),680009,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3048843,103.9139400,Goodlife!,440015,other_centre,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3208653,103.8856974,Harmony Activity Centre,380098,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3637896,103.8918133,Jia Ying Senior Activity Centre,530019,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3658264,103.8917060,Jia Ying Senior Activity Centre @ 25 (Branch),530025,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3252421,103.9218114,Kembangan- Chai Chee Senior Activity Centre,461022,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3077541,103.8612908,King George’s Ave Senior Activity Centre,200811,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2811757,103.8434106,Kreta Ayer Senior Activity Centre (Banda),050005,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2873776,103.8394071,Kreta Ayer Senior Activity Centre (Jalan Kukoh),162008,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2874030,103.8420298,Kreta Ayer Senior Activity Centre (Chin Swee),160051,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3655604,103.8476481,Lions Befrienders (Ang Mo Kio 318) Senior Activity Centre,560318,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3198168,103.8633755,Lions Befrienders (Bendemeer) Senior Activity Centre,330032,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3097910,103.7686577,Lions Befrienders (Clementi) Senior Activity Centre,121420,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3101505,103.7870824,Lions Befrienders (Ghim Moh) Senior Activity Centre,270018,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2949031,103.8036993,Lions Befrienders (Mei Ling) Senior Activity Centre,141150,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3592418,103.9516131,Lions Befrienders (Tampines) Senior Activity Centre,520434,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3305457,103.9242467,Moral Senior Activity Centre (Kaki Bukit),460544,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2806324,103.8249355,Sarah Senior Activity Centre,160105,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2854355,103.8187826,Redhill Moral Senior Activity Centre,150089,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3355807,103.7233179,Silver Ace @ Taman Jurong,611118,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2882108,103.8141480,Silver Ace@Lengkok Bahru,151057,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2873190,103.8174756,Silver Ace@Redhill,150071,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2714720,103.8229921,Silver Ace@Telok Blangah,090041,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3264103,103.8595553,Silver Ace@Whampoa,320022,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3242014,103.9248789,Sunlove Senior Activity Centre (Chai Chee),461031,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.4394080,103.7764519,Sunlove Senior Activity Centre (Marsiling),730003,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3200340,103.9016160,Tembusu Senior Activity Centre,401031,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3792849,103.8422322,THK SAC @ AMK 645,560645,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3359218,103.8590585,THK SAC @ Toa Payoh 15,310015,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2840567,103.8210651,THK SAC @ Bukit Merah,150118,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2869245,103.8204185,THK SAC @ Henderson (Satellite 93),150093,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3233797,103.8865213,THK SAC @ MacPherson,370090,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2786678,103.8175266,THK SAC @ Telok Blangah Crescent,090003,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3332184,103.8545172,THK SAC @ Toa Payoh 31,310031,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3654450,103.8427151,THK SAC @ AMK 208,560208,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2871336,103.8070005,Thong Kheng Senior Activity Centre (Queenstown),150003,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.2841329,103.8232030,Thong Kheng Senior Activity Centre (Tanglin-Cairnhill),151123,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3062152,103.8582215,Wesley Senior Activity Centre,200025,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3498113,103.9326079,Evergreen Circle SAC,521827,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
+1.3463263,103.7433792,Fei Yue Senior Activity Centre (Bukit Batok),650183,sac_aac,data.gov.sg MOH d_f0fd1b3643ed8bd34bd403dedd7c1533
