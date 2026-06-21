@@ -78,6 +78,7 @@ python models/provision_model.py \
     --childcare data/childcare.csv --community data/community.csv \
     --sport data/sport.csv --flood data/flood_risk.csv \
     --noise data/expressways.csv \
+    --covered_linkway data/covered_linkway.csv \
     --judged data/judged_inputs.csv \
     --out data/provision_scores.csv
 

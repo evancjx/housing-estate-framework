@@ -158,12 +158,16 @@ C_MARKET   = [(3,5),(2,4),(1,3),(0,1)]
 C_SUPER    = [(4,5),(2,4),(1,3),(0,1)]
 C_BUS      = [(12,5),(8,4),(4,3),(1,2),(0,1)]   # fallback: stop count
 C_BUS_ROUTES = [(300,5),(220,4),(140,3),(70,2),(0,1)]  # total route-passes within 800m
+# §1c: covered linkway polygon count within 800m (LTA DataMall, quarterly).
+# Calibrated on 7,012 LTA Mar-2026 polygons: top tier ≥100 (Bukit Panjang 158,
+# Bukit Batok 145), near-zero for new towns (Tengah 0, Punggol 0, Canberra 4).
+C_SHELTER  = [(100,5),(50,4),(30,3),(15,2),(0,1)]
 C_CHILDCARE= [(4,5),(2,4),(1,3),(0,1)]   # within 500m
 
 # ----------------------------------------------------------------------
 # Component scorers
 # ----------------------------------------------------------------------
-def score_connectivity(lat, lon, mrt, bus, mrt_operational):
+def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None):
     d_mrt = nearest_m(lat, lon, pts_of(mrt))
     s_mrt = score_by_distance(d_mrt, A_MRT)
     if bus is not None and 'route_count' in bus.columns:
@@ -172,6 +176,11 @@ def score_connectivity(lat, lon, mrt, bus, mrt_operational):
         s_bus = score_by_count(total_routes, C_BUS_ROUTES)
     else:
         s_bus = score_by_count(count_within(lat, lon, pts_of(bus), 800), C_BUS)
+    if covered_linkway is not None:
+        n_shelter = count_within(lat, lon, pts_of(covered_linkway), 800)
+        s_shelter = score_by_count(n_shelter, C_SHELTER)
+        return round(0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter, 2), {
+            'nearest_mrt_m': round(d_mrt), 'covered_linkways_800m': n_shelter}
     return round(0.7*s_mrt + 0.3*s_bus, 2), {'nearest_mrt_m': round(d_mrt)}
 
 def score_amenities(lat, lon, markets, supers, clinics):
@@ -245,7 +254,8 @@ def run(estates, layers, judged):
     for _, e in estates.iterrows():
         lat, lon = float(e['lat']), float(e['lon']); name = e['estate']
         s = {}
-        s['conn'],_      = score_connectivity(lat, lon, layers['mrt'], layers['bus'], None)
+        s['conn'],_      = score_connectivity(lat, lon, layers['mrt'], layers['bus'], None,
+                                             layers.get('covered_linkway'))
         s['amen'],_      = score_amenities(lat, lon, layers['markets'], layers['supermarkets'], layers['clinics'])
         s['green'],_     = score_green(lat, lon, layers['parks'])
         s['sch'],_       = score_schools(lat, lon, layers['schools'])
@@ -291,7 +301,7 @@ def main():
     ap.add_argument('--estates', required=True)
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
               'supermarkets','childcare','community','sport','flood','noise',
-              'air_noise','eldercare']:
+              'air_noise','eldercare','covered_linkway']:
         ap.add_argument(f'--{L}')
     ap.add_argument('--judged', help='CSV: estate,dens,env,mom,hawker (the 4 non-geospatial)')
     ap.add_argument('--out', default='provision_scores.csv')
@@ -303,7 +313,7 @@ def main():
     layers = {L: load(getattr(a, L)) for L in
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
                'supermarkets','childcare','community','sport','flood','noise',
-               'air_noise','eldercare']}
+               'air_noise','eldercare','covered_linkway']}
     judged = load(a.judged)
 
     df = run(estates, layers, judged)
@@ -323,7 +333,7 @@ if __name__ == '__main__':
     main()
 
 # ======================================================================
-# INPUT CONTRACT — provision_model.py v1.3
+# INPUT CONTRACT — provision_model.py v1.4
 # ======================================================================
 # REQUIRED:
 #   --estates estates.csv     columns: estate,lat,lon
@@ -347,6 +357,12 @@ if __name__ == '__main__':
 #                              approach corridors for Changi, Seletar, Paya Lebar)
 #   --eldercare eldercare.csv lat,lon,name,type     (AIC Silver Pages: day_centre,
 #                              nursing_home, ambulatory_care, day_care, AAC, etc.)
+#   --covered_linkway covered_linkway.csv  lat,lon  (LTA DataMall static shapefile,
+#                              converted polygon centroids; 7,012 features, Mar 2026,
+#                              quarterly. OPTIONAL — if absent, conn falls back to
+#                              0.7*s_mrt + 0.3*s_bus. If present, sub-weights become
+#                              0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter; top-level
+#                              conn weight (0.15) is unchanged. MEASURED provenance.)
 #
 # NON-GEOSPATIAL (judgement) COMPONENTS:
 #   --judged judged.csv       columns: estate,dens,env,mom,hawker   (each 1-5)
