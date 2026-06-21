@@ -538,6 +538,71 @@ git commit -m "docs: wire build_master into pipeline; fix provision command (eld
 
 ---
 
+## Task 2.5: Complete archetype coverage (close the master_output blank-cell gap)
+
+**Files:**
+- Modify: `data/archetype_assignments.csv`
+- Create: add `test_archetype_coverage` to `tests/test_build_master.py`
+- Regenerate: `data/liveability_matrix.csv`, `data/master_output.csv`
+
+**Context:** Task 2.3's review found `JURONG WEST` and `KALLANG` (de-folded in Task 2.1) plus `HOLLAND VILLAGE` are absent from `archetype_assignments.csv`, so their `archetype` cell is blank in master_output — undercutting the no-blank-cells goal. Assign the canonical tags (matching the prior hand-assembled master): `HOLLAND VILLAGE` → `D` (private lifestyle enclave), `JURONG WEST` → `B`, `KALLANG` → `B` (mature HDB towns).
+
+- [ ] **Step 1: Write the failing coverage test**
+
+Add to `tests/test_build_master.py`:
+```python
+def test_archetype_coverage_complete():
+    import os
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data = os.path.join(here, "data")
+    est = pd.read_csv(os.path.join(data, "estates.csv"))
+    arch = pd.read_csv(os.path.join(data, "archetype_assignments.csv"))
+    est_names = set(est["estate"].str.strip().str.upper())
+    arch_names = set(arch["estate"].str.strip().str.upper())
+    missing = est_names - arch_names
+    assert not missing, f"estates with no archetype: {missing}"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `python3 -m pytest tests/test_build_master.py::test_archetype_coverage_complete -v`
+Expected: FAIL — missing `{HOLLAND VILLAGE, JURONG WEST, KALLANG}`.
+
+- [ ] **Step 3: Add the three archetype rows**
+
+Append to `data/archetype_assignments.csv` (match the existing column order `estate,archetype,confidence,rationale`):
+```
+HOLLAND VILLAGE,D,High,Private/mixed-use lifestyle enclave; F&B/character-driven; canonical D archetype
+JURONG WEST,B,High,Large mature HDB town (Boon Lay/Pioneer/Lakeside); de-folded from Jurong East alias in v2
+KALLANG,B,High,Central mature HDB town (Kallang/Whampoa); de-folded from Boon Keng alias in v2
+```
+(If `archetype_assignments.csv` contains a duplicate `CENTRAL AREA` row, remove the duplicate while here.)
+
+- [ ] **Step 4: Run to verify GREEN**
+
+Run: `python3 -m pytest tests/test_build_master.py::test_archetype_coverage_complete -v` → PASS
+
+- [ ] **Step 5: Regenerate liveability + master (bounded: only the 3 archetype cells change, no scores)**
+
+```bash
+python3 models/liveability_model.py --scores data/provision_scores.csv \
+  --pipeline data/pipeline_data.json --archetypes data/archetype_assignments.csv \
+  --out data/liveability_matrix.csv
+python3 models/build_master.py
+git --no-pager diff --stat data/liveability_matrix.csv data/master_output.csv
+```
+Confirm: the liveability diff is ONLY the `archetype` column for HOLLAND VILLAGE/JURONG WEST/KALLANG (blank → D/B/B); NO score/band/gap changes. master_output now has a non-blank `archetype` for every estate. If any score changed, STOP and report.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add data/archetype_assignments.csv data/liveability_matrix.csv data/master_output.csv tests/test_build_master.py
+git commit -m "data: complete archetype coverage (Holland Village D, Jurong West/Kallang B); regen liveability+master"
+```
+(append the footer)
+
+---
+
 ## Self-Review (completed)
 
 - **Coverage:** roadmap Phase-2 tasks 2.1a/b/c (→2.1), 2.2 (→2.2), 2.3 (→2.4 docs), 2.6 + deferred momentum (→2.3) all mapped. Private-value surfacing (original 2.4) + README (2.5) deferred to Phase 3 with the private-data coverage work — explicitly flagged `not_covered` in build_master so it's structurally ready.
