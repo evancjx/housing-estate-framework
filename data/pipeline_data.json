@@ -2861,5 +2861,28 @@
         }
       ]
     }
+  ],
+  "construction_disruptions": [
+    {
+      "description": "Tengah new town active construction — multiple simultaneous BTO sites, utility works, road works across entire new town",
+      "estates": [
+        "TENGAH"
+      ],
+      "severity": "moderate",
+      "certainty": "confirmed",
+      "end_year": 2028,
+      "notes": "severity=moderate(0.10), certainty=confirmed(1.0), end_year=2028. At year=2026: yrs_remaining=2 → time_factor=1.0. Penalty=0.10×1.0×1.0=0.10 → D=0.90. Auto-expires when end_year <= current_year."
+    },
+    {
+      "description": "Alexandra Hospital redevelopment — temporary healthcare capacity reduction affecting Queenstown and Dover catchments",
+      "estates": [
+        "QUEENSTOWN",
+        "DOVER"
+      ],
+      "severity": "moderate",
+      "certainty": "planned",
+      "end_year": 2028,
+      "notes": "severity=moderate(0.10), certainty=planned(0.40), end_year=2028. At year=2026: yrs_remaining=2 → time_factor=1.0. Penalty=0.10×0.40×1.0=0.04 → D=0.96. Auto-expires 2028."
+    }
   ]
 }

@@ -1,0 +1,4 @@
+estate,segment,n,resid_raw,resid_shrunk,trust,conn,amen,green,sch,hlth,eldercare,infra,childcare,community,sport,flood,noise,air_noise,dens,env,mom,hawker,provision,weight_covered,score,provision_private,score_private,measured_only,band,value_score,value_band,mult,reported
+BUKIT TIMAH,private_resale,1493,-0.014953687972296237,-0.014659130756821223,decimal,4.2,4.25,4.0,4.6,3.35,1.0,5.0,5.0,5.0,1.0,5.0,1.0,5.0,2.0,4.0,2.0,4.0,3.84,1.0,3.84,3.95,3.95,False,B,3.8967056746017414,B,1.0147671027608702,3.9
+CLEMENTI,private_resale,1731,0.008370020969412195,0.008227431174362334,decimal,3.75,4.2,3.0,5.0,5.0,1.0,4.0,5.0,5.0,4.0,5.0,2.0,5.0,3.0,3.0,3.0,3.0,3.78,1.0,3.78,3.92,3.92,False,B,3.7490278953006726,B,0.9918063215081145,3.75
+CANBERRA,private_resale,3284,-0.0035375605956389222,-0.0035055368123351424,decimal,3.3,3.15,4.0,4.4,2.9,1.0,4.0,5.0,4.0,4.0,5.0,5.0,5.0,2.0,4.0,3.0,2.0,3.56,1.0,3.56,3.66,3.66,False,B,3.5725016106776675,B,1.0035116883926032,3.57

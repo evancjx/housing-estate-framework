@@ -76,6 +76,37 @@ W = {
 }
 assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
 
+# Private (condo) weight variant. Adjustments vs W:
+#   conn  ↓ 0.15→0.12 (car ownership higher; parking within development)
+#   amen  ↑ 0.10→0.13 (F&B cluster / mall access > hawker)
+#   green ↓ 0.09→0.07 (landscaped grounds within development reduce urgency)
+#   sch   ↑ 0.07→0.11 (school postal code is a direct pricing driver)
+#   sport ↓ 0.02→0.01 (gym/pool within development)
+#   hawker↓ 0.04→0.02 (restaurant/delivery preference)
+#   infra ↑ 0.15→0.16 (MRT proximity premium stronger for asset value)
+#   eldercare ↓ 0.03→0.02 (private buyer cohort skews younger/wealthier)
+#   childcare ↑ 0.06→0.07 (family-forming cohort in private market)
+W_PRIVATE = {
+    'conn':      0.12,
+    'amen':      0.13,
+    'green':     0.07,
+    'sch':       0.11,
+    'dens':      0.08,
+    'hlth':      0.04,
+    'mom':       0.04,
+    'infra':     0.16,
+    'env':       0.02,
+    'childcare': 0.07,
+    'community': 0.03,
+    'sport':     0.01,
+    'flood':     0.01,
+    'hawker':    0.02,
+    'noise':     0.04,
+    'air_noise': 0.03,
+    'eldercare': 0.02,
+}
+assert abs(sum(W_PRIVATE.values()) - 1.0) < 1e-9, f"W_PRIVATE must sum to 1.0, got {sum(W_PRIVATE.values())}"
+
 PROVENANCE = {
     'conn':      'MEASURED',
     'amen':      'MEASURED',
@@ -288,6 +319,16 @@ def run(estates, layers, judged):
         return round(val, 2), round(wsum, 3)
     df[['provision','weight_covered']] = df.apply(lambda r: pd.Series(provision(r)), axis=1)
     df['score'] = df['provision']  # column name value_model.py expects
+
+    # Private (condo) provision score — same components, W_PRIVATE weights
+    def provision_p(row):
+        present = {k: row[k] for k in W_PRIVATE if not pd.isna(row[k])}
+        wsum = sum(W_PRIVATE[k] for k in present)
+        val = sum(W_PRIVATE[k]*present[k] for k in present) / wsum
+        return round(val, 2)
+    df['provision_private'] = df.apply(provision_p, axis=1)
+    df['score_private'] = df['provision_private']
+
     df['measured_only'] = df[['dens','env','mom','hawker']].isna().any(axis=1)
     return df
 

@@ -88,12 +88,17 @@ TRAVEL_TIMES_T0 = {
   "LENTOR":          ( 28,  52,  38,  50,  18),
   "TENGAH":          ( 55,  40,  48,  65,  58),   # bus-dependent T0; JRL not open
   "CENTRAL AREA":    (  0,  30,  15,  35,  45),   # exits pipeline — shown for reference only
+  # New estates added 2026-06 (§ missing estates)
+  "JURONG WEST":     ( 35,  15,  22,  55,  55),   # Boon Lay area; EWL direct; JLD 3 stops
+  "KALLANG":         ( 20,  38,  28,  28,  42),   # Old Airport Rd / Kallang River; CCL+EWL
+  "HOLLAND VILLAGE": ( 22,  22,  12,  45,  48),   # CC21; one-north 2 stops; JLD via Buona Vista
 }
 
 # T5 (2031): JRL open mid-2028. Tengah times improve significantly.
 # Other deltas: Tampines East gets TEL direct to CBD improvement, etc.
 TRAVEL_TIMES_T5 = {k: list(v) for k, v in TRAVEL_TIMES_T0.items()}
-TRAVEL_TIMES_T5["TENGAH"] = [40, 15, 30, 60, 55]   # JRL open: CBD 55→40, JLD bus→15 min direct
+TRAVEL_TIMES_T5["TENGAH"]          = [40, 15, 30, 60, 55]   # JRL open: CBD 55→40, JLD bus→15 min direct
+TRAVEL_TIMES_T5["JURONG WEST"]     = [28, 10, 18, 52, 52]   # JRL opens ~2028: Boon Lay+Jurong West stations direct to JLD
 
 # T15 (2041): West Coast Extension (-15 min conservative, vs max -20 min published)
 TRAVEL_TIMES_T15 = {k: list(v) for k, v in TRAVEL_TIMES_T5.items()}

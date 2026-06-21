@@ -207,40 +207,50 @@ def _build_persona_weights() -> Dict[str, Dict[str, float]]:
 PERSONA_WEIGHTS = _build_persona_weights()
 
 # ---------------------------------------------------------------------------
-# 2. D Multiplier — known disruption losses for 2026 scoring run
+# 2. D Multiplier — computed from pipeline_data.json construction_disruptions
 # ---------------------------------------------------------------------------
 # Formula: D(a) = max(0.70, 1 - Σ(severity × certainty × time_factor))
+# severity:   moderate=0.10, major=0.20, structural=0.30
+# certainty:  confirmed=1.0, gazetted=0.75, planned=0.40, rumour=0.0
+# time_factor: 0-2yr=1.0, 2-5yr=0.75, 5-10yr=0.40, >10yr=0.20
 # Only losses/disruptions; positive additions must NOT appear here.
-D_MULTIPLIERS: Dict[str, float] = {
-    # Alexandra Hospital redevelopment: temporary capacity reduction
-    #   severity=moderate(0.10), certainty=planned(0.40), time=within2yr(1.0)
-    #   penalty = 0.10 × 0.40 × 1.0 = 0.04 → D = 1.00 - 0.04 = 0.96
-    "QUEENSTOWN": 0.96,
-
-    # Same Alexandra Hospital also serves Dover residents
-    #   same penalty → D = 0.96
-    "DOVER": 0.96,
-
-    # Tengah: active mass construction disruption across new town
-    #   Multiple BTO sites + utility works + road works 2026-2028
-    #   severity=moderate(0.10), certainty=confirmed(1.0), time=within2yr(1.0)
-    #   penalty = 0.10 × 1.0 × 1.0 = 0.10 → D = 1.00 - 0.10 = 0.90
-    "TENGAH": 0.90,
-
-    # All other estates: no known disruptions → D = 1.00
-}
-
-# T5 D multipliers: disruptions resolve by 2031 horizon → all estates 1.00
-# TENGAH construction completes ~2030; Alexandra Hospital redevelopment finishes ~2028-2030.
-D_MULTIPLIERS_T5: Dict[str, float] = {}   # all 1.00 at T5
-
+_SEVERITY  = {"moderate": 0.10, "major": 0.20, "structural": 0.30}
+_CERTAINTY = {"confirmed": 1.0, "gazetted": 0.75, "planned": 0.40, "rumour": 0.0}
 _DEFAULT_D = 1.00
 
 
-def get_d(estate: str, horizon: str = "T0") -> float:
+def _time_factor(end_year: int, current_year: int) -> float:
+    yrs = end_year - current_year
+    if yrs <= 0:  return 0.0   # construction complete — no penalty
+    if yrs <= 2:  return 1.0
+    if yrs <= 5:  return 0.75
+    if yrs <= 10: return 0.40
+    return 0.20
+
+
+def compute_d_multipliers(disruptions: list, current_year: int) -> Dict[str, float]:
+    """Compute D multiplier per estate from construction_disruptions list in pipeline JSON."""
+    penalties: Dict[str, float] = {}
+    for site in disruptions:
+        sev    = _SEVERITY.get(site.get("severity", "moderate"), 0.10)
+        cert   = _CERTAINTY.get(site.get("certainty", "planned"), 0.40)
+        tf     = _time_factor(site.get("end_year", current_year), current_year)
+        penalty = sev * cert * tf
+        if penalty == 0:
+            continue
+        for estate in site.get("estates", []):
+            e = estate.upper()
+            penalties[e] = penalties.get(e, 0.0) + penalty
+    return {e: round(max(0.70, 1.0 - p), 4) for e, p in penalties.items()}
+
+
+def get_d(estate: str, horizon: str = "T0",
+          d_t0: Optional[Dict[str, float]] = None,
+          d_t5: Optional[Dict[str, float]] = None) -> float:
+    """Return D multiplier for an estate at a given horizon."""
     if horizon == "T5":
-        return D_MULTIPLIERS_T5.get(estate.upper(), _DEFAULT_D)
-    return D_MULTIPLIERS.get(estate.upper(), _DEFAULT_D)
+        return (d_t5 or {}).get(estate.upper(), _DEFAULT_D)
+    return (d_t0 or {}).get(estate.upper(), _DEFAULT_D)
 
 
 # ---------------------------------------------------------------------------
@@ -251,15 +261,15 @@ ALIAS_MAP: Dict[str, str] = {
     "MARSILING":     "WOODLANDS",
     "KAKI BUKIT":    "BEDOK",
     "EAST COAST":    "MARINE PARADE",
-    "BOON LAY":      "JURONG EAST",
-    "TAMAN JURONG":  "JURONG EAST",
-    "JURONG WEST":   "JURONG EAST",
-    "BUONA VISTA":   "QUEENSTOWN",
+    "BOON LAY":      "JURONG WEST",    # Boon Lay is the town centre of Jurong West
+    "TAMAN JURONG":  "JURONG WEST",
+    "BUONA VISTA":   "HOLLAND VILLAGE",
     "NOVENA":        "TOA PAYOH",
-    "KALLANG":       "BOON KENG",
     "WEST COAST":    "CLEMENTI",
     "TAMPINES NORTH":"TAMPINES",
     "YEW TEE":       "CHOA CHU KANG",
+    # JURONG WEST: now a real estate — removed from alias map
+    # KALLANG: now a real estate — removed from alias map
 }
 
 
@@ -640,6 +650,7 @@ def run(
     pipeline_path: str,
     out_path: str,
     debug: bool = False,
+    year: int = 2026,
 ) -> pd.DataFrame:
 
     # -- Load provision scores
@@ -654,6 +665,11 @@ def run(
     with open(pipeline_path, "r", encoding="utf-8") as f:
         pipeline_data = json.load(f)
     pipeline_items = pipeline_data.get("pipeline_items", [])
+
+    # -- Compute D multipliers dynamically from construction_disruptions
+    disruptions = pipeline_data.get("construction_disruptions", [])
+    d_t0_map = compute_d_multipliers(disruptions, year)
+    d_t5_map = compute_d_multipliers(disruptions, year + 5)
 
     if debug:
         print("\n=== PERSONA WEIGHTS (normalised) ===")
@@ -675,8 +691,8 @@ def run(
         # Build component dict from CSV row
         components_t0: Dict[str, float] = {c: float(row[c]) for c in BASE_W}
 
-        d_t0 = get_d(estate, "T0")
-        d_t5 = get_d(estate, "T5")
+        d_t0 = get_d(estate, "T0", d_t0_map, d_t5_map)
+        d_t5 = get_d(estate, "T5", d_t0_map, d_t5_map)
         prov_score = float(row["score"])
         prov_band  = provision_band(prov_score)
 
@@ -771,8 +787,14 @@ def main() -> None:
         action="store_true",
         help="Print computed persona weight table to console",
     )
+    parser.add_argument(
+        "--year",
+        type=int,
+        default=2026,
+        help="Scoring year for D multiplier time decay (default: 2026)",
+    )
     args = parser.parse_args()
-    run(args.scores, args.pipeline, args.out, debug=args.debug)
+    run(args.scores, args.pipeline, args.out, debug=args.debug, year=args.year)
 
 
 if __name__ == "__main__":

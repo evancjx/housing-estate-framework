@@ -39,14 +39,17 @@ import pandas as pd
 # ----------------------------------------------------------------------
 # Estate name → HDB town alias (for estates that are sub-areas of a larger HDB town)
 ESTATE_TOWN_ALIAS = {
-    "CANBERRA":      "SEMBAWANG",        # Canberra BTOs have no MOP yet; fold into Sembawang town data
-    "BOON KENG":     "KALLANG/WHAMPOA",  # Boon Keng is part of Kallang/Whampoa HDB town
-    "WOODLEIGH":     "TOA PAYOH",        # Bidadari/Woodleigh is under Toa Payoh HDB town
-    "DOVER":         "QUEENSTOWN",       # Dover Road area is in Queenstown HDB town
-    "TAMPINES WEST": "TAMPINES",         # Tampines West is part of Tampines HDB town
-    "TAMPINES EAST": "TAMPINES",         # Tampines East is part of Tampines HDB town
-    "LENTOR":        "ANG MO KIO",       # Lentor private; proxy via AMK HDB town (indicative only)
+    "CANBERRA":        "SEMBAWANG",        # Canberra BTOs have no MOP yet; fold into Sembawang town data
+    "BOON KENG":       "KALLANG/WHAMPOA",  # Boon Keng is part of Kallang/Whampoa HDB town
+    "KALLANG":         "KALLANG/WHAMPOA",  # Kallang estate — HDB town is KALLANG/WHAMPOA
+    "WOODLEIGH":       "TOA PAYOH",        # Bidadari/Woodleigh is under Toa Payoh HDB town
+    "DOVER":           "QUEENSTOWN",       # Dover Road area is in Queenstown HDB town
+    "TAMPINES WEST":   "TAMPINES",         # Tampines West is part of Tampines HDB town
+    "TAMPINES EAST":   "TAMPINES",         # Tampines East is part of Tampines HDB town
+    "LENTOR":          "ANG MO KIO",       # Lentor private; proxy via AMK HDB town (indicative only)
+    "HOLLAND VILLAGE": "QUEENSTOWN",       # Holland Village HDB proxy via Queenstown (private-dominant; no direct HDB town)
     # TENGAH: no MOP resale data yet — excluded from value model
+    # JURONG WEST: direct HDB town name match — no alias needed
     # All other estate names match HDB town names directly — no alias needed
 }
 
@@ -117,6 +120,10 @@ def fit_segment(df, seg_name, scores):
                 extra.append(shadow)
     if extra:
         scores = pd.concat([scores, pd.DataFrame(extra)], ignore_index=True)
+
+    # For private segments, prefer score_private (W_PRIVATE weights) if present
+    if seg_name in ("private_resale", "private_rental") and "score_private" in scores.columns:
+        scores = scores.assign(score=scores["score_private"])
 
     # attach the estate score (provision or liveability) by area key
     df = df.merge(scores.rename(columns={"estate": s["area_key"], "score": "_score"}),
