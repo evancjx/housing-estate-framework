@@ -68,6 +68,9 @@ Three working models (employment, lease, private value) and the entire private s
 | 2.3 Wire into pipeline + regenerate | `SG-Estate-Framework/CLAUDE.md`, `data/master_output.csv` | Add `build_master.py` as the pipeline tail; regenerate; diff against the hand-assembled file; document the diff | 2.2 |
 | 2.4 Private-value surfacing | `models/build_master.py`, `data/value_output_private.csv` | Run `value_model --private`; the 16 private-resale estates appear as a **separate** `value_private_*` block (segment label retained) | 2.2, 1.1, 1.2 |
 | 2.5 README correction | `README.md`, root `CLAUDE.md` | Remove the stale "Value does NOT cover private/landed" claim; show HDB + private side-by-side (separate) | 2.4 |
+| 2.6 Regenerate momentum chain + fix provision command | `data/judged_inputs.csv`, `data/provision_scores.csv` (+ derived), `SG-Estate-Framework/CLAUDE.md` | **Deferred from Phase 1 (1.9):** momentum model now omits the Marine Parade TEL5 hardcode but committed CSVs predate it (band-immaterial: provision 2.90→2.86, stays D). Re-run momentum→provision→liveability→value to refresh, AND fix the CLAUDE.md provision command which omits `--eldercare`/`--air_noise` (so it doesn't reproduce the committed provision_scores.csv). | — |
+
+> **Phase 1 deferred doc-hygiene** (none block anything; do alongside 2.x): stale docstrings — `value_model.py` section comment `~ score + controls`, `liveability_model.py` `score_estate` `×D / Then capped` order and the S-group mapping base values (post-BASE_W reconcile), `liveability_model.py:30` `S7 mom base 0.05`→0.04; add 3 missing estates (HOLLAND VILLAGE, JURONG WEST, KALLANG) to `archetype_assignments.csv` + an `estates ⊆ archetypes` guard test; `value_band="N/A"` reads back as NaN so `build_master` must key off `value_basis`. The outer (non-repo) `../CLAUDE.md` still says "9 components" — user updates manually.
 
 ---
 
