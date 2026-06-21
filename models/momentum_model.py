@@ -31,8 +31,9 @@ CALIBRATION NOTES:
 CORRECTIONS APPLIED (documented — do not silently undo):
     - WOODLEIGH: workflow agents researched under "BIDADARI" not "WOODLEIGH".
       Adds Bidadari Polyclinic (51 Alkaff Crescent, HIGH, CONFIRMED, 2027) = +0.38.
-    - MARINE PARADE: workflow missed TEL Stage 5 (Bedok South TE30 + Sungei Bedok TE31,
-      HIGH, GAZETTED, 2026). MRT item: 0.40 × 0.75 × 1.0 × 0.85 = +0.255.
+    - MARINE PARADE: TEL Stage 5 (Bedok South TE30 + Sungei Bedok TE31) opens 2026.
+      time_factor(2026) = 0.0 (already-delivered rule: year ≤ CURRENT_YEAR → 0).
+      No manual addition applied — item contributes 0 forward momentum by model invariant.
     - BOON KENG: only TE22A Founders' Memorial (LOW, GAZETTED, 2028, MRT) captured.
       Manual raw_sum set to 0.17 (gives score 2 after penalty) — consistent with
       mature central estate with minimal announced pipeline beyond adjacent minor MRT.
@@ -102,9 +103,8 @@ MANUAL_ADDITIONS = {
     # Bidadari Polyclinic (HIGH, CONFIRMED, 2027): sole meaningful pipeline item
     # for WOODLEIGH (= Bidadari new town). Contribution: 0.40 × 0.95 × 1.0 = 0.38
     'WOODLEIGH':      0.38,
-    # TEL Stage 5 Bedok South + Sungei Bedok (HIGH, GAZETTED, 2026, MRT):
-    # 0.40 × 0.75 × 1.0 × 0.85 = 0.255. East Coast is Marine Parade planning area.
-    'MARINE PARADE':  0.255,
+    # MARINE PARADE: TEL5 opens 2026 → time_factor=0.0 → 0 forward momentum.
+    # No entry — see docstring CORRECTIONS note above.
     # TE22A Founders' Memorial (LOW, GAZETTED, 2028, MRT near Boon Keng) gives 0.064.
     # Set floor at 0.17 so penalty yields ≥ 0.15 (score 2) for this mature central estate.
     'BOON KENG':      0.17,

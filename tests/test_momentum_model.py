@@ -14,3 +14,9 @@ def test_unknown_significance_warns(capsys):
         {"significance": "ENORMOUS", "certainty": "CONFIRMED", "expected_year": 2028, "type": "MRT"})
     assert c == 0.0
     assert "unknown" in capsys.readouterr().err.lower()
+
+
+def test_no_current_year_forward_momentum():
+    # a 2026 item must contribute 0 forward momentum (year <= CURRENT_YEAR → time_factor=0)
+    assert momentum_model.item_contribution(
+        {"significance": "HIGH", "certainty": "GAZETTED", "expected_year": 2026, "type": "MRT"}) == 0.0
