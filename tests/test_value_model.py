@@ -52,3 +52,11 @@ def test_direct_rows_tagged_direct():
     out = value_model.value_scores(_resid_df(), _scores(), set(_scores()["estate"]))
     q = out[out["estate"] == "QUEENSTOWN"].iloc[0]
     assert q["value_basis"] == "direct"
+
+
+def test_clean_psm_drops_zero_area():
+    df = pd.DataFrame({"resale_price": [500000, 600000], "floor_area_sqm": [0, 100]})
+    out = value_model.clean_psm(df, "resale_price", "floor_area_sqm")
+    assert len(out) == 1
+    assert np.isfinite(out["_lnpsm"]).all()
+    assert (out["floor_area_sqm"] > 0).all()

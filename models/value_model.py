@@ -82,6 +82,14 @@ def build_formula(df, controls, month_col):
     rhs = " + ".join(ctrl_terms) if ctrl_terms else "1"
     return f"_lnpsm ~ {rhs}"
 
+def clean_psm(df, price_col, area_col):
+    """Compute price-per-sqm and drop non-finite / non-positive rows (incl. area==0)."""
+    df = df.copy()
+    df["_psm"] = df[price_col] / df[area_col]
+    df = df[(df[area_col] > 0) & np.isfinite(df["_psm"]) & (df["_psm"] > 0)]
+    df["_lnpsm"] = np.log(df["_psm"])
+    return df
+
 # ----------------------------------------------------------------------
 # 2. SEGMENT MODELS — controls differ by tenure (framework §3 table)
 # ----------------------------------------------------------------------
@@ -118,9 +126,11 @@ def fit_segment(df, seg_name, scores):
     df = df.copy()
 
     # price per sqm, logged
-    df["_psm"] = df[s["price_col"]] / df[s["area_col"]]
-    df = df[df["_psm"] > 0]
-    df["_lnpsm"] = np.log(df["_psm"])
+    n_before = len(df)
+    df = clean_psm(df, s["price_col"], s["area_col"])
+    dropped = n_before - len(df)
+    if dropped:
+        print(f"  [{seg_name}] dropped {dropped} rows with non-finite/zero psm")
 
     # Expand scores: for each alias whose target town has no score yet,
     # inject a shadow row using the alias estate's score so the regression
