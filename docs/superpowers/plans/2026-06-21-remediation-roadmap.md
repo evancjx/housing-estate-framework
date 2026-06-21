@@ -89,6 +89,7 @@ The user's literal ask. Each segment is added as a **separate, non-blended** Val
 | 3.7 Rental segments | `scrapers/`, `data/`, `models/value_model.py` | Ingest URA private rental + HDB rental; wire the existing dead `--rental` flag; add an HDB-rental segment | — |
 | 3.8 BTO/SBF primary market | `models/data_ingest.py`, `models/value_model.py` | Ingest HDB launch prices so pre-MOP new towns (Tengah, Lentor) get a primary-market Value instead of blank | — |
 | 3.9 Canonical geographic unit | `data/estates.csv`, `models/build_master.py` | Define ONE unit + documented hierarchy; stop parent town and its sub-areas appearing as ranking peers; de-dup shared transaction pools (Tampines ×3) | 2.2, 3.1 |
+| 3.10 Wire eldercare + air_noise layers | provision run, `data/provision_scores.csv` (+ derived) | **Discovered in Phase 2:** the committed provision run OMITS `--eldercare`/`--air_noise`, so both components sit at floor defaults (1.0/5.0) for every estate — dead weight. Wire `data/eldercare.csv` + `data/air_noise_corridors.csv` into the canonical run; regenerate; review band shifts (e.g. WOODLANDS C→B, PUNGGOL B→C, LENTOR air_noise→1 near Seletar) as a deliberate, reviewed change. | 2.x |
 
 ---
 

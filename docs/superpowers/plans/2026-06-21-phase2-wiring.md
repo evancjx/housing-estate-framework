@@ -427,13 +427,15 @@ git commit -m "feat(build_master): reproducible joiner wiring employment+lease+a
 
 **This is a controlled data regeneration, not a TDD task.** The verification IS the diff review against a bounded expected-change set.
 
+> **IMPORTANT (corrected after a BLOCKED run):** the committed `provision_scores.csv` was generated **without** `--eldercare` and `--air_noise` (both components sit at floor defaults: eldercare=1.0, air_noise=5.0 for every estate). Therefore the reproducing command does **NOT** pass those two flags. Wiring in the real `data/eldercare.csv` + `data/air_noise_corridors.csv` layers shifts ~35 estates (some band changes, e.g. WOODLANDS, PUNGGOL) and is a deliberate **Phase 3** data-completeness task — keep it OUT of this bounded regeneration.
+
 **Expected-change set (everything else must stay byte-identical):**
 - **Momentum / provision shifts** for: `JURONG EAST` (loses Boon Lay/Taman Jurong/Jurong-West credit → mom may drop), `JURONG WEST` (gains own + Boon Lay/Taman Jurong → mom may rise), `KALLANG` (gains own → may rise), `BOON KENG` (loses Kallang fold → may drop), `MARINE PARADE` (TEL5=2026 → mom 2→1, provision 2.90→2.86, stays D).
 - **Liveability shifts** for: `QUEENSTOWN` and `HOLLAND VILLAGE` (Buona Vista pipeline now boosts Queenstown, not Holland Village) plus the provision-driven shifts above.
 
 - [ ] **Step 1: Sanity — confirm the provision command reproduces today's committed file BEFORE changing anything**
 
-Run (the COMPLETE layer set — note `--eldercare` and `--air_noise`, which the stale CLAUDE.md command omits):
+Run the command that reproduces the committed baseline — **without** `--eldercare`/`--air_noise` (see the IMPORTANT note above):
 ```bash
 python3 models/provision_model.py --estates data/estates.csv \
   --mrt data/mrt_layer.csv --bus data/bus_routes.csv \
@@ -442,12 +444,12 @@ python3 models/provision_model.py --estates data/estates.csv \
   --markets data/markets.csv --supermarkets data/supermarkets.csv \
   --childcare data/childcare.csv --community data/community.csv \
   --sport data/sport.csv --flood data/flood_risk.csv \
-  --noise data/expressways.csv --air_noise data/air_noise_corridors.csv \
-  --eldercare data/eldercare.csv --covered_linkway data/covered_linkway.csv \
+  --noise data/expressways.csv \
+  --covered_linkway data/covered_linkway.csv \
   --judged data/judged_inputs.csv --out /tmp/prov_check.csv
 git --no-pager diff --no-index data/provision_scores.csv /tmp/prov_check.csv | head -40
 ```
-Expected: NO diff (byte-identical). If it differs, STOP and report — the layer set is wrong; do not proceed.
+Expected: NO diff (byte-identical). If it differs, STOP and report — do not proceed.
 
 - [ ] **Step 2: Regenerate momentum → judged_inputs (alias + Marine Parade fixes realized here)**
 
@@ -463,14 +465,13 @@ cp /tmp/judged_updated.csv data/judged_inputs.csv
 - [ ] **Step 3: Regenerate provision → liveability → value → master**
 
 ```bash
-# provision (full layers, as Step 1)
+# provision (SAME layer set as Step 1 — NO --eldercare/--air_noise, to stay byte-identical except for the momentum change)
 python3 models/provision_model.py --estates data/estates.csv \
   --mrt data/mrt_layer.csv --bus data/bus_routes.csv --clinics data/chas.csv \
   --polyclinics data/polyclinics.csv --schools data/schools.csv --parks data/parks.csv \
   --markets data/markets.csv --supermarkets data/supermarkets.csv \
   --childcare data/childcare.csv --community data/community.csv --sport data/sport.csv \
   --flood data/flood_risk.csv --noise data/expressways.csv \
-  --air_noise data/air_noise_corridors.csv --eldercare data/eldercare.csv \
   --covered_linkway data/covered_linkway.csv --judged data/judged_inputs.csv \
   --out data/provision_scores.csv
 # liveability (with archetypes for the X-gate)
@@ -515,7 +516,7 @@ joins employment+lease+archetype with X-gate via build_master.py."
 
 In `SG-Estate-Framework/CLAUDE.md`:
 - Add `build_master.py` as the pipeline tail in the architecture diagram and the Commands section: `python3 models/build_master.py` after value/liveability/lease/employment.
-- Correct the provision command in the Commands block to include `--air_noise data/air_noise_corridors.csv --eldercare data/eldercare.csv` (it currently omits both, so it does not reproduce `provision_scores.csv`).
+- Do NOT add `--eldercare`/`--air_noise` to the provision command — the committed `provision_scores.csv` was generated WITHOUT them, so the current (no-flags) command correctly reproduces it. Instead add a one-line note next to the provision command: "eldercare/air_noise layers (`data/eldercare.csv`, `data/air_noise_corridors.csv`) exist but are not yet wired into the canonical run — Phase 3 ingests them (will shift some bands)."
 
 - [ ] **Step 2: Deferred doc-hygiene (zero behavior change)**
 
