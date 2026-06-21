@@ -53,6 +53,9 @@ ESTATE_TOWN_ALIAS = {
     # All other estate names match HDB town names directly — no alias needed
 }
 
+# Estates that are private-dominant: must NOT borrow an HDB-resale residual.
+PRIVATE_DOMINANT_PROXIES = {"HOLLAND VILLAGE", "LENTOR"}
+
 CFG = {
     "adj_cap_low": 0.75,        # min Value adjustment multiplier (framework lock)
     "adj_cap_high": 1.25,       # max Value adjustment multiplier
@@ -180,6 +183,7 @@ def value_scores(resid_df, scores, original_estate_names):
     df["value_score"] = (df["score"] * mult)
     df["value_band"]  = df["value_score"].apply(band)
     df["mult"] = mult
+    df["value_basis"] = "direct"
     # honesty: blank the decimal where sample is thin
     df["reported"] = np.where(df["trust"]=="decimal",
                               df["value_score"].round(2).astype(str),
@@ -192,22 +196,36 @@ def value_scores(resid_df, scores, original_estate_names):
         target_resid_row = resid_df[resid_df["estate"] == target_town]
         if alias_score_row.empty or target_resid_row.empty:
             continue
-        alias_score = alias_score_row["score"].iloc[0]
+        alias_score = float(alias_score_row["score"].iloc[0])
+
+        if alias_estate in PRIVATE_DOMINANT_PROXIES:
+            # invariant 2: never attribute an HDB residual to a private-dominant estate
+            alias_rows.append(pd.Series({
+                "estate": alias_estate, "segment": target_resid_row.iloc[0]["segment"],
+                "n": 0, "resid_raw": np.nan, "resid_shrunk": np.nan,
+                "trust": "band_only", "score": alias_score,
+                "value_score": np.nan, "mult": np.nan, "value_band": "N/A",
+                "value_basis": "no_hdb_segment",
+                "reported": "no private-segment match",
+            }))
+            continue
+
         row = target_resid_row.iloc[0].copy()
         row["estate"] = alias_estate
-        row["score"]  = alias_score
-        m = np.exp(-row["resid_shrunk"])
-        m = float(np.clip(m, CFG["adj_cap_low"], CFG["adj_cap_high"]))
-        row["mult"]        = m
+        row["score"] = alias_score
+        m = float(np.clip(np.exp(-row["resid_shrunk"]),
+                          CFG["adj_cap_low"], CFG["adj_cap_high"]))
+        row["mult"] = m
         row["value_score"] = alias_score * m
-        row["value_band"]  = band(row["value_score"])
-        row["reported"]    = (str(round(row["value_score"], 2))
-                              if row["trust"] == "decimal"
-                              else row["value_band"] + " (band only, n<%d)" % CFG["trust_decimal_n"])
+        row["value_band"] = band(row["value_score"])
+        row["value_basis"] = f"proxy_from:{target_town}"   # non-independent: shares parent n
+        row["reported"] = (str(round(row["value_score"], 2))
+                           if row["trust"] == "decimal"
+                           else row["value_band"] + " (band only, n<%d)" % CFG["trust_decimal_n"])
         alias_rows.append(row)
     if alias_rows:
         df = pd.concat([df, pd.DataFrame(alias_rows)], ignore_index=True)
-    return df.sort_values("value_score", ascending=False)
+    return df.sort_values("value_score", ascending=False, na_position="last")
 
 # ----------------------------------------------------------------------
 # 4. CLI
