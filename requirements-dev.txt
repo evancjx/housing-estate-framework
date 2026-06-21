@@ -1,0 +1,5 @@
+pytest>=8.0
+pandas
+numpy
+statsmodels
+shapely
