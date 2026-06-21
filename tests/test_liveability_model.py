@@ -1,5 +1,23 @@
+import os
+
+import pandas as pd
 import liveability_model
 import provision_model
+
+
+def test_x_archetype_emits_nr(tmp_path, data_dir):
+    out = tmp_path / "lv.csv"
+    liveability_model.run(
+        scores_path=os.path.join(data_dir, "provision_scores.csv"),
+        pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+        out_path=str(out),
+        archetypes_path=os.path.join(data_dir, "archetype_assignments.csv"),
+    )
+    df = pd.read_csv(out)
+    ca = df[df["estate"] == "CENTRAL AREA"]
+    assert not ca.empty
+    assert (ca["yf_T0_band"] == "N/R").all()
+    assert (ca["provision_band"] == "N/R").all()
 
 
 def test_base_w_mirrors_provision_w():

@@ -647,6 +647,7 @@ def run(
     out_path: str,
     debug: bool = False,
     year: int = 2026,
+    archetypes_path: Optional[str] = None,
 ) -> pd.DataFrame:
 
     # -- Load provision scores
@@ -656,6 +657,13 @@ def run(
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
         sys.exit(f"provision_scores.csv missing columns: {missing}")
+
+    # -- Load archetype tags (for the X = non-residential N/R gate, invariant 6)
+    ARCH: Dict[str, str] = {}
+    if archetypes_path and __import__("os").path.exists(archetypes_path):
+        adf = pd.read_csv(archetypes_path)
+        adf["estate"] = adf["estate"].str.strip().str.upper()
+        ARCH = dict(zip(adf["estate"], adf["archetype"].str.strip().str.upper()))
 
     # -- Load pipeline
     with open(pipeline_path, "r", encoding="utf-8") as f:
@@ -684,6 +692,19 @@ def run(
     for _, row in df.iterrows():
         estate = row["estate"]
 
+        if ARCH.get(estate) == "X":
+            nr = {"estate": estate, "archetype": "X", "provision_band": "N/R",
+                  "provision_score": float(row.get("score", 0.0)),
+                  "D_T0": 1.0, "D_T5": 1.0, "D_T15": 1.0}
+            for pre in ["yf", "sp", "ret", "ls"]:
+                for hz in ["T0", "T5", "T15"]:
+                    nr[f"{pre}_{hz}"] = float("nan")
+                    nr[f"{pre}_{hz}_band"] = "N/R"
+                nr[f"{pre}_arrow"] = "→"
+                nr[f"{pre}_T15_arrow"] = "→"
+            records.append(nr)
+            continue
+
         # Build component dict from CSV row
         components_t0: Dict[str, float] = {c: float(row[c]) for c in BASE_W}
 
@@ -705,6 +726,7 @@ def run(
 
         record: Dict = {
             "estate":          estate,
+            "archetype":       ARCH.get(estate, ""),
             "provision_band":  prov_band,
             "provision_score": round(prov_score, 3),
             "D_T0":            d_t0,
@@ -740,12 +762,16 @@ def run(
     results = pd.DataFrame(records)
 
     # -- Gap on CONTINUOUS scores (both on the 1-5 scale). Band ladders are non-linear.
+    # N/R rows (X-archetype) have float("nan") in score cells; pd.to_numeric coerces
+    # them so the subtraction propagates NaN, and gap_label is skipped via pd.notna check.
     prov_score_col = results["provision_score"]
     for pre in ["yf", "sp", "ret", "ls"]:
         for hz in ["T0", "T5", "T15"]:
-            g = (results[f"{pre}_{hz}"] - prov_score_col).round(2)
+            live = pd.to_numeric(results[f"{pre}_{hz}"], errors="coerce")
+            g = (live - prov_score_col).round(2)
             results[f"gap_{pre}_{hz}"] = g
-            results[f"gap_{pre}_{hz}_label"] = g.map(gap_label)
+            results[f"gap_{pre}_{hz}_label"] = g.map(
+                lambda x: gap_label(x) if pd.notna(x) else "N/R")
 
     # -- Save
     results.to_csv(out_path, index=False)
@@ -790,8 +816,14 @@ def main() -> None:
         default=2026,
         help="Scoring year for D multiplier time decay (default: 2026)",
     )
+    parser.add_argument(
+        "--archetypes",
+        default="SG-Estate-Framework/data/archetype_assignments.csv",
+        help="archetype_assignments.csv (X = non-residential N/R gate)",
+    )
     args = parser.parse_args()
-    run(args.scores, args.pipeline, args.out, debug=args.debug, year=args.year)
+    run(args.scores, args.pipeline, args.out, debug=args.debug, year=args.year,
+        archetypes_path=args.archetypes)
 
 
 if __name__ == "__main__":
