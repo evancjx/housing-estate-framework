@@ -15,7 +15,6 @@
   h1 { font-size: 17px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; letter-spacing: -0.3px; }
   .meta { font-size: 11px; color: #475569; margin-bottom: 24px; }
 
-  /* controls */
   .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
   .filter-btn {
     padding: 5px 12px; border-radius: 5px; border: 1px solid #1e293b;
@@ -28,12 +27,9 @@
   .search::placeholder { color: #374151; }
   .search:focus { border-color: #6366f1; }
 
-  /* table wrapper */
   .tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #1e293b; }
-
   table { border-collapse: collapse; width: 100%; white-space: nowrap; }
 
-  /* header groups */
   thead tr.group th {
     padding: 8px 10px 6px;
     font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
@@ -49,124 +45,117 @@
   }
   thead tr.cols th:hover { color: #94a3b8; }
   thead tr.cols th.sorted { color: #a5b4fc; }
-  thead tr.cols th::after { content: " ↕"; opacity: 0.3; font-size: 9px; }
-  thead tr.cols th.sorted-asc::after { content: " ↑"; opacity: 1; }
-  thead tr.cols th.sorted-desc::after { content: " ↓"; opacity: 1; }
+  thead tr.cols th.sorted-asc::after { content: " ↑"; }
+  thead tr.cols th.sorted-desc::after { content: " ↓"; }
 
-  /* group colours */
-  .g-id    { background: #0d1117; color: #475569; }
-  .g-prov  { background: #050f1a; color: #1d4ed8; border-left: 2px solid #1e3a5f; }
-  .g-live  { background: #041208; color: #15803d; border-left: 2px solid #14532d; }
-  .g-gap   { background: #0a0c06; color: #4d7c0f; border-left: 2px solid #365314; }
-  .g-val   { background: #0f0a00; color: #b45309; border-left: 2px solid #451a03; }
-  .g-priv  { background: #0c0814; color: #7c3aed; border-left: 2px solid #3b0764; }
-  .g-path  { background: #0a0a0a; color: #475569; border-left: 2px solid #1e293b; }
+  .g-id   { background: #0d1117; color: #334155; }
+  .g-prov { background: #0d1117; color: #1e40af; }
+  .g-live { background: #0d1117; color: #065f46; }
+  .g-gap  { background: #0d1117; color: #7c3aed; }
+  .g-val  { background: #0d1117; color: #92400e; }
+  .g-emp  { background: #0d1117; color: #1d4ed8; }
+  .g-risk { background: #0d1117; color: #7f1d1d; }
+  .g-path { background: #0d1117; color: #374151; }
 
-  /* rows */
   tbody tr { border-bottom: 1px solid #111827; transition: background 0.1s; }
-  tbody tr:hover { background: #141a24; }
-  tbody tr.nr-row { opacity: 0.4; }
+  tbody tr:hover { background: #111827; }
+  tbody tr.nr-row { opacity: 0.45; }
   tbody tr.hidden { display: none; }
 
   td { padding: 7px 10px; text-align: center; }
-  td.left { text-align: left; }
+  td.estate-name { text-align: left; font-weight: 600; color: #e2e8f0; min-width: 130px; }
+  td.path { font-size: 10px; color: #64748b; }
+  td.pvt-n { font-size: 10px; color: #475569; }
 
-  /* estate name */
-  td.estate-name { font-weight: 600; color: #e2e8f0; text-align: left; min-width: 130px; }
-
-  /* archetype badge */
-  .arch {
-    display: inline-block; padding: 2px 7px; border-radius: 4px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-  }
-  .arch-A { background: #0c2a3e; color: #38bdf8; border: 1px solid #1e4a6e; }
-  .arch-B { background: #0a2218; color: #4ade80; border: 1px solid #14532d; }
-  .arch-C { background: #1a1208; color: #fb923c; border: 1px solid #7c2d12; }
-  .arch-D { background: #1a0d1a; color: #e879f9; border: 1px solid #701a75; }
-  .arch-E { background: #0f1a2a; color: #60a5fa; border: 1px solid #1e3a5f; }
-  .arch-F { background: #1a1000; color: #fbbf24; border: 1px solid #78350f; }
-  .arch-G { background: #0a1a0a; color: #a3e635; border: 1px solid #365314; }
-  .arch-X { background: #1a0a0a; color: #f87171; border: 1px solid #7f1d1d; }
-
-  /* band cells */
   .band {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 700; min-width: 34px; text-align: center;
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    font-weight: 700; font-size: 11px; letter-spacing: 0.3px;
   }
-  .b-A  { background: #0c2a3e; color: #7dd3fc; }
-  .b-Bp { background: #0a2218; color: #86efac; }
-  .b-B  { background: #111827; color: #cbd5e1; }
-  .b-C  { background: #1a1208; color: #fdba74; }
-  .b-D  { background: #1a0f0a; color: #f87171; }
-  .b-F  { background: #1a0a0a; color: #ef4444; }
-  .b-NR { background: #111; color: #374151; font-weight: 400; font-size: 10px; }
+  .b-A   { background: #14532d; color: #4ade80; }
+  .b-Bp  { background: #1e3a5f; color: #60a5fa; }
+  .b-B   { background: #1e293b; color: #94a3b8; }
+  .b-C   { background: #292524; color: #a8a29e; }
+  .b-D   { background: #431407; color: #fb923c; }
+  .b-F   { background: #3f0909; color: #f87171; }
+  .b-NR  { background: transparent; color: #374151; }
 
-  /* multiplier */
-  .mult-up   { color: #4ade80; font-weight: 600; }
-  .mult-down { color: #f87171; font-weight: 600; }
-  .mult-flat { color: #94a3b8; }
+  .arch {
+    display: inline-block; width: 18px; height: 18px; border-radius: 4px;
+    text-align: center; line-height: 18px; font-weight: 800; font-size: 11px;
+  }
+  .arch-A { background:#1e3a5f; color:#60a5fa; }
+  .arch-B { background:#1e293b; color:#94a3b8; }
+  .arch-C { background:#1e3a2f; color:#6ee7b7; }
+  .arch-D { background:#3b1f2b; color:#f9a8d4; }
+  .arch-E { background:#2d1b4e; color:#c4b5fd; }
+  .arch-F { background:#292524; color:#a8a29e; }
+  .arch-G { background:#1c2f1c; color:#86efac; }
+  .arch-X { background:#374151; color:#9ca3af; }
 
-  /* gap */
-  .gap-pos  { color: #4ade80; font-weight: 600; }
-  .gap-neg  { color: #f87171; font-weight: 600; }
+  .traj { font-family: monospace; font-size: 11px; color: #94a3b8; letter-spacing: 0.5px; }
+  .gap-pos { color: #4ade80; font-weight: 700; }
+  .gap-neg { color: #f87171; font-weight: 700; }
   .gap-zero { color: #374151; }
-
-  /* disruption */
+  .mult-up   { color: #4ade80; font-size: 11px; }
+  .mult-flat { color: #64748b; font-size: 11px; }
+  .mult-down { color: #f87171; font-size: 11px; }
   .d-full { color: #374151; }
-  .d-warn { color: #fbbf24; font-weight: 600; }
-  .d-bad  { color: #f87171; font-weight: 600; }
+  .d-warn { color: #fbbf24; font-weight: 700; }
+  .d-bad  { color: #f87171; font-weight: 700; }
 
-  /* notes */
-  .note-overpriced { color: #f87171; font-size: 10px; }
-  .note-underpriced { color: #4ade80; font-size: 10px; }
-  .note-disrupt { color: #fbbf24; font-size: 10px; }
-  .note-nr { color: #475569; font-size: 10px; }
+  .note-overpriced  { background: #3f0909; color: #f87171; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+  .note-underpriced { background: #14532d; color: #4ade80; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+  .note-disrupt     { background: #431407; color: #fbbf24; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+  .note-nr          { background: #1e293b; color: #475569; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
 
-  /* life path */
-  .path { font-size: 10px; color: #64748b; }
+  .noise-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px;
+    vertical-align: middle;
+  }
 
-  /* trajectory arrow */
-  .traj { font-size: 11px; }
-
-  /* legend */
   .legend {
-    margin-top: 20px; display: flex; gap: 24px; flex-wrap: wrap;
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;
     font-size: 10px; color: #475569;
   }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
 
-  /* private n */
-  .pvt-n { font-size: 10px; color: #6b7280; }
+  th[colspan] { border-right: 1px solid #1e3a5f; }
+  td:last-child { border-right: none; }
+  .col-sep { border-left: 1px solid #1e293b; }
 </style>
 </head>
 <body>
-
-<h1>SG Estate Framework — All Districts Comparison</h1>
-<p class="meta">32 estates · 31 active · Data as of June 2026 · Private: D5/15/16/21/27</p>
+<h1>SG Estate Comparison</h1>
+<p class="meta">32 estates · 15-component provision · 4 personas × 3 horizons · HDB + private value · v1.1 (2026-06-21)</p>
 
 <div class="controls">
-  <input class="search" type="text" id="search" placeholder="Search estate…" oninput="filterTable()">
   <button class="filter-btn active" onclick="filterArch('all',this)">All</button>
   <button class="filter-btn" onclick="filterArch('A',this)">A — Regional</button>
   <button class="filter-btn" onclick="filterArch('B',this)">B — Mature HDB</button>
   <button class="filter-btn" onclick="filterArch('C',this)">C — Coastal</button>
-  <button class="filter-btn" onclick="filterArch('D',this)">D — Private enclave</button>
-  <button class="filter-btn" onclick="filterArch('E',this)">E — New integrated</button>
-  <button class="filter-btn" onclick="filterArch('F',this)">F — Infill node</button>
-  <button class="filter-btn" onclick="filterArch('G',this)">G — New town</button>
+  <button class="filter-btn" onclick="filterArch('D',this)">D — Private Enclave</button>
+  <button class="filter-btn" onclick="filterArch('E',this)">E — New Central-Edge</button>
+  <button class="filter-btn" onclick="filterArch('F',this)">F — Infill MRT Node</button>
+  <button class="filter-btn" onclick="filterArch('G',this)">G — New Town</button>
+  <input class="search" id="search" placeholder="Search estate..." oninput="filterTable()">
 </div>
 
 <div class="tbl-wrap">
-<table id="main-table">
+<table>
 <thead>
   <tr class="group">
-    <th class="g-id" colspan="3">Identity</th>
-    <th class="g-prov" colspan="2">Provision</th>
-    <th class="g-live" colspan="7">Liveability T0 → T5 → T15</th>
-    <th class="g-gap" colspan="4">Gap vs Provision (T0)</th>
-    <th class="g-val" colspan="4">HDB Value</th>
-    <th class="g-priv" colspan="3">Private Value</th>
-    <th class="g-path" colspan="3">Life Path</th>
+    <th colspan="2" class="g-id">IDENTITY</th>
+    <th colspan="3" class="g-prov">PROVISION</th>
+    <th colspan="5" class="g-live">LIVEABILITY (T0)</th>
+    <th colspan="2" class="g-live">LS TRAJECTORY</th>
+    <th colspan="4" class="g-gap">GAP (live−prov)</th>
+    <th colspan="2" class="g-val">HDB VALUE</th>
+    <th colspan="2" class="g-val">LS VALUE</th>
+    <th colspan="3" class="g-val">PRIVATE VALUE</th>
+    <th colspan="3" class="g-emp">EMPLOYMENT</th>
+    <th colspan="2" class="g-risk">RISK</th>
+    <th colspan="2" class="g-path">LIFE PATH</th>
+    <th class="g-path">FLAGS</th>
   </tr>
   <tr class="cols">
     <th onclick="sortTable(0)">Estate</th>
@@ -174,27 +163,32 @@
     <th onclick="sortTable(2)">D</th>
     <th onclick="sortTable(3)">Prov</th>
     <th onclick="sortTable(4)">Score</th>
-    <th onclick="sortTable(5)">YF T0</th>
-    <th onclick="sortTable(6)">SP T0</th>
-    <th onclick="sortTable(7)">Ret T0</th>
-    <th onclick="sortTable(8)">LS T0</th>
-    <th onclick="sortTable(9)">LS T5</th>
-    <th onclick="sortTable(10)">LS T15</th>
-    <th onclick="sortTable(11)">Trajectory</th>
-    <th onclick="sortTable(12)">YF</th>
-    <th onclick="sortTable(13)">SP</th>
-    <th onclick="sortTable(14)">Ret</th>
-    <th onclick="sortTable(15)">LS</th>
-    <th onclick="sortTable(16)">HDB band</th>
+    <th onclick="sortTable(5)">YF</th>
+    <th onclick="sortTable(6)">SP</th>
+    <th onclick="sortTable(7)">Ret</th>
+    <th onclick="sortTable(8)">LS</th>
+    <th onclick="sortTable(9)">Noise★</th>
+    <th onclick="sortTable(10)">T0→T5→T15</th>
+    <th onclick="sortTable(11)">Arrow</th>
+    <th onclick="sortTable(12)">YF gap</th>
+    <th onclick="sortTable(13)">SP gap</th>
+    <th onclick="sortTable(14)">Ret gap</th>
+    <th onclick="sortTable(15)">LS gap</th>
+    <th onclick="sortTable(16)">Band</th>
     <th onclick="sortTable(17)">Mult</th>
-    <th onclick="sortTable(18)">LS band</th>
-    <th onclick="sortTable(19)">LS mult</th>
-    <th onclick="sortTable(20)">Pvt band</th>
-    <th onclick="sortTable(21)">Pvt mult</th>
+    <th onclick="sortTable(18)">Band</th>
+    <th onclick="sortTable(19)">Mult</th>
+    <th onclick="sortTable(20)">Band</th>
+    <th onclick="sortTable(21)">Mult</th>
     <th onclick="sortTable(22)">n</th>
-    <th onclick="sortTable(23)">Best path</th>
-    <th onclick="sortTable(24)">Worst path</th>
-    <th onclick="sortTable(25)">Flag</th>
+    <th onclick="sortTable(23)">T0</th>
+    <th onclick="sortTable(24)">T5</th>
+    <th onclick="sortTable(25)">T15</th>
+    <th onclick="sortTable(26)">Lease</th>
+    <th onclick="sortTable(27)">Noise</th>
+    <th onclick="sortTable(28)">Best path</th>
+    <th onclick="sortTable(29)">Worst path</th>
+    <th onclick="sortTable(30)">Notes</th>
   </tr>
 </thead>
 <tbody id="tbody">
@@ -210,49 +204,51 @@
   <div class="legend-item"><span class="band b-D">D</span></div>
   <div class="legend-item"><span class="band b-F">F</span> worst</div>
   <div style="width:1px;height:14px;background:#1e293b;margin:0 4px"></div>
-  <div class="legend-item"><span style="color:#4ade80">▲ mult</span> underpriced</div>
-  <div class="legend-item"><span style="color:#f87171">▼ mult</span> overpriced</div>
+  <div class="legend-item"><span style="color:#4ade80">▲ mult</span> underpriced vs provision</div>
+  <div class="legend-item"><span style="color:#f87171">▼ mult</span> overpriced vs provision</div>
   <div class="legend-item"><span style="color:#4ade80">+gap</span> lovable beyond checklist</div>
   <div class="legend-item"><span style="color:#f87171">−gap</span> over-equipped for persona</div>
   <div style="width:1px;height:14px;background:#1e293b;margin:0 4px"></div>
   <div class="legend-item">YF=YoungFam · SP=SinglePro · Ret=Retiree · LS=Lifestyle</div>
   <div class="legend-item">T0=now · T5=2031 · T15=2041</div>
+  <div class="legend-item">★ Noise col in liveability = LS T0 band; Noise in Risk = distance score 1–5 (5=quiet)</div>
+  <div class="legend-item">Archetypes: A=Regional · B=Mature HDB · C=Coastal · D=Private Enclave · E=New Central-Edge · F=Infill Node · G=New Town · X=N/R</div>
 </div>
 
 <script>
 const DATA = [
-  {estate:"WOODLANDS",arch:"A",d:1.00,prov:"B",score:3.5,yf0:"B",sp0:"C",ret0:"C",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-1,gap_ret:-1,gap_ls:-1,hdb_b:"B",hdb_m:1.1203,ls_b:"B",ls_m:1.1298,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"PASIR RIS",arch:"C",d:1.00,prov:"B",score:3.66,yf0:"B",sp0:"C",ret0:"B",ls0:"C",ls5:"B",ls15:"B+",gap_yf:0,gap_sp:-1,gap_ret:0,gap_ls:-1,hdb_b:"B",hdb_m:1.0331,ls_b:"C",ls_m:1.0244,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"JURONG EAST",arch:"A",d:1.00,prov:"B",score:3.87,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.0621,ls_b:"B+",ls_m:1.0737,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"BISHAN",arch:"B",d:1.00,prov:"B",score:3.87,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"D",hdb_m:0.7656,ls_b:"D",ls_m:0.7701,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"downsizing",flag:"overpriced"},
-  {estate:"BEDOK",arch:"B",d:1.00,prov:"B+",score:4.47,yf0:"B+",sp0:"B+",ret0:"A",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"A",hdb_m:1.0205,ls_b:"B+",ls_m:1.0165,pvt_b:"B+",pvt_m:1.001,pvt_n:3316,best:"ageing_in_place",worst:"settling_single",flag:""},
-  {estate:"TAMPINES",arch:"A",d:1.00,prov:"B",score:3.64,yf0:"B",sp0:"C",ret0:"B",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-1,gap_ret:0,gap_ls:-1,hdb_b:"C",hdb_m:0.9406,ls_b:"C",ls_m:0.9407,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"TOA PAYOH",arch:"B",d:1.00,prov:"A",score:4.55,yf0:"A",sp0:"A",ret0:"A",ls0:"A",ls5:"A",ls15:"A",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:0.9578,ls_b:"B+",ls_m:0.9595,pvt_b:null,pvt_m:null,pvt_n:null,best:"ageing_in_place",worst:"upgrader",flag:""},
-  {estate:"QUEENSTOWN",arch:"B",d:0.96,prov:"B",score:3.66,yf0:"B",sp0:"C",ret0:"B",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-1,gap_ret:0,gap_ls:-1,hdb_b:"D",hdb_m:0.7898,ls_b:"D",ls_m:0.7865,pvt_b:"B",pvt_m:null,pvt_n:30,best:"ageing_in_place",worst:"settling_single",flag:"disruption,overpriced"},
-  {estate:"SERANGOON",arch:"B",d:1.00,prov:"C",score:3.33,yf0:"C",sp0:"C",ret0:"C",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"D",hdb_m:0.8594,ls_b:"D",ls_m:0.8672,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"SEMBAWANG",arch:"B",d:1.00,prov:"B+",score:4.03,yf0:"B+",sp0:"B+",ret0:"B",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:-0.5,gap_ls:-0.5,hdb_b:"A",hdb_m:1.1468,ls_b:"A",ls_m:1.1463,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"MARINE PARADE",arch:"D",d:1.00,prov:"C",score:3.15,yf0:"C",sp0:"C",ret0:"C",ls0:"C",ls5:"C",ls15:"C",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"F",hdb_m:0.75,ls_b:"F",ls_m:0.75,pvt_b:"C",pvt_m:1.0,pvt_n:5422,best:"forming_family",worst:"upgrader",flag:"overpriced"},
-  {estate:"CANBERRA",arch:"B",d:1.00,prov:"B",score:3.77,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.1468,ls_b:"B+",ls_m:1.1463,pvt_b:"B",pvt_m:1.0139,pvt_n:145,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"BOON KENG",arch:"F",d:1.00,prov:"B+",score:4.21,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.8738,ls_b:"B",ls_m:0.8729,pvt_b:null,pvt_m:null,pvt_n:null,best:"ageing_in_place",worst:"settling_single",flag:""},
-  {estate:"WOODLEIGH",arch:"E",d:1.00,prov:"B",score:3.92,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9578,ls_b:"B",ls_m:0.9595,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"forming_family",flag:""},
-  {estate:"DOVER",arch:"F",d:0.96,prov:"B",score:3.7,yf0:"B",sp0:"B",ret0:"C",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:-1,gap_ls:0,hdb_b:"D",hdb_m:0.7898,ls_b:"D",ls_m:0.7865,pvt_b:"B",pvt_m:null,pvt_n:30,best:"settling_single",worst:"downsizing",flag:"disruption,overpriced"},
-  {estate:"TENGAH",arch:"G",d:0.90,prov:"F",score:2.45,yf0:"F",sp0:"F",ret0:"F",ls0:"F",ls5:"C",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:null,hdb_m:null,ls_b:null,ls_m:null,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:"disruption"},
-  {estate:"TAMPINES WEST",arch:"A",d:1.00,prov:"B",score:3.89,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9406,ls_b:"B",ls_m:0.9407,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"TAMPINES EAST",arch:"A",d:1.00,prov:"B",score:3.89,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9406,ls_b:"B",ls_m:0.9407,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"downsizing",flag:""},
-  {estate:"ANG MO KIO",arch:"B",d:1.00,prov:"B+",score:4.06,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B",hdb_m:0.9852,ls_b:"B",ls_m:0.9823,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"LENTOR",arch:"F",d:1.00,prov:"B",score:3.69,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9852,ls_b:"B",ls_m:0.9823,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"forming_family",flag:""},
-  {estate:"SENGKANG",arch:"B",d:1.00,prov:"B+",score:4.03,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B+",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B+",hdb_m:1.0946,ls_b:"B+",ls_m:1.0883,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"PUNGGOL",arch:"E",d:1.00,prov:"B",score:3.74,yf0:"B",sp0:"B+",ret0:"C",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0.5,gap_ret:-1,gap_ls:0,hdb_b:"B",hdb_m:1.0071,ls_b:"B+",ls_m:1.0307,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"downsizing",flag:""},
-  {estate:"YISHUN",arch:"B",d:1.00,prov:"B+",score:4.05,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B+",hdb_m:1.0984,ls_b:"B+",ls_m:1.0923,pvt_b:null,pvt_m:null,pvt_n:null,best:"ageing_in_place",worst:"upgrader",flag:""},
-  {estate:"HOUGANG",arch:"B",d:1.00,prov:"B+",score:4.24,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.0559,ls_b:"B+",ls_m:1.0503,pvt_b:null,pvt_m:null,pvt_n:null,best:"ageing_in_place",worst:"upgrader",flag:""},
-  {estate:"CHOA CHU KANG",arch:"B",d:1.00,prov:"B",score:3.97,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"A",hdb_m:1.1875,ls_b:"A",ls_m:1.1849,pvt_b:null,pvt_m:null,pvt_n:null,best:"settling_single",worst:"upgrader",flag:"underpriced"},
-  {estate:"BUKIT BATOK",arch:"B",d:1.00,prov:"B",score:3.94,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.067,ls_b:"B",ls_m:1.0614,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"BUKIT MERAH",arch:"B",d:1.00,prov:"B+",score:4.29,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.8332,ls_b:"C",ls_m:0.8311,pvt_b:null,pvt_m:null,pvt_n:null,best:"ageing_in_place",worst:"settling_single",flag:""},
-  {estate:"BUKIT PANJANG",arch:"B",d:1.00,prov:"B+",score:4.23,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"A",hdb_m:1.1476,ls_b:"A",ls_m:1.1354,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"upgrader",flag:""},
-  {estate:"GEYLANG",arch:"B",d:1.00,prov:"B+",score:4.02,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B",hdb_m:0.9076,ls_b:"B",ls_m:0.9083,pvt_b:null,pvt_m:null,pvt_n:null,best:"forming_family",worst:"settling_single",flag:""},
-  {estate:"CLEMENTI",arch:"B",d:1.00,prov:"B+",score:4.02,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B",hdb_m:0.9094,ls_b:"C",ls_m:0.9066,pvt_b:"B+",pvt_m:1.0107,pvt_n:154,best:"ageing_in_place",worst:"upgrader",flag:""},
-  {estate:"CENTRAL AREA",arch:"X",d:1.00,prov:"A",score:4.51,yf0:"N/R",sp0:"N/R",ret0:"N/R",ls0:"N/R",ls5:"N/R",ls15:"N/R",gap_yf:null,gap_sp:null,gap_ret:null,gap_ls:null,hdb_b:null,hdb_m:null,ls_b:null,ls_m:null,pvt_b:null,pvt_m:null,pvt_n:null,best:"N/R",worst:"N/R",flag:"nr"},
-  {estate:"BUKIT TIMAH",arch:"D",d:1.00,prov:"B+",score:4.11,yf0:"B+",sp0:"B+",ret0:"B",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:-0.5,gap_ls:0,hdb_b:"C",hdb_m:0.75,ls_b:"C",ls_m:0.75,pvt_b:"B+",pvt_m:0.9802,pvt_n:136,best:"settling_single",worst:"downsizing",flag:"overpriced"},
+  {estate:"WOODLANDS",arch:"A",d:1.00,prov:"C",score:3.37,noise:4,yf0:"C",sp0:"C",ret0:"C",ls0:"C",ls5:"C",ls15:"C",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:1.1215,ls_b:"B",ls_m:1.1272,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"F",emp5:"F",emp15:"F",lease:"B+",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"PASIR RIS",arch:"C",d:1.00,prov:"C",score:3.39,noise:1,yf0:"B",sp0:"C",ret0:"B",ls0:"C",ls5:"B",ls15:"B+",gap_yf:1,gap_sp:0,gap_ret:1,gap_ls:0,hdb_b:"C",hdb_m:1.0215,ls_b:"C",ls_m:1.0216,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"D",emp5:"D",emp15:"D",lease:"B",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"JURONG EAST",arch:"A",d:1.00,prov:"B",score:3.78,noise:2,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.0652,ls_b:"B+",ls_m:1.0801,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"B",emp15:"B+",lease:"B",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"BISHAN",arch:"B",d:1.00,prov:"B",score:3.66,noise:2,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"D",hdb_m:0.7606,ls_b:"D",ls_m:0.7682,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"B",emp15:"C",lease:"B",best:"forming_family",worst:"downsizing",flag:"overpriced"},
+  {estate:"BEDOK",arch:"B",d:1.00,prov:"B+",score:4.44,noise:3,yf0:"B+",sp0:"B+",ret0:"A",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"A",hdb_m:1.0272,ls_b:"B+",ls_m:1.0186,pvt_b:"B+",pvt_m:1.001,pvt_n:3316,emp0:"B",emp5:"B",emp15:"B",lease:"C",best:"ageing_in_place",worst:"settling_single",flag:""},
+  {estate:"TAMPINES",arch:"A",d:1.00,prov:"B",score:3.53,noise:2,yf0:"B",sp0:"C",ret0:"B",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-1,gap_ret:0,gap_ls:-1,hdb_b:"C",hdb_m:0.9425,ls_b:"C",ls_m:0.9465,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"B",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"TOA PAYOH",arch:"B",d:1.00,prov:"B+",score:4.33,noise:1,yf0:"A",sp0:"B+",ret0:"A",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0.5,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"B+",hdb_m:0.9491,ls_b:"B+",ls_m:0.9611,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"B",emp15:"C",lease:"C",best:"ageing_in_place",worst:"upgrader",flag:""},
+  {estate:"QUEENSTOWN",arch:"B",d:0.96,prov:"B",score:3.57,noise:4,yf0:"B",sp0:"C",ret0:"C",ls0:"C",ls5:"C",ls15:"C",gap_yf:0,gap_sp:-1,gap_ret:-1,gap_ls:-1,hdb_b:"D",hdb_m:0.7923,ls_b:"D",ls_m:0.7838,pvt_b:"B",pvt_m:null,pvt_n:30,emp0:"B+",emp5:"B+",emp15:"B+",lease:"B",best:"ageing_in_place",worst:"settling_single",flag:"disruption,overpriced"},
+  {estate:"SERANGOON",arch:"B",d:1.00,prov:"C",score:3.24,noise:3,yf0:"C",sp0:"C",ret0:"C",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"D",hdb_m:0.8633,ls_b:"D",ls_m:0.8643,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"B",emp15:"C",lease:"B",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"SEMBAWANG",arch:"B",d:1.00,prov:"B",score:3.90,noise:5,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.1469,ls_b:"B+",ls_m:1.1457,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"F",emp5:"F",emp15:"F",lease:"B+",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"MARINE PARADE",arch:"D",d:1.00,prov:"D",score:2.99,noise:1,yf0:"C",sp0:"D",ret0:"C",ls0:"D",ls5:"D",ls15:"D",gap_yf:0.5,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"F",hdb_m:0.75,ls_b:"F",ls_m:0.75,pvt_b:"C",pvt_m:1.0,pvt_n:5422,emp0:"B",emp5:"B",emp15:"B",lease:"D",best:"forming_family",worst:"upgrader",flag:"overpriced"},
+  {estate:"CANBERRA",arch:"B",d:1.00,prov:"B",score:3.65,noise:5,yf0:"B",sp0:"B",ret0:"C",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:-1,gap_ls:0,hdb_b:"B+",hdb_m:1.1469,ls_b:"B+",ls_m:1.1457,pvt_b:"B",pvt_m:1.0139,pvt_n:145,emp0:"F",emp5:"F",emp15:"F",lease:"A",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"BOON KENG",arch:"F",d:1.00,prov:"B+",score:4.11,noise:2,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.8756,ls_b:"B",ls_m:0.875,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"B",emp15:"B",lease:"B",best:"ageing_in_place",worst:"settling_single",flag:""},
+  {estate:"WOODLEIGH",arch:"E",d:1.00,prov:"B",score:3.79,noise:3,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9491,ls_b:"B",ls_m:0.9611,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B",emp5:"C",emp15:"C",lease:"A",best:"settling_single",worst:"forming_family",flag:""},
+  {estate:"DOVER",arch:"F",d:0.96,prov:"B",score:3.61,noise:3,yf0:"B",sp0:"C",ret0:"C",ls0:"C",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-1,gap_ret:-1,gap_ls:-1,hdb_b:"D",hdb_m:0.7923,ls_b:"D",ls_m:0.7838,pvt_b:"B",pvt_m:null,pvt_n:30,emp0:"B+",emp5:"B+",emp15:"B+",lease:"B",best:"settling_single",worst:"downsizing",flag:"disruption,overpriced"},
+  {estate:"TENGAH",arch:"G",d:0.90,prov:"F",score:2.30,noise:3,yf0:"F",sp0:"F",ret0:"F",ls0:"F",ls5:"C",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:null,hdb_m:null,ls_b:null,ls_m:null,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"F",emp5:"C",emp15:"B",lease:"A",best:"settling_single",worst:"downsizing",flag:"disruption"},
+  {estate:"TAMPINES WEST",arch:"A",d:1.00,prov:"B",score:3.73,noise:3,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.9425,ls_b:"C",ls_m:0.9465,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"B",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"TAMPINES EAST",arch:"A",d:1.00,prov:"B",score:3.69,noise:1,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"C",hdb_m:0.9425,ls_b:"C",ls_m:0.9465,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"B",best:"forming_family",worst:"downsizing",flag:""},
+  {estate:"ANG MO KIO",arch:"B",d:1.00,prov:"B",score:3.90,noise:2,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B+",ls15:"B+",gap_yf:0.5,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"B",hdb_m:0.9813,ls_b:"B",ls_m:0.9831,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"C",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"LENTOR",arch:"F",d:1.00,prov:"B",score:3.50,noise:2,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"C",hdb_m:0.9813,ls_b:"B",ls_m:0.9831,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"A",best:"settling_single",worst:"forming_family",flag:""},
+  {estate:"SENGKANG",arch:"B",d:1.00,prov:"B",score:3.81,noise:2,yf0:"B+",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B+",gap_yf:0.5,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.0867,ls_b:"B+",ls_m:1.0875,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"D",emp15:"D",lease:"A",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"PUNGGOL",arch:"E",d:1.00,prov:"B",score:3.60,noise:5,yf0:"C",sp0:"B",ret0:"C",ls0:"B",ls5:"B",ls15:"B",gap_yf:-1,gap_sp:0,gap_ret:-1,gap_ls:0,hdb_b:"B",hdb_m:1.0074,ls_b:"B",ls_m:1.0217,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"F",emp5:"F",emp15:"F",lease:"A",best:"settling_single",worst:"downsizing",flag:""},
+  {estate:"YISHUN",arch:"B",d:1.00,prov:"B+",score:4.04,noise:5,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:-0.5,gap_ret:0,gap_ls:-0.5,hdb_b:"B+",hdb_m:1.1093,ls_b:"B+",ls_m:1.0955,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"D",emp5:"F",emp15:"F",lease:"B",best:"ageing_in_place",worst:"upgrader",flag:""},
+  {estate:"HOUGANG",arch:"B",d:1.00,prov:"B+",score:4.26,noise:4,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"A",hdb_m:1.0685,ls_b:"B+",ls_m:1.058,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"C",lease:"B",best:"ageing_in_place",worst:"upgrader",flag:""},
+  {estate:"CHOA CHU KANG",arch:"B",d:1.00,prov:"B",score:3.68,noise:1,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.1716,ls_b:"B+",ls_m:1.1778,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"B+",lease:"B+",best:"settling_single",worst:"upgrader",flag:"underpriced"},
+  {estate:"BUKIT BATOK",arch:"B",d:1.00,prov:"B",score:3.85,noise:4,yf0:"B",sp0:"B",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B+",hdb_m:1.0704,ls_b:"B",ls_m:1.0592,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B+",emp5:"B+",emp15:"B+",lease:"B",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"BUKIT MERAH",arch:"B",d:1.00,prov:"B+",score:4.20,noise:3,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"B",hdb_m:0.8355,ls_b:"C",ls_m:0.8296,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B+",emp5:"B+",emp15:"B+",lease:"B",best:"ageing_in_place",worst:"settling_single",flag:""},
+  {estate:"BUKIT PANJANG",arch:"B",d:1.00,prov:"B+",score:4.08,noise:2,yf0:"B+",sp0:"B+",ret0:"B+",ls0:"B+",ls5:"B+",ls15:"B+",gap_yf:0,gap_sp:0,gap_ret:0,gap_ls:0,hdb_b:"A",hdb_m:1.145,ls_b:"A",ls_m:1.1442,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"C",emp5:"C",emp15:"B+",lease:"B+",best:"forming_family",worst:"upgrader",flag:""},
+  {estate:"GEYLANG",arch:"B",d:1.00,prov:"B",score:3.83,noise:1,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"C",hdb_m:0.9021,ls_b:"C",ls_m:0.9048,pvt_b:null,pvt_m:null,pvt_n:null,emp0:"B+",emp5:"B+",emp15:"B",lease:"C",best:"forming_family",worst:"settling_single",flag:""},
+  {estate:"CLEMENTI",arch:"B",d:1.00,prov:"B",score:3.79,noise:2,yf0:"B+",sp0:"B",ret0:"B+",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0,gap_ret:0.5,gap_ls:0,hdb_b:"C",hdb_m:0.9011,ls_b:"C",ls_m:0.9038,pvt_b:"B+",pvt_m:1.0107,pvt_n:154,emp0:"B+",emp5:"B+",emp15:"A",lease:"B",best:"ageing_in_place",worst:"upgrader",flag:""},
+  {estate:"CENTRAL AREA",arch:"X",d:1.00,prov:"B+",score:4.41,noise:2,yf0:"N/R",sp0:"N/R",ret0:"N/R",ls0:"N/R",ls5:"N/R",ls15:"N/R",gap_yf:null,gap_sp:null,gap_ret:null,gap_ls:null,hdb_b:null,hdb_m:null,ls_b:null,ls_m:null,pvt_b:null,pvt_m:null,pvt_n:null,emp0:null,emp5:null,emp15:null,lease:null,best:"N/R",worst:"N/R",flag:"nr"},
+  {estate:"BUKIT TIMAH",arch:"D",d:1.00,prov:"B",score:3.91,noise:1,yf0:"B+",sp0:"B+",ret0:"B",ls0:"B",ls5:"B",ls15:"B",gap_yf:0.5,gap_sp:0.5,gap_ret:0,gap_ls:0,hdb_b:"D",hdb_m:0.75,ls_b:"D",ls_m:0.75,pvt_b:"B+",pvt_m:0.9802,pvt_n:136,emp0:"B",emp5:"B",emp15:"B+",lease:"C",best:"settling_single",worst:"downsizing",flag:"overpriced"},
 ];
 
 function bandClass(b) {
@@ -264,7 +260,7 @@ function bandHTML(b) {
   if (b === "N/R") return '<span class="band b-NR">N/R</span>';
   return `<span class="band ${bandClass(b)}">${b}</span>`;
 }
-function multHTML(m, prov_m) {
+function multHTML(m) {
   if (m === null || m === undefined) return '<span style="color:#374151">—</span>';
   const cls = m >= 1.05 ? "mult-up" : m <= 0.90 ? "mult-down" : "mult-flat";
   const arrow = m >= 1.05 ? "▲" : m <= 0.90 ? "▼" : "";
@@ -281,29 +277,39 @@ function dHTML(d) {
   if (d >= 0.95) return `<span class="d-warn">${d.toFixed(2)}</span>`;
   return `<span class="d-bad">${d.toFixed(2)}</span>`;
 }
+function noiseScoreHTML(n) {
+  if (n === null || n === undefined) return '—';
+  const colors = {1:"#f87171",2:"#fb923c",3:"#fbbf24",4:"#86efac",5:"#4ade80"};
+  const labels = {1:"loud",2:"noisy",3:"mod",4:"quiet",5:"silent"};
+  return `<span class="noise-dot" style="background:${colors[n]}"></span>${n} <span style="color:#374151;font-size:10px">${labels[n]}</span>`;
+}
 function pathShort(p) {
   return {forming_family:"forming fam",downsizing:"downsizing",settling_single:"settling",ageing_in_place:"ageing",upgrader:"upgrader","N/R":"N/R"}[p] || p;
 }
 function flagHTML(f) {
   if (!f) return "";
-  const parts = f.split(",");
-  return parts.map(p => {
-    if (p==="overpriced") return '<span class="note-overpriced">▼ overpriced</span>';
+  return f.split(",").map(p => {
+    if (p==="overpriced")  return '<span class="note-overpriced">▼ overpriced</span>';
     if (p==="underpriced") return '<span class="note-underpriced">▲ underpriced</span>';
-    if (p==="disruption") return '<span class="note-disrupt">⚠ disruption</span>';
-    if (p==="nr") return '<span class="note-nr">N/R — exits pipeline</span>';
+    if (p==="disruption")  return '<span class="note-disrupt">⚠ disruption</span>';
+    if (p==="nr")          return '<span class="note-nr">N/R — exits pipeline</span>';
     return "";
   }).join(" ");
 }
 function trajHTML(r) {
   if (r.ls0 === "N/R") return '<span style="color:#374151">N/R</span>';
-  const arrow = (a,b) => {
-    const order = {A:5,"B+":4.5,B:4,C:3,D:2.5,F:1};
-    const diff = (order[b]||0) - (order[a]||0);
-    return diff > 0 ? "↗" : diff < 0 ? "↘" : "→";
-  };
-  const a1 = arrow(r.ls0, r.ls5), a2 = arrow(r.ls5, r.ls15);
-  return `<span class="traj">${r.ls0} ${a1} ${r.ls5} ${a2} ${r.ls15}</span>`;
+  const order = {A:6,"B+":5,B:4,C:3,D:2,F:1};
+  const arrow = (a,b) => { const d=(order[b]||0)-(order[a]||0); return d>0?"↗":d<0?"↘":"→"; };
+  return `<span class="traj">${r.ls0} ${arrow(r.ls0,r.ls5)} ${r.ls5} ${arrow(r.ls5,r.ls15)} ${r.ls15}</span>`;
+}
+function trajArrow(r) {
+  if (r.ls0 === "N/R") return '—';
+  const order = {A:6,"B+":5,B:4,C:3,D:2,F:1};
+  const net = (order[r.ls15]||0) - (order[r.ls0]||0);
+  if (net > 1) return '<span style="color:#4ade80;font-weight:700">↑↑</span>';
+  if (net > 0) return '<span style="color:#86efac">↑</span>';
+  if (net < 0) return '<span style="color:#f87171">↓</span>';
+  return '<span style="color:#374151">→</span>';
 }
 
 function renderRow(r) {
@@ -318,9 +324,9 @@ function renderRow(r) {
     <td>${bandHTML(r.sp0)}</td>
     <td>${bandHTML(r.ret0)}</td>
     <td>${bandHTML(r.ls0)}</td>
-    <td>${bandHTML(r.ls5)}</td>
-    <td>${bandHTML(r.ls15)}</td>
+    <td>${bandHTML(r.ls0)}</td>
     <td>${trajHTML(r)}</td>
+    <td>${trajArrow(r)}</td>
     <td>${gapHTML(r.gap_yf)}</td>
     <td>${gapHTML(r.gap_sp)}</td>
     <td>${gapHTML(r.gap_ret)}</td>
@@ -332,6 +338,11 @@ function renderRow(r) {
     <td>${bandHTML(r.pvt_b)}</td>
     <td>${r.pvt_m !== null ? multHTML(r.pvt_m) : '<span style="color:#374151">—</span>'}</td>
     <td class="pvt-n">${r.pvt_n !== null ? r.pvt_n.toLocaleString() : '—'}</td>
+    <td>${bandHTML(r.emp0)}</td>
+    <td>${bandHTML(r.emp5)}</td>
+    <td>${bandHTML(r.emp15)}</td>
+    <td>${bandHTML(r.lease)}</td>
+    <td>${noiseScoreHTML(r.noise)}</td>
     <td class="path">${pathShort(r.best)}</td>
     <td class="path">${pathShort(r.worst)}</td>
     <td>${flagHTML(r.flag)}</td>
@@ -341,10 +352,7 @@ function renderRow(r) {
 const tbody = document.getElementById("tbody");
 tbody.innerHTML = DATA.map(renderRow).join("");
 
-// ── Filter by archetype ──
-let activeArch = "all";
-let searchVal = "";
-
+let activeArch = "all", searchVal = "";
 function filterArch(arch, btn) {
   activeArch = arch;
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -357,38 +365,29 @@ function filterTable() {
 }
 function applyFilters() {
   document.querySelectorAll("#tbody tr").forEach(tr => {
-    const arch = tr.dataset.arch;
-    const name = tr.dataset.estate;
-    const archOk = activeArch === "all" || arch === activeArch;
-    const searchOk = name.includes(searchVal);
+    const archOk = activeArch === "all" || tr.dataset.arch === activeArch;
+    const searchOk = tr.dataset.estate.includes(searchVal);
     tr.classList.toggle("hidden", !(archOk && searchOk));
   });
 }
 
-// ── Sort ──
 let sortCol = -1, sortAsc = true;
 function sortTable(col) {
   const ths = document.querySelectorAll("thead tr.cols th");
-  ths.forEach((th,i) => {
-    th.classList.remove("sorted","sorted-asc","sorted-desc");
-  });
+  ths.forEach(th => th.classList.remove("sorted","sorted-asc","sorted-desc"));
   if (sortCol === col) sortAsc = !sortAsc;
   else { sortCol = col; sortAsc = true; }
   ths[col].classList.add("sorted", sortAsc ? "sorted-asc" : "sorted-desc");
-
   const rows = Array.from(document.querySelectorAll("#tbody tr"));
-  const BAND_ORDER = {A:6,"B+":5,B:4,C:3,D:2,F:1,"N/R":0,null:0,undefined:0};
-
+  const BAND_ORDER = {A:6,"B+":5,B:4,C:3,D:2,F:1,"N/R":0};
   rows.sort((a,b) => {
     const at = a.querySelectorAll("td")[col]?.innerText.trim() || "";
     const bt = b.querySelectorAll("td")[col]?.innerText.trim() || "";
-    // Try numeric
     const an = parseFloat(at.replace(/[^0-9.\-]/g,""));
     const bn = parseFloat(bt.replace(/[^0-9.\-]/g,""));
     let cmp;
     if (!isNaN(an) && !isNaN(bn)) cmp = an - bn;
-    else if (BAND_ORDER[at] !== undefined && BAND_ORDER[bt] !== undefined)
-      cmp = BAND_ORDER[at] - BAND_ORDER[bt];
+    else if (BAND_ORDER[at] !== undefined && BAND_ORDER[bt] !== undefined) cmp = BAND_ORDER[at] - BAND_ORDER[bt];
     else cmp = at.localeCompare(bt);
     return sortAsc ? cmp : -cmp;
   });
