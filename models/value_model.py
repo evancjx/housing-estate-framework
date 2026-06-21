@@ -67,6 +67,18 @@ def band(x):
         if x >= edge: return b
     return "F"
 
+
+def build_formula(df, controls, month_col):
+    """RHS = within-segment quality controls only. Provision score is NEVER here."""
+    ctrl_terms = []
+    for c in controls:
+        if c in df.columns:
+            ctrl_terms.append(f"C({c})" if df[c].dtype == object else c)
+    if month_col in df.columns:
+        ctrl_terms.append(f"C({month_col})")
+    rhs = " + ".join(ctrl_terms) if ctrl_terms else "1"
+    return f"_lnpsm ~ {rhs}"
+
 # ----------------------------------------------------------------------
 # 2. SEGMENT MODELS — controls differ by tenure (framework §3 table)
 # ----------------------------------------------------------------------
@@ -132,21 +144,12 @@ def fit_segment(df, seg_name, scores):
     if df.empty:
         return None
 
-    # build formula: lnpsm ~ score + controls + C(month)
-    ctrl_terms = []
-    for c in s["controls"]:
-        if c in df.columns:
-            # categorical if non-numeric
-            if df[c].dtype == object:
-                ctrl_terms.append(f"C({c})")
-            else:
-                ctrl_terms.append(c)
-    month = s["month_col"]
-    if month in df.columns:
-        ctrl_terms.append(f"C({month})")
-    rhs = " + ".join(["_score"] + ctrl_terms) if ctrl_terms else "_score"
-
-    model = smf.ols(f"_lnpsm ~ {rhs}", data=df).fit()
+    # build controls-only formula: lnpsm ~ controls + C(month)
+    # NOTE: provision _score is deliberately NOT a regressor — it is the Value
+    # multiplier base (value_scores). Putting it here partials out the provision
+    # premium then multiplies it back, double-counting provision.
+    model_formula = build_formula(df, s["controls"], s["month_col"])
+    model = smf.ols(model_formula, data=df).fit()
     df["_resid"] = model.resid
 
     # ----- per-subzone/town residual with hierarchical shrinkage -----
