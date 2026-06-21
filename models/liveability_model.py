@@ -100,6 +100,8 @@ Pipeline type → component boosts:
   TOWN_CENTRE   → amen: +0.3
   PARK_PCN      → green: +0.15
   SERS          → infra: +0.2
+  NRP           → amen: +0.15, infra: +0.10   (v1.4)
+  LUP           → infra: +0.10                (v1.4)
 
 === CLI ===
 python liveability_model.py \\
@@ -383,6 +385,10 @@ PIPELINE_BOOSTS: Dict[str, Dict[str, float]] = {
     "TOWN_CENTRE":   {"amen": 0.3},
     "PARK_PCN":      {"green": 0.15},
     "SERS":          {"infra": 0.2},
+    # v1.4: HDB upgrading programmes ingested from data.gov.sg (audit §2a).
+    # NRP improves precinct common areas + landscape + lifts; LUP is lift-only.
+    "NRP":           {"amen": 0.15, "infra": 0.10},
+    "LUP":           {"infra": 0.10},
 }
 
 CERTAINTY_FACTORS: Dict[str, float] = {

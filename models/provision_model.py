@@ -10,11 +10,13 @@ HONEST SCOPE (read this — the model enforces it in output):
                         infra, childcare, community, sport, flood_risk, noise,
                         air_noise (geometric corridor proxy — see note),
                         eldercare (v1.3: carved from healthcare — AIC/MOH facilities)
-  PARTLY_MEASURED  (2): density (dwelling density yes; "feel" no),
+  PARTLY_MEASURED  (3): density (dwelling density yes; "feel" no),
                         env_comfort (heat/shade only; air-noise + expressway now
-                        split out as siblings — see audit §2d)
-  JUDGED           (2): momentum (requires reading announcements — not a query),
-                        hawker (fame/reputation — not a query)
+                        split out as siblings — see audit §2d),
+                        momentum (HDB-side ingested from data.gov.sg NRP+LUP+SERS
+                        via ingest_hdb_upgrading.py; private-side en-bloc / new
+                        launches still JUDGED — see audit §2a)
+  JUDGED           (1): hawker (fame/reputation — not a query)
 
 Note on `air_noise`: this is a geometric distance to runway centerlines + 12 km
 approach/departure corridor extensions for Changi, Seletar, and Paya Lebar
@@ -90,7 +92,7 @@ PROVENANCE = {
     'eldercare': 'MEASURED',
     'dens':      'PARTLY_MEASURED',
     'env':       'PARTLY_MEASURED',
-    'mom':       'JUDGED',
+    'mom':       'PARTLY_MEASURED',
     'hawker':    'JUDGED',
 }
 
