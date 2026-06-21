@@ -71,10 +71,21 @@ def time_factor(expected_year):
     return 0.20
 
 def item_contribution(item):
-    sig  = SIG.get(item.get('significance', ''), 0.0)
-    cert = CERT.get(item.get('certainty', ''), 0.0)
-    tf   = time_factor(item.get('expected_year', CURRENT_YEAR))
-    slip = SLIP_PREMIUM if item.get('type', '').upper() in MRT_TYPES else 1.0
+    sig_key  = str(item.get('significance', '')).strip().upper()
+    cert_key = str(item.get('certainty', '')).strip().upper()
+    sig  = SIG.get(sig_key)
+    cert = CERT.get(cert_key)
+    if sig is None or cert is None:
+        sys.stderr.write(
+            f"WARN: unknown significance/certainty '{sig_key}'/'{cert_key}' "
+            f"for item {item.get('description', item.get('type', '?'))} — counted as 0\n")
+        return 0.0
+    if 'expected_year' not in item:
+        sys.stderr.write(
+            f"WARN: missing expected_year for {item.get('description', '?')} — counted as 0\n")
+        return 0.0
+    tf   = time_factor(item['expected_year'])
+    slip = SLIP_PREMIUM if str(item.get('type', '')).upper() in MRT_TYPES else 1.0
     return sig * cert * tf * slip
 
 def score_from_adj(adj_sum):
