@@ -566,11 +566,13 @@ def score_estate(
     """
     w = PERSONA_WEIGHTS[persona]
     raw = sum(w[c] * components.get(c, 0.0) for c in w)
-    raw *= d
 
+    # Veto encodes a STRUCTURAL service failure -> cap the pre-D score so a
+    # transient disruption (D<1) cannot mask it.
     cap = veto_cap(components, persona)
     raw = apply_cap(raw, cap)
 
+    raw *= d
     return max(SOFT_FLOOR, raw)
 
 

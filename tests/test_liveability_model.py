@@ -18,3 +18,12 @@ def test_gap_label_dead_band():
     assert liveability_model.gap_label(0.8) == "punches_above"
     assert liveability_model.gap_label(-0.8) == "over_equipped"
     assert liveability_model.gap_label(0.5) == "matched"   # boundary inclusive
+
+
+def test_veto_caps_pre_d():
+    # amen==1 caps at C (3.49); with strong components raw>cap and D=0.8.
+    comps = {c: 5.0 for c in liveability_model.BASE_W}
+    comps["amen"] = 1.0
+    score = liveability_model.score_estate(comps, "SinglePro", d=0.8)
+    # structural cap 3.49 applied BEFORE D -> <= 3.49*0.8 = 2.792 (not 3.49)
+    assert score <= 3.49 * 0.8 + 1e-6
