@@ -88,3 +88,15 @@ def test_missing_required_input_fails_loudly(inputs):
     bad["lease"] = "/nonexistent/lease.csv"
     with pytest.raises(SystemExit):
         build_master.build(_ns(bad))
+
+
+def test_archetype_coverage_complete():
+    import os
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data = os.path.join(here, "data")
+    est = pd.read_csv(os.path.join(data, "estates.csv"))
+    arch = pd.read_csv(os.path.join(data, "archetype_assignments.csv"))
+    est_names = set(est["estate"].str.strip().str.upper())
+    arch_names = set(arch["estate"].str.strip().str.upper())
+    missing = est_names - arch_names
+    assert not missing, f"estates with no archetype: {missing}"

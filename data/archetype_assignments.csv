@@ -31,3 +31,6 @@ BOON KENG,F,High,Subzone of Kallang; ~12000 residents; single NEL station; no st
 LENTOR,F,High,Subzone of AMK planning area; single TEL station; private-condo dominated; no BTO component no hawker/polyclinic/bus interchange
 TENGAH,G,High,JRL delayed to 2028 (not operational at T0); active construction across multiple districts; Tengah Polyclinic opened Feb 2026 but MRT absent
 CENTRAL AREA,X,High,CBD/Orchard/Marina Bay core; majority non-residential zoning; minimal HDB; exits provision pipeline as N/R
+HOLLAND VILLAGE,D,High,Private/mixed-use lifestyle enclave; F&B/character-driven; canonical D archetype
+JURONG WEST,B,High,Large mature HDB town (Boon Lay/Pioneer/Lakeside); de-folded from Jurong East alias in v2
+KALLANG,B,High,Central mature HDB town (Kallang/Whampoa); de-folded from Boon Keng alias in v2
