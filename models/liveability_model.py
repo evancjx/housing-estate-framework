@@ -17,9 +17,9 @@ v1.3 change: eldercare carved from hlth (0.07→0.04). eldercare joins S6.
 v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
 
 Deltas are applied at the S-group level (9 groups), then distributed to their
-constituent 15 components proportionally by base weight.
+constituent 17 components proportionally by base weight.
 
-S-group → 15-component mapping:
+S-group → 17-component mapping (15 covered by S-groups; hawker and noise applied directly):
   S1 (conn)      → conn                   (base 0.15)
   S8 (infra)     → infra                  (base 0.15)
   S2 (amen)      → amen+community         (base 0.13+0.04=0.17)

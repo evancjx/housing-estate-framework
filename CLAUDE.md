@@ -43,8 +43,8 @@ what columns each CSV must have. Update both the contract and the loader when yo
 
 These are not stylistic preferences — they are framework rules the code actively enforces:
 
-- **Weight vectors must stay in sync.** `provision_model.py:W` (15 components) and
-  `liveability_model.py:BASE_W` (13 components, after grouping) must agree on the base weights.
+- **Weight vectors must stay in sync.** `provision_model.py:W` (17 components) and
+  `liveability_model.py:BASE_W` (17 components, sourced from `W`) must agree on the base weights.
   When adding/renaming a component, update both, plus the S-group mapping in `liveability_model.py:S_GROUPS`.
 - **Provenance is never faked.** `provision_model.py` tags each component MEASURED / PARTLY_MEASURED /
   JUDGED. If a JUDGED input (dens/env/mom/hawker) is missing, the model renormalises over present

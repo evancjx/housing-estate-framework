@@ -36,26 +36,64 @@ each to be honest.
 ## 1. The Provision score (the old Core, unchanged math, honest label)
 
 ```
-Provision(a) = Σ (wᵢ × Sᵢ)        i = 1..9,  Sᵢ ∈ [1,5]
+Provision(a) = Σ (wᵢ × Sᵢ)        i = 1..17,  Sᵢ ∈ [1,5]
 ProvisionFinal(a) = Provision(a) × D(a)      [D = losses/disruptions only; see §4]
 ```
 Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (see §6).
 **Archetype-BLIND**: every estate scored on the same yardstick so scores stay comparable.
 
-### 1.1 Components and weights (renormalised, sum = 1.000)
+### 1.1 Components and weights — `W` (17 components, sum = 1.000)
 
-| # | Component | Weight | Scored on (guidance — single 1–5, sub-metrics are guidance not separate weights) |
-|---|-----------|------:|------|
-| 1 | Connectivity | 0.1709 | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
-| 2 | Daily amenities | 0.1597 | Basics (hawker, wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
-| 3 | Green & blue | 0.1064 | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
-| 4 | Schools | 0.0819 | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach. Trimmed (address-level factor). |
-| 5 | Density & built form | 0.0962 | Lived density: block spacing, mixed-use, lift/access, pavement. Empty/derelict floor = desolation signal. |
-| 6 | Healthcare | 0.0850 | Primary-care-first: GP/CHAS/pharmacy + polyclinic (`hlth`), eldercare day-centres / AAC / nursing-home density (`eldercare`, v1.3: split out as MEASURED — AIC Silver Pages / MOH registry), THEN A&E time |
-| 7 | Momentum (+) | 0.0645 | Confirmed *additions* only, time-discounted (positive only — losses live in D). v1.4: HDB-side now MEASURED — `ingest_hdb_upgrading.py` pulls NRP + LUP precincts from data.gov.sg (datasets `d_156a38…` / `d_9b5886…`) and merges into `pipeline_data.json`; SERS items stay hand-curated; private-side en-bloc / new-launch pipeline remains JUDGED. |
-| 8 | Infrastructure readiness | 0.1709 | Trunk infra *operational now* (LiveNow horizon). Distinct from S1: S1 = quality-when-present; S8 = operational-at-horizon. |
-| 9 | Environmental comfort | 0.0645 | Heat/shade (`env`), expressway exposure (`noise`), aircraft-corridor proximity (`air_noise`, v1.2: split out as MEASURED — geometric proxy of runway centerlines + 12 km approach corridors for Changi / Seletar / Paya Lebar), construction disruption, flood-prone routes (`flood`) |
-|10 | *(reserved — estate stewardship; NOT "social mix")* | — | See Appendix on the permanent social-mix exclusion |
+Sourced verbatim from `provision_model.py:W`. Do not edit here without updating that file.
+
+| # | Key | Weight | Provenance | Notes |
+|---|-----|------:|:----------:|-------|
+| 1 | `conn` | 0.15 | MEASURED | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
+| 2 | `infra` | 0.15 | MEASURED | Trunk infra *operational now* (LiveNow horizon). Distinct from conn: conn = quality-when-present; infra = operational-at-horizon. |
+| 3 | `amen` | 0.10 | MEASURED | Basics (wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
+| 4 | `green` | 0.09 | MEASURED | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
+| 5 | `dens` | 0.08 | PARTLY_MEASURED | Dwelling density yes; "feel" (block spacing, pavement quality) no |
+| 6 | `sch` | 0.07 | MEASURED | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach |
+| 7 | `childcare` | 0.06 | MEASURED | Licensed childcare / infant care centres within 800m |
+| 8 | `hlth` | 0.04 | MEASURED | Primary-care-first: GP/CHAS/pharmacy + polyclinic access, THEN A&E time |
+| 9 | `mom` | 0.04 | PARTLY_MEASURED | Confirmed *additions* only, time-discounted. HDB-side ingested from data.gov.sg NRP+LUP+SERS; private-side en-bloc / new-launch pipeline still JUDGED |
+| 10 | `hawker` | 0.04 | JUDGED | Fame/reputation of hawker culture — not a spatial query; must come from `judged_inputs.csv` |
+| 11 | `noise` | 0.04 | MEASURED | Expressway exposure: distance-weighted proximity to major expressways |
+| 12 | `air_noise` | 0.03 | MEASURED | Geometric runway-centerline + 12 km approach/departure corridor proxy for Changi, Seletar, Paya Lebar (v1.2) |
+| 13 | `community` | 0.03 | MEASURED | Community clubs, resident corner, active ageing centres (non-eldercare function) |
+| 14 | `eldercare` | 0.03 | MEASURED | Eldercare day-centres / AAC / nursing-home density (AIC Silver Pages / MOH registry; v1.3: carved from hlth) |
+| 15 | `env` | 0.02 | PARTLY_MEASURED | Heat/shade only; air_noise + expressway noise split out as siblings (audit §2d) |
+| 16 | `sport` | 0.02 | MEASURED | SportSG facilities + park connectors with fitness infrastructure within 1 km |
+| 17 | `flood` | 0.01 | MEASURED | Flood-prone routes / PUB drainage risk overlay |
+
+Row 10 reserved: *(estate stewardship; NOT "social mix")* — see Appendix on the permanent social-mix exclusion.
+
+#### `W_PRIVATE` — private (condo) segment weight variant (17 components, sum = 1.000)
+
+Applied by `value_model.py` when scoring private transactions. Rationale: private buyers have
+higher car ownership (conn ↓), use in-development amenities (green ↓, sport ↓), prioritise
+school postal codes as a direct pricing driver (sch ↑), and skew younger/wealthier (eldercare ↓).
+Sourced verbatim from `provision_model.py:W_PRIVATE`.
+
+| Key | W (HDB) | W_PRIVATE | Delta | Rationale |
+|-----|--------:|----------:|------:|-----------|
+| `conn` | 0.15 | 0.12 | −0.03 | Car ownership higher; parking within development |
+| `amen` | 0.10 | 0.13 | +0.03 | F&B cluster / mall access > hawker |
+| `green` | 0.09 | 0.07 | −0.02 | Landscaped grounds within development reduce urgency |
+| `dens` | 0.08 | 0.08 | 0 | — |
+| `sch` | 0.07 | 0.11 | +0.04 | School postal code is a direct pricing driver |
+| `childcare` | 0.06 | 0.07 | +0.01 | Family-forming cohort in private market |
+| `hlth` | 0.04 | 0.04 | 0 | — |
+| `mom` | 0.04 | 0.04 | 0 | — |
+| `hawker` | 0.04 | 0.02 | −0.02 | Restaurant / delivery preference |
+| `noise` | 0.04 | 0.04 | 0 | — |
+| `infra` | 0.15 | 0.16 | +0.01 | MRT proximity premium stronger for asset value |
+| `air_noise` | 0.03 | 0.03 | 0 | — |
+| `community` | 0.03 | 0.03 | 0 | — |
+| `eldercare` | 0.03 | 0.02 | −0.01 | Private buyer cohort skews younger/wealthier |
+| `env` | 0.02 | 0.02 | 0 | — |
+| `sport` | 0.02 | 0.01 | −0.01 | Gym/pool within development |
+| `flood` | 0.01 | 0.01 | 0 | — |
 
 ### 1.2 S11 — conditional car-mobility (provision side)
 For `car-primary` nodes only. Scores expressway access + multi-district drive time + congestion/
