@@ -19,16 +19,16 @@ v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
 Deltas are applied at the S-group level (9 groups), then distributed to their
 constituent 17 components proportionally by base weight.
 
-S-group → 17-component mapping (15 covered by S-groups; hawker and noise applied directly):
-  S1 (conn)      → conn                   (base 0.15)
-  S8 (infra)     → infra                  (base 0.15)
-  S2 (amen)      → amen+community         (base 0.13+0.04=0.17)
-  S3 (green)     → green+sport            (base 0.09+0.03=0.12)
-  S4 (schools)   → sch+childcare          (base 0.07+0.06=0.13)
-  S5 (density)   → dens                   (base 0.08)
-  S6 (health)    → hlth+eldercare         (base 0.04+0.03=0.07)
-  S7 (momentum)  → mom                    (base 0.05)
-  S9 (env)       → env+flood+air_noise    (base 0.02+0.03+0.03=0.08)
+S-group → 17-component mapping (all 17 covered; see provision_model.W for base weights):
+  S1 (conn)      → conn                        (base 0.15)
+  S8 (infra)     → infra                       (base 0.15)
+  S2 (amen)      → amen+community+hawker       (base 0.10+0.03+0.04=0.17)
+  S3 (green)     → green+sport                 (base 0.09+0.02=0.11)
+  S4 (schools)   → sch+childcare               (base 0.07+0.06=0.13)
+  S5 (density)   → dens                        (base 0.08)
+  S6 (health)    → hlth+eldercare              (base 0.04+0.03=0.07)
+  S7 (momentum)  → mom                         (base 0.04)
+  S9 (env)       → env+flood+air_noise+noise   (base 0.02+0.01+0.03+0.04=0.10)
 
 Delta table (percentage points, each column sums to 0):
               YoungFam  SinglePro  Retiree  Lifestyle
@@ -540,8 +540,7 @@ def score_estate(
 ) -> float:
     """
     Compute raw liveability score for one estate × persona × horizon.
-    Formula: Σ(w_persona(i) × S_i) × D
-    Then capped by veto rules (persona-specific).
+    Formula: Σ(w_persona(i) × S_i), capped by persona veto, then × D.
     Soft floor applied last.
     """
     w = PERSONA_WEIGHTS[persona]

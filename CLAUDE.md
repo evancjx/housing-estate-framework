@@ -34,6 +34,7 @@ liveability_model.py      → provision_scores.csv + pipeline_data.json → live
 value_model.py            → provision_scores.csv (or liveability_matrix.csv) + hdb_resale.csv → value_output.csv
 lease_risk_model.py       → hdb_resale.csv → lease_risk.csv (standalone, joined later)
 employment_model.py       → station-count commute approximation → employment_scores_{T0,T5,T15}.csv
+build_master.py           → all outputs above → master_output.csv (consolidated cross-model summary)
 ```
 
 Each model file ends with an **INPUT CONTRACT** block in its docstring — the authoritative spec for
@@ -81,6 +82,8 @@ python models/provision_model.py \
     --covered_linkway data/covered_linkway.csv \
     --judged data/judged_inputs.csv \
     --out data/provision_scores.csv
+# Note: eldercare/air_noise layers (data/eldercare.csv, data/air_noise_corridors.csv) exist but are
+# not yet wired into the canonical run — Phase 3 ingests them (will shift some bands).
 
 python models/liveability_model.py \
     --scores data/provision_scores.csv \
@@ -97,6 +100,9 @@ python models/momentum_model.py \
     --pipeline data/pipeline_data.json \
     --judged data/judged_inputs.csv \
     --out data/judged_inputs_updated.csv
+
+# Consolidate all model outputs into master_output.csv
+python3 models/build_master.py
 ```
 
 There is no test suite, linter config, or build system. Validate changes by running the pipeline

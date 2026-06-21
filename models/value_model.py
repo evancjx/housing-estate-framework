@@ -100,7 +100,7 @@ SEGMENTS = {
 }
 
 # ----------------------------------------------------------------------
-# 3. CORE — fit ln(price_psm) ~ score + controls + month, take residuals
+# 3. CORE — fit ln(price_psm) ~ controls + C(month), take residuals
 # ----------------------------------------------------------------------
 def fit_segment(df, seg_name, scores):
     import statsmodels.formula.api as smf
