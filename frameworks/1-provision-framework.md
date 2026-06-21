@@ -51,7 +51,7 @@ Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (s
 | 3 | Green & blue | 0.1064 | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
 | 4 | Schools | 0.0819 | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach. Trimmed (address-level factor). |
 | 5 | Density & built form | 0.0962 | Lived density: block spacing, mixed-use, lift/access, pavement. Empty/derelict floor = desolation signal. |
-| 6 | Healthcare | 0.0850 | Primary-care-first: GP/CHAS/pharmacy, polyclinic, eldercare, THEN A&E time |
+| 6 | Healthcare | 0.0850 | Primary-care-first: GP/CHAS/pharmacy + polyclinic (`hlth`), eldercare day-centres / AAC / nursing-home density (`eldercare`, v1.3: split out as MEASURED — AIC Silver Pages / MOH registry), THEN A&E time |
 | 7 | Momentum (+) | 0.0645 | Confirmed *additions* only, time-discounted (positive only — losses live in D) |
 | 8 | Infrastructure readiness | 0.1709 | Trunk infra *operational now* (LiveNow horizon). Distinct from S1: S1 = quality-when-present; S8 = operational-at-horizon. |
 | 9 | Environmental comfort | 0.0645 | Heat/shade (`env`), expressway exposure (`noise`), aircraft-corridor proximity (`air_noise`, v1.2: split out as MEASURED — geometric proxy of runway centerlines + 12 km approach corridors for Changi / Seletar / Paya Lebar), construction disruption, flood-prone routes (`flood`) |

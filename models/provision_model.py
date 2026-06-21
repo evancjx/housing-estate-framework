@@ -6,9 +6,10 @@ Computes the Provision score per estate from ACTUAL spatial data, instead of
 analyst judgement. Emits the scores.csv that value_model.py consumes.
 
 HONEST SCOPE (read this — the model enforces it in output):
-  MEASURED        (12): connectivity, amenities, green, schools, healthcare,
+  MEASURED        (13): connectivity, amenities, green, schools, healthcare,
                         infra, childcare, community, sport, flood_risk, noise,
-                        air_noise (geometric corridor proxy — see note)
+                        air_noise (geometric corridor proxy — see note),
+                        eldercare (v1.3: carved from healthcare — AIC/MOH facilities)
   PARTLY_MEASURED  (2): density (dwelling density yes; "feel" no),
                         env_comfort (heat/shade only; air-noise + expressway now
                         split out as siblings — see audit §2d)
@@ -47,10 +48,10 @@ import argparse, sys, math
 import numpy as np, pandas as pd
 
 # ----------------------------------------------------------------------
-# v1.2 weights (sum=1.000). Added air_noise (3%); carved from env (0.05→0.02),
-# the first step of the audit §2d env split. air_noise = distance to runway
-# centerlines + 12km approach corridors for Changi / Seletar / Paya Lebar.
-# noise = distance to nearest expressway motorway, OSM-sourced.
+# v1.3 weights (sum=1.000). Added eldercare (3%); carved from hlth (0.07→0.04),
+# implementing audit §1d. eldercare = AIC Silver Pages / MOH day-care + AAC +
+# nursing-home + senior-care-centre density. hlth now scopes GP/polyclinic only.
+# Prior v1.2 split: air_noise carved from env (0.05→0.02) — see audit §2d.
 # ----------------------------------------------------------------------
 W = {
     'conn':      0.15,
@@ -58,7 +59,7 @@ W = {
     'green':     0.09,
     'sch':       0.07,
     'dens':      0.08,
-    'hlth':      0.07,
+    'hlth':      0.04,
     'mom':       0.04,
     'infra':     0.15,
     'env':       0.02,
@@ -69,6 +70,7 @@ W = {
     'hawker':    0.04,
     'noise':     0.04,
     'air_noise': 0.03,
+    'eldercare': 0.03,
 }
 assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
 
@@ -85,6 +87,7 @@ PROVENANCE = {
     'flood':     'MEASURED',
     'noise':     'MEASURED',
     'air_noise': 'MEASURED',
+    'eldercare': 'MEASURED',
     'dens':      'PARTLY_MEASURED',
     'env':       'PARTLY_MEASURED',
     'mom':       'JUDGED',
@@ -142,6 +145,11 @@ A_NOISE    = [(500,1),(1000,2),(1500,3),(2000,4),(99999,5)]
 # so anchors are wider. Distance is to nearest runway/approach-corridor point.
 A_AIR_NOISE = [(1000,1),(2000,2),(3500,3),(5000,4),(99999,5)]
 
+# eldercare: distance-to-nearest + count-within-1500m. Sparser than GPs;
+# anchors match community-club scale (walk-or-short-bus visits).
+A_ELDER    = [(500,5),(1000,4),(1500,3),(2500,2),(99999,1)]
+C_ELDER    = [(4,5),(2,4),(1,3),(0,1)]   # within 1500m
+
 # count anchors
 C_CLINIC   = [(8,5),(5,4),(3,3),(1,2),(0,1)]
 C_MARKET   = [(3,5),(2,4),(1,3),(0,1)]
@@ -184,6 +192,14 @@ def score_healthcare(lat, lon, clinics, poly):
     s_poly = score_by_distance(nearest_m(lat, lon, pts_of(poly)), A_POLY)
     s_gp = score_by_count(count_within(lat, lon, pts_of(clinics), 800), C_CLINIC)
     return round(0.55*s_poly + 0.45*s_gp, 2), {}
+
+def score_eldercare(lat, lon, eldercare):
+    d = nearest_m(lat, lon, pts_of(eldercare))
+    n = count_within(lat, lon, pts_of(eldercare), 1500)
+    s_near = score_by_distance(d, A_ELDER)
+    s_cnt = score_by_count(n, C_ELDER)
+    return round(0.5*s_near + 0.5*s_cnt, 2), {'nearest_eldercare_m': round(d) if d != np.inf else None,
+                                              'eldercare_within_1500m': n}
 
 def score_infra(lat, lon, mrt, mrt_operational):
     if mrt is None or len(mrt) == 0: return 1.0, {'note': 'no mrt data'}
@@ -232,6 +248,7 @@ def run(estates, layers, judged):
         s['green'],_     = score_green(lat, lon, layers['parks'])
         s['sch'],_       = score_schools(lat, lon, layers['schools'])
         s['hlth'],_      = score_healthcare(lat, lon, layers['clinics'], layers['polyclinics'])
+        s['eldercare'],_ = score_eldercare(lat, lon, layers['eldercare'])
         s['infra'],_     = score_infra(lat, lon, layers['mrt'], None)
         s['childcare'],_ = score_childcare(lat, lon, layers['childcare'])
         s['community'],_ = score_community(lat, lon, layers['community'])
@@ -272,7 +289,7 @@ def main():
     ap.add_argument('--estates', required=True)
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
               'supermarkets','childcare','community','sport','flood','noise',
-              'air_noise']:
+              'air_noise','eldercare']:
         ap.add_argument(f'--{L}')
     ap.add_argument('--judged', help='CSV: estate,dens,env,mom,hawker (the 4 non-geospatial)')
     ap.add_argument('--out', default='provision_scores.csv')
@@ -284,14 +301,14 @@ def main():
     layers = {L: load(getattr(a, L)) for L in
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
                'supermarkets','childcare','community','sport','flood','noise',
-               'air_noise']}
+               'air_noise','eldercare']}
     judged = load(a.judged)
 
     df = run(estates, layers, judged)
     df['band'] = df['provision'].apply(band)
     df.to_csv(a.out, index=False)
 
-    cols = ['estate','conn','amen','green','sch','dens','hlth','mom','hawker','infra','env',
+    cols = ['estate','conn','amen','green','sch','dens','hlth','eldercare','mom','hawker','infra','env',
             'childcare','community','sport','flood','noise','air_noise',
             'provision','band','weight_covered','measured_only']
     print(df[cols].to_string(index=False))
@@ -304,7 +321,7 @@ if __name__ == '__main__':
     main()
 
 # ======================================================================
-# INPUT CONTRACT — provision_model.py v1.2
+# INPUT CONTRACT — provision_model.py v1.3
 # ======================================================================
 # REQUIRED:
 #   --estates estates.csv     columns: estate,lat,lon
@@ -326,23 +343,25 @@ if __name__ == '__main__':
 #   --air_noise air_noise_corridors.csv  lat,lon,corridor
 #                             (geometric proxy: runway centerlines + 12 km
 #                              approach corridors for Changi, Seletar, Paya Lebar)
+#   --eldercare eldercare.csv lat,lon,name,type     (AIC Silver Pages: day_centre,
+#                              nursing_home, ambulatory_care, day_care, AAC, etc.)
 #
 # NON-GEOSPATIAL (judgement) COMPONENTS:
 #   --judged judged.csv       columns: estate,dens,env,mom,hawker   (each 1-5)
 #       If omitted, those 4 components are left MISSING and provision is
-#       computed from the 12 measured components only (measured_only=True).
+#       computed from the 13 measured components only (measured_only=True).
 #       NEVER auto-fill these — they are opinion by construction.
 #
-# WEIGHTS (v1.2, 16 components, sum=1.000):
-#   conn 15%, infra 15%, amen 10%, green 9%, dens 8%, sch 7%, hlth 7%,
-#   childcare 6%, mom 4%, hawker 4%, noise 4%, air_noise 3%, community 3%,
-#   env 2%, sport 2%, flood 1%
+# WEIGHTS (v1.3, 17 components, sum=1.000):
+#   conn 15%, infra 15%, amen 10%, green 9%, dens 8%, sch 7%, childcare 6%,
+#   hlth 4%, mom 4%, hawker 4%, noise 4%, air_noise 3%, community 3%,
+#   eldercare 3%, env 2%, sport 2%, flood 1%
 #
 # PIPELINE:
 #   python provision_model.py --estates e.csv --mrt mrt.csv ... \
 #       --childcare childcare.csv --community community.csv \
 #       --sport sport.csv --flood flood_risk.csv --noise expressways.csv \
-#       --air_noise air_noise_corridors.csv \
+#       --air_noise air_noise_corridors.csv --eldercare eldercare.csv \
 #       --judged judged_inputs.csv --out provision_scores.csv
 #   python value_model.py --scores provision_scores.csv --hdb hdb.csv
 # ======================================================================

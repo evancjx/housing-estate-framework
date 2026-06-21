@@ -13,22 +13,23 @@ SECONDARY:       Gap = Liveability_cell − Provision_band (the headline signal)
 
 Base weights (from provision_model.py W dict, sum = 1.000):
   conn=0.15  amen=0.13  green=0.09  sch=0.07  dens=0.08
-  hlth=0.07  mom=0.05   infra=0.15  env=0.02
+  hlth=0.04  eldercare=0.03  mom=0.05   infra=0.15  env=0.02
   childcare=0.06  community=0.04  sport=0.03  flood=0.03  air_noise=0.03
 
+v1.3 change: eldercare carved from hlth (0.07→0.04). eldercare joins S6.
 v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
 
 Deltas are applied at the S-group level (9 groups), then distributed to their
-constituent 14 components proportionally by base weight.
+constituent 15 components proportionally by base weight.
 
-S-group → 14-component mapping:
+S-group → 15-component mapping:
   S1 (conn)      → conn                   (base 0.15)
   S8 (infra)     → infra                  (base 0.15)
   S2 (amen)      → amen+community         (base 0.13+0.04=0.17)
   S3 (green)     → green+sport            (base 0.09+0.03=0.12)
   S4 (schools)   → sch+childcare          (base 0.07+0.06=0.13)
   S5 (density)   → dens                   (base 0.08)
-  S6 (health)    → hlth                   (base 0.07)
+  S6 (health)    → hlth+eldercare         (base 0.04+0.03=0.07)
   S7 (momentum)  → mom                    (base 0.05)
   S9 (env)       → env+flood+air_noise    (base 0.02+0.03+0.03=0.08)
 
@@ -124,7 +125,8 @@ BASE_W: Dict[str, float] = {
     "green":     0.09,
     "sch":       0.07,
     "dens":      0.08,
-    "hlth":      0.07,
+    "hlth":      0.04,
+    "eldercare": 0.03,
     "mom":       0.05,
     "infra":     0.15,
     "env":       0.02,
@@ -143,7 +145,7 @@ S_GROUPS: Dict[str, list] = {
     "S3": ["green", "sport"],
     "S4": ["sch", "childcare"],
     "S5": ["dens"],
-    "S6": ["hlth"],
+    "S6": ["hlth", "eldercare"],
     "S7": ["mom"],
     "S8": ["infra"],
     "S9": ["env", "flood", "air_noise"],
