@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetch CHAS clinics — tries data.gov.sg first, falls back to OneMap Search.
-Writes SG-Estate-Framework/data/chas.csv  (lat, lon, name)
+Writes ../data/chas.csv  (lat, lon, name)
 """
 import csv, json, os, sys, time, urllib.request, urllib.parse, urllib.error
 

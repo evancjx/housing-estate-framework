@@ -4,7 +4,7 @@ Singapore Estate Data Ingestion  —  data_ingest.py
 ===================================================
 Downloads publicly available geospatial layers from data.gov.sg and the
 OneMap Search API, standardises column names to match provision_model.py's
-input contract, and writes cleaned CSVs to SG-Estate-Framework/data/.
+input contract, and writes cleaned CSVs to ../data/.
 
 Run from the models/ directory (no API keys required):
     python data_ingest.py

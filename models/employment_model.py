@@ -34,8 +34,16 @@ Sources:
   - LTA LTMP 2040 (45-minute city target)
 """
 
+import argparse
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
+
+try:
+    from framework_config import DATA_DIR
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import DATA_DIR
 
 # ── Node weights (T0) ──────────────────────────────────────────────────────
 NODES = ["cbd", "jld", "one_north", "changi", "woodlands_rc"]
@@ -149,7 +157,13 @@ def compute(times_dict, weights):
         })
     return pd.DataFrame(rows).sort_values("emp_score", ascending=False)
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Employment Accessibility Model")
+    parser.add_argument("--out-dir", default=str(DATA_DIR), help="Directory for output CSVs")
+    args = parser.parse_args()
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     print("=" * 72)
     print("EMPLOYMENT ACCESSIBILITY SCORES — T0 (current)")
     print("Weights: CBD 45% | JLD 20% | one-north 15% | Changi 10% | WRC 10%")
@@ -189,11 +203,15 @@ if __name__ == "__main__":
                   "emp_band_T15","emp_score_T15","delta_T15"]].to_string(index=False))
 
     # Write outputs
-    df0.to_csv("SG-Estate-Framework/data/employment_scores_T0.csv", index=False)
-    df5.to_csv("SG-Estate-Framework/data/employment_scores_T5.csv", index=False)
-    df15.to_csv("SG-Estate-Framework/data/employment_scores_T15.csv", index=False)
-    merged.to_csv("SG-Estate-Framework/data/employment_trajectory.csv", index=False)
+    df0.to_csv(out_dir / "employment_scores_T0.csv", index=False)
+    df5.to_csv(out_dir / "employment_scores_T5.csv", index=False)
+    df15.to_csv(out_dir / "employment_scores_T15.csv", index=False)
+    merged.to_csv(out_dir / "employment_trajectory.csv", index=False)
     print("\nWritten: employment_scores_T0/T5/T15.csv + employment_trajectory.csv")
+
+
+if __name__ == "__main__":
+    main()
 
 # ======================================================================
 # INPUT CONTRACT

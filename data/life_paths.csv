@@ -1,161 +1,161 @@
 estate,path,start_score,start_band,end_score,end_band,delta,arrow,band_shift
-WOODLANDS,forming_family,3.809,B,3.905,B,0.096,→,B→B
-WOODLANDS,downsizing,3.793,B,3.743,B,-0.05,→,B→B
-WOODLANDS,settling_single,3.809,B,3.926,B,0.117,↑,B→B
-WOODLANDS,ageing_in_place,3.618,B,3.743,B,0.125,↑,B→B
-WOODLANDS,upgrader,3.727,B,3.849,B,0.122,↑,B→B
-PASIR RIS,forming_family,4.15,B+,4.078,B+,-0.072,→,B+→B+
-PASIR RIS,downsizing,4.078,B+,3.883,B,-0.195,↓,B+→B
-PASIR RIS,settling_single,4.15,B+,4.15,B+,0.0,→,B+→B+
-PASIR RIS,ageing_in_place,3.883,B,3.883,B,0.0,→,B→B
-PASIR RIS,upgrader,3.982,B,3.982,B,0.0,→,B→B
-JURONG EAST,forming_family,3.986,B,3.873,B,-0.113,↓,B→B
-JURONG EAST,downsizing,3.803,B,3.815,B,0.012,→,B→B
-JURONG EAST,settling_single,3.986,B,4.033,B+,0.047,→,B→B+
-JURONG EAST,ageing_in_place,3.684,B,3.815,B,0.131,↑,B→B
-JURONG EAST,upgrader,3.982,B,4.022,B+,0.04,→,B→B+
-BISHAN,forming_family,4.295,B+,4.305,B+,0.01,→,B+→B+
-BISHAN,downsizing,4.305,B+,4.154,B+,-0.151,↓,B+→B+
-BISHAN,settling_single,4.295,B+,4.295,B+,0.0,→,B+→B+
-BISHAN,ageing_in_place,4.154,B+,4.154,B+,0.0,→,B+→B+
-BISHAN,upgrader,4.224,B+,4.224,B+,0.0,→,B+→B+
-BEDOK,forming_family,4.372,B+,4.484,B+,0.112,↑,B+→B+
-BEDOK,downsizing,4.466,B+,4.648,A,0.182,↑,B+→A
-BEDOK,settling_single,4.372,B+,4.383,B+,0.011,→,B+→B+
-BEDOK,ageing_in_place,4.63,A,4.648,A,0.018,→,A→A
-BEDOK,upgrader,4.38,B+,4.392,B+,0.012,→,B+→B+
-TAMPINES,forming_family,4.041,B+,4.007,B+,-0.034,→,B+→B+
-TAMPINES,downsizing,3.981,B,3.927,B,-0.054,→,B→B
-TAMPINES,settling_single,4.041,B+,4.069,B+,0.028,→,B+→B+
-TAMPINES,ageing_in_place,3.896,B,3.927,B,0.031,→,B→B
-TAMPINES,upgrader,3.945,B,3.974,B,0.029,→,B→B
-TOA PAYOH,forming_family,4.519,A,4.647,A,0.128,↑,A→A
-TOA PAYOH,downsizing,4.584,A,4.736,A,0.152,↑,A→A
-TOA PAYOH,settling_single,4.519,A,4.543,A,0.024,→,A→A
-TOA PAYOH,ageing_in_place,4.584,A,4.736,A,0.152,↑,A→A
-TOA PAYOH,upgrader,4.532,A,4.54,A,0.008,→,A→A
-QUEENSTOWN,forming_family,3.85,B,4.056,B+,0.206,↑,B→B+
-QUEENSTOWN,downsizing,3.848,B,4.141,B+,0.293,↑,B→B+
-QUEENSTOWN,settling_single,3.85,B,4.033,B+,0.183,↑,B→B+
-QUEENSTOWN,ageing_in_place,3.89,B,4.141,B+,0.251,↑,B→B+
-QUEENSTOWN,upgrader,3.865,B,4.041,B+,0.176,↑,B→B+
-SERANGOON,forming_family,4.363,B+,4.412,B+,0.049,→,B+→B+
-SERANGOON,downsizing,4.381,B+,4.397,B+,0.016,→,B+→B+
-SERANGOON,settling_single,4.363,B+,4.395,B+,0.032,→,B+→B+
-SERANGOON,ageing_in_place,4.361,B+,4.397,B+,0.036,→,B+→B+
-SERANGOON,upgrader,4.245,B+,4.28,B+,0.035,→,B+→B+
-SEMBAWANG,forming_family,4.529,A,4.562,A,0.033,→,A→A
-SEMBAWANG,downsizing,4.461,B+,4.394,B+,-0.067,→,B+→B+
-SEMBAWANG,settling_single,4.529,A,4.61,A,0.081,→,A→A
-SEMBAWANG,ageing_in_place,4.227,B+,4.394,B+,0.167,↑,B+→B+
-SEMBAWANG,upgrader,4.369,B+,4.442,B+,0.073,→,B+→B+
-MARINE PARADE,forming_family,4.256,B+,4.299,B+,0.043,→,B+→B+
-MARINE PARADE,downsizing,4.299,B+,4.262,B+,-0.037,→,B+→B+
-MARINE PARADE,settling_single,4.256,B+,4.256,B+,0.0,→,B+→B+
-MARINE PARADE,ageing_in_place,4.262,B+,4.262,B+,0.0,→,B+→B+
-MARINE PARADE,upgrader,4.163,B+,4.163,B+,0.0,→,B+→B+
-CANBERRA,forming_family,4.194,B+,4.196,B+,0.002,→,B+→B+
-CANBERRA,downsizing,4.131,B+,3.941,B,-0.19,↓,B+→B
-CANBERRA,settling_single,4.194,B+,4.264,B+,0.07,→,B+→B+
-CANBERRA,ageing_in_place,3.864,B,3.941,B,0.077,→,B→B
-CANBERRA,upgrader,4.045,B+,4.119,B+,0.074,→,B+→B+
-BOON KENG,forming_family,4.087,B+,4.231,B+,0.144,↑,B+→B+
-BOON KENG,downsizing,4.231,B+,4.256,B+,0.025,→,B+→B+
-BOON KENG,settling_single,4.087,B+,4.087,B+,0.0,→,B+→B+
-BOON KENG,ageing_in_place,4.256,B+,4.256,B+,0.0,→,B+→B+
-BOON KENG,upgrader,4.105,B+,4.105,B+,0.0,→,B+→B+
-WOODLEIGH,forming_family,4.281,B+,4.21,B+,-0.071,→,B+→B+
-WOODLEIGH,downsizing,4.176,B+,4.215,B+,0.039,→,B+→B+
-WOODLEIGH,settling_single,4.281,B+,4.294,B+,0.013,→,B+→B+
-WOODLEIGH,ageing_in_place,4.134,B+,4.215,B+,0.081,→,B+→B+
-WOODLEIGH,upgrader,4.278,B+,4.282,B+,0.004,→,B+→B+
-DOVER,forming_family,3.594,B,3.727,B,0.133,↑,B→B
-DOVER,downsizing,3.578,B,3.524,B,-0.054,→,B→B
-DOVER,settling_single,3.594,B,3.744,B,0.15,↑,B→B
-DOVER,ageing_in_place,3.383,C,3.524,B,0.141,↑,C→B
-DOVER,upgrader,3.555,B,3.703,B,0.148,↑,B→B
-TENGAH,forming_family,3.352,C,3.791,B,0.439,↑,C→B
-TENGAH,downsizing,3.1,C,3.518,B,0.418,↑,C→B
-TENGAH,settling_single,3.352,C,4.11,B+,0.758,↑,C→B+
-TENGAH,ageing_in_place,2.802,D,3.518,B,0.716,↑,D→B
-TENGAH,upgrader,3.109,C,3.834,B,0.725,↑,C→B
-TAMPINES WEST,forming_family,4.031,B+,4.126,B+,0.095,→,B+→B+
-TAMPINES WEST,downsizing,4.126,B+,4.0,B+,-0.126,↓,B+→B+
-TAMPINES WEST,settling_single,4.031,B+,4.031,B+,0.0,→,B+→B+
-TAMPINES WEST,ageing_in_place,4.0,B+,4.0,B+,0.0,→,B+→B+
-TAMPINES WEST,upgrader,3.972,B,3.972,B,0.0,→,B→B
-TAMPINES EAST,forming_family,3.874,B,3.897,B,0.023,→,B→B
-TAMPINES EAST,downsizing,3.897,B,3.68,B,-0.217,↓,B→B
-TAMPINES EAST,settling_single,3.874,B,3.874,B,0.0,→,B→B
-TAMPINES EAST,ageing_in_place,3.68,B,3.68,B,0.0,→,B→B
-TAMPINES EAST,upgrader,3.801,B,3.801,B,0.0,→,B→B
-ANG MO KIO,forming_family,4.678,A,4.714,A,0.036,→,A→A
-ANG MO KIO,downsizing,4.714,A,4.693,A,-0.021,→,A→A
-ANG MO KIO,settling_single,4.678,A,4.678,A,0.0,→,A→A
-ANG MO KIO,ageing_in_place,4.693,A,4.693,A,0.0,→,A→A
-ANG MO KIO,upgrader,4.655,A,4.655,A,0.0,→,A→A
-LENTOR,forming_family,3.901,B,3.658,B,-0.243,↓,B→B
-LENTOR,downsizing,3.623,B,3.68,B,0.057,→,B→B
-LENTOR,settling_single,3.901,B,3.938,B,0.037,→,B→B
-LENTOR,ageing_in_place,3.639,B,3.68,B,0.041,→,B→B
-LENTOR,upgrader,3.772,B,3.811,B,0.039,→,B→B
-SENGKANG,forming_family,4.158,B+,4.224,B+,0.066,→,B+→B+
-SENGKANG,downsizing,4.183,B+,4.209,B+,0.026,→,B+→B+
-SENGKANG,settling_single,4.158,B+,4.201,B+,0.043,→,B+→B+
-SENGKANG,ageing_in_place,4.161,B+,4.209,B+,0.048,→,B+→B+
-SENGKANG,upgrader,4.05,B+,4.096,B+,0.046,→,B+→B+
-PUNGGOL,forming_family,4.101,B+,3.772,B,-0.329,↓,B+→B
-PUNGGOL,downsizing,3.731,B,3.561,B,-0.17,↓,B→B
-PUNGGOL,settling_single,4.101,B+,4.145,B+,0.044,→,B+→B+
-PUNGGOL,ageing_in_place,3.513,B,3.561,B,0.048,→,B→B
-PUNGGOL,upgrader,3.965,B,4.011,B+,0.046,→,B→B+
-YISHUN,forming_family,4.352,B+,4.553,A,0.201,↑,B+→A
-YISHUN,downsizing,4.505,A,4.569,A,0.064,→,A→A
-YISHUN,settling_single,4.352,B+,4.403,B+,0.051,→,B+→B+
-YISHUN,ageing_in_place,4.513,A,4.569,A,0.056,→,A→A
-YISHUN,upgrader,4.264,B+,4.317,B+,0.053,→,B+→B+
-HOUGANG,forming_family,4.313,B+,4.493,B+,0.18,↑,B+→B+
-HOUGANG,downsizing,4.463,B+,4.498,B+,0.035,→,B+→B+
-HOUGANG,settling_single,4.313,B+,4.345,B+,0.032,→,B+→B+
-HOUGANG,ageing_in_place,4.462,B+,4.498,B+,0.036,→,B+→B+
-HOUGANG,upgrader,4.213,B+,4.247,B+,0.034,→,B+→B+
-CHOA CHU KANG,forming_family,4.257,B+,4.247,B+,-0.01,→,B+→B+
-CHOA CHU KANG,downsizing,4.186,B+,4.26,B+,0.074,→,B+→B+
-CHOA CHU KANG,settling_single,4.257,B+,4.299,B+,0.042,→,B+→B+
-CHOA CHU KANG,ageing_in_place,4.147,B+,4.26,B+,0.113,↑,B+→B+
-CHOA CHU KANG,upgrader,4.152,B+,4.186,B+,0.034,→,B+→B+
-BUKIT BATOK,forming_family,4.063,B+,4.082,B+,0.019,→,B+→B+
-BUKIT BATOK,downsizing,4.067,B+,4.077,B+,0.01,→,B+→B+
-BUKIT BATOK,settling_single,4.063,B+,4.072,B+,0.009,→,B+→B+
-BUKIT BATOK,ageing_in_place,4.062,B+,4.077,B+,0.015,→,B+→B+
-BUKIT BATOK,upgrader,3.963,B,3.972,B,0.009,→,B→B
-BUKIT MERAH,forming_family,4.229,B+,4.395,B+,0.166,↑,B+→B+
-BUKIT MERAH,downsizing,4.38,B+,4.44,B+,0.06,→,B+→B+
-BUKIT MERAH,settling_single,4.229,B+,4.238,B+,0.009,→,B+→B+
-BUKIT MERAH,ageing_in_place,4.424,B+,4.44,B+,0.016,→,B+→B+
-BUKIT MERAH,upgrader,4.252,B+,4.262,B+,0.01,→,B+→B+
-BUKIT PANJANG,forming_family,4.153,B+,4.32,B+,0.167,↑,B+→B+
-BUKIT PANJANG,downsizing,4.302,B+,4.279,B+,-0.023,→,B+→B+
-BUKIT PANJANG,settling_single,4.153,B+,4.164,B+,0.011,→,B+→B+
-BUKIT PANJANG,ageing_in_place,4.261,B+,4.279,B+,0.018,→,B+→B+
-BUKIT PANJANG,upgrader,3.985,B,3.997,B,0.012,→,B→B
-GEYLANG,forming_family,4.111,B+,4.318,B+,0.207,↑,B+→B+
-GEYLANG,downsizing,4.318,B+,4.308,B+,-0.01,→,B+→B+
-GEYLANG,settling_single,4.111,B+,4.111,B+,0.0,→,B+→B+
-GEYLANG,ageing_in_place,4.308,B+,4.308,B+,0.0,→,B+→B+
-GEYLANG,upgrader,4.124,B+,4.124,B+,0.0,→,B+→B+
-CLEMENTI,forming_family,4.315,B+,4.438,B+,0.123,↑,B+→B+
-CLEMENTI,downsizing,4.438,B+,4.448,B+,0.01,→,B+→B+
-CLEMENTI,settling_single,4.315,B+,4.315,B+,0.0,→,B+→B+
-CLEMENTI,ageing_in_place,4.448,B+,4.448,B+,0.0,→,B+→B+
-CLEMENTI,upgrader,4.228,B+,4.228,B+,0.0,→,B+→B+
-CENTRAL AREA,forming_family,4.338,B+,4.591,A,0.253,↑,B+→A
-CENTRAL AREA,downsizing,4.591,A,4.766,A,0.175,↑,A→A
-CENTRAL AREA,settling_single,4.338,B+,4.338,B+,0.0,→,B+→B+
-CENTRAL AREA,ageing_in_place,4.766,A,4.766,A,0.0,→,A→A
-CENTRAL AREA,upgrader,4.359,B+,4.359,B+,0.0,→,B+→B+
-BUKIT TIMAH,forming_family,4.193,B+,4.163,B+,-0.03,→,B+→B+
-BUKIT TIMAH,downsizing,4.148,B+,3.961,B,-0.187,↓,B+→B
-BUKIT TIMAH,settling_single,4.193,B+,4.202,B+,0.009,→,B+→B+
-BUKIT TIMAH,ageing_in_place,3.946,B,3.961,B,0.015,→,B→B
-BUKIT TIMAH,upgrader,4.055,B+,4.064,B+,0.009,→,B+→B+
+WOODLANDS,forming_family,3.406,C,3.693,B,0.287,up,C->B
+WOODLANDS,downsizing,3.585,B,3.471,C,-0.114,down,B->C
+WOODLANDS,settling_single,3.334,C,3.522,B,0.188,up,C->B
+WOODLANDS,ageing_in_place,3.353,C,3.471,C,0.118,up,C->C
+WOODLANDS,upgrader,3.406,C,3.693,B,0.287,up,C->B
+PASIR RIS,forming_family,3.208,C,4.018,B+,0.81,up,C->B+
+PASIR RIS,downsizing,3.688,B,3.905,B,0.217,up,B->B
+PASIR RIS,settling_single,3.103,C,3.833,B,0.73,up,C->B
+PASIR RIS,ageing_in_place,3.508,B,3.905,B,0.397,up,B->B
+PASIR RIS,upgrader,3.208,C,4.018,B+,0.81,up,C->B+
+JURONG EAST,forming_family,3.864,B,4.002,B+,0.138,up,B->B+
+JURONG EAST,downsizing,3.789,B,4.044,B+,0.255,up,B->B+
+JURONG EAST,settling_single,3.862,B,4.206,B+,0.344,up,B->B+
+JURONG EAST,ageing_in_place,3.764,B,4.044,B+,0.28,up,B->B+
+JURONG EAST,upgrader,3.864,B,4.185,B+,0.321,up,B->B+
+BISHAN,forming_family,3.541,B,3.842,B,0.301,up,B->B
+BISHAN,downsizing,3.765,B,3.76,B,-0.005,flat,B->B
+BISHAN,settling_single,3.505,B,3.688,B,0.183,up,B->B
+BISHAN,ageing_in_place,3.667,B,3.76,B,0.093,flat,B->B
+BISHAN,upgrader,3.541,B,3.842,B,0.301,up,B->B
+BEDOK,forming_family,4.331,B+,4.489,B+,0.158,up,B+->B+
+BEDOK,downsizing,4.471,B+,4.588,A,0.117,up,B+->A
+BEDOK,settling_single,4.333,B+,4.342,B+,0.009,flat,B+->B+
+BEDOK,ageing_in_place,4.57,A,4.588,A,0.018,flat,A->A
+BEDOK,upgrader,4.331,B+,4.489,B+,0.158,up,B+->B+
+TAMPINES,forming_family,3.44,C,3.937,B,0.497,up,C->B
+TAMPINES,downsizing,3.703,B,3.902,B,0.199,up,B->B
+TAMPINES,settling_single,3.375,C,3.868,B,0.493,up,C->B
+TAMPINES,ageing_in_place,3.621,B,3.902,B,0.281,up,B->B
+TAMPINES,upgrader,3.44,C,3.937,B,0.497,up,C->B
+TOA PAYOH,forming_family,4.334,B+,4.513,A,0.179,up,B+->A
+TOA PAYOH,downsizing,4.477,B+,4.607,A,0.13,up,B+->A
+TOA PAYOH,settling_single,4.349,B+,4.347,B+,-0.002,flat,B+->B+
+TOA PAYOH,ageing_in_place,4.521,A,4.607,A,0.086,flat,A->A
+TOA PAYOH,upgrader,4.334,B+,4.513,A,0.179,up,B+->A
+QUEENSTOWN,forming_family,3.339,C,3.849,B,0.51,up,C->B
+QUEENSTOWN,downsizing,3.661,B,3.764,B,0.103,up,B->B
+QUEENSTOWN,settling_single,3.358,C,3.496,C,0.138,up,C->C
+QUEENSTOWN,ageing_in_place,3.557,B,3.764,B,0.207,up,B->B
+QUEENSTOWN,upgrader,3.339,C,3.849,B,0.51,up,C->B
+SERANGOON,forming_family,3.023,C,3.813,B,0.79,up,C->B
+SERANGOON,downsizing,3.39,C,3.529,B,0.139,up,C->B
+SERANGOON,settling_single,3.023,C,3.722,B,0.699,up,C->B
+SERANGOON,ageing_in_place,2.974,D,3.529,B,0.555,up,D->B
+SERANGOON,upgrader,3.023,C,3.813,B,0.79,up,C->B
+SEMBAWANG,forming_family,3.975,B,4.178,B+,0.203,up,B->B+
+SEMBAWANG,downsizing,4.076,B+,3.9,B,-0.176,down,B+->B
+SEMBAWANG,settling_single,3.826,B,4.055,B+,0.229,up,B->B+
+SEMBAWANG,ageing_in_place,3.758,B,3.9,B,0.142,up,B->B
+SEMBAWANG,upgrader,3.975,B,4.178,B+,0.203,up,B->B+
+MARINE PARADE,forming_family,2.694,D,3.117,C,0.423,up,D->C
+MARINE PARADE,downsizing,3.117,C,3.056,C,-0.061,flat,C->C
+MARINE PARADE,settling_single,2.72,D,2.694,D,-0.026,flat,D->D
+MARINE PARADE,ageing_in_place,3.056,C,3.056,C,0.0,flat,C->C
+MARINE PARADE,upgrader,2.694,D,3.117,C,0.423,up,D->C
+CANBERRA,forming_family,3.605,B,3.844,B,0.239,up,B->B
+CANBERRA,downsizing,3.795,B,3.54,B,-0.255,down,B->B
+CANBERRA,settling_single,3.469,C,3.658,B,0.189,up,C->B
+CANBERRA,ageing_in_place,3.481,C,3.54,B,0.059,flat,C->B
+CANBERRA,upgrader,3.605,B,3.844,B,0.239,up,B->B
+BOON KENG,forming_family,3.977,B,4.184,B+,0.207,up,B->B+
+BOON KENG,downsizing,4.168,B+,4.223,B+,0.055,flat,B+->B+
+BOON KENG,settling_single,3.996,B,4.026,B+,0.03,flat,B->B+
+BOON KENG,ageing_in_place,4.197,B+,4.223,B+,0.026,flat,B+->B+
+BOON KENG,upgrader,3.977,B,4.184,B+,0.207,up,B->B+
+WOODLEIGH,forming_family,3.701,B,3.865,B,0.164,up,B->B
+WOODLEIGH,downsizing,3.846,B,3.806,B,-0.04,flat,B->B
+WOODLEIGH,settling_single,3.738,B,3.709,B,-0.029,flat,B->B
+WOODLEIGH,ageing_in_place,3.76,B,3.806,B,0.046,flat,B->B
+WOODLEIGH,upgrader,3.701,B,3.865,B,0.164,up,B->B
+DOVER,forming_family,3.408,C,3.72,B,0.312,up,C->B
+DOVER,downsizing,3.571,B,3.605,B,0.034,flat,B->B
+DOVER,settling_single,3.386,C,3.55,B,0.164,up,C->B
+DOVER,ageing_in_place,3.461,C,3.605,B,0.144,up,C->B
+DOVER,upgrader,3.408,C,3.72,B,0.312,up,C->B
+TENGAH,forming_family,2.065,F,2.964,D,0.899,up,F->D
+TENGAH,downsizing,2.115,F,2.96,D,0.845,up,F->D
+TENGAH,settling_single,1.92,F,3.383,C,1.463,up,F->C
+TENGAH,ageing_in_place,1.983,F,2.96,D,0.977,up,F->D
+TENGAH,upgrader,2.065,F,3.165,C,1.1,up,F->C
+TAMPINES WEST,forming_family,3.64,B,3.909,B,0.269,up,B->B
+TAMPINES WEST,downsizing,3.909,B,3.781,B,-0.128,down,B->B
+TAMPINES WEST,settling_single,3.599,B,3.64,B,0.041,flat,B->B
+TAMPINES WEST,ageing_in_place,3.781,B,3.781,B,0.0,flat,B->B
+TAMPINES WEST,upgrader,3.64,B,3.909,B,0.269,up,B->B
+TAMPINES EAST,forming_family,3.578,B,3.751,B,0.173,up,B->B
+TAMPINES EAST,downsizing,3.737,B,3.632,B,-0.105,down,B->B
+TAMPINES EAST,settling_single,3.536,B,3.621,B,0.085,flat,B->B
+TAMPINES EAST,ageing_in_place,3.61,B,3.632,B,0.022,flat,B->B
+TAMPINES EAST,upgrader,3.578,B,3.751,B,0.173,up,B->B
+ANG MO KIO,forming_family,3.677,B,4.369,B+,0.692,up,B->B+
+ANG MO KIO,downsizing,4.0,B+,4.434,B+,0.434,up,B+->B+
+ANG MO KIO,settling_single,3.697,B,4.33,B+,0.633,up,B->B+
+ANG MO KIO,ageing_in_place,4.004,B+,4.434,B+,0.43,up,B+->B+
+ANG MO KIO,upgrader,3.677,B,4.369,B+,0.692,up,B->B+
+LENTOR,forming_family,3.49,C,3.396,C,-0.094,flat,C->C
+LENTOR,downsizing,3.37,C,3.528,B,0.158,up,C->B
+LENTOR,settling_single,3.404,C,3.519,B,0.115,up,C->B
+LENTOR,ageing_in_place,3.496,C,3.528,B,0.032,flat,C->B
+LENTOR,upgrader,3.49,C,3.434,C,-0.056,flat,C->C
+SENGKANG,forming_family,3.655,B,3.985,B,0.33,up,B->B
+SENGKANG,downsizing,3.916,B,3.951,B,0.035,flat,B->B
+SENGKANG,settling_single,3.603,B,3.762,B,0.159,up,B->B
+SENGKANG,ageing_in_place,3.868,B,3.951,B,0.083,flat,B->B
+SENGKANG,upgrader,3.655,B,3.985,B,0.33,up,B->B
+PUNGGOL,forming_family,3.648,B,3.424,C,-0.224,down,B->C
+PUNGGOL,downsizing,3.393,C,3.288,C,-0.105,down,C->C
+PUNGGOL,settling_single,3.568,B,3.681,B,0.113,up,B->B
+PUNGGOL,ageing_in_place,3.251,C,3.288,C,0.037,flat,C->C
+PUNGGOL,upgrader,3.648,B,3.603,B,-0.045,flat,B->B
+YISHUN,forming_family,4.033,B+,4.279,B+,0.246,up,B+->B+
+YISHUN,downsizing,4.242,B+,4.18,B+,-0.062,flat,B+->B+
+YISHUN,settling_single,3.947,B,4.072,B+,0.125,up,B->B+
+YISHUN,ageing_in_place,4.137,B+,4.18,B+,0.043,flat,B+->B+
+YISHUN,upgrader,4.033,B+,4.279,B+,0.246,up,B+->B+
+HOUGANG,forming_family,4.186,B+,4.294,B+,0.108,up,B+->B+
+HOUGANG,downsizing,4.259,B+,4.233,B+,-0.026,flat,B+->B+
+HOUGANG,settling_single,4.098,B+,4.246,B+,0.148,up,B+->B+
+HOUGANG,ageing_in_place,4.188,B+,4.233,B+,0.045,flat,B+->B+
+HOUGANG,upgrader,4.186,B+,4.294,B+,0.108,up,B+->B+
+CHOA CHU KANG,forming_family,3.64,B,4.007,B+,0.367,up,B->B+
+CHOA CHU KANG,downsizing,3.871,B,3.906,B,0.035,flat,B->B
+CHOA CHU KANG,settling_single,3.576,B,3.85,B,0.274,up,B->B
+CHOA CHU KANG,ageing_in_place,3.721,B,3.906,B,0.185,up,B->B
+CHOA CHU KANG,upgrader,3.64,B,4.007,B+,0.367,up,B->B+
+BUKIT BATOK,forming_family,3.762,B,4.115,B+,0.353,up,B->B+
+BUKIT BATOK,downsizing,4.012,B+,3.976,B,-0.036,flat,B+->B
+BUKIT BATOK,settling_single,3.688,B,3.937,B,0.249,up,B->B
+BUKIT BATOK,ageing_in_place,3.855,B,3.976,B,0.121,up,B->B
+BUKIT BATOK,upgrader,3.762,B,4.115,B+,0.353,up,B->B+
+BUKIT MERAH,forming_family,4.193,B+,4.386,B+,0.193,up,B+->B+
+BUKIT MERAH,downsizing,4.37,B+,4.355,B+,-0.015,flat,B+->B+
+BUKIT MERAH,settling_single,4.203,B+,4.203,B+,0.0,flat,B+->B+
+BUKIT MERAH,ageing_in_place,4.339,B+,4.355,B+,0.016,flat,B+->B+
+BUKIT MERAH,upgrader,4.193,B+,4.386,B+,0.193,up,B+->B+
+BUKIT PANJANG,forming_family,4.083,B+,4.171,B+,0.088,flat,B+->B+
+BUKIT PANJANG,downsizing,4.153,B+,4.131,B+,-0.022,flat,B+->B+
+BUKIT PANJANG,settling_single,3.93,B,4.095,B+,0.165,up,B->B+
+BUKIT PANJANG,ageing_in_place,4.113,B+,4.131,B+,0.018,flat,B+->B+
+BUKIT PANJANG,upgrader,4.083,B+,4.171,B+,0.088,flat,B+->B+
+GEYLANG,forming_family,3.611,B,4.015,B+,0.404,up,B->B+
+GEYLANG,downsizing,4.015,B+,4.055,B+,0.04,flat,B+->B+
+GEYLANG,settling_single,3.669,B,3.611,B,-0.058,flat,B->B
+GEYLANG,ageing_in_place,4.055,B+,4.055,B+,0.0,flat,B+->B+
+GEYLANG,upgrader,3.611,B,4.015,B+,0.404,up,B->B+
+CLEMENTI,forming_family,3.656,B,3.932,B,0.276,up,B->B
+CLEMENTI,downsizing,3.909,B,3.894,B,-0.015,flat,B->B
+CLEMENTI,settling_single,3.599,B,3.681,B,0.082,flat,B->B
+CLEMENTI,ageing_in_place,3.866,B,3.894,B,0.028,flat,B->B
+CLEMENTI,upgrader,3.656,B,3.932,B,0.276,up,B->B
+CENTRAL AREA,forming_family,4.261,B+,4.606,A,0.345,up,B+->A
+CENTRAL AREA,downsizing,4.589,A,4.718,A,0.129,up,A->A
+CENTRAL AREA,settling_single,4.286,B+,4.31,B+,0.024,flat,B+->B+
+CENTRAL AREA,ageing_in_place,4.692,A,4.718,A,0.026,flat,A->A
+CENTRAL AREA,upgrader,4.261,B+,4.606,A,0.345,up,B+->A
+BUKIT TIMAH,forming_family,3.754,B,3.886,B,0.132,up,B->B
+BUKIT TIMAH,downsizing,3.871,B,3.759,B,-0.112,down,B->B
+BUKIT TIMAH,settling_single,3.671,B,3.764,B,0.093,flat,B->B
+BUKIT TIMAH,ageing_in_place,3.744,B,3.759,B,0.015,flat,B->B
+BUKIT TIMAH,upgrader,3.754,B,3.886,B,0.132,up,B->B

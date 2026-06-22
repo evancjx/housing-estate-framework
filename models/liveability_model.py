@@ -11,27 +11,23 @@ SECONDARY:       Gap = Liveability_cell − Provision_band (the headline signal)
 
 === COMPUTED PERSONA WEIGHTS (audit table) ===
 
-Base weights (from provision_model.py W dict, sum = 1.000):
-  conn=0.15  amen=0.13  green=0.09  sch=0.07  dens=0.08
-  hlth=0.04  eldercare=0.03  mom=0.05   infra=0.15  env=0.02
-  childcare=0.06  community=0.04  sport=0.03  flood=0.03  air_noise=0.03
+Base weights are imported from framework_config.PROVISION_WEIGHTS and must
+match provision_model.py exactly. Deltas are applied at the conceptual S-group
+level, then distributed to each constituent component proportionally.
 
-v1.3 change: eldercare carved from hlth (0.07→0.04). eldercare joins S6.
-v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
+S-group mapping:
+  S1 (conn)      -> conn
+  S8 (infra)     -> infra
+  S2 (amen)      -> amen+community+hawker
+  S3 (green)     -> green+sport
+  S4 (schools)   -> sch+childcare
+  S5 (density)   -> dens
+  S6 (health)    -> hlth+eldercare
+  S7 (momentum)  -> mom
+  S9 (env)       -> env+flood+noise+air_noise
 
-Deltas are applied at the S-group level (9 groups), then distributed to their
-constituent 15 components proportionally by base weight.
-
-S-group → 15-component mapping:
-  S1 (conn)      → conn                   (base 0.15)
-  S8 (infra)     → infra                  (base 0.15)
-  S2 (amen)      → amen+community         (base 0.13+0.04=0.17)
-  S3 (green)     → green+sport            (base 0.09+0.03=0.12)
-  S4 (schools)   → sch+childcare          (base 0.07+0.06=0.13)
-  S5 (density)   → dens                   (base 0.08)
-  S6 (health)    → hlth+eldercare         (base 0.04+0.03=0.07)
-  S7 (momentum)  → mom                    (base 0.05)
-  S9 (env)       → env+flood+air_noise    (base 0.02+0.03+0.03=0.08)
+If a persona delta would make a group negative after the real-data component
+split, that group is floored at zero and the full persona vector is normalised.
 
 Delta table (percentage points, each column sums to 0):
               YoungFam  SinglePro  Retiree  Lifestyle
@@ -105,8 +101,8 @@ Pipeline type → component boosts:
 
 === CLI ===
 python liveability_model.py \\
-    --scores  SG-Estate-Framework/data/provision_scores.csv \\
-    --pipeline SG-Estate-Framework/data/pipeline_data.json \\
+    --scores  data/provision_scores.csv \\
+    --pipeline data/pipeline_data.json \\
     --out     liveability_matrix.csv
 """
 
@@ -118,93 +114,38 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+try:
+    from framework_config import (
+        BAND_NUMERIC,
+        DATA_DIR,
+        PERSONA_DELTAS,
+        PERSONAS,
+        PIPELINE_ESTATE_ALIAS,
+        PROVISION_WEIGHTS,
+        S_GROUPS,
+        SOFT_FLOOR,
+        band_label,
+        build_persona_weights,
+    )
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import (
+        BAND_NUMERIC,
+        DATA_DIR,
+        PERSONA_DELTAS,
+        PERSONAS,
+        PIPELINE_ESTATE_ALIAS,
+        PROVISION_WEIGHTS,
+        S_GROUPS,
+        SOFT_FLOOR,
+        band_label,
+        build_persona_weights,
+    )
+
 # ---------------------------------------------------------------------------
 # 1. Base provision weights (must mirror provision_model.py W dict exactly)
 # ---------------------------------------------------------------------------
-BASE_W: Dict[str, float] = {
-    "conn":      0.15,
-    "amen":      0.13,
-    "green":     0.09,
-    "sch":       0.07,
-    "dens":      0.08,
-    "hlth":      0.04,
-    "eldercare": 0.03,
-    "mom":       0.05,
-    "infra":     0.15,
-    "env":       0.02,
-    "childcare": 0.06,
-    "community": 0.04,
-    "sport":     0.03,
-    "flood":     0.03,
-    "air_noise": 0.03,
-}
-assert abs(sum(BASE_W.values()) - 1.0) < 1e-9, "BASE_W must sum to 1.0"
-
-# S-group → component membership (for proportional delta distribution)
-S_GROUPS: Dict[str, list] = {
-    "S1": ["conn"],
-    "S2": ["amen", "community"],
-    "S3": ["green", "sport"],
-    "S4": ["sch", "childcare"],
-    "S5": ["dens"],
-    "S6": ["hlth", "eldercare"],
-    "S7": ["mom"],
-    "S8": ["infra"],
-    "S9": ["env", "flood", "air_noise"],
-}
-
-# Persona delta table: S-group → delta in percentage points
-# Each column sums to 0; doc-2 §2 values used verbatim.
-PERSONA_DELTAS: Dict[str, Dict[str, float]] = {
-    "S1": {"YoungFam": -7,  "SinglePro": +8,  "Retiree":  -3,  "Lifestyle": +6},
-    "S2": {"YoungFam": +1,  "SinglePro": +2,  "Retiree":  +4,  "Lifestyle": +3},
-    "S3": {"YoungFam": +4,  "SinglePro": -2,  "Retiree":  +4,  "Lifestyle": -2},
-    "S4": {"YoungFam": +7,  "SinglePro": -9,  "Retiree":  -9,  "Lifestyle": -10},
-    "S5": {"YoungFam":  0,  "SinglePro": -3,  "Retiree":  +2,  "Lifestyle": +4},
-    "S6": {"YoungFam": +1,  "SinglePro": -4,  "Retiree": +12,  "Lifestyle": -6},
-    "S7": {"YoungFam": -5,  "SinglePro": +3,  "Retiree":  -5,  "Lifestyle": +2},
-    "S8": {"YoungFam": -2,  "SinglePro": +1,  "Retiree":  -2,  "Lifestyle": +1},
-    "S9": {"YoungFam": +2,  "SinglePro": +4,  "Retiree":  -3,  "Lifestyle": +2},
-}
-
-PERSONAS = ["YoungFam", "SinglePro", "Retiree", "Lifestyle"]
-
-
-def _build_persona_weights() -> Dict[str, Dict[str, float]]:
-    """
-    Compute final (normalised) 13-component weight vector per persona.
-
-    Steps:
-      1. For each S-group, add the persona delta (pp) to the group's base weight sum.
-      2. Distribute the new group weight proportionally across constituent components.
-      3. Normalise the full 13-component vector to sum=1.0.
-    """
-    persona_weights: Dict[str, Dict[str, float]] = {}
-
-    for persona in PERSONAS:
-        w = dict(BASE_W)  # start with base weights
-
-        for s_group, components in S_GROUPS.items():
-            delta_pp = PERSONA_DELTAS[s_group][persona] / 100.0
-            base_group_weight = sum(BASE_W[c] for c in components)
-            new_group_weight = base_group_weight + delta_pp
-
-            # Proportional distribution within the group
-            for c in components:
-                if base_group_weight > 0:
-                    proportion = BASE_W[c] / base_group_weight
-                else:
-                    proportion = 1.0 / len(components)
-                w[c] = new_group_weight * proportion
-
-        # Normalise to sum=1
-        total = sum(w.values())
-        persona_weights[persona] = {c: v / total for c, v in w.items()}
-
-    return persona_weights
-
-
-PERSONA_WEIGHTS = _build_persona_weights()
+BASE_W: Dict[str, float] = PROVISION_WEIGHTS
+PERSONA_WEIGHTS = build_persona_weights()
 
 # ---------------------------------------------------------------------------
 # 2. D Multiplier — known disruption losses for 2026 scoring run
@@ -246,21 +187,7 @@ def get_d(estate: str, horizon: str = "T0") -> float:
 # ---------------------------------------------------------------------------
 # 3. Alias map — pipeline estate names → provision_scores.csv estate names
 # ---------------------------------------------------------------------------
-ALIAS_MAP: Dict[str, str] = {
-    "BIDADARI":      "WOODLEIGH",
-    "MARSILING":     "WOODLANDS",
-    "KAKI BUKIT":    "BEDOK",
-    "EAST COAST":    "MARINE PARADE",
-    "BOON LAY":      "JURONG EAST",
-    "TAMAN JURONG":  "JURONG EAST",
-    "JURONG WEST":   "JURONG EAST",
-    "BUONA VISTA":   "QUEENSTOWN",
-    "NOVENA":        "TOA PAYOH",
-    "KALLANG":       "BOON KENG",
-    "WEST COAST":    "CLEMENTI",
-    "TAMPINES NORTH":"TAMPINES",
-    "YEW TEE":       "CHOA CHU KANG",
-}
+ALIAS_MAP: Dict[str, str] = PIPELINE_ESTATE_ALIAS
 
 
 def canonicalise_estate(name: str) -> str:
@@ -272,19 +199,6 @@ def canonicalise_estate(name: str) -> str:
 # ---------------------------------------------------------------------------
 # 4. Band classification
 # ---------------------------------------------------------------------------
-BAND_EDGES = [
-    (4.5, "A"),
-    (4.0, "B+"),
-    (3.5, "B"),
-    (3.0, "C"),
-    (2.5, "D"),
-]
-SOFT_FLOOR = 1.5
-
-# Band → numeric for gap computation (A=5, B+=4.5, B=4, C=3, D=2.5, F=1)
-BAND_NUMERIC: Dict[str, float] = {
-    "A": 5.0, "B+": 4.5, "B": 4.0, "C": 3.0, "D": 2.5, "F": 1.0,
-}
 CAP_A   = None    # no cap
 CAP_B   = 3.99    # <= B means band B or lower → score must be < 4.0 (below B+ threshold)
 CAP_C   = 3.49    # <= C means band C or lower → score must be < 3.5 (below B threshold)
@@ -293,11 +207,7 @@ CAP_D   = 2.99    # <= D means band D or lower → score must be < 3.0 (below C 
 
 def band(score: float) -> str:
     """Convert numeric score to band label. Applies soft floor 1.5."""
-    s = max(SOFT_FLOOR, score)
-    for threshold, label in BAND_EDGES:
-        if s >= threshold:
-            return label
-    return "F"
+    return band_label(score, soft_floor=SOFT_FLOOR)
 
 
 def apply_cap(score: float, cap_score: Optional[float]) -> float:
@@ -753,12 +663,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--scores",
-        default="SG-Estate-Framework/data/provision_scores.csv",
+        default=str(DATA_DIR / "provision_scores.csv"),
         help="Path to provision_scores.csv (output of provision_model.py)",
     )
     parser.add_argument(
         "--pipeline",
-        default="SG-Estate-Framework/data/pipeline_data.json",
+        default=str(DATA_DIR / "pipeline_data.json"),
         help="Path to pipeline_data.json",
     )
     parser.add_argument(
@@ -783,9 +693,12 @@ if __name__ == "__main__":
 # INPUT CONTRACT
 # ---------------------------------------------------------------------------
 # provision_scores.csv (output of provision_model.py):
-#   Required columns: estate, conn, amen, green, sch, dens, hlth, mom, infra,
-#                     env, childcare, community, sport, flood, score, band
-#   All component columns: float, range 1.0–5.0
+#   Required columns: estate, score, band, plus every component in
+#                     framework_config.PROVISION_WEIGHTS:
+#                     conn, amen, green, sch, dens, hlth, mom, infra, env,
+#                     childcare, community, sport, flood, hawker, noise,
+#                     air_noise, eldercare
+#   All component columns: float, range 1.0-5.0
 #   score: weighted provision score (float)
 #   band:  provision band string (A/B+/B/C/D/F)
 #
@@ -801,14 +714,14 @@ if __name__ == "__main__":
 # RUN:
 #   pip install pandas numpy --break-system-packages
 #
-#   python SG-Estate-Framework/models/liveability_model.py \
-#       --scores   SG-Estate-Framework/data/provision_scores.csv \
-#       --pipeline SG-Estate-Framework/data/pipeline_data.json \
+#   python models/liveability_model.py \
+#       --scores   data/provision_scores.csv \
+#       --pipeline data/pipeline_data.json \
 #       --out      liveability_matrix.csv
 #
 #   # To inspect computed persona weights:
-#   python SG-Estate-Framework/models/liveability_model.py \
-#       --scores   SG-Estate-Framework/data/provision_scores.csv \
-#       --pipeline SG-Estate-Framework/data/pipeline_data.json \
+#   python models/liveability_model.py \
+#       --scores   data/provision_scores.csv \
+#       --pipeline data/pipeline_data.json \
 #       --out      liveability_matrix.csv \
 #       --debug

@@ -52,6 +52,11 @@ RUN:
 import argparse, json, math, sys
 import pandas as pd
 
+try:
+    from framework_config import PIPELINE_ESTATE_ALIAS
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import PIPELINE_ESTATE_ALIAS
+
 CURRENT_YEAR = 2026
 
 # ---- Formula constants ----
@@ -126,21 +131,7 @@ ESTATE_NAMES = [
 ]
 
 # Non-canonical names the workflow used → canonical mapping
-ALIAS_MAP = {
-    'BIDADARI':        'WOODLEIGH',
-    'MARSILING':       'WOODLANDS',
-    'KAKI BUKIT':      'BEDOK',
-    'EAST COAST':      'MARINE PARADE',
-    'BOON LAY':        'JURONG EAST',
-    'TAMAN JURONG':    'JURONG EAST',
-    'JURONG WEST':     'JURONG EAST',
-    'BUONA VISTA':     'QUEENSTOWN',
-    'NOVENA':          'TOA PAYOH',
-    'KALLANG':         'BOON KENG',
-    'WEST COAST':      'CLEMENTI',
-    'TAMPINES NORTH':  'TAMPINES',
-    'YEW TEE':         'CHOA CHU KANG',
-}
+ALIAS_MAP = PIPELINE_ESTATE_ALIAS
 
 def canonical(name):
     n = name.upper().strip()

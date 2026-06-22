@@ -34,21 +34,16 @@ import argparse, sys, json
 import numpy as np
 import pandas as pd
 
+try:
+    from framework_config import BAND_EDGES, HDB_TOWN_ALIAS, band_label
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import BAND_EDGES, HDB_TOWN_ALIAS, band_label
+
 # ----------------------------------------------------------------------
 # 1. CONFIG — the only knobs. Documented so a future run can challenge them.
 # ----------------------------------------------------------------------
-# Estate name → HDB town alias (for estates that are sub-areas of a larger HDB town)
-ESTATE_TOWN_ALIAS = {
-    "CANBERRA":      "SEMBAWANG",        # Canberra BTOs have no MOP yet; fold into Sembawang town data
-    "BOON KENG":     "KALLANG/WHAMPOA",  # Boon Keng is part of Kallang/Whampoa HDB town
-    "WOODLEIGH":     "TOA PAYOH",        # Bidadari/Woodleigh is under Toa Payoh HDB town
-    "DOVER":         "QUEENSTOWN",       # Dover Road area is in Queenstown HDB town
-    "TAMPINES WEST": "TAMPINES",         # Tampines West is part of Tampines HDB town
-    "TAMPINES EAST": "TAMPINES",         # Tampines East is part of Tampines HDB town
-    "LENTOR":        "ANG MO KIO",       # Lentor private; proxy via AMK HDB town (indicative only)
-    # TENGAH: no MOP resale data yet — excluded from value model
-    # All other estate names match HDB town names directly — no alias needed
-}
+# Estate name -> HDB town alias. TENGAH has no MOP resale data yet.
+ESTATE_TOWN_ALIAS = HDB_TOWN_ALIAS
 
 CFG = {
     "adj_cap_low": 0.75,        # min Value adjustment multiplier (framework lock)
@@ -56,13 +51,11 @@ CFG = {
     "shrink_min_n": 30,         # below this many txns, shrink subzone toward town mean
     "shrink_strength": 30.0,    # k in James-Stein-style pull: w = n/(n+k)
     "trust_decimal_n": 100,     # below this, report BAND only, not a decimal
-    "band_edges": [(4.5,"A"),(4.0,"B+"),(3.5,"B"),(3.0,"C"),(2.5,"D"),(0,"F")],
+    "band_edges": BAND_EDGES,
 }
 
 def band(x):
-    for edge,b in CFG["band_edges"]:
-        if x >= edge: return b
-    return "F"
+    return band_label(x)
 
 # ----------------------------------------------------------------------
 # 2. SEGMENT MODELS — controls differ by tenure (framework §3 table)

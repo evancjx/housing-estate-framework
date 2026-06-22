@@ -21,17 +21,15 @@ import os, sys
 import pandas as pd
 import numpy as np
 
+try:
+    from framework_config import DATA_DIR, HDB_TOWN_ALIAS
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import DATA_DIR, HDB_TOWN_ALIAS
+
 # ---------------------------------------------------------------------------
 # Estate -> HDB town mapping (estates that are sub-areas of a larger HDB town)
 # ---------------------------------------------------------------------------
-ESTATE_TOWN_ALIAS = {
-    "CANBERRA":      "SEMBAWANG",
-    "BOON KENG":     "KALLANG/WHAMPOA",
-    "WOODLEIGH":     "TOA PAYOH",
-    "DOVER":         "QUEENSTOWN",
-    "TAMPINES WEST": "TAMPINES",
-    "TAMPINES EAST": "TAMPINES",
-}
+ESTATE_TOWN_ALIAS = HDB_TOWN_ALIAS
 
 # Manual overrides: estates with no (or meaningless) HDB resale data
 # These are new BTOs or new private estates with ~94-99yr leases remaining
@@ -58,11 +56,10 @@ def lease_score(years: float) -> float:
 
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir   = os.path.join(script_dir, "..", "data")
-    hdb_path   = os.path.join(data_dir, "hdb_resale.csv")
-    out_path   = os.path.join(data_dir, "lease_risk.csv")
-    estates_path = os.path.join(data_dir, "estates.csv")
+    data_dir = DATA_DIR
+    hdb_path = data_dir / "hdb_resale.csv"
+    out_path = data_dir / "lease_risk.csv"
+    estates_path = data_dir / "estates.csv"
 
     if not os.path.exists(hdb_path):
         sys.exit(f"ERROR: {hdb_path} not found")

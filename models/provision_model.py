@@ -49,52 +49,12 @@ See INPUT CONTRACT at the bottom for exact columns + data sources.
 import argparse, sys, math
 import numpy as np, pandas as pd
 
-# ----------------------------------------------------------------------
-# v1.3 weights (sum=1.000). Added eldercare (3%); carved from hlth (0.07→0.04),
-# implementing audit §1d. eldercare = AIC Silver Pages / MOH day-care + AAC +
-# nursing-home + senior-care-centre density. hlth now scopes GP/polyclinic only.
-# Prior v1.2 split: air_noise carved from env (0.05→0.02) — see audit §2d.
-# ----------------------------------------------------------------------
-W = {
-    'conn':      0.15,
-    'amen':      0.10,
-    'green':     0.09,
-    'sch':       0.07,
-    'dens':      0.08,
-    'hlth':      0.04,
-    'mom':       0.04,
-    'infra':     0.15,
-    'env':       0.02,
-    'childcare': 0.06,
-    'community': 0.03,
-    'sport':     0.02,
-    'flood':     0.01,
-    'hawker':    0.04,
-    'noise':     0.04,
-    'air_noise': 0.03,
-    'eldercare': 0.03,
-}
-assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
+try:
+    from framework_config import PROVENANCE, PROVISION_WEIGHTS, band_label
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import PROVENANCE, PROVISION_WEIGHTS, band_label
 
-PROVENANCE = {
-    'conn':      'MEASURED',
-    'amen':      'MEASURED',
-    'green':     'MEASURED',
-    'sch':       'MEASURED',
-    'hlth':      'MEASURED',
-    'infra':     'MEASURED',
-    'childcare': 'MEASURED',
-    'community': 'MEASURED',
-    'sport':     'MEASURED',
-    'flood':     'MEASURED',
-    'noise':     'MEASURED',
-    'air_noise': 'MEASURED',
-    'eldercare': 'MEASURED',
-    'dens':      'PARTLY_MEASURED',
-    'env':       'PARTLY_MEASURED',
-    'mom':       'PARTLY_MEASURED',
-    'hawker':    'JUDGED',
-}
+W = PROVISION_WEIGHTS
 
 # ----------------------------------------------------------------------
 # Geo helpers — haversine metres; nearest + count-within-radius
@@ -292,9 +252,7 @@ def run(estates, layers, judged):
     return df
 
 def band(x):
-    for edge, b in [(4.5,"A"),(4.0,"B+"),(3.5,"B"),(3.0,"C"),(2.5,"D"),(0,"F")]:
-        if x >= edge: return b
-    return "F"
+    return band_label(x)
 
 def main():
     ap = argparse.ArgumentParser()

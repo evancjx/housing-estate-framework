@@ -52,6 +52,11 @@ from typing import Iterable
 
 import pandas as pd
 
+try:
+    from framework_config import PIPELINE_ESTATE_ALIAS
+except ImportError:  # pragma: no cover - supports package-style imports
+    from models.framework_config import PIPELINE_ESTATE_ALIAS
+
 NRP_DATASET = "d_156a38dc024d2b20a6c1d0c0179e797c"
 LUP_DATASET = "d_9b5886a025c8db1192a8fada42bd4330"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
@@ -64,23 +69,8 @@ SIG_THRESHOLDS = {
     "LUP": [(8, "HIGH"), (4, "MEDIUM")],
 }
 
-# Estate-name aliases — pipeline planning-area names → canonical estates.csv names.
-# Kept here to avoid coupling to momentum_model.py at import time. Mirror its ALIAS_MAP.
-ALIAS_MAP = {
-    "BIDADARI":        "WOODLEIGH",
-    "MARSILING":       "WOODLANDS",
-    "KAKI BUKIT":      "BEDOK",
-    "EAST COAST":      "MARINE PARADE",
-    "BOON LAY":        "JURONG EAST",
-    "TAMAN JURONG":    "JURONG EAST",
-    "JURONG WEST":     "JURONG EAST",
-    "BUONA VISTA":     "QUEENSTOWN",
-    "NOVENA":          "TOA PAYOH",
-    "KALLANG":         "BOON KENG",
-    "WEST COAST":      "CLEMENTI",
-    "TAMPINES NORTH":  "TAMPINES",
-    "YEW TEE":         "CHOA CHU KANG",
-}
+# Estate-name aliases: pipeline planning-area names -> canonical estates.csv names.
+ALIAS_MAP = PIPELINE_ESTATE_ALIAS
 
 # NAME-substring → canonical-estate map. Longest substring wins so multi-word
 # matches beat short ones ("BT PANJANG RING" matches "BT PANJANG" before any

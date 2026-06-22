@@ -34,18 +34,41 @@ liveability_model.py      → provision_scores.csv + pipeline_data.json → live
 value_model.py            → provision_scores.csv (or liveability_matrix.csv) + hdb_resale.csv → value_output.csv
 lease_risk_model.py       → hdb_resale.csv → lease_risk.csv (standalone, joined later)
 employment_model.py       → station-count commute approximation → employment_scores_{T0,T5,T15}.csv
+build_master_output.py    → joins canonical outputs → life_paths.csv + master_output.csv
 ```
 
 Each model file ends with an **INPUT CONTRACT** block in its docstring — the authoritative spec for
 what columns each CSV must have. Update both the contract and the loader when you change a schema.
 
+## Refactor decision: shared framework config
+
+The framework constants are centralised in `models/framework_config.py`. This was done after a
+review found that `provision_model.py` and `liveability_model.py` had drifted: liveability was using
+a different base weight vector, omitted some provision components, and several scripts still carried
+duplicated alias maps or stale `SG-Estate-Framework/...` paths.
+
+The decision is intentional:
+
+- `PROVISION_WEIGHTS` is the source of truth for the code-level component weights.
+- `S_GROUPS` maps those code-level components back to the 9 conceptual framework groups used for
+  persona deltas.
+- `HDB_TOWN_ALIAS` and `PIPELINE_ESTATE_ALIAS` are separate because they solve different joins:
+  HDB transaction town rollups vs pipeline-data estate canonicalisation.
+- Persona deltas are applied at the S-group level. If a delta would make a group negative after the
+  real-data component split, that group is floored at zero and the whole persona vector is
+  renormalised. A persona can de-emphasise a positive provision component to zero, but it should not
+  assign negative value to provision.
+
+When changing weights, aliases, band edges, or S-group membership, update `framework_config.py` first
+and run `make smoke`. Do not reintroduce private copies of these constants inside model files.
+
 ## Cross-cutting invariants enforced in code
 
 These are not stylistic preferences — they are framework rules the code actively enforces:
 
-- **Weight vectors must stay in sync.** `provision_model.py:W` (15 components) and
-  `liveability_model.py:BASE_W` (13 components, after grouping) must agree on the base weights.
-  When adding/renaming a component, update both, plus the S-group mapping in `liveability_model.py:S_GROUPS`.
+- **Weight vectors must stay in sync.** `models/framework_config.py:PROVISION_WEIGHTS` is imported
+  by both `provision_model.py` and `liveability_model.py`. `S_GROUPS` in the same file must cover
+  every provision component exactly once. `make smoke` enforces this.
 - **Provenance is never faked.** `provision_model.py` tags each component MEASURED / PARTLY_MEASURED /
   JUDGED. If a JUDGED input (dens/env/mom/hawker) is missing, the model renormalises over present
   components and sets `measured_only=True` — it does NOT impute. Preserve this behaviour.
@@ -54,9 +77,9 @@ These are not stylistic preferences — they are framework rules the code active
 - **Bands, not decimals, below thresholds.** `value_model.py:CFG["trust_decimal_n"] = 100` — under that
   sample count, the `reported` field shows a band only. The ±0.3 cross-grader noise floor means
   differences smaller than that are not real distinctions; report bands when in doubt.
-- **`ESTATE_TOWN_ALIAS` is duplicated** across `value_model.py`, `lease_risk_model.py`, and
-  (as `ALIAS_MAP`) `liveability_model.py`. Keep them aligned — e.g. CANBERRA→SEMBAWANG,
-  WOODLEIGH→TOA PAYOH. Diverging maps silently break joins.
+- **Alias maps have one owner.** Use `HDB_TOWN_ALIAS` for HDB transaction town rollups and
+  `PIPELINE_ESTATE_ALIAS` for pipeline-item canonicalisation. Both live in
+  `models/framework_config.py`; diverging maps silently break joins.
 - **D multiplier holds LOSSES ONLY.** Positive additions go in S7 momentum / liveability T5, never
   in D. This avoids the v0.2–0.4 double-count.
 - **Tengah has no resale value.** Canberra is folded into Sembawang. Don't add synthetic rows for
@@ -91,6 +114,11 @@ python models/value_model.py \
     --scores data/provision_scores.csv \
     --hdb data/hdb_resale.csv \
     --out data/value_output.csv
+
+python models/build_master_output.py
+
+# Smoke-check constants, paths, and committed deterministic outputs
+make smoke
 
 # Refresh the momentum (S7) component from pipeline_data.json, then re-run provision
 python models/momentum_model.py \
