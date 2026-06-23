@@ -603,6 +603,64 @@ git commit -m "data: complete archetype coverage (Holland Village D, Jurong West
 
 ---
 
+## Task 2.6: Reconcile the fifth alias map (ingest_hdb_upgrading.py) + disclose data divergence
+
+**Files:**
+- Modify: `models/ingest_hdb_upgrading.py`
+- Create: add a guard test to `tests/test_aliases.py`
+- Modify: `SG-Estate-Framework/CLAUDE.md` (disclosure note)
+
+**Context (found by the final whole-branch review):** `ingest_hdb_upgrading.py` is a FIFTH alias map, upstream of momentum (it regenerates the NRP/LUP `pipeline_items` in `pipeline_data.json`). Its local `ALIAS_MAP` (lines 69-83) and `NAME_HINTS` (lines 90-159) still encode the exact bugs Task 2.1 fixed (`BOON LAY/TAMAN JURONG/JURONG WEST→JURONG EAST`, `KALLANG→BOON KENG`). The committed `pipeline_data.json` is only consistent because nobody has re-run this network-fed ingester. Make the CODE single-source so the next refresh is correct; disclose that the committed data carries legacy attribution (the ingester needs network, so a full `pipeline_data.json` regeneration + cascade is deferred to Phase 3).
+
+- [ ] **Step 1: Write the failing guard test**
+
+Add to `tests/test_aliases.py`:
+```python
+def test_ingest_hdb_upgrading_uses_shared_alias():
+    import ingest_hdb_upgrading as ih
+    assert ih.ALIAS_MAP is aliases.PIPELINE_NAME_ALIAS
+    hints = dict(ih.NAME_HINTS)
+    assert hints["JURONG WEST"] == "JURONG WEST"
+    assert hints["BOON LAY"] == "JURONG WEST"
+    assert hints["TAMAN JURONG"] == "JURONG WEST"
+    assert hints["KALLANG"] == "KALLANG"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `python3 -m pytest tests/test_aliases.py::test_ingest_hdb_upgrading_uses_shared_alias -v`
+Expected: FAIL (local ALIAS_MAP is a separate dict; NAME_HINTS map those names to JURONG EAST / BOON KENG).
+
+- [ ] **Step 3: Reconcile the ingester**
+
+In `models/ingest_hdb_upgrading.py`:
+- DELETE the local `ALIAS_MAP = {...}` literal (lines ~67-83) and the "Mirror its ALIAS_MAP" comment; add `from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP` to the top imports.
+- Fix the four conflicting `NAME_HINTS` entries to match the resolved pipeline aliases:
+  - `("JURONG WEST", "JURONG EAST")` → `("JURONG WEST", "JURONG WEST")`
+  - `("BOON LAY", "JURONG EAST")` → `("BOON LAY", "JURONG WEST")`
+  - `("TAMAN JURONG", "JURONG EAST")` → `("TAMAN JURONG", "JURONG WEST")`
+  - `("KALLANG", "BOON KENG")` → `("KALLANG", "KALLANG")`
+- Leave the other NAME_HINTS as-is (finer precinct-geography mappings like TEBAN/YUNG/WHAMPOA/BENDEMEER are not in the flagged bug set; reconciling them belongs with the Phase-3 ingester refresh).
+
+- [ ] **Step 4: Run to verify GREEN + full suite**
+
+Run: `python3 -m pytest tests/test_aliases.py -v` → PASS
+Run: `python3 -m pytest -q` → all PASS (no data changed; pipeline_data.json untouched).
+
+- [ ] **Step 5: Disclose the data divergence**
+
+In `SG-Estate-Framework/CLAUDE.md`, near the pipeline/momentum description, add a note: "`ingest_hdb_upgrading.py` now shares `aliases.PIPELINE_NAME_ALIAS`, but the committed `pipeline_data.json` NRP/LUP items were generated under the OLD attribution (some Jurong West / Kallang precincts credited to Jurong East / Boon Keng). The ingester fetches from data.gov.sg (network), so regenerating `pipeline_data.json` + the momentum→provision cascade is deferred to Phase 3. Until then, Jurong East momentum is mildly overstated by Jurong West NRP precincts."
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add models/ingest_hdb_upgrading.py tests/test_aliases.py SG-Estate-Framework/CLAUDE.md
+git commit -m "fix(aliases): reconcile ingest_hdb_upgrading to shared PIPELINE_NAME_ALIAS + guard; disclose pipeline_data.json legacy attribution"
+```
+(append the footer)
+
+---
+
 ## Self-Review (completed)
 
 - **Coverage:** roadmap Phase-2 tasks 2.1a/b/c (→2.1), 2.2 (→2.2), 2.3 (→2.4 docs), 2.6 + deferred momentum (→2.3) all mapped. Private-value surfacing (original 2.4) + README (2.5) deferred to Phase 3 with the private-data coverage work — explicitly flagged `not_covered` in build_master so it's structurally ready.
