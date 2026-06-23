@@ -43,11 +43,12 @@ what columns each CSV must have. Update both the contract and the loader when yo
 
 These are not stylistic preferences — they are framework rules the code actively enforces:
 
-- **Weight vectors must stay in sync.** `provision_model.py:W` (15 components) and
-  `liveability_model.py:BASE_W` (13 components, after grouping) must agree on the base weights.
+- **Weight vectors must stay in sync.** `provision_model.py:W` (21 components, v2.0) and
+  `liveability_model.py:BASE_W` (same 21 keys) must agree on the base weights.
   When adding/renaming a component, update both, plus the S-group mapping in `liveability_model.py:S_GROUPS`.
 - **Provenance is never faked.** `provision_model.py` tags each component MEASURED / PARTLY_MEASURED /
-  JUDGED. If a JUDGED input (dens/env/mom/hawker) is missing, the model renormalises over present
+  JUDGED. v2.0 has 15 MEASURED + 6 PARTLY_MEASURED + 0 JUDGED. If a PARTLY_MEASURED input
+  (dens/env/mom/hawker/stewardship/ev_charging) is missing, the model renormalises over present
   components and sets `measured_only=True` — it does NOT impute. Preserve this behaviour.
 - **HDB and private are separate universes.** `value_model.py` keeps them as distinct SEGMENTS with
   different control variables; never blend or rank across them.
@@ -58,7 +59,9 @@ These are not stylistic preferences — they are framework rules the code active
   (as `ALIAS_MAP`) `liveability_model.py`. Keep them aligned — e.g. CANBERRA→SEMBAWANG,
   WOODLEIGH→TOA PAYOH. Diverging maps silently break joins.
 - **D multiplier holds LOSSES ONLY.** Positive additions go in S7 momentum / liveability T5, never
-  in D. This avoids the v0.2–0.4 double-count.
+  in D. This avoids the v0.2–0.4 double-count. v2.0 adds an explicit construction-disruption
+  sub-channel: `d_construction = max(0.95, 1 - 0.05 × bca_severity/1000)`, sourced from
+  `data/bca_permits.csv`. Penalty caps at 5%; never raises a score.
 - **Tengah has no resale value.** Canberra is folded into Sembawang. Don't add synthetic rows for
   these; the alias mechanism + manual overrides in `lease_risk_model.py` handle them.
 

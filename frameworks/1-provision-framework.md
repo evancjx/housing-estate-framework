@@ -130,23 +130,35 @@ persona in Doc 2). S3/S5/S7/S9=1 → no cap.
 
 ---
 
-## 5. Provision pilot scores (8 estates — illustrative, analyst judgement, NOT GIS)
+## 5. Provision scores (v2.0 — 32 estates, real-data pipeline)
 
-| Estate | Archetype | Provision band | (pilot decimal — noise ±0.3) |
+Top / mid / bottom of the v2.0 distribution; full ranking in `data/provision_scores.csv`.
+"Pilot decimal" replaced by the actual model output (post-D-multiplier).
+
+| Estate | Archetype | Provision band | Decimal |
 |--------|:--:|:--:|:--:|
-| Queenstown | B | B+ | 4.20 |
-| Pasir Ris | B→A | B+ | 4.04 |
-| Woodleigh | B | B+ | 4.03 |
-| Tampines | A | B+ | 4.00 |
-| Holland Village | D | B | 3.95 |
-| Marine Parade | C | B | 3.86 |
-| Canberra | B/E | C | 3.44 |
-| Tengah | E | D | 2.96 |
+| Central Area | A (urban core) | A | 4.56 |
+| Toa Payoh | B | B+ | 4.42 |
+| Bedok | A | B+ | 4.38 |
+| Bukit Merah | B+ | B+ | 4.23 |
+| Yishun | B | B+ | 4.13 |
+| Bukit Timah | D | B | 3.97 |
+| Ang Mo Kio | B | B | 3.96 |
+| Marine Parade | C | C | 3.13 |
+| Woodlands | B | C | 3.29 |
+| **Tengah** | **E** | **F** | **2.45** |
 
-Six of eight inside a 0.34 spread — *inside the ±0.3 cross-grader noise.* This is the
-**provision-saturation** effect: most established SG estates have crossed the provision
-threshold, so provision stops discriminating among them. Provision's discriminating power is
-greatest for NEW/transitional towns (Tengah, Canberra), weakest for the mature cluster.
+**TENGAH at F is a legitimate v2.0 outcome, not a bug.** As an early new-town precinct with most
+infrastructure still pipeline-only, it scores 1-3 on connectivity, amenities, hawker (no centres
+built yet), childcare, community, infra, and stewardship. The momentum (mom=5) and flood (3) +
+eldercare (5) components keep it above 2.0, but the present-day provision is genuinely thin.
+Its T5/T15 trajectory in Document 2 tells the *different* story (forward momentum is highest
+in SG). This is exactly the split the two-document architecture was built to express — a low
+Provision-now estate can still have high Liveability-future for the right life-path.
+
+Most established estates cluster in B / B+ (provision-saturation effect). Discriminating power
+is greatest for new / transitional towns (Tengah F, Marine Parade C) and the highest-end
+(Central A); weakest for the mature cluster (~3.6–4.2 band).
 
 ---
 

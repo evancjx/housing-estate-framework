@@ -6,22 +6,29 @@ Computes the Provision score per estate from ACTUAL spatial data, instead of
 analyst judgement. Emits the scores.csv that value_model.py consumes.
 
 HONEST SCOPE — v2.0 (21 components):
-  MEASURED        (20): connectivity, amenities, green, schools, healthcare,
-                        infra, env (heat/shade — refactored with tree-canopy +
-                        UHI delta), childcare, community, sport, flood_risk,
-                        noise, air_noise, eldercare, density (HDB Property Info),
-                        momentum (HDB+private pipeline), hawker (NEA v2 + stall
-                        counts), air_quality (NEA PSI/PM2.5/NO2),
-                        jtc_industrial (JTC TOL parcels), ev_charging
-                        (LTA EV registry — stub until token).
-  PARTLY_MEASURED  (1): stewardship (MND TCMR transcribed; OneService pending).
-  JUDGED           (0): nothing — v2.0 eliminates the JUDGED tier.
+  MEASURED        (15): connectivity, amenities, green, schools, healthcare,
+                        infra, childcare, community, sport, flood_risk, noise,
+                        air_noise, eldercare, air_quality (NEA PSI/PM2.5),
+                        jtc_industrial (JTC TOL parcels).
+  PARTLY_MEASURED  (6): dens     (HDB Property Info + 0.5 ha/block area proxy),
+                        env      (parks-coverage canopy proxy + MSS UHI delta),
+                        mom      (HDB + URA pipeline; 0.90× conservative penalty
+                                  + curated MANUAL_ADDITIONS),
+                        hawker   (NEA Hawker v2 with approximated stall counts),
+                        stewardship (MND TCMR KPI bands; OneService sparse),
+                        ev_charging (LTA stub — currently all-zero until token).
+  JUDGED           (0): v2.0 eliminates the JUDGED tier.
 
-Provenance flips landed in v2.0:
-  dens     PARTLY → MEASURED  (HDB Property Information ingested)
-  env      PARTLY → MEASURED  (NParks canopy proxy + MSS UHI delta)
-  mom      PARTLY → MEASURED  (URA REALIS + STB en-bloc added to pipeline)
-  hawker   JUDGED → MEASURED  (NEA Hawker Centre v2 with stall counts)
+Provenance flips landed in v2.0 (all four legacy JUDGED → real data, but
+proxies remain — hence PARTLY_MEASURED, not MEASURED:
+  dens     PARTLY (no real area polygons — block count × 0.5 ha proxy)
+  env      PARTLY (NParks tree-canopy polygons unpublished — parks-coverage
+                   proxy + MSS UHI delta is the ceiling for now)
+  mom      PARTLY (item_contribution() runs the formula, but a 0.90×
+                   conservative penalty + curated MANUAL_ADDITIONS in
+                   momentum_model.py mean it isn't pure-MEASURED)
+  hawker   PARTLY (NEA gazette lists centres but not stall counts — stalls
+                   approximated per centre)
 
 Note on `air_noise`: this is a geometric distance to runway centerlines + 12 km
 approach/departure corridor extensions for Changi, Seletar, and Paya Lebar
@@ -87,14 +94,13 @@ W = {
 assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
 
 PROVENANCE = {
-    # MEASURED (20)
+    # MEASURED (15) — pure geometry / public registry joins
     'conn':            'MEASURED',
     'amen':            'MEASURED',
     'green':           'MEASURED',
     'sch':             'MEASURED',
     'hlth':            'MEASURED',
     'infra':           'MEASURED',
-    'env':             'MEASURED',      # was PARTLY — canopy + UHI ingested
     'childcare':       'MEASURED',
     'community':       'MEASURED',
     'sport':           'MEASURED',
@@ -102,14 +108,15 @@ PROVENANCE = {
     'noise':           'MEASURED',
     'air_noise':       'MEASURED',
     'eldercare':       'MEASURED',
-    'dens':            'MEASURED',      # was PARTLY — HDB Property Info ingested
-    'mom':             'MEASURED',      # was PARTLY — private pipeline ingested
-    'hawker':          'MEASURED',      # was JUDGED — NEA Hawker v2 ingested
-    'air_quality':     'MEASURED',      # NEW
-    'jtc_industrial':  'MEASURED',      # NEW
-    'ev_charging':     'MEASURED',      # NEW (stub until LTA token)
-    # PARTLY_MEASURED (1)
-    'stewardship':     'PARTLY_MEASURED',  # NEW (TCMR transcribed; OneService pending)
+    'air_quality':     'MEASURED',      # NEW v2.0 — NEA PSI annual mean
+    'jtc_industrial':  'MEASURED',      # NEW v2.0 — JTC heavy-industry setback
+    # PARTLY_MEASURED (6) — real data, but with documented proxies/caveats
+    'dens':            'PARTLY_MEASURED',  # 0.5 ha/block area proxy (no OneMap block polygons)
+    'env':             'PARTLY_MEASURED',  # parks-coverage canopy proxy (no NParks tree polygons)
+    'mom':             'PARTLY_MEASURED',  # 0.90× conservative penalty; some manual additions
+    'hawker':          'PARTLY_MEASURED',  # stall counts approximated from NEA centre list
+    'stewardship':     'PARTLY_MEASURED',  # TCMR KPI bands transcribed; OneService close-rate sparse
+    'ev_charging':     'PARTLY_MEASURED',  # stub until LTA AccountKey; currently all-zero
 }
 assert set(PROVENANCE.keys()) == set(W.keys()), \
     f"PROVENANCE and W must agree on keys (diff: {set(W) ^ set(PROVENANCE)})"

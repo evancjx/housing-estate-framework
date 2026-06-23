@@ -23,6 +23,16 @@ OUTPUT (data/coastal.csv):
   blue_type ∈ {SEA, RESERVOIR, WATERWAY, NONE} — set to whichever blue
   feature is closest if has_blue_within_800m, else NONE.
 
+KNOWN INLAND-CENTROID CASES (NOT BUGS):
+  WOODLANDS HDB centroid = 1.4420, 103.7920; the populated HDB cluster sits
+  ~890m south of the Woodlands Waterfront / Causeway. Falls just outside the
+  800m blue-bonus threshold — this is the lived reality (a Marsiling resident
+  is not "next to the sea" in any walkable sense).
+  SEMBAWANG HDB centroid = 1.4455, 103.8195; ~1.9km south of Sembawang Park.
+  Same story — the coastal park is a destination, not a daily amenity.
+  Adding fake closer anchors to "fix" these would launder geography. Both
+  estates correctly score NONE for blue_type.
+
 INPUT CONTRACT:
   --estates  CSV with estate, lat, lon (UPPERCASE)
   --out      output CSV path
