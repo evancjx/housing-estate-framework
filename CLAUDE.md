@@ -55,9 +55,11 @@ These are not stylistic preferences — they are framework rules the code active
 - **Bands, not decimals, below thresholds.** `value_model.py:CFG["trust_decimal_n"] = 100` — under that
   sample count, the `reported` field shows a band only. The ±0.3 cross-grader noise floor means
   differences smaller than that are not real distinctions; report bands when in doubt.
-- **`ESTATE_TOWN_ALIAS` is duplicated** across `value_model.py`, `lease_risk_model.py`, and
-  (as `ALIAS_MAP`) `liveability_model.py`. Keep them aligned — e.g. CANBERRA→SEMBAWANG,
-  WOODLEIGH→TOA PAYOH. Diverging maps silently break joins.
+- **Alias maps are single-sourced in `models/aliases.py`** (Phase 2). `PIPELINE_NAME_ALIAS`
+  (imported by `momentum_model.py`, `liveability_model.py`, `ingest_hdb_upgrading.py`) and
+  `ESTATE_TOWN_ALIAS` + `PRIVATE_DOMINANT_PROXIES` (imported by `value_model.py`,
+  `lease_risk_model.py`) — e.g. CANBERRA→SEMBAWANG, WOODLEIGH→TOA PAYOH. `tests/test_aliases.py`
+  guards single-sourcing with `is`-identity checks; do not re-introduce a local copy.
 - **D multiplier holds LOSSES ONLY.** Positive additions go in S7 momentum / liveability T5, never
   in D. This avoids the v0.2–0.4 double-count.
 - **Tengah has no resale value.** Canberra is folded into Sembawang. Don't add synthetic rows for
