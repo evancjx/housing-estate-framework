@@ -100,3 +100,23 @@ def test_archetype_coverage_complete():
     arch_names = set(arch["estate"].str.strip().str.upper())
     missing = est_names - arch_names
     assert not missing, f"estates with no archetype: {missing}"
+
+
+def test_real_private_value_surfaces_and_x_gated(inputs, tmp_path):
+    # add a private-value file: BISHAN has direct private data; HOLLAND VILLAGE has no_hdb_segment (no direct)
+    vp = pd.DataFrame({
+        "estate": ["BISHAN", "HOLLAND VILLAGE"],
+        "segment": ["private_resale", "private_resale"],
+        "value_score": [4.1, ""], "value_band": ["A", "N/A"],
+        "value_basis": ["direct", "no_hdb_segment"], "n": [3316, 0],
+    })
+    d = dict(inputs)
+    d["value_private"] = _write(str(tmp_path), "vp.csv", vp)
+    m = build_master.build(_ns(d))
+    bishan = m[m["estate"] == "BISHAN"].iloc[0]
+    assert bishan["value_private_band"] == "A"          # real direct private value surfaced
+    assert bishan["value_private_basis"] == "direct"
+    hv = m[m["estate"] == "HOLLAND VILLAGE"].iloc[0]
+    assert hv["value_private_band"] == "not_covered"    # no_hdb_segment -> not borrowed
+    ca = m[m["estate"] == "CENTRAL AREA"].iloc[0]
+    assert ca["value_private_band"] == "N/R"            # X-gate applies to private cells

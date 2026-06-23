@@ -60,16 +60,31 @@ def build(args):
     for c in flag_cols:
         m[c] = m[c].astype(str).replace("", _NODATA).replace("nan", _NODATA)
 
-    # private Value not yet ingested (Phase 3)
+    # private Value — regenerated via the fixed value_model (R.3, value_basis-aware).
+    # Estates without direct private data (or flagged no_hdb_segment) stay not_covered.
     m["value_private_band"] = _NOTCOV
     m["value_private_basis"] = _NOTCOV
+    m["value_private_score"] = _NOTCOV
+    m["value_private_n"] = _NOTCOV
+    _vp_path = getattr(args, "value_private", None)
+    if _vp_path and os.path.exists(_vp_path):
+        vp = _load(_vp_path, "value_private")
+        vp = vp[vp["value_basis"].astype(str) != "no_hdb_segment"]
+        vp = vp.drop_duplicates(subset="estate", keep="first").set_index("estate")
+        for est in vp.index:
+            mask = m["estate"] == est
+            if mask.any():
+                m.loc[mask, "value_private_band"] = str(vp.loc[est, "value_band"])
+                m.loc[mask, "value_private_basis"] = str(vp.loc[est, "value_basis"])
+                m.loc[mask, "value_private_score"] = str(vp.loc[est, "value_score"])
+                m.loc[mask, "value_private_n"] = str(vp.loc[est, "n"])
 
     # X-archetype N/R gate: scored fields become N/R for non-residential strategic districts
     xmask = m["archetype"].astype(str).str.upper() == "X"
     nr_cols = ["value_hdb_score", "value_hdb_band", "value_hdb_basis", "value_hdb_n",
                "emp_score", "emp_band", "best_node", "worst_node",
                "lease_score", "lease_band", "lease_source",
-               "value_private_band", "value_private_basis"]
+               "value_private_band", "value_private_basis", "value_private_score", "value_private_n"]
     for c in nr_cols:
         m.loc[xmask, c] = _NR
 
@@ -91,6 +106,7 @@ def main():
     ap.add_argument("--employment", default=f"{D}/employment_scores_T0.csv")
     ap.add_argument("--lease", default=f"{D}/lease_risk.csv")
     ap.add_argument("--archetypes", default=f"{D}/archetype_assignments.csv")
+    ap.add_argument("--value_private", default=f"{D}/value_output_private.csv")
     ap.add_argument("--out", default=f"{D}/master_output.csv")
     build(ap.parse_args())
 
