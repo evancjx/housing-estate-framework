@@ -116,42 +116,24 @@ import numpy as np
 import pandas as pd
 
 # ---------------------------------------------------------------------------
-# 1. Base provision weights (must mirror provision_model.py W dict exactly)
+# 1. Base provision weights + S-groups + persona deltas — single-sourced in
+#    framework_config so they cannot drift from provision_model.
 # ---------------------------------------------------------------------------
-from provision_model import W as _PROV_W  # single source of truth (invariant)
+from framework_config import (
+    PROVISION_WEIGHTS as BASE_W,
+    S_GROUPS,
+    PERSONA_DELTAS,
+    PERSONAS,
+)
 
-BASE_W: Dict[str, float] = dict(_PROV_W)
 assert abs(sum(BASE_W.values()) - 1.0) < 1e-9, "BASE_W must sum to 1.0"
-assert set(BASE_W) == set(_PROV_W), "BASE_W must mirror provision_model.W exactly"
 
-# S-group → component membership (for proportional delta distribution)
-S_GROUPS: Dict[str, list] = {
-    "S1": ["conn"],
-    "S2": ["amen", "community", "hawker"],
-    "S3": ["green", "sport"],
-    "S4": ["sch", "childcare"],
-    "S5": ["dens"],
-    "S6": ["hlth", "eldercare"],
-    "S7": ["mom"],
-    "S8": ["infra"],
-    "S9": ["env", "flood", "air_noise", "noise"],
-}
-
-# Persona delta table: S-group → delta in percentage points
-# Each column sums to 0; doc-2 §2 values used verbatim.
-PERSONA_DELTAS: Dict[str, Dict[str, float]] = {
-    "S1": {"YoungFam": -7,  "SinglePro": +8,  "Retiree":  -3,  "Lifestyle": +6},
-    "S2": {"YoungFam": +1,  "SinglePro": +2,  "Retiree":  +4,  "Lifestyle": +3},
-    "S3": {"YoungFam": +4,  "SinglePro": -2,  "Retiree":  +4,  "Lifestyle": -2},
-    "S4": {"YoungFam": +7,  "SinglePro": -9,  "Retiree":  -9,  "Lifestyle": -10},
-    "S5": {"YoungFam":  0,  "SinglePro": -3,  "Retiree":  +2,  "Lifestyle": +4},
-    "S6": {"YoungFam": +1,  "SinglePro": -4,  "Retiree": +12,  "Lifestyle": -6},
-    "S7": {"YoungFam": -5,  "SinglePro": +3,  "Retiree":  -5,  "Lifestyle": +2},
-    "S8": {"YoungFam": -2,  "SinglePro": +1,  "Retiree":  -2,  "Lifestyle": +1},
-    "S9": {"YoungFam": +2,  "SinglePro": +4,  "Retiree":  -3,  "Lifestyle": +2},
-}
-
-PERSONAS = ["YoungFam", "SinglePro", "Retiree", "Lifestyle"]
+# NOTE: the local _build_persona_weights below intentionally does NOT floor a
+# group weight at zero, whereas framework_config.build_persona_weights does.
+# The unfloored form is the committed-output behaviour (a -5pp S7 delta on a
+# 0.04 base yields a small NEGATIVE momentum weight for YoungFam/Retiree).
+# Adopting the floor is a legitimate origin improvement but it CHANGES output,
+# so it is deferred to the reviewed data-change task R.2 — keeping R.1 byte-neutral.
 
 
 def _build_persona_weights() -> Dict[str, Dict[str, float]]:

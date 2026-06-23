@@ -50,82 +50,17 @@ import argparse, sys, math
 import numpy as np, pandas as pd
 
 # ----------------------------------------------------------------------
-# v1.3 weights (sum=1.000). Added eldercare (3%); carved from hlth (0.07→0.04),
-# implementing audit §1d. eldercare = AIC Silver Pages / MOH day-care + AAC +
-# nursing-home + senior-care-centre density. hlth now scopes GP/polyclinic only.
-# Prior v1.2 split: air_noise carved from env (0.05→0.02) — see audit §2d.
+# Constants imported from framework_config (single source of truth).
+# Module-level names W / W_PRIVATE / PROVENANCE are preserved so that
+# existing tests (test_doc_consistency.py, test_invariants.py) and any
+# downstream import of `provision_model.W` continue to work unchanged.
 # ----------------------------------------------------------------------
-W = {
-    'conn':      0.15,
-    'amen':      0.10,
-    'green':     0.09,
-    'sch':       0.07,
-    'dens':      0.08,
-    'hlth':      0.04,
-    'mom':       0.04,
-    'infra':     0.15,
-    'env':       0.02,
-    'childcare': 0.06,
-    'community': 0.03,
-    'sport':     0.02,
-    'flood':     0.01,
-    'hawker':    0.04,
-    'noise':     0.04,
-    'air_noise': 0.03,
-    'eldercare': 0.03,
-}
-assert abs(sum(W.values()) - 1.0) < 1e-9, f"Weights must sum to 1.0, got {sum(W.values())}"
-
-# Private (condo) weight variant. Adjustments vs W:
-#   conn  ↓ 0.15→0.12 (car ownership higher; parking within development)
-#   amen  ↑ 0.10→0.13 (F&B cluster / mall access > hawker)
-#   green ↓ 0.09→0.07 (landscaped grounds within development reduce urgency)
-#   sch   ↑ 0.07→0.11 (school postal code is a direct pricing driver)
-#   sport ↓ 0.02→0.01 (gym/pool within development)
-#   hawker↓ 0.04→0.02 (restaurant/delivery preference)
-#   infra ↑ 0.15→0.16 (MRT proximity premium stronger for asset value)
-#   eldercare ↓ 0.03→0.02 (private buyer cohort skews younger/wealthier)
-#   childcare ↑ 0.06→0.07 (family-forming cohort in private market)
-W_PRIVATE = {
-    'conn':      0.12,
-    'amen':      0.13,
-    'green':     0.07,
-    'sch':       0.11,
-    'dens':      0.08,
-    'hlth':      0.04,
-    'mom':       0.04,
-    'infra':     0.16,
-    'env':       0.02,
-    'childcare': 0.07,
-    'community': 0.03,
-    'sport':     0.01,
-    'flood':     0.01,
-    'hawker':    0.02,
-    'noise':     0.04,
-    'air_noise': 0.03,
-    'eldercare': 0.02,
-}
-assert abs(sum(W_PRIVATE.values()) - 1.0) < 1e-9, f"W_PRIVATE must sum to 1.0, got {sum(W_PRIVATE.values())}"
-
-PROVENANCE = {
-    'conn':      'MEASURED',
-    'amen':      'MEASURED',
-    'green':     'MEASURED',
-    'sch':       'MEASURED',
-    'hlth':      'MEASURED',
-    'infra':     'MEASURED',
-    'childcare': 'MEASURED',
-    'community': 'MEASURED',
-    'sport':     'MEASURED',
-    'flood':     'MEASURED',
-    'noise':     'MEASURED',
-    'air_noise': 'MEASURED',
-    'eldercare': 'MEASURED',
-    'dens':      'PARTLY_MEASURED',
-    'env':       'PARTLY_MEASURED',
-    'mom':       'PARTLY_MEASURED',
-    'hawker':    'JUDGED',
-}
+from framework_config import (
+    PROVISION_WEIGHTS as W,
+    PROVISION_WEIGHTS_PRIVATE as W_PRIVATE,
+    PROVENANCE,
+    band_label as _fc_band_label,
+)
 
 # ----------------------------------------------------------------------
 # Geo helpers — haversine metres; nearest + count-within-radius
