@@ -87,16 +87,17 @@ python models/provision_model.py \
     --markets data/markets.csv --supermarkets data/supermarkets.csv \
     --childcare data/childcare.csv --community data/community.csv \
     --sport data/sport.csv --flood data/flood_risk.csv \
-    --noise data/expressways.csv \
+    --noise data/expressways.csv --air_noise data/air_noise_corridors.csv \
+    --eldercare data/eldercare.csv \
     --covered_linkway data/covered_linkway.csv \
     --judged data/judged_inputs.csv \
     --out data/provision_scores.csv
-# Note: eldercare/air_noise layers (data/eldercare.csv, data/air_noise_corridors.csv) exist but are
-# not yet wired into the canonical run — Phase 3 ingests them (will shift some bands).
+# eldercare + air_noise are now wired into the canonical run (was Phase 3.10).
 
 python models/liveability_model.py \
     --scores data/provision_scores.csv \
     --pipeline data/pipeline_data.json \
+    --archetypes data/archetype_assignments.csv \
     --out data/liveability_matrix.csv
 
 python models/value_model.py \
