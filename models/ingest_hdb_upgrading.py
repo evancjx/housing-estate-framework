@@ -52,6 +52,8 @@ from typing import Iterable
 
 import pandas as pd
 
+from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP
+
 NRP_DATASET = "d_156a38dc024d2b20a6c1d0c0179e797c"
 LUP_DATASET = "d_9b5886a025c8db1192a8fada42bd4330"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
@@ -62,24 +64,6 @@ PROPOSED_HORIZON_YEAR = 2030   # placeholder horizon for "2999" entries
 SIG_THRESHOLDS = {
     "NRP": [(6, "HIGH"), (3, "MEDIUM")],
     "LUP": [(8, "HIGH"), (4, "MEDIUM")],
-}
-
-# Estate-name aliases — pipeline planning-area names → canonical estates.csv names.
-# Kept here to avoid coupling to momentum_model.py at import time. Mirror its ALIAS_MAP.
-ALIAS_MAP = {
-    "BIDADARI":        "WOODLEIGH",
-    "MARSILING":       "WOODLANDS",
-    "KAKI BUKIT":      "BEDOK",
-    "EAST COAST":      "MARINE PARADE",
-    "BOON LAY":        "JURONG EAST",
-    "TAMAN JURONG":    "JURONG EAST",
-    "JURONG WEST":     "JURONG EAST",
-    "BUONA VISTA":     "QUEENSTOWN",
-    "NOVENA":          "TOA PAYOH",
-    "KALLANG":         "BOON KENG",
-    "WEST COAST":      "CLEMENTI",
-    "TAMPINES NORTH":  "TAMPINES",
-    "YEW TEE":         "CHOA CHU KANG",
 }
 
 # NAME-substring → canonical-estate map. Longest substring wins so multi-word
@@ -117,10 +101,10 @@ NAME_HINTS = [
     ("SERANGOON",         "SERANGOON"),
     ("WOODLANDS",         "WOODLANDS"),
     ("MARSILING",         "WOODLANDS"),
-    ("JURONG WEST",       "JURONG EAST"),
+    ("JURONG WEST",       "JURONG WEST"),
     ("JURONG EAST",       "JURONG EAST"),
-    ("BOON LAY",          "JURONG EAST"),
-    ("TAMAN JURONG",      "JURONG EAST"),
+    ("BOON LAY",          "JURONG WEST"),
+    ("TAMAN JURONG",      "JURONG WEST"),
     ("TEBAN",             "JURONG EAST"),
     ("YUNG",              "JURONG EAST"),
     ("HOLLAND",           "QUEENSTOWN"),
@@ -138,7 +122,7 @@ NAME_HINTS = [
     ("PASIR RIS",         "PASIR RIS"),
     ("WHAMPOA",           "CENTRAL AREA"),
     ("BENDEMEER",         "BOON KENG"),
-    ("KALLANG",           "BOON KENG"),
+    ("KALLANG",           "KALLANG"),
     ("BOON KENG",         "BOON KENG"),
     ("SMITH",             "CENTRAL AREA"),
     ("RACE COURSE",       "CENTRAL AREA"),

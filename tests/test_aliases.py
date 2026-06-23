@@ -32,3 +32,13 @@ def test_estate_town_unchanged_entries():
     assert aliases.ESTATE_TOWN_ALIAS["CANBERRA"] == "SEMBAWANG"
     assert aliases.ESTATE_TOWN_ALIAS["HOLLAND VILLAGE"] == "QUEENSTOWN"
     assert aliases.ESTATE_TOWN_ALIAS["LENTOR"] == "ANG MO KIO"
+
+
+def test_ingest_hdb_upgrading_uses_shared_alias():
+    import ingest_hdb_upgrading as ih
+    assert ih.ALIAS_MAP is aliases.PIPELINE_NAME_ALIAS
+    hints = dict(ih.NAME_HINTS)
+    assert hints["JURONG WEST"] == "JURONG WEST"
+    assert hints["BOON LAY"] == "JURONG WEST"
+    assert hints["TAMAN JURONG"] == "JURONG WEST"
+    assert hints["KALLANG"] == "KALLANG"

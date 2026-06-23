@@ -62,6 +62,13 @@ These are not stylistic preferences — they are framework rules the code active
   in D. This avoids the v0.2–0.4 double-count.
 - **Tengah has no resale value.** Canberra is folded into Sembawang. Don't add synthetic rows for
   these; the alias mechanism + manual overrides in `lease_risk_model.py` handle them.
+- **`pipeline_data.json` carries legacy NRP/LUP attribution (Phase-2 disclosure).** `ingest_hdb_upgrading.py`
+  now imports `aliases.PIPELINE_NAME_ALIAS` as its single-source alias map, but the committed
+  `pipeline_data.json` was generated under the OLD local map that credited some Jurong West and
+  Kallang precincts to Jurong East and Boon Keng respectively. The ingester fetches from data.gov.sg
+  (network required), so regenerating `pipeline_data.json` and the downstream momentum→provision
+  cascade is deferred to Phase 3. Until then, Jurong East momentum is mildly overstated by Jurong
+  West NRP precincts and Boon Keng may carry stray Kallang sites.
 
 ## Commands
 
