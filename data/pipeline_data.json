@@ -1823,6 +1823,358 @@
       "certainty": "CONFIRMED",
       "expected_year": 2027,
       "notes": "LUP confirmed (3 sites): MARSILING RISE(MAR07); MARSILING RISE(MAR07); WOODLANDS STREET 13(WDL28)  [year=mode of U/C completions]"
+    },
+    {
+      "description": "The Continuum new launch — 816 units",
+      "benefiting_estates": [
+        "GEYLANG"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Thiam Siew Ave freehold; Hoi Hup + Sunway (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Lentor Hills Residences new launch — 598 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2026,
+      "notes": "URA REALIS pipeline entry — Lentor Hills 99-yr (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Hillock Green new launch — 474 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Lentor Central 99-yr (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Lentoria new launch — 267 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Lentor Hills Rd (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Lentor Mansion new launch — 533 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — GuocoLand (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Pinetree Hill new launch — 520 units",
+      "benefiting_estates": [
+        "BUKIT TIMAH"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Pine Grove A site; UOL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Watten House new launch — 180 units",
+      "benefiting_estates": [
+        "BUKIT TIMAH"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Shelford freehold; UOL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Tembusu Grand new launch — 638 units",
+      "benefiting_estates": [
+        "GEYLANG"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Jalan Tembusu 99-yr; CDL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Hillhaven new launch — 341 units",
+      "benefiting_estates": [
+        "BUKIT PANJANG"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Hillview Rise; Far East + Sekisui (transcribed 2026-06-23)"
+    },
+    {
+      "description": "J'den new launch — 368 units",
+      "benefiting_estates": [
+        "JURONG EAST"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — JE Central; CapitaLand (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Hillshore new launch — 59 units",
+      "benefiting_estates": [
+        "PASIR PANJANG"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Pasir Panjang Rd FH (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Sora new launch — 440 units",
+      "benefiting_estates": [
+        "JURONG EAST"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Yuan Ching Rd; CSC Land (transcribed 2026-06-23)"
+    },
+    {
+      "description": "The Hill@One-North new launch — 142 units",
+      "benefiting_estates": [
+        "DOVER"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Slim Barracks Rise; Kingsford (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Lentor Modern new launch — 605 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2026,
+      "notes": "URA REALIS pipeline entry — Lentor Central; GuocoLand (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Parktown Residence new launch — 1193 units",
+      "benefiting_estates": [
+        "TAMPINES"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Tampines N integrated; CapitaLand/UOL/SingHaiyi (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Bagnall Haus new launch — 113 units",
+      "benefiting_estates": [
+        "BEDOK"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Upp East Coast Rd FH; Roxy-Pacific (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Emerald of Katong new launch — 846 units",
+      "benefiting_estates": [
+        "MARINE PARADE"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Jln Tembusu 99-yr; Sim Lian (transcribed 2026-06-23)"
+    },
+    {
+      "description": "The Chuan Park new launch — 916 units",
+      "benefiting_estates": [
+        "SERANGOON"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Lor Chuan; Kingsford+MCC (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Union Square Residences new launch — 366 units",
+      "benefiting_estates": [
+        "CENTRAL AREA"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Havelock Rd; CDL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Norwood Grand new launch — 348 units",
+      "benefiting_estates": [
+        "WOODLANDS"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Champions Way; CDL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Nava Grove new launch — 552 units",
+      "benefiting_estates": [
+        "BUKIT TIMAH"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Pine Grove B; SingHaiyi (transcribed 2026-06-23)"
+    },
+    {
+      "description": "The Orie new launch — 777 units",
+      "benefiting_estates": [
+        "TOA PAYOH"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Lor 1 TP; CDL (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Aurelle of Tampines new launch — 760 units",
+      "benefiting_estates": [
+        "TAMPINES"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Tampines St 62 EC; Sim Lian (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Novo Place new launch — 504 units",
+      "benefiting_estates": [
+        "TENGAH"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "HIGH",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "URA REALIS pipeline entry — Tengah Plantation EC; Hoi Hup+Sunway (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Lentor Central Resi new launch — 477 units",
+      "benefiting_estates": [
+        "LENTOR"
+      ],
+      "type": "PRIVATE_NEW_LAUNCH",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "URA REALIS pipeline entry — Lentor Gardens; Hong Leong/GuocoLand (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Pine Grove en-bloc redevelopment — 660 units",
+      "benefiting_estates": [
+        "BUKIT TIMAH"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "STB / EdgeProp en-bloc tender — GLS site sold to UOL/SingHaiyi; 2 plots (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Park View Mansions en-bloc redevelopment — 440 units",
+      "benefiting_estates": [
+        "JURONG EAST"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "STB / EdgeProp en-bloc tender — Yuan Ching Rd; CSC Land Sora (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Bagnall Court en-bloc redevelopment — 113 units",
+      "benefiting_estates": [
+        "BEDOK"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "STB / EdgeProp en-bloc tender — Becomes Bagnall Haus (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Chuan Park en-bloc redevelopment — 916 units",
+      "benefiting_estates": [
+        "SERANGOON"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "STB / EdgeProp en-bloc tender — Sold collective sale; redevelopment underway (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Thiam Siew Ave plots en-bloc redevelopment — 816 units",
+      "benefiting_estates": [
+        "GEYLANG"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "STB / EdgeProp en-bloc tender — Becomes The Continuum (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Watten Estate en-bloc redevelopment — 180 units",
+      "benefiting_estates": [
+        "BUKIT TIMAH"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2027,
+      "notes": "STB / EdgeProp en-bloc tender — Watten House redevelopment (transcribed 2026-06-23)"
+    },
+    {
+      "description": "Maxwell House en-bloc redevelopment — 322 units",
+      "benefiting_estates": [
+        "CENTRAL AREA"
+      ],
+      "type": "EN_BLOC_TENDER",
+      "significance": "MEDIUM",
+      "certainty": "CONFIRMED",
+      "expected_year": 2028,
+      "notes": "STB / EdgeProp en-bloc tender — CBD residential conversion (transcribed 2026-06-23)"
     }
   ],
   "estate_scores": [
