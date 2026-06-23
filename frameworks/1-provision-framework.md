@@ -42,20 +42,43 @@ ProvisionFinal(a) = Provision(a) × D(a)      [D = losses/disruptions only; see 
 Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (see §6).
 **Archetype-BLIND**: every estate scored on the same yardstick so scores stay comparable.
 
-### 1.1 Components and weights (renormalised, sum = 1.000)
+### 1.1 Components and weights (v2.0: 21 components, sum = 1.000)
 
-| # | Component | Weight | Scored on (guidance — single 1–5, sub-metrics are guidance not separate weights) |
-|---|-----------|------:|------|
-| 1 | Connectivity | 0.1709 | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
-| 2 | Daily amenities | 0.1597 | Basics (hawker, wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
-| 3 | Green & blue | 0.1064 | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
-| 4 | Schools | 0.0819 | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach. Trimmed (address-level factor). |
-| 5 | Density & built form | 0.0962 | Lived density: block spacing, mixed-use, lift/access, pavement. Empty/derelict floor = desolation signal. |
-| 6 | Healthcare | 0.0850 | Primary-care-first: GP/CHAS/pharmacy + polyclinic (`hlth`), eldercare day-centres / AAC / nursing-home density (`eldercare`, v1.3: split out as MEASURED — AIC Silver Pages / MOH registry), THEN A&E time |
-| 7 | Momentum (+) | 0.0645 | Confirmed *additions* only, time-discounted (positive only — losses live in D). v1.4: HDB-side now MEASURED — `ingest_hdb_upgrading.py` pulls NRP + LUP precincts from data.gov.sg (datasets `d_156a38…` / `d_9b5886…`) and merges into `pipeline_data.json`; SERS items stay hand-curated; private-side en-bloc / new-launch pipeline remains JUDGED. |
-| 8 | Infrastructure readiness | 0.1709 | Trunk infra *operational now* (LiveNow horizon). Distinct from S1: S1 = quality-when-present; S8 = operational-at-horizon. |
-| 9 | Environmental comfort | 0.0645 | Heat/shade (`env`), expressway exposure (`noise`), aircraft-corridor proximity (`air_noise`, v1.2: split out as MEASURED — geometric proxy of runway centerlines + 12 km approach corridors for Changi / Seletar / Paya Lebar), construction disruption, flood-prone routes (`flood`) |
-|10 | *(reserved — estate stewardship; NOT "social mix")* | — | See Appendix on the permanent social-mix exclusion |
+v2.0 changes (audit response to `factor_audit_reports/2026-06-19.md`):
+- **Component 10 unreserved:** `stewardship` populated (PARTLY_MEASURED — MND TCMR KPI bands).
+  Not social mix — observable upkeep proxies (lift breakdowns, arrears, cleanliness).
+- **New components:** `air_quality` (NEA PSI annual mean), `jtc_industrial` (heavy-industry
+  setback), `ev_charging` (LTA station registry density), `hawker` carved from S2 (NEA hawker
+  stalls per 1k pop), `noise` carved from S9 (expressway buffer).
+- **Provenance:** 20 MEASURED + 1 PARTLY_MEASURED. The four legacy JUDGED inputs
+  (dens/env/mom/hawker) all promoted to MEASURED via dedicated ingester CSVs.
+- **D-multiplier extension:** construction-disruption now sourced from `bca_permits.csv`
+  (`d_construction = max(0.95, 1 − 0.05 × severity/1000)`), routed through D not as a new
+  component (G2: D is losses-only).
+
+| # | Component | Code | Weight | Scored on |
+|---|-----------|------|------:|-----------|
+| 1 | Connectivity | `conn` | 0.14 | Walk-time to rail, bus routes 800m, **pedestrian shelter %, dedicated cycling-path metres** (v2.0 sub-metrics, weighted blend) |
+| 2 | Daily amenities | `amen` | 0.09 | Markets / supermarkets / clinics density |
+| 2b | Hawker centres | `hawker` | 0.04 | NEA stalls per 1k residents in 800m (was JUDGED in v1.x) |
+| 2c | Community facilities | `community` | 0.02 | CCs, libraries |
+| 3 | Green | `green` | 0.08 | Park network-walk + **blue-infrastructure bonus** (sea/reservoir/waterway 800m) |
+| 3b | Sport | `sport` | 0.02 | Sports halls / pools |
+| 4 | Schools | `sch` | 0.07 | MOE P1 distance bands |
+| 4b | Childcare | `childcare` | 0.05 | ECDA-licensed centres |
+| 5 | Density & built form | `dens` | 0.08 | **HDB dwellings/ha (block-resolution)** + URA GPR (was PARTLY in v1.x) |
+| 6a | Healthcare | `hlth` | 0.04 | CHAS GP + polyclinic distance |
+| 6b | Eldercare | `eldercare` | 0.03 | AIC/MOH day-centres + nursing homes |
+| 7 | Momentum (+) | `mom` | 0.04 | Confirmed additions (HDB NRP/LUP + **URA REALIS private launches + en-bloc**, v2.0) |
+| 8 | Infrastructure readiness | `infra` | 0.13 | MRT operational; trunk utilities |
+| 9a | Environmental comfort | `env` | 0.01 | **UHI temp anomaly + tree-canopy %** (v2.0 — was JUDGED) |
+| 9b | Flood-prone routes | `flood` | 0.01 | Flood-risk overlay |
+| 9c | Expressway noise | `noise` | 0.03 | Expressway 200m buffer (split from S9 in v2.0) |
+| 9d | Air-corridor noise | `air_noise` | 0.03 | Changi / Seletar / Paya Lebar approach corridors |
+| 9e | Air quality | `air_quality` | 0.03 | **PM2.5 annual mean (NEA PSI)** + road-buffer correction |
+| 9f | Industrial proximity | `jtc_industrial` | 0.02 | **Heavy-industry setback distance** (B2/B3 stricter than B1) |
+|10 | Stewardship | `stewardship` | 0.03 | **MND TCMR KPI bands** (arrears, lift, cleanliness, maintenance) + OneService close-rate. NOT "social mix" — observable upkeep only. |
+|11 | EV charging | `ev_charging` | 0.01 | **LTA charger density + HDB carpark coverage %** |
 
 ### 1.2 S11 — conditional car-mobility (provision side)
 For `car-primary` nodes only. Scores expressway access + multi-district drive time + congestion/
@@ -84,10 +107,18 @@ Cross-archetype "which is better to live in" is answered ONLY by Document 2.
 
 ## 3. D multiplier — losses/disruptions ONLY
 ```
-D = max(0.70, 1 − Σ(severity × certainty × time_factor))
+D = max(0.70, 1 − Σ(severity × certainty × time_factor))           # framework formula (general)
+d_construction = max(0.95, 1 − 0.05 × severity_score/1000)          # v2.0 explicit construction sub-channel
 ```
 Severity: moderate 0.10 / major 0.20 / structural 0.30. Certainty: confirmed 1.00 / gazetted 0.75
 / under-study 0.40 / rumour 0.00. Time: 0–2y 1.00 / 2–5y 0.75 / 5–10y 0.40 / >10y 0.20.
+
+**v2.0 construction-disruption channel:** active BCA-permitted construction sites within 500m,
+severity = `GFA(kSF) × remaining_months / setback_m` (sourced from
+`data/bca_permits.csv` via `ingest_bca_permits.py`, with pipeline-fallback while the official BCA
+Permit Search API remains gated). Penalty caps at 5% per the framework's "D never dominates"
+principle. JURONG EAST / SEMBAWANG / CLEMENTI presently absorb the heaviest hit.
+
 **Positive additions do NOT go here** (they live in S7 / Document 2's Future horizon) — this
 removes the v0.2–0.4 double-count.
 

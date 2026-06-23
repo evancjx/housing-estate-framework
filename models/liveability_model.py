@@ -121,36 +121,49 @@ import pandas as pd
 # ---------------------------------------------------------------------------
 # 1. Base provision weights (must mirror provision_model.py W dict exactly)
 # ---------------------------------------------------------------------------
+# v2.0: 21 components (mirrors provision_model.py W exactly).
+# Added: hawker, noise, air_quality, jtc_industrial, stewardship, ev_charging.
+# All-MEASURED except stewardship (PARTLY_MEASURED — TCMR KPI bands).
 BASE_W: Dict[str, float] = {
-    "conn":      0.15,
-    "amen":      0.13,
-    "green":     0.09,
-    "sch":       0.07,
-    "dens":      0.08,
-    "hlth":      0.04,
-    "eldercare": 0.03,
-    "mom":       0.05,
-    "infra":     0.15,
-    "env":       0.02,
-    "childcare": 0.06,
-    "community": 0.04,
-    "sport":     0.03,
-    "flood":     0.03,
-    "air_noise": 0.03,
+    "conn":            0.14,
+    "amen":            0.09,
+    "green":           0.08,
+    "sch":             0.07,
+    "dens":            0.08,
+    "hlth":            0.04,
+    "mom":             0.04,
+    "infra":           0.13,
+    "env":             0.01,
+    "childcare":       0.05,
+    "community":       0.02,
+    "sport":           0.02,
+    "flood":           0.01,
+    "hawker":          0.04,
+    "noise":           0.03,
+    "air_noise":       0.03,
+    "eldercare":       0.03,
+    "air_quality":     0.03,
+    "jtc_industrial":  0.02,
+    "stewardship":     0.03,
+    "ev_charging":     0.01,
 }
 assert abs(sum(BASE_W.values()) - 1.0) < 1e-9, "BASE_W must sum to 1.0"
 
-# S-group → component membership (for proportional delta distribution)
+# S-group → component membership (for proportional delta distribution).
+# v2.0: new components folded into existing groups by topical similarity so
+# PERSONA_DELTAS stays unchanged (no new persona-axis judgement required):
+#   hawker → S2 (amen);  ev_charging + stewardship → S8 (infra);
+#   air_quality + jtc_industrial + noise → S9 (env).
 S_GROUPS: Dict[str, list] = {
     "S1": ["conn"],
-    "S2": ["amen", "community"],
+    "S2": ["amen", "community", "hawker"],
     "S3": ["green", "sport"],
     "S4": ["sch", "childcare"],
     "S5": ["dens"],
     "S6": ["hlth", "eldercare"],
     "S7": ["mom"],
-    "S8": ["infra"],
-    "S9": ["env", "flood", "air_noise"],
+    "S8": ["infra", "ev_charging", "stewardship"],
+    "S9": ["env", "flood", "air_noise", "air_quality", "jtc_industrial", "noise"],
 }
 
 # Persona delta table: S-group → delta in percentage points

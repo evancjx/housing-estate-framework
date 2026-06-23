@@ -48,18 +48,26 @@ Cell(estate, persona, horizon) =
 
 ## 2. The four personas (signed Δ on Document-1 weights; each column sums to 0)
 
-| Component | Young family | Single pro | Retiree | Lifestyle-seeker |
-|-----------|----:|----:|----:|----:|
-| 1 Connectivity | −7 | +8 | −3 | +6 |
-| 2 Amenities | +1 | +2 | +4 | +3 |
-| 3 Green/blue | +4 | −2 | +4 | −2 |
-| 4 Schools | +7 | −9 | −9 | −10 |
-| 5 Density/built form | 0 | −3 | +2 | +4 |
-| 6 Healthcare | +1 | −4 | +12 | −6 |
-| 7 Momentum | −5 | +3 | −5 | +2 |
-| 8 Infra readiness | −2 | +1 | −2 | +1 |
-| 9 Env comfort | +2 | +4 | −3 | +2 |
-| (sums to 0 after minor calibration rounding) | | | | |
+**v2.0 — BASE_W now mirrors the 21-component Provision W.** Persona deltas remain at the 9
+S-group level (S1–S9) so the column-sums-to-0 invariant holds without adding new persona-axis
+judgements; new v2.0 components are folded into existing S-groups by topical similarity:
+- S2 (amenities): adds `hawker` (carved from amen as a first-class component).
+- S6 (health): contains `hlth` + `eldercare` (unchanged from v1.3).
+- S8 (infra): adds `ev_charging`, `stewardship`.
+- S9 (env): adds `air_quality`, `jtc_industrial`, `noise`.
+
+| S-group | Component(s) | Young family | Single pro | Retiree | Lifestyle-seeker |
+|---------|--------------|----:|----:|----:|----:|
+| S1 Connectivity | conn | −7 | +8 | −3 | +6 |
+| S2 Amenities | amen, community, **hawker** | +1 | +2 | +4 | +3 |
+| S3 Green/blue | green, sport | +4 | −2 | +4 | −2 |
+| S4 Schools | sch, childcare | +7 | −9 | −9 | −10 |
+| S5 Density/built form | dens | 0 | −3 | +2 | +4 |
+| S6 Healthcare | hlth, eldercare | +1 | −4 | +12 | −6 |
+| S7 Momentum | mom | −5 | +3 | −5 | +2 |
+| S8 Infra readiness | infra, **ev_charging, stewardship** | −2 | +1 | −2 | +1 |
+| S9 Env comfort | env, flood, air_noise, **air_quality, jtc_industrial, noise** | +2 | +4 | −3 | +2 |
+| (sums to 0 after minor calibration rounding) | | | | | |
 
 ---
 
