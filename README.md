@@ -41,7 +41,7 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 ---
 
 ## ⚠️ Status & honest limitations (read before trusting any number)
-1. **Provision is still mostly analyst judgment.** Only the CHAS clinic layer was ingested as real geodata; the rest await uploads (MRT is the highest-value next layer — it's 34% of the score). Provision numbers carry a ±0.3 cross-grader noise bar.
+1. **Provision is computed from real geospatial layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, and covered linkways are all ingested. The remaining judgement inputs are the 3 PARTLY/JUDGED components (dens/env "feel", momentum, hawker fame). Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
 2. **Value is real where HDB resale exists.** It does NOT cover private/landed enclaves (East Coast, Siglap, Holland Village) — those need URA private transaction data (Postal Districts 15/16).
 3. **Tengah & Canberra have no resale Value** — Tengah pre-MOP (no market yet), Canberra folded into Sembawang town.
 4. **3 of 9 components are irreducibly judgment** (density-feel, environmental comfort, momentum) — they cannot come from a shapefile and are flagged as such in the model.

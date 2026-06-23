@@ -44,9 +44,14 @@ what columns each CSV must have. Update both the contract and the loader when yo
 
 These are not stylistic preferences — they are framework rules the code actively enforces:
 
-- **Weight vectors must stay in sync.** `provision_model.py:W` (17 components) and
-  `liveability_model.py:BASE_W` (17 components, sourced from `W`) must agree on the base weights.
-  When adding/renaming a component, update both, plus the S-group mapping in `liveability_model.py:S_GROUPS`.
+- **Constants are single-sourced in `models/framework_config.py`.** `PROVISION_WEIGHTS` (17),
+  `PROVISION_WEIGHTS_PRIVATE`, `PROVENANCE`, `S_GROUPS`, `PERSONA_DELTAS`, `BAND_EDGES`,
+  `BAND_NUMERIC`, `band_label`, `build_persona_weights`, `validate_framework_config`. `provision_model.py`
+  imports `W`/`W_PRIVATE`/`PROVENANCE` from it; `liveability_model.py` imports `BASE_W`/`S_GROUPS`/
+  `PERSONA_DELTAS`. When adding/renaming a component, edit framework_config (and S_GROUPS).
+  **Alias maps stay in `models/aliases.py`** (NOT framework_config — its alias dicts are intentionally absent).
+  Note: `liveability_model._build_persona_weights` is deliberately UNFLOORED (committed-output behaviour);
+  `framework_config.build_persona_weights` floors a negative group weight at zero (origin improvement, not yet adopted).
 - **Provenance is never faked.** `provision_model.py` tags each component MEASURED / PARTLY_MEASURED /
   JUDGED. If a JUDGED input (dens/env/mom/hawker) is missing, the model renormalises over present
   components and sets `measured_only=True` — it does NOT impute. Preserve this behaviour.
