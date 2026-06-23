@@ -507,7 +507,15 @@ def run(estates, layers, judged):
             if pd.isna(s.get(k)) and not jr.empty and k in jr.columns \
                     and not pd.isna(jr.iloc[0][k]):
                 s[k] = float(jr.iloc[0][k])
-        rows.append({'estate': name, **s})
+        # Construction-disruption D-multiplier (Task 2.12) — losses-only.
+        # severity_score from bca_permits.csv: GFA(kSF) × remaining_months / setback_m.
+        # Empirically max ~1100 (JURONG EAST); typical heavy site ~500.
+        # D ramps linearly from 1.00 (no disruption) to 0.95 (severity≥1000).
+        sev = e.get('severity_score_bca_permits')
+        if sev is None or pd.isna(sev):
+            sev = e.get('severity_score', 0)   # if joined without suffix
+        d_construction = max(0.95, 1.0 - 0.05 * (float(sev or 0) / 1000.0))
+        rows.append({'estate': name, **s, 'd_construction': round(d_construction, 3)})
     df = pd.DataFrame(rows)
 
     # provision = weighted sum; if a JUDGED/PARTLY input is missing, report
@@ -518,6 +526,9 @@ def run(estates, layers, judged):
         val = sum(W[k]*present[k] for k in present) / wsum   # renormalise over present
         return round(val, 2), round(wsum, 3)
     df[['provision','weight_covered']] = df.apply(lambda r: pd.Series(provision(r)), axis=1)
+    # Apply D-multiplier (losses-only — never raises score)
+    df['provision_predisrupt'] = df['provision']
+    df['provision'] = (df['provision'] * df['d_construction']).round(2)
     df['score'] = df['provision']  # column name value_model.py expects
     df['measured_only'] = df[['dens','env','mom','hawker']].isna().any(axis=1)
     return df

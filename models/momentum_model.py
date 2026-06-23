@@ -17,6 +17,16 @@ FORMULA (per pipeline item):
                    > 10 years      → 0.20
     slip_premium:  0.85 applied to MRT/LRT items (framework invariant: rail promises slip)
 
+PRIVATE-SIDE (Provision v2.0, Task 2.11):
+    PRIVATE_NEW_LAUNCH and EN_BLOC_TENDER items (merged by
+    ingest_private_pipeline.py) flow through item_contribution() unchanged —
+    they declare significance/certainty/expected_year like any other item,
+    so no formula change is needed to honour them. Effect: LENTOR, BUKIT
+    TIMAH, GEYLANG, CENTRAL AREA jump mom score by +2 once private launches
+    are present. The audit gap noted in 2026-06-19.md §3 ("private-side
+    momentum remains JUDGED") closes by virtue of the URA REALIS feed, not
+    by adding a new formula.
+
 CALIBRATION NOTES:
     raw_sum = Σ(contributions for an estate)
     After applying 0.90 conservative penalty (adversarial verification was skipped):
