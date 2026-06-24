@@ -89,7 +89,7 @@ TOWN_COUNCILS = [
     },
     {
         "name": "Jurong-Clementi TC",
-        "estates": ["JURONG EAST", "CLEMENTI"],
+        "estates": ["JURONG EAST", "CLEMENTI", "JURONG WEST"],
         "scc_arrears": "GREEN", "lift": "GREEN",
         "cleanliness": "GREEN", "estate_maintenance": "GREEN",
     },

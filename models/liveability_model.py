@@ -526,7 +526,11 @@ def score_estate(
     Soft floor applied last.
     """
     w = PERSONA_WEIGHTS[persona]
-    raw = sum(w[c] * components.get(c, 0.0) for c in w)
+    present = {c: components[c] for c in w
+               if c in components and components[c] is not None
+               and not (isinstance(components[c], float) and np.isnan(components[c]))}
+    wsum = sum(w[c] for c in present)
+    raw = (sum(w[c] * present[c] for c in present) / wsum) if wsum > 0 else 0.0
 
     # Veto encodes a STRUCTURAL service failure -> cap the pre-D score so a
     # transient disruption (D<1) cannot mask it.

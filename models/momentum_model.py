@@ -50,7 +50,7 @@ RUN:
         --out judged_inputs_updated.csv
     # Then review and copy over judged_inputs.csv if satisfied
 """
-import argparse, json, math, sys
+import argparse, json, math, re, sys
 import pandas as pd
 
 CURRENT_YEAR = 2026
@@ -138,17 +138,59 @@ ESTATE_NAMES = [
 
 from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP, canonicalise_pipeline_name as canonical
 
+def _units(item):
+    """Parse unit count from item description. Returns int or None if not found."""
+    desc = item.get('description', '')
+    m = re.search(r'(\d+)\s*units?', desc)
+    return int(m.group(1)) if m else None
+
+
 def build_canonical_sums(pipeline_data):
+    """
+    Build per-estate raw contribution sums from pipeline_items.
+
+    De-dup rule: EN_BLOC_TENDER items that have a matching PRIVATE_NEW_LAUNCH
+    for the same (canonical estate, unit_count) are skipped — they represent
+    the SAME physical redevelopment (tender → launch) and would otherwise
+    double-count the same project. Only de-dup when unit_count is not None
+    (unit count is the discriminating signal). Standalone en-blocs with no
+    matching launch (e.g. Pine Grove, Maxwell House) are kept.
+    """
+    items = pipeline_data.get('pipeline_items', [])
+
+    # Build set of (canonical_estate, unit_count) for all PRIVATE_NEW_LAUNCH items
+    launch_keys = set()
+    for it in items:
+        if it.get('type', '').upper() == 'PRIVATE_NEW_LAUNCH':
+            estates = it.get('benefiting_estates', [])
+            if estates:
+                key_estate = canonical(estates[0])
+                key_units = _units(it)
+                if key_units is not None:
+                    launch_keys.add((key_estate, key_units))
+
     sums = {}
-    for item in pipeline_data.get('pipeline_items', []):
+    for item in items:
         contrib = item_contribution(item)
         if contrib == 0.0:
             continue
+
+        item_type = item.get('type', '').upper()
+        estates = item.get('benefiting_estates', [])
+
+        # Skip EN_BLOC_TENDER items that have a matching PRIVATE_NEW_LAUNCH twin
+        # (same benefiting estate + same unit count = same physical redevelopment)
+        if item_type == 'EN_BLOC_TENDER' and estates:
+            key_estate = canonical(estates[0])
+            key_units = _units(item)
+            if key_units is not None and (key_estate, key_units) in launch_keys:
+                continue  # absorbed into the corresponding PRIVATE_NEW_LAUNCH
+
         # Deduplicate per item: if multiple benefiting_estates map to the same
         # canonical name (e.g. "Queenstown" + "Buona Vista" both → QUEENSTOWN),
         # the item should only be counted once for that estate.
         seen = set()
-        for raw_estate in item.get('benefiting_estates', []):
+        for raw_estate in estates:
             estate = canonical(raw_estate)
             if estate in seen:
                 continue

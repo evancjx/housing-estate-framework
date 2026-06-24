@@ -45,3 +45,14 @@ def test_veto_caps_pre_d():
     score = liveability_model.score_estate(comps, "SinglePro", d=0.8)
     # structural cap 3.49 applied BEFORE D -> <= 3.49*0.8 = 2.792 (not 3.49)
     assert score <= 3.49 * 0.8 + 1e-6
+
+
+def test_nan_component_renormalises_not_floor():
+    import numpy as np
+    from framework_config import PROVISION_WEIGHTS
+    for missing in PROVISION_WEIGHTS:
+        comps = {c: 3.5 for c in PROVISION_WEIGHTS}
+        comps[missing] = np.nan
+        for p in liveability_model.PERSONAS:
+            s = liveability_model.score_estate(comps, p, d=1.0)
+            assert s > liveability_model.SOFT_FLOOR + 0.5, f"missing {missing} collapsed {p} to {s}"

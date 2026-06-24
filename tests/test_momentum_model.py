@@ -20,3 +20,11 @@ def test_no_current_year_forward_momentum():
     # a 2026 item must contribute 0 forward momentum (year <= CURRENT_YEAR → time_factor=0)
     assert momentum_model.item_contribution(
         {"significance": "HIGH", "certainty": "GAZETTED", "expected_year": 2026, "type": "MRT"}) == 0.0
+
+
+def test_enbloc_launch_twin_not_double_counted():
+    import json
+    d = json.load(open("data/pipeline_data.json"))
+    sums = momentum_model.build_canonical_sums(d)
+    assert momentum_model.score_from_adj(sums.get("SERANGOON", 0) * momentum_model.CONSERVATIVE_PENALTY) == 4
+    assert momentum_model.score_from_adj(sums.get("JURONG EAST", 0) * momentum_model.CONSERVATIVE_PENALTY) == 4
