@@ -44,7 +44,7 @@ what columns each CSV must have. Update both the contract and the loader when yo
 
 These are not stylistic preferences — they are framework rules the code actively enforces:
 
-- **Constants are single-sourced in `models/framework_config.py`.** `PROVISION_WEIGHTS` (17),
+- **Constants are single-sourced in `models/framework_config.py`.** `PROVISION_WEIGHTS` (20 — added v2.0: air_quality, jtc_industrial, stewardship),
   `PROVISION_WEIGHTS_PRIVATE`, `PROVENANCE`, `S_GROUPS`, `PERSONA_DELTAS`, `BAND_EDGES`,
   `BAND_NUMERIC`, `band_label`, `build_persona_weights`, `validate_framework_config`. `provision_model.py`
   imports `W`/`W_PRIVATE`/`PROVENANCE` from it; `liveability_model.py` imports `BASE_W`/`S_GROUPS`/
@@ -53,7 +53,8 @@ These are not stylistic preferences — they are framework rules the code active
   Note: `liveability_model._build_persona_weights` is deliberately UNFLOORED (committed-output behaviour);
   `framework_config.build_persona_weights` floors a negative group weight at zero (origin improvement, not yet adopted).
 - **Provenance is never faked.** `provision_model.py` tags each component MEASURED / PARTLY_MEASURED /
-  JUDGED. If a JUDGED input (dens/env/mom/hawker) is missing, the model renormalises over present
+  JUDGED. Provenance split: 14 MEASURED + 5 PARTLY_MEASURED (dens, env, mom, air_quality, stewardship) + 1 JUDGED (hawker).
+  If a PARTLY_MEASURED or JUDGED input is missing, the model renormalises over present
   components and sets `measured_only=True` — it does NOT impute. Preserve this behaviour.
 - **HDB and private are separate universes.** `value_model.py` keeps them as distinct SEGMENTS with
   different control variables; never blend or rank across them.

@@ -43,16 +43,8 @@ PROVISION_WEIGHTS: Dict[str, float] = {
 }
 assert abs(sum(PROVISION_WEIGHTS.values()) - 1.0) < 1e-9
 
-# Private (condo) weight variant. Adjustments vs PROVISION_WEIGHTS:
-#   conn  ↓ 0.15→0.12 (car ownership higher; parking within development)
-#   amen  ↑ 0.10→0.13 (F&B cluster / mall access > hawker)
-#   green ↓ 0.09→0.07 (landscaped grounds within development reduce urgency)
-#   sch   ↑ 0.07→0.11 (school postal code is a direct pricing driver)
-#   sport ↓ 0.02→0.01 (gym/pool within development)
-#   hawker↓ 0.04→0.02 (restaurant/delivery preference)
-#   infra ↑ 0.15→0.16 (MRT proximity premium stronger for asset value)
-#   eldercare ↓ 0.03→0.02 (private buyer cohort skews younger/wealthier)
-#   childcare ↑ 0.06→0.07 (family-forming cohort in private market)
+# Private (condo) weight variant — 20 components, condo tilts vs PROVISION_WEIGHTS;
+# see frameworks/1-provision-framework.md for rationale.
 PROVISION_WEIGHTS_PRIVATE: Dict[str, float] = {
     "conn":           0.11,
     "amen":           0.12,

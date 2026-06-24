@@ -36,63 +36,88 @@ each to be honest.
 ## 1. The Provision score (the old Core, unchanged math, honest label)
 
 ```
-Provision(a) = Σ (wᵢ × Sᵢ)        i = 1..17,  Sᵢ ∈ [1,5]
+Provision(a) = Σ (wᵢ × Sᵢ)        i = 1..20,  Sᵢ ∈ [1,5]
 ProvisionFinal(a) = Provision(a) × D(a)      [D = losses/disruptions only; see §4]
 ```
 Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (see §6).
 **Archetype-BLIND**: every estate scored on the same yardstick so scores stay comparable.
 
-### 1.1 Components and weights — `W` (17 components, sum = 1.000)
+### 1.1 Components and weights — `W` (20 components, sum = 1.000)
 
-Sourced verbatim from `provision_model.py:W`. Do not edit here without updating that file.
+Sourced verbatim from `models/framework_config.py:PROVISION_WEIGHTS`. Do not edit here without updating that file.
 
 | # | Key | Weight | Provenance | Notes |
 |---|-----|------:|:----------:|-------|
-| 1 | `conn` | 0.15 | MEASURED | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
-| 2 | `infra` | 0.15 | MEASURED | Trunk infra *operational now* (LiveNow horizon). Distinct from conn: conn = quality-when-present; infra = operational-at-horizon. |
-| 3 | `amen` | 0.10 | MEASURED | Basics (wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
-| 4 | `green` | 0.09 | MEASURED | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
+| 1 | `conn` | 0.14 | MEASURED | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
+| 2 | `infra` | 0.14 | MEASURED | Trunk infra *operational now* (LiveNow horizon). Distinct from conn: conn = quality-when-present; infra = operational-at-horizon. |
+| 3 | `amen` | 0.09 | MEASURED | Basics (wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
+| 4 | `green` | 0.08 | MEASURED | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
 | 5 | `dens` | 0.08 | PARTLY_MEASURED | Dwelling density yes; "feel" (block spacing, pavement quality) no |
 | 6 | `sch` | 0.07 | MEASURED | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach |
-| 7 | `childcare` | 0.06 | MEASURED | Licensed childcare / infant care centres within 800m |
+| 7 | `childcare` | 0.05 | MEASURED | Licensed childcare / infant care centres within 800m |
 | 8 | `hlth` | 0.04 | MEASURED | Primary-care-first: GP/CHAS/pharmacy + polyclinic access, THEN A&E time |
 | 9 | `mom` | 0.04 | PARTLY_MEASURED | Confirmed *additions* only, time-discounted. HDB-side ingested from data.gov.sg NRP+LUP+SERS; private-side en-bloc / new-launch pipeline still JUDGED |
 | 10 | `hawker` | 0.04 | JUDGED | Fame/reputation of hawker culture — not a spatial query; must come from `judged_inputs.csv` |
-| 11 | `noise` | 0.04 | MEASURED | Expressway exposure: distance-weighted proximity to major expressways |
+| 11 | `noise` | 0.03 | MEASURED | Expressway exposure: distance-weighted proximity to major expressways |
 | 12 | `air_noise` | 0.03 | MEASURED | Geometric runway-centerline + 12 km approach/departure corridor proxy for Changi, Seletar, Paya Lebar (v1.2) |
-| 13 | `community` | 0.03 | MEASURED | Community clubs, resident corner, active ageing centres (non-eldercare function) |
-| 14 | `eldercare` | 0.03 | MEASURED | Eldercare day-centres / AAC / nursing-home density (AIC Silver Pages / MOH registry; v1.3: carved from hlth) |
-| 15 | `env` | 0.02 | PARTLY_MEASURED | Heat/shade only; air_noise + expressway noise split out as siblings (audit §2d) |
-| 16 | `sport` | 0.02 | MEASURED | SportSG facilities + park connectors with fitness infrastructure within 1 km |
-| 17 | `flood` | 0.01 | MEASURED | Flood-prone routes / PUB drainage risk overlay |
+| 13 | `eldercare` | 0.03 | MEASURED | Eldercare day-centres / AAC / nursing-home density (AIC Silver Pages / MOH registry; v1.3: carved from hlth) |
+| 14 | `stewardship` | 0.03 | PARTLY_MEASURED | MND TCMR KPI bands (GREEN/AMBER/RED → 5/3/1). Observable upkeep only — NOT social mix. |
+| 15 | `air_quality` | 0.03 | PARTLY_MEASURED | NEA PSI/PM2.5 climatology + expressway road-buffer. Climatology stub until live NEA fetch wired. |
+| 16 | `community` | 0.02 | MEASURED | Community clubs, resident corner, active ageing centres (non-eldercare function) |
+| 17 | `sport` | 0.02 | MEASURED | SportSG facilities + park connectors with fitness infrastructure within 1 km |
+| 18 | `jtc_industrial` | 0.02 | MEASURED | Inverse-distance to JTC heavy-industrial zones; penalty for close proximity |
+| 19 | `env` | 0.01 | PARTLY_MEASURED | Heat/shade only; air_noise + expressway noise split out as siblings (audit §2d) |
+| 20 | `flood` | 0.01 | MEASURED | Flood-prone routes / PUB drainage risk overlay |
 
-Row 10 reserved: *(estate stewardship; NOT "social mix")* — see Appendix on the permanent social-mix exclusion.
+#### New component specs (v2.0)
 
-#### `W_PRIVATE` — private (condo) segment weight variant (17 components, sum = 1.000)
+**`air_quality` (PARTLY_MEASURED, w=0.03):** Scored from NEA PSI/PM2.5 long-run climatology per
+planning area, penalised further for expressway road-buffer proximity (PM2.5 hotspot proxy). Marked
+PARTLY_MEASURED because the climatology layer is a stub until live NEA API fetch is wired; the
+road-buffer sub-component is MEASURED from the expressway layer already in the pipeline.
+
+**`jtc_industrial` (MEASURED, w=0.02):** Inverse-distance score to JTC-designated heavy-industrial
+zones (Jurong Island, Tuas, Senoko, Kranji). Closer proximity → lower score. Fully computable from
+the public JTC zone polygons; marked MEASURED.
+
+**`stewardship` (PARTLY_MEASURED, w=0.03):** MND Town Council Management Report (TCMR) KPI bands
+mapped to a 1–5 scale (GREEN→5, AMBER→3, RED→1). Captures observable estate upkeep quality:
+cleanliness, lighting, lift reliability, estate maintenance responsiveness. **This is explicitly NOT
+social mix** — it measures observable physical upkeep, not resident demographics. PARTLY_MEASURED
+because TCMR publication cadence is annual and band changes lag reality by up to 12 months.
+
+**DEFERRED — `ev_charging` (stub, NOT in live model):** EV charging infrastructure density was
+identified as a future component but is deferred pending LTA token / data access. Weight is not
+allocated; it does not appear in PROVISION_WEIGHTS. Do not include it in scoring runs.
+
+#### `W_PRIVATE` — private (condo) segment weight variant (20 components, sum = 1.000)
 
 Applied by `value_model.py` when scoring private transactions. Rationale: private buyers have
 higher car ownership (conn ↓), use in-development amenities (green ↓, sport ↓), prioritise
 school postal codes as a direct pricing driver (sch ↑), and skew younger/wealthier (eldercare ↓).
-Sourced verbatim from `provision_model.py:W_PRIVATE`.
+Sourced verbatim from `models/framework_config.py:PROVISION_WEIGHTS_PRIVATE`.
 
 | Key | W (HDB) | W_PRIVATE | Delta | Rationale |
 |-----|--------:|----------:|------:|-----------|
-| `conn` | 0.15 | 0.12 | −0.03 | Car ownership higher; parking within development |
-| `amen` | 0.10 | 0.13 | +0.03 | F&B cluster / mall access > hawker |
-| `green` | 0.09 | 0.07 | −0.02 | Landscaped grounds within development reduce urgency |
+| `conn` | 0.14 | 0.11 | −0.03 | Car ownership higher; parking within development |
+| `amen` | 0.09 | 0.12 | +0.03 | F&B cluster / mall access > hawker |
+| `green` | 0.08 | 0.07 | −0.01 | Landscaped grounds within development reduce urgency |
 | `dens` | 0.08 | 0.08 | 0 | — |
 | `sch` | 0.07 | 0.11 | +0.04 | School postal code is a direct pricing driver |
-| `childcare` | 0.06 | 0.07 | +0.01 | Family-forming cohort in private market |
+| `childcare` | 0.05 | 0.05 | 0 | — |
 | `hlth` | 0.04 | 0.04 | 0 | — |
 | `mom` | 0.04 | 0.04 | 0 | — |
 | `hawker` | 0.04 | 0.02 | −0.02 | Restaurant / delivery preference |
-| `noise` | 0.04 | 0.04 | 0 | — |
-| `infra` | 0.15 | 0.16 | +0.01 | MRT proximity premium stronger for asset value |
+| `noise` | 0.03 | 0.04 | +0.01 | — |
 | `air_noise` | 0.03 | 0.03 | 0 | — |
-| `community` | 0.03 | 0.03 | 0 | — |
 | `eldercare` | 0.03 | 0.02 | −0.01 | Private buyer cohort skews younger/wealthier |
-| `env` | 0.02 | 0.02 | 0 | — |
+| `stewardship` | 0.03 | 0.02 | −0.01 | — |
+| `air_quality` | 0.03 | 0.03 | 0 | — |
+| `community` | 0.02 | 0.03 | +0.01 | — |
 | `sport` | 0.02 | 0.01 | −0.01 | Gym/pool within development |
+| `jtc_industrial` | 0.02 | 0.02 | 0 | — |
+| `infra` | 0.14 | 0.13 | −0.01 | — |
+| `env` | 0.01 | 0.02 | +0.01 | — |
 | `flood` | 0.01 | 0.01 | 0 | — |
 
 ### 1.2 S11 — conditional car-mobility (provision side)
@@ -138,6 +163,8 @@ persona in Doc 2). S3/S5/S7/S9=1 → no cap.
 ---
 
 ## 5. Provision pilot scores (8 estates — illustrative, analyst judgement, NOT GIS)
+
+> **Note:** §5 numbers predate the 20-component re-weight; regenerate from `data/provision_scores.csv` after a full pipeline run with the v2.0 weights.
 
 | Estate | Archetype | Provision band | (pilot decimal — noise ±0.3) |
 |--------|:--:|:--:|:--:|

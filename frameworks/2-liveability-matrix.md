@@ -61,6 +61,11 @@ Cell(estate, persona, horizon) =
 | 9 Env comfort | +2 | +4 | −3 | +2 |
 | (sums to 0 after minor calibration rounding) | | | | |
 
+> **v2.0 note (20-component model):** The three new provision components fold into existing S-groups
+> without adding new groups — `stewardship` → S8 (Infra readiness); `air_quality` and
+> `jtc_industrial` → S9 (Env comfort). `PERSONA_DELTAS` remains a 9-group structure; no persona
+> delta changes are required.
+
 ---
 
 ## 3. Value lives HERE, not in Provision (cost is demand-side)
