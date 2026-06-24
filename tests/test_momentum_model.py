@@ -1,3 +1,5 @@
+import os
+
 import momentum_model
 
 
@@ -24,7 +26,7 @@ def test_no_current_year_forward_momentum():
 
 def test_enbloc_launch_twin_not_double_counted():
     import json
-    d = json.load(open("data/pipeline_data.json"))
+    d = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "pipeline_data.json")))
     sums = momentum_model.build_canonical_sums(d)
     assert momentum_model.score_from_adj(sums.get("SERANGOON", 0) * momentum_model.CONSERVATIVE_PENALTY) == 4
     assert momentum_model.score_from_adj(sums.get("JURONG EAST", 0) * momentum_model.CONSERVATIVE_PENALTY) == 4
