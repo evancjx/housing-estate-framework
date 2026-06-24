@@ -46,7 +46,7 @@ RUN:
 
 See INPUT CONTRACT at the bottom for exact columns + data sources.
 """
-import argparse, sys, math
+import argparse, json, sys, math
 import numpy as np, pandas as pd
 
 # ----------------------------------------------------------------------
@@ -112,6 +112,12 @@ A_NOISE    = [(500,1),(1000,2),(1500,3),(2000,4),(99999,5)]
 # air_noise: INVERSE — aircraft noise propagates further than expressway noise,
 # so anchors are wider. Distance is to nearest runway/approach-corridor point.
 A_AIR_NOISE = [(1000,1),(2000,2),(3500,3),(5000,4),(99999,5)]
+
+# air_quality (PM2.5 µg/m³, INVERSE — lower is better): WHO 2021 tiers
+A_PM25     = [(8,5),(12,4),(16,3),(20,2),(99999,1)]
+# jtc_industrial (distance to heavy-industrial polygon, INVERSE — farther is
+# better): JTC TOL parcel proximity from ingest_jtc_industrial.py
+A_JTC      = [(500,1),(1500,2),(3000,3),(5000,4),(99999,5)]
 
 # eldercare: distance-to-nearest + count-within-1500m. Sparser than GPs;
 # anchors match community-club scale (walk-or-short-bus visits).
@@ -213,9 +219,71 @@ def score_air_noise(lat, lon, air_noise_corridors):
     return float(score_by_distance(d, A_AIR_NOISE)), {'nearest_air_corridor_m': round(d) if d != np.inf else None}
 
 # ----------------------------------------------------------------------
+# v2.0 new scorers — consume per-estate enrichment rows (ported from
+# worktree-provision-v2-audit branch; ev_charging deferred)
+# ----------------------------------------------------------------------
+def score_jtc_industrial(row):
+    """Inverse-distance from heavy-industrial polygons."""
+    d = row.get('nearest_industrial_m')
+    if d is None or pd.isna(d):
+        return np.nan, {'note': 'jtc data missing'}
+    tag = row.get('intensity_tag', 'NONE')
+    # Light-industrial gets looser anchors (B1 light-industrial closer to mixed-use)
+    if tag in ('HEAVY', 'NONE'):
+        anchors = A_JTC
+    else:
+        anchors = [(250,2),(800,3),(2000,4),(99999,5)]
+    return float(score_by_distance(d, anchors)), {
+        'jtc_nearest_m': round(d), 'jtc_tag': tag,
+    }
+
+
+def score_air_quality(row):
+    """PM2.5 with road-buffer correction."""
+    pm = row.get('pm25_annual_mean')
+    if pm is None or pd.isna(pm):
+        return np.nan, {'note': 'air quality data missing'}
+    correction = row.get('road_buffer_correction', 0.0) or 0.0
+    # correction is an ADDITIVE µg/m³ penalty per ingest_nea_air.py
+    pm_adj = float(pm) + float(correction)
+    return float(score_by_distance(pm_adj, A_PM25)), {
+        'pm25_adjusted': round(pm_adj, 1),
+        'haze_days': row.get('haze_days_y'),
+    }
+
+
+TCMR_MAP = {'GREEN': 5, 'AMBER': 3, 'RED': 1}
+
+def score_stewardship(estate_upper, tcmr_json):
+    """MND TCMR KPI bands → 1-5. PARTLY_MEASURED."""
+    if tcmr_json is None:
+        return np.nan, {'note': 'tcmr missing'}
+    for tc in tcmr_json.get('town_councils', []):
+        if estate_upper in [e.upper() for e in tc.get('estates', [])]:
+            kpis = [TCMR_MAP.get(tc.get(k), 3) for k in
+                    ['scc_arrears', 'lift', 'cleanliness', 'estate_maintenance']]
+            base = sum(kpis) / len(kpis)
+            close = tc.get('oneservice_close_rate_pct')
+            if close is not None:
+                base += 0.3 if close >= 90 else (-0.3 if close < 80 else 0.0)
+            return float(round(max(1.0, min(5.0, base)), 2)), {'tc': tc.get('name')}
+    return np.nan, {'note': f'no TC mapping for {estate_upper}'}
+
+
+# ----------------------------------------------------------------------
 # Assemble
 # ----------------------------------------------------------------------
-def run(estates, layers, judged):
+def run(estates, layers, judged, tcmr_json=None):
+    # Build per-estate lookup dicts from enrichment CSVs (keyed by UPPERCASE estate)
+    jtc_lkp = {}
+    if layers.get('jtc_industrial') is not None:
+        for _, r in layers['jtc_industrial'].iterrows():
+            jtc_lkp[str(r['estate']).upper()] = r.to_dict()
+    aq_lkp = {}
+    if layers.get('air_quality') is not None:
+        for _, r in layers['air_quality'].iterrows():
+            aq_lkp[str(r['estate']).upper()] = r.to_dict()
+
     rows = []
     for _, e in estates.iterrows():
         lat, lon = float(e['lat']), float(e['lon']); name = e['estate']
@@ -234,6 +302,11 @@ def run(estates, layers, judged):
         s['flood'],_     = score_flood_risk(lat, lon, layers['flood'])
         s['noise'],_     = score_noise(lat, lon, layers['noise'])
         s['air_noise'],_ = score_air_noise(lat, lon, layers['air_noise'])
+
+        # v2.0 per-estate enrichment components
+        s['jtc_industrial'],_ = score_jtc_industrial(jtc_lkp.get(name.upper(), {}))
+        s['air_quality'],_    = score_air_quality(aq_lkp.get(name.upper(), {}))
+        s['stewardship'],_    = score_stewardship(name.upper(), tcmr_json)
 
         # PARTLY/JUDGED: from judged_inputs.csv if provided, else NaN-flag
         jr = judged[judged['estate'] == name] if judged is not None else pd.DataFrame()
@@ -277,8 +350,9 @@ def main():
     ap.add_argument('--estates', required=True)
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
               'supermarkets','childcare','community','sport','flood','noise',
-              'air_noise','eldercare','covered_linkway']:
+              'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality']:
         ap.add_argument(f'--{L}')
+    ap.add_argument('--tcmr', help='JSON path: town_council_kpi.json (for stewardship score)')
     ap.add_argument('--judged', help='CSV: estate,dens,env,mom,hawker (the 4 non-geospatial)')
     ap.add_argument('--out', default='provision_scores.csv')
     a = ap.parse_args()
@@ -289,15 +363,20 @@ def main():
     layers = {L: load(getattr(a, L)) for L in
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
                'supermarkets','childcare','community','sport','flood','noise',
-               'air_noise','eldercare','covered_linkway']}
+               'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality']}
     judged = load(a.judged)
+    tcmr_json = None
+    if a.tcmr:
+        with open(a.tcmr) as fh:
+            tcmr_json = json.load(fh)
 
-    df = run(estates, layers, judged)
+    df = run(estates, layers, judged, tcmr_json=tcmr_json)
     df['band'] = df['provision'].apply(band)
     df.to_csv(a.out, index=False)
 
     cols = ['estate','conn','amen','green','sch','dens','hlth','eldercare','mom','hawker','infra','env',
             'childcare','community','sport','flood','noise','air_noise',
+            'jtc_industrial','air_quality','stewardship',
             'provision','band','weight_covered','measured_only']
     print(df[cols].to_string(index=False))
     print("\nProvenance:", {k: PROVENANCE[k] for k in W})

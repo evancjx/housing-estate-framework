@@ -1,8 +1,8 @@
 import provision_model
 
 
-def test_w_has_17_components():
-    assert len(provision_model.W) == 17
+def test_w_has_20_components():
+    assert len(provision_model.W) == 20
 
 
 def test_provenance_keys_match_w():
