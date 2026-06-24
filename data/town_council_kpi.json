@@ -1,0 +1,238 @@
+{
+  "year": 2024,
+  "source": "MND Town Council Management Report FY2023 (published 2024)",
+  "transcribed_on": "2026-06-24",
+  "kpi_bands": [
+    "GREEN",
+    "AMBER",
+    "RED"
+  ],
+  "note": "OneService complaint figures pending MSE/MEWR API access; score_stewardship treats them as missing and renormalises.",
+  "town_councils": [
+    {
+      "name": "Aljunied-Hougang TC",
+      "estates": [
+        "HOUGANG",
+        "SERANGOON"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Ang Mo Kio TC",
+      "estates": [
+        "ANG MO KIO",
+        "LENTOR"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Bishan-Toa Payoh TC",
+      "estates": [
+        "BISHAN",
+        "TOA PAYOH"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Chua Chu Kang TC",
+      "estates": [
+        "CHOA CHU KANG",
+        "BUKIT BATOK",
+        "TENGAH"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "AMBER",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "East Coast TC",
+      "estates": [
+        "BEDOK"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "AMBER",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Holland-Bukit Panjang TC",
+      "estates": [
+        "BUKIT PANJANG",
+        "BUKIT TIMAH",
+        "DOVER"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Jalan Besar TC",
+      "estates": [
+        "CENTRAL AREA",
+        "BOON KENG",
+        "KALLANG"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "AMBER",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Jurong-Clementi TC",
+      "estates": [
+        "JURONG EAST",
+        "CLEMENTI"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Marine Parade TC",
+      "estates": [
+        "MARINE PARADE",
+        "GEYLANG",
+        "WOODLEIGH"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Marsiling-Yew Tee TC",
+      "estates": [
+        "WOODLANDS"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Nee Soon TC",
+      "estates": [
+        "YISHUN"
+      ],
+      "scc_arrears": "AMBER",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Pasir Ris-Punggol TC",
+      "estates": [
+        "PASIR RIS",
+        "PUNGGOL"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Sembawang TC",
+      "estates": [
+        "SEMBAWANG",
+        "CANBERRA"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Sengkang TC",
+      "estates": [
+        "SENGKANG"
+      ],
+      "scc_arrears": "AMBER",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "AMBER",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Tampines TC",
+      "estates": [
+        "TAMPINES",
+        "TAMPINES EAST",
+        "TAMPINES WEST"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    },
+    {
+      "name": "Tanjong Pagar TC",
+      "estates": [
+        "BUKIT MERAH",
+        "QUEENSTOWN"
+      ],
+      "scc_arrears": "GREEN",
+      "lift": "GREEN",
+      "cleanliness": "GREEN",
+      "estate_maintenance": "GREEN",
+      "oneservice_complaints_per_1k_units": null,
+      "oneservice_close_rate_pct": null,
+      "provenance_note": "tcmr_only"
+    }
+  ]
+}

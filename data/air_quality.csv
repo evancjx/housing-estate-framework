@@ -1,0 +1,36 @@
+estate,region,pm25_annual_mean,no2_annual_mean,haze_days_y,road_buffer_correction
+WOODLANDS,north,15.0,14.0,2,0.0
+PASIR RIS,east,14.0,12.0,2,0.0
+JURONG EAST,west,18.0,16.0,3,0.0
+BISHAN,central,16.0,17.0,2,0.0
+BEDOK,east,14.0,12.0,2,0.0
+TAMPINES,east,14.0,12.0,2,0.0
+TOA PAYOH,central,16.0,17.0,2,0.0
+QUEENSTOWN,south,16.0,18.0,3,0.0
+SERANGOON,central,16.0,17.0,2,0.0
+SEMBAWANG,north,15.0,14.0,2,0.0
+MARINE PARADE,east,14.0,12.0,2,0.0
+CANBERRA,north,15.0,14.0,2,0.0
+BOON KENG,central,16.0,17.0,2,0.0
+WOODLEIGH,central,16.0,17.0,2,0.0
+DOVER,south,16.0,18.0,3,0.0
+TENGAH,west,18.0,16.0,3,0.0
+TAMPINES WEST,east,14.0,12.0,2,0.0
+TAMPINES EAST,east,14.0,12.0,2,0.0
+ANG MO KIO,central,16.0,17.0,2,0.0
+LENTOR,central,16.0,17.0,2,0.0
+SENGKANG,central,16.0,17.0,2,0.0
+PUNGGOL,central,16.0,17.0,2,0.0
+YISHUN,north,15.0,14.0,2,0.0
+HOUGANG,central,16.0,17.0,2,0.0
+CHOA CHU KANG,west,18.0,16.0,3,0.2
+BUKIT BATOK,west,18.0,16.0,3,0.0
+BUKIT MERAH,south,16.0,18.0,3,0.0
+BUKIT PANJANG,west,18.0,16.0,3,0.0
+GEYLANG,central,16.0,17.0,2,0.0
+CLEMENTI,west,18.0,16.0,3,0.0
+CENTRAL AREA,south,16.0,18.0,3,0.0
+BUKIT TIMAH,central,16.0,17.0,2,0.0
+JURONG WEST,central,16.0,17.0,2,0.0
+KALLANG,central,16.0,17.0,2,0.0
+HOLLAND VILLAGE,central,16.0,17.0,2,0.0
