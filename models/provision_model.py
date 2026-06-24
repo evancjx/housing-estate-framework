@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 """
-Singapore Estate PROVISION MODEL  (Document 1, v1.0)  — geospatial, real-data
+Singapore Estate PROVISION MODEL  (Document 1, v2.0)  — geospatial, real-data
 =============================================================================
 Computes the Provision score per estate from ACTUAL spatial data, instead of
 analyst judgement. Emits the scores.csv that value_model.py consumes.
 
 HONEST SCOPE (read this — the model enforces it in output):
-  MEASURED        (13): connectivity, amenities, green, schools, healthcare,
+  MEASURED        (14): connectivity, amenities, green, schools, healthcare,
                         infra, childcare, community, sport, flood_risk, noise,
                         air_noise (geometric corridor proxy — see note),
-                        eldercare (v1.3: carved from healthcare — AIC/MOH facilities)
-  PARTLY_MEASURED  (3): density (dwelling density yes; "feel" no),
+                        eldercare (v1.3: carved from healthcare — AIC/MOH facilities),
+                        jtc_industrial (v2.0: industrial-buffer/nuisance proximity)
+  PARTLY_MEASURED  (5): density (dwelling density yes; "feel" no),
                         env_comfort (heat/shade only; air-noise + expressway now
                         split out as siblings — see audit §2d),
                         momentum (HDB-side ingested from data.gov.sg NRP+LUP+SERS
                         via ingest_hdb_upgrading.py; private-side en-bloc / new
-                        launches still JUDGED — see audit §2a)
+                        launches still JUDGED — see audit §2a),
+                        air_quality (v2.0: PM2.5/NEA air-quality index proxy),
+                        stewardship (v2.0: TC-KPI / estate maintenance quality)
   JUDGED           (1): hawker (fame/reputation — not a query)
 
 Note on `air_noise`: this is a geometric distance to runway centerlines + 12 km
@@ -388,7 +391,7 @@ if __name__ == '__main__':
     main()
 
 # ======================================================================
-# INPUT CONTRACT — provision_model.py v1.4
+# INPUT CONTRACT — provision_model.py v2.0
 # ======================================================================
 # REQUIRED:
 #   --estates estates.csv     columns: estate,lat,lon
@@ -417,18 +420,21 @@ if __name__ == '__main__':
 #                              quarterly. OPTIONAL — if absent, conn falls back to
 #                              0.7*s_mrt + 0.3*s_bus. If present, sub-weights become
 #                              0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter; top-level
-#                              conn weight (0.15) is unchanged. MEASURED provenance.)
+#                              conn weight (0.14) is unchanged. MEASURED provenance.)
 #
 # NON-GEOSPATIAL (judgement) COMPONENTS:
 #   --judged judged.csv       columns: estate,dens,env,mom,hawker   (each 1-5)
 #       If omitted, those 4 components are left MISSING and provision is
-#       computed from the 13 measured components only (measured_only=True).
+#       computed from the 16 geospatial/enrichment components (dens/env/mom/hawker excluded)
+#       (measured_only=True).
 #       NEVER auto-fill these — they are opinion by construction.
 #
-# WEIGHTS (v1.3, 17 components, sum=1.000):
-#   conn 15%, infra 15%, amen 10%, green 9%, dens 8%, sch 7%, childcare 6%,
-#   hlth 4%, mom 4%, hawker 4%, noise 4%, air_noise 3%, community 3%,
-#   eldercare 3%, env 2%, sport 2%, flood 1%
+# WEIGHTS (v2.0, 20 components, sum=1.000):
+#   Authoritative source: framework_config.PROVISION_WEIGHTS (imported as W above).
+#   conn 14%, infra 14%, amen 9%, green 8%, dens 8%, sch 7%, childcare 5%,
+#   hlth 4%, mom 4%, hawker 4%, noise 3%, air_noise 3%, eldercare 3%,
+#   stewardship 3%, air_quality 3%, community 2%, sport 2%, jtc_industrial 2%,
+#   env 1%, flood 1%
 #
 # PIPELINE:
 #   python provision_model.py --estates e.csv --mrt mrt.csv ... \

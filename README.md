@@ -11,7 +11,7 @@ Everything produced in the design session, organized. Start with the transcript.
 - **sg-estate-liveability-framework.md** — the original v0.1–v0.8 monolith, kept as the historical record (superseded by the two split documents but preserves the full version-by-version reasoning).
 
 ## 📁 models/  (runnable pipeline)
-- **provision_model.py** — computes Provision from geospatial layers (MRT, clinics, schools, parks, etc.). Measures 6 components, flags 3 as judgment. INPUT CONTRACT at bottom of file.
+- **provision_model.py** — computes Provision from geospatial layers (MRT, clinics, schools, parks, etc.). Measures 14 components geospatially, flags 5 as partly-measured and 1 (hawker) as judgment. INPUT CONTRACT at bottom of file.
 - **value_model.py** — computes Value = Provision × price-residual from transaction data. Segmented (HDB/private), shrinkage, band-only below n=100. INPUT CONTRACT at bottom.
 - **onemap_geocode_mrt.py** — RUN LOCALLY (needs internet). Converts station names → coordinates via OneMap. Produces the MRT layer the provision model needs.
 
@@ -41,12 +41,15 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 ---
 
 ## ⚠️ Status & honest limitations (read before trusting any number)
-1. **Provision is computed from real geospatial layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, and covered linkways are all ingested. The remaining judgement inputs are the 3 PARTLY/JUDGED components (dens/env "feel", momentum, hawker fame). Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
+1. **Provision is computed from real geospatial layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, covered linkways, JTC industrial buffer (jtc_industrial), air-quality index proxy (air_quality), and TC-KPI stewardship scores (stewardship) are all ingested. The remaining judgement inputs are the 5 PARTLY/JUDGED components (dens/env "feel", momentum, air_quality, stewardship, hawker fame). Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
 2. **Value is real where HDB resale exists.** It does NOT cover private/landed enclaves (East Coast, Siglap, Holland Village) — those need URA private transaction data (Postal Districts 15/16).
 3. **Tengah & Canberra have no resale Value** — Tengah pre-MOP (no market yet), Canberra folded into Sembawang town.
 4. **3 of 9 components are irreducibly judgment** (density-feel, environmental comfort, momentum) — they cannot come from a shapefile and are flagged as such in the model.
 5. **Report bands, not decimals.** Most established estates cluster within noise; the decimals are not real distinctions.
 6. **Re-verify all dated facts** (in the transcript) before any scoring run — MRT dates, polyclinic openings, etc. decay.
+
+## Data file note
+`data/value_private.csv` is a stale pre-fix artifact superseded by `data/value_output_private.csv` (the canonical de-circularised private Value output) and is NOT consumed by the pipeline.
 
 ## Next step to make it fully data-driven
 Upload the **MRT location layer** (coordinates) → lights up Connectivity + Infrastructure (34% of score). Then parks, schools, food layers. Then URA private data for the landed enclaves.

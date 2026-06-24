@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
 """
-Singapore Estate LIVEABILITY MATRIX (Document 2, v1.0)
+Singapore Estate LIVEABILITY MATRIX (Document 2, v1.4)
 =======================================================
 Demand-side · person-relative · NON-comparable by design.
 Takes provision_scores.csv + pipeline_data.json as inputs; outputs a
-4-persona × 2-horizon (T0 / T5) liveability matrix per estate.
+4-persona × 3-horizon (T0 / T5 / T15) liveability matrix per estate.
 
 PRIMARY OUTPUT:  profile-first band grid (not a ranking).
 SECONDARY:       Gap = Liveability_cell − Provision_band (the headline signal).
 
 === COMPUTED PERSONA WEIGHTS (audit table) ===
 
-Base weights are imported from provision_model.W (17 components); see that file.
+Base weights are imported from framework_config.PROVISION_WEIGHTS (20 components); see that file.
 
+v2.0 change: 3 new components added — jtc_industrial (MEASURED, S9), air_quality (PARTLY_MEASURED, S9),
+             stewardship (PARTLY_MEASURED, S8). conn/infra weights reduced 0.15→0.14 each.
 v1.3 change: eldercare carved from hlth (0.07→0.04). eldercare joins S6.
 v1.2 change: air_noise carved from env (0.05→0.02). air_noise joins S9.
 
 Deltas are applied at the S-group level (9 groups), then distributed to their
-constituent 17 components proportionally by base weight.
+constituent 20 components proportionally by base weight.
 
-S-group → 17-component mapping (all 17 covered; see provision_model.W for base weights):
-  S1 (conn)      → conn                        (base 0.15)
-  S8 (infra)     → infra                       (base 0.15)
-  S2 (amen)      → amen+community+hawker       (base 0.10+0.03+0.04=0.17)
-  S3 (green)     → green+sport                 (base 0.09+0.02=0.11)
-  S4 (schools)   → sch+childcare               (base 0.07+0.06=0.13)
-  S5 (density)   → dens                        (base 0.08)
-  S6 (health)    → hlth+eldercare              (base 0.04+0.03=0.07)
-  S7 (momentum)  → mom                         (base 0.04)
-  S9 (env)       → env+flood+air_noise+noise   (base 0.02+0.01+0.03+0.04=0.10)
+S-group → 20-component mapping (all 20 covered; see framework_config.PROVISION_WEIGHTS for base weights):
+  S1 (conn)      → conn                                              (base 0.14)
+  S8 (infra)     → infra+stewardship                                 (base 0.14+0.03=0.17)
+  S2 (amen)      → amen+community+hawker                             (base 0.09+0.02+0.04=0.15)
+  S3 (green)     → green+sport                                       (base 0.08+0.02=0.10)
+  S4 (schools)   → sch+childcare                                     (base 0.07+0.05=0.12)
+  S5 (density)   → dens                                              (base 0.08)
+  S6 (health)    → hlth+eldercare                                    (base 0.04+0.03=0.07)
+  S7 (momentum)  → mom                                               (base 0.04)
+  S9 (env)       → env+flood+noise+air_noise+air_quality+jtc_industrial (base 0.01+0.01+0.03+0.03+0.03+0.02=0.13)
 
 Delta table (percentage points, each column sums to 0):
               YoungFam  SinglePro  Retiree  Lifestyle
@@ -138,12 +140,12 @@ assert abs(sum(BASE_W.values()) - 1.0) < 1e-9, "BASE_W must sum to 1.0"
 
 def _build_persona_weights() -> Dict[str, Dict[str, float]]:
     """
-    Compute final (normalised) 13-component weight vector per persona.
+    Compute final (normalised) 20-component weight vector per persona.
 
     Steps:
       1. For each S-group, add the persona delta (pp) to the group's base weight sum.
       2. Distribute the new group weight proportionally across constituent components.
-      3. Normalise the full 13-component vector to sum=1.0.
+      3. Normalise the full 20-component vector to sum=1.0.
     """
     persona_weights: Dict[str, Dict[str, float]] = {}
 
@@ -800,7 +802,10 @@ if __name__ == "__main__":
 # ---------------------------------------------------------------------------
 # provision_scores.csv (output of provision_model.py):
 #   Required columns: estate, conn, amen, green, sch, dens, hlth, mom, infra,
-#                     env, childcare, community, sport, flood, score, band
+#                     env, childcare, community, sport, flood, noise, air_noise,
+#                     eldercare, hawker, air_quality, jtc_industrial, stewardship,
+#                     score, band
+#   (All 20 components from framework_config.BASE_W, plus score and band.)
 #   All component columns: float, range 1.0–5.0
 #   score: weighted provision score (float)
 #   band:  provision band string (A/B+/B/C/D/F)
@@ -810,7 +815,8 @@ if __name__ == "__main__":
 #     description:         str
 #     benefiting_estates:  list[str]  (may use alias names — see ALIAS_MAP)
 #     type:                str  (MRT | POLYCLINIC | HOSPITAL | SCHOOL | HAWKER |
-#                                MALL_COMMERCIAL | TOWN_CENTRE | PARK_PCN | SERS)
+#                                MALL_COMMERCIAL | TOWN_CENTRE | PARK_PCN | SERS |
+#                                NRP | LUP)
 #     certainty:           str  (CONFIRMED | GAZETTED | PLANNED | RUMOUR)
 #     expected_year:       int
 #

@@ -319,5 +319,5 @@ if __name__ == "__main__":
 # WHAT YOU GET:
 #   value_output.csv with per-estate, per-segment: n, residual (raw+shrunk),
 #   Value score, Value band, and a 'reported' field that HIDES the decimal
-#   when n < 100 (shows band only) — enforcing the framework's no-false-precision rule.
+#   when n < CFG['trust_decimal_n'] (currently 100) (shows band only) — enforcing the framework's no-false-precision rule.
 # ======================================================================

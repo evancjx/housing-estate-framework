@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# DEFERRED / NOT WIRED: produces a CSV but no Provision component consumes it (no entry in framework_config.PROVISION_WEIGHTS). Placeholder for a future component.
 """
 Pedestrian + cycling path ingester  (Provision v2.0 §1.6)
 ==========================================================
