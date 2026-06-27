@@ -212,6 +212,9 @@ Gap(a, persona, horizon) = Liveability_cell(Doc2) − Provision_band(Doc1)
 - **Component 10 / social-mix:** permanently excluded as a SCORED component. A "social mix" score
   launders class/income sorting under a neutral label. Stewardship (upkeep, lighting, neglect) is
   the only acceptable future filler, and only after observable measurement.
+- **Care-network proximity:** excluded from Provision. It is real and decision-critical, but it
+  depends on private user-supplied anchors (parents, adult children, caregivers, co-parents), so it
+  belongs in Document 2 as a Liveability overlay.
 - **Car-mobility drag:** without it, S11 rewards car-affluence as provision — same laundering trap.
 - **Verified anchors (re-verify; decay):** mature/non-mature retired → Standard/Plus/Prime (Oct
   2024 BTO). CCL6 passenger service 12 Jul 2026. TEL4 (Marine Parade) operational 23 Jun 2024.

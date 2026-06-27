@@ -9,8 +9,9 @@
 
 **Liveability = what it's like for THIS person to live here, now and later.** Not a property of
 the place — a *relationship* between the place and a life. It takes Provision (Document 1) as raw
-material and adds the three things provision cannot see: **fit** (does this provision match this
-life), **cost** (what you pay for it), and **trajectory** (how the fit changes over time).
+material and adds the things provision cannot see: **fit** (does this provision match this life),
+**cost** (what you pay for it), **trajectory** (how the fit changes over time), and
+**private anchors** (work and care networks that only matter to this household).
 
 **There is no single liveability number.** Liveability is a **matrix**: persona × time-horizon.
 A universal liveability score would be an average over personas that describes no actual resident
@@ -46,6 +47,8 @@ Cell(estate, persona, horizon) =
 - `S_i(horizon)`: T0 uses present-state; T5 folds in confirmed additions, each discounted by
   Certainty × Time × SlipPremium (rail 0.85). Promises are NOT counted at face value.
 - `C_persona`: persona-specific vetoes (e.g. Schools=1 caps young-family at C; Healthcare=1 caps retiree at C).
+- Public CSV output stops at this base cell. User-specific decision reads may add job-anchor fit
+  (§L9.3) and care-network proximity (§4.1), because those require private user-supplied anchors.
 
 ---
 
@@ -84,6 +87,47 @@ samples don't distort. Adjustment capped 0.75×–1.25× until calibrated.
 **In small, broadly-liveable Singapore, Value is arguably the PRIMARY output** — provision is high
 almost everywhere, so what varies most is price-for-equivalent-liveability and personal fit.
 
+### 3.1 Employment-hub demand pressure — value context, not liveability
+
+Living near a business / industrial hub has two different effects:
+
+1. **Commute fit:** useful to the resident if their job anchor is that hub (§L9.3).
+2. **Demand pressure:** more jobs can raise housing demand nearby and may support faster
+   accommodation-value growth over time.
+
+These are not the same score. Commute fit belongs in Liveability; demand pressure belongs beside
+Value as an investment / market-context read. Do **not** blend expected appreciation into
+Liveability, because "where should I live" and "what will appreciate fastest" can point to
+different estates.
+
+Judge employment-driven demand pressure as a thesis-strength tag, not a guaranteed return:
+
+```
+HubDemandSignal(estate, horizon) =
+    job_growth_certainty
+  × commute_catchment_gain
+  × housing_supply_tightness
+  × amenity_follow_through
+  × nuisance_discount
+```
+
+| Input | High signal | Low signal |
+|-------|-------------|------------|
+| `job_growth_certainty` | confirmed / under-construction employment node | speculative or long-dated plan |
+| `commute_catchment_gain` | many homes move into <=30-45 min access to the hub | hub remains hard to reach |
+| `housing_supply_tightness` | limited nearby new housing relative to jobs | major housing supply absorbs demand |
+| `amenity_follow_through` | retail, food, schools, parks and transport arrive with jobs | isolated workplace with weak daily amenities |
+| `nuisance_discount` | office / research / light-business hub | heavy industrial, freight, air/noise/traffic drag |
+
+Output tags:
+
+| Tag | Meaning |
+|-----|---------|
+| `structural_uplift_thesis` | jobs + access + amenities are strong, and housing supply is constrained |
+| `selective_uplift_thesis` | upside exists, but only for subzones/projects with good access and low nuisance |
+| `priced_in_or_supply_absorbed` | benefits likely already capitalised or diluted by large new supply |
+| `nuisance_discount_dominant` | job access exists, but industrial/environmental drag weakens residential desirability |
+
 ---
 
 ## 4. LIFE-PATHS — the answer for a real human (your "current and future life" point)
@@ -101,6 +145,52 @@ A person is not one persona frozen in time. Read the matrix as a **path**, not a
 neither a single Provision number nor a flat persona list could express. An estate great for
 single-pro-now but weak for family-future is a *bad* "forming family" choice even if both cells
 look individually fine, because the *path* matters.
+
+### 4.1 Care-network proximity — user-supplied anchor overlay
+
+Care-network proximity measures whether the household can realistically give or receive help from
+its actual support network: parents, adult children, regular caregivers, co-parents, or relatives
+who provide childcare / eldercare backup. It is **not** an estate component and **not** a proxy for
+social mix. If no care anchor is supplied, the value is `N/A`, not a penalty.
+
+```
+CareFit(estate, horizon) =
+    Σ [ priority(anchor) × time_score(travel_time_to_anchor) ] / Σ priority(anchor)
+```
+
+`travel_time_to_anchor` is door-to-door in the required direction and mode at the relevant care
+window. Use the worse direction for reciprocal care. Use the household's stated mode: walk,
+transit, taxi/car, or mixed.
+
+| Travel time to anchor | `time_score` | Judgement |
+|----------------------:|-------------:|-----------|
+| <=15 min | 5 | daily care is realistic |
+| >15-30 min | 4 | frequent care is realistic |
+| >30-45 min | 3 | weekly/planned support is realistic |
+| >45-60 min | 2 | fragile; care requires planning |
+| >60 min | 1 | weak; emergency-only in practice |
+
+Priority is not guessed from demographics. It is supplied by the user:
+
+| Anchor role / frequency | Priority |
+|-------------------------|---------:|
+| daily primary care dependency | 1.00 |
+| several-times-weekly support | 0.75 |
+| weekly support | 0.45 |
+| emergency / backup only | 0.25 |
+
+Report the overlay as a tag:
+
+| `CareFit` | Tag |
+|----------:|-----|
+| >=4.25 | `strong_care_fit` |
+| 3.50-4.24 | `adequate_care_fit` |
+| 2.50-3.49 | `fragile_care_fit` |
+| <2.50 | `weak_care_fit` |
+
+Critical-anchor cap: if a daily primary childcare or eldercare anchor scores <=2 (>45 min), the
+relevant life-path is capped at C unless a documented substitute exists (e.g. paid care near home).
+This cap is user-specific and never changes the estate's Provision score.
 
 ---
 
@@ -219,10 +309,22 @@ Tengah/Jurong-worker are both rationally placed even where a CBD-centric score w
 In practice: don't publish a single connectivity-driven liveability; publish it against the
 reader's stated work location.
 
+The production pipeline also publishes employment-accessibility context (`employment_scores_T0`,
+`employment_scores_T5`, `employment_scores_T15`). Read it as commute opportunity and strategic
+job-node fit, not as an automatic price-growth forecast. The price-growth thesis is handled by
+§3.1's demand-pressure tag.
+
+## L9.3A Care-network fit is a user-supplied anchor overlay
+Care-network proximity is added as a Liveability overlay, parallel to job-anchor fit but never
+folded into Provision. It is judged only from declared care anchors and travel-time practicality,
+with `N/A` when no anchor is supplied. This prevents the factor from laundering family structure,
+income, ethnicity, or estate demographics into a neutral-looking score.
+
 ## L9.4 Rank-or-Profile (mirrors Document 1)
 Liveability defaults to a PROFILE, not a ranking. Rank two estates only when same archetype + same
-horizon + same persona + same job-anchor AND they differ beyond ±0.3. Otherwise output the profile:
-"this place offers [provision] for [household] at [price] on [horizon], best-fit for [anchor]."
+horizon + same persona + same job-anchor + same care-anchor profile AND they differ beyond ±0.3.
+Otherwise output the profile: "this place offers [provision] for [household] at [price] on
+[horizon], best-fit for [job anchor], with [care-fit tag]."
 
 ## L9.5 The nine-estate verdict (profile-led, ranking only where defensible)
 | Role | Estate(s) | Note |
@@ -245,3 +347,5 @@ horizon + same persona + same job-anchor AND they differ beyond ±0.3. Otherwise
 | 42 | Fill Ratio = weighted component (transitional only) | Captures lived desolation penalty without the multiplier's high-provision-bias. | Reviewer's whole-grade multiplier; v0.4 unweighted diagnostic. |
 | 43 | Archetype X = strategic district, NEVER ranked vs residential | JLD broke the framework as a scored "estate." | Scoring JLD as a residential estate (the 3.58 bug). |
 | 44 | Output reframed: profile-first, rank-exception | The framework's best role is "what provision, for whom, at what price, on what horizon" — not "most liveable." | Headline universal liveability ranking. |
+| 45 | Care-network proximity overlay | Actual childcare/eldercare support often dominates district choice, but only relative to a household's private anchors. | Adding family proximity to Provision; inferring support from estate demographics or social mix. |
+| 46 | Employment-hub demand pressure separated from liveability | Job nodes improve commute fit and can support housing demand, but appreciation is an investment thesis, not resident liveability. | Folding expected price growth into Liveability or treating industrial proximity as purely positive. |

@@ -5,6 +5,10 @@ Employment Accessibility Model  (Option A — station-count approximation)
 Scores each estate by transit commute time to 5 major employment nodes,
 weighted by node employment size.
 
+This is a commute-opportunity / job-anchor context model, not a price-growth
+forecast. Employment hubs may create housing demand pressure, but that belongs
+in the Value / investment-context read documented in frameworks/2 §3.1.
+
 Methodology:
   - Travel times hand-estimated via MRT station counts + transfer penalties
   - ~2 min per station in-train, +8 min per interchange, +10 min door overhead
