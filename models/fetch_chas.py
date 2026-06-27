@@ -3,12 +3,15 @@
 Fetch CHAS clinics — tries data.gov.sg first, falls back to OneMap Search.
 Writes SG-Estate-Framework/data/chas.csv  (lat, lon, name)
 """
-import csv, json, os, sys, time, urllib.request, urllib.parse, urllib.error
+import csv, html, json, os, re, sys, time, urllib.request, urllib.parse, urllib.error
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 OUT = os.path.join(DATA_DIR, "chas.csv")
 ONEMAP_SEARCH = "https://www.onemap.gov.sg/api/common/elastic/search"
 POLL_BASE = "https://api-open.data.gov.sg/v1/public/api/datasets/{}/poll-download"
+# CHAS Clinics — data.gov.sg dataset. The /datasets search API no longer surfaces it, but
+# poll-download by this ID works. GeoJSON FeatureCollection (~1190 clinics, lat/lon + HCI_NAME).
+CHAS_DATASET_ID = "d_548c33ea2d99e29ec63a7cc9edcccedc"
 
 def http_get_json(url, timeout=30):
     req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
@@ -19,6 +22,48 @@ def http_get_bytes(url, timeout=60):
     req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
+
+# ------------------------------------------------------------------
+# Strategy 0 (primary): known CHAS dataset by ID
+# ------------------------------------------------------------------
+def _chas_from_geojson(raw: bytes):
+    """Parse the data.gov.sg CHAS GeoJSON (a KML export): take lon/lat from each feature's
+    geometry and the clinic name from HCI_NAME inside the HTML-encoded Description attribute table."""
+    d = json.loads(raw)
+    rows = []
+    for f in d.get("features", []):
+        geom = f.get("geometry") or {}
+        c = geom.get("coordinates")
+        if not c or len(c) < 2:
+            continue
+        try:
+            lon, lat = float(c[0]), float(c[1])
+        except (TypeError, ValueError):
+            continue
+        if lat == 0 and lon == 0:
+            continue
+        desc = (f.get("properties", {}) or {}).get("Description", "") or ""
+        pairs = dict(re.findall(r"<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>", desc, re.S))
+        name = html.unescape(pairs.get("HCI_NAME", pairs.get("NAME", ""))).strip()
+        rows.append({"lat": lat, "lon": lon, "name": name})
+    return rows
+
+
+def try_datagov_known():
+    """Primary source: the known CHAS Clinics dataset, fetched by ID via poll-download."""
+    print(f"[1/3] Fetching known CHAS dataset {CHAS_DATASET_ID}...")
+    try:
+        meta = http_get_json(POLL_BASE.format(CHAS_DATASET_ID), timeout=25)
+        url = meta.get("data", {}).get("url") or meta.get("url")
+        if not url:
+            print("    no download URL in poll response")
+            return None
+        rows = _chas_from_geojson(http_get_bytes(url, timeout=60))
+        print(f"    parsed {len(rows)} clinics")
+        return rows or None
+    except Exception as e:
+        print(f"    failed: {e}")
+        return None
 
 # ------------------------------------------------------------------
 # Strategy 1: data.gov.sg search -> poll-download
@@ -154,7 +199,9 @@ def try_onemap_search():
 # Main
 # ------------------------------------------------------------------
 def main():
-    rows = try_datagov()
+    rows = try_datagov_known()
+    if not rows:
+        rows = try_datagov()
     if not rows:
         rows = try_onemap_search()
 
