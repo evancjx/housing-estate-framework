@@ -162,6 +162,15 @@ def main():
         print("ERROR: Could not fetch CHAS clinics from any source.")
         sys.exit(1)
 
+    # Fail loud rather than silently overwriting the canonical layer with a near-empty result.
+    # The OneMap CHAS search has degraded before (returned ~3 clinics vs the real ~1000+),
+    # which would silently collapse the provision `hlth` component across estates.
+    MIN_EXPECTED_CLINICS = 200
+    if len(rows) < MIN_EXPECTED_CLINICS:
+        sys.exit(f"ERROR: only {len(rows)} clinics fetched (< {MIN_EXPECTED_CLINICS}); "
+                 f"refusing to overwrite {OUT}. The CHAS source is likely broken — "
+                 f"keep the committed chas.csv and investigate the fetch.")
+
     with open(OUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["lat", "lon", "name"])
         w.writeheader()
