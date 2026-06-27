@@ -1,4 +1,16 @@
 Project Name,Transacted Price ($),Area (SQFT),Unit Price ($ PSF),Sale Date,Street Name,Type of Sale,Type of Area,Area (SQM),Unit Price ($ PSM),Nett Price($),Property Type,Number of Units,Tenure,Postal District,Market Segment,Floor Level
+THE PALETTE,"2,250,000","1,377.79","1,633",Jun-26,PASIR RIS GROVE,Resale,Strata,128,"17,578",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
+COCO PALMS,"1,640,000",904.18,"1,814",Jun-26,PASIR RIS GROVE,Resale,Strata,84,"19,524",-,Condominium,1,99 yrs lease commencing from 2008,18,Outside Central Region,06 to 10
+EASTPOINT GREEN,"2,668,888","2,098.98","1,272",Jun-26,SIMEI STREET 3,Resale,Strata,195,"13,687",-,Condominium,1,99 yrs lease commencing from 1996,18,Outside Central Region,06 to 10
+THE TAPESTRY,"1,210,000",807.3,"1,499",Jun-26,TAMPINES STREET 86,Resale,Strata,75,"16,133",-,Condominium,1,99 yrs lease commencing from 2017,18,Outside Central Region,11 to 15
+THE ALPS RESIDENCES,"1,850,000","1,087.16","1,702",Jun-26,TAMPINES STREET 86,Resale,Strata,101,"18,317",-,Condominium,1,99 yrs lease commencing from 2015,18,Outside Central Region,11 to 15
+THE PALETTE,"1,368,000",893.41,"1,531",Jun-26,PASIR RIS GROVE,Resale,Strata,83,"16,482",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,01 to 05
+TREASURE AT TAMPINES,"1,030,000",592.02,"1,740",Jun-26,TAMPINES LANE,Resale,Strata,55,"18,727",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
+D'NEST,"1,160,000",753.48,"1,540",Jun-26,PASIR RIS GROVE,Resale,Strata,70,"16,571",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
+COCO PALMS,"2,250,000","1,377.79","1,633",Jun-26,PASIR RIS GROVE,Resale,Strata,128,"17,578",-,Condominium,1,99 yrs lease commencing from 2008,18,Outside Central Region,11 to 15
+VUE 8 RESIDENCE,"1,250,000",775.01,"1,613",Jun-26,PASIR RIS HEIGHTS,Resale,Strata,72,"17,361",-,Condominium,1,99 yrs lease commencing from 2012,18,Outside Central Region,11 to 15
+THE PALETTE,"1,158,000",721.19,"1,606",Jun-26,PASIR RIS GROVE,Resale,Strata,67,"17,284",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
+THE SANTORINI,"1,050,000",731.95,"1,435",Jun-26,TAMPINES STREET 86,Resale,Strata,68,"15,441",-,Condominium,1,99 yrs lease commencing from 2013,18,Outside Central Region,01 to 05
 PARKTOWN RESIDENCE,"2,679,000","1,184.04","2,263",Jun-26,TAMPINES STREET 62,New Sale,Strata,110,"24,355",-,Apartment,1,99 yrs lease commencing from 2023,18,Outside Central Region,01 to 05
 THE TAPESTRY,"1,820,000",990.29,"1,838",Jun-26,TAMPINES STREET 86,Resale,Strata,92,"19,783",-,Condominium,1,99 yrs lease commencing from 2017,18,Outside Central Region,11 to 15
 D'NEST,"1,965,000","1,270.15","1,547",Jun-26,PASIR RIS GROVE,Resale,Strata,118,"16,653",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,01 to 05
@@ -6555,40 +6567,3 @@ THE SANTORINI,"1,385,000","1,119.46","1,237",Jun-21,TAMPINES STREET 86,Resale,St
 TREASURE AT TAMPINES,"1,747,000","1,323.97","1,320",Jun-21,TAMPINES LANE,New Sale,Strata,123,"14,203",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
 TREASURE AT TAMPINES,"1,299,000",914.94,"1,420",Jun-21,TAMPINES LANE,New Sale,Strata,85,"15,282",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
 VUE 8 RESIDENCE,"1,230,000","1,033.34","1,190",Jun-21,PASIR RIS HEIGHTS,Resale,Strata,96,"12,813",-,Condominium,1,99 yrs lease commencing from 2012,18,Outside Central Region,11 to 15
-D'NEST,"1,310,088","1,130.22","1,159",Jun-21,PASIR RIS GROVE,Resale,Strata,105,"12,477",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
-CHANGI RISE CONDOMINIUM,"930,000","1,130.22",823,Jun-21,SIMEI RISE,Resale,Strata,105,"8,857",-,Condominium,1,99 yrs lease commencing from 2000,18,Outside Central Region,06 to 10
-EASTPOINT GREEN,"875,000","1,140.98",767,Jun-21,SIMEI STREET 3,Resale,Strata,106,"8,255",-,Condominium,1,99 yrs lease commencing from 1996,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,014,000",678.13,"1,495",Jun-21,TAMPINES LANE,New Sale,Strata,63,"16,095",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,309,000",914.94,"1,431",Jun-21,TAMPINES LANE,New Sale,Strata,85,"15,400",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-TREASURE AT TAMPINES,"1,291,000",914.94,"1,411",Jun-21,TAMPINES LANE,New Sale,Strata,85,"15,188",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,277,000",947.23,"1,348",Jun-21,TAMPINES LANE,New Sale,Strata,88,"14,511",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"994,000",678.13,"1,466",Jun-21,TAMPINES LANE,New Sale,Strata,63,"15,778",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,003,000",678.13,"1,479",Jun-21,TAMPINES LANE,New Sale,Strata,63,"15,921",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,047,000",678.13,"1,544",Jun-21,TAMPINES LANE,New Sale,Strata,63,"16,619",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,026,000",656.6,"1,563",Jun-21,TAMPINES LANE,New Sale,Strata,61,"16,820",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-TREASURE AT TAMPINES,"1,755,000","1,323.97","1,326",Jun-21,TAMPINES LANE,New Sale,Strata,123,"14,268",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
-THE SANTORINI,"595,000",527.44,"1,128",Jun-21,TAMPINES STREET 86,Resale,Strata,49,"12,143",-,Condominium,1,99 yrs lease commencing from 2013,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,656,000","1,237.86","1,338",Jun-21,TAMPINES LANE,New Sale,Strata,115,"14,400",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,344,000",947.23,"1,419",Jun-21,TAMPINES LANE,New Sale,Strata,88,"15,273",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-TREASURE AT TAMPINES,"1,352,000",947.23,"1,427",Jun-21,TAMPINES LANE,New Sale,Strata,88,"15,364",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-STRATUM,"570,000",452.09,"1,261",Jun-21,ELIAS ROAD,Resale,Strata,42,"13,571",-,Condominium,1,99 yrs lease commencing from 2012,18,Outside Central Region,01 to 05
-RIPPLE BAY,"735,000",764.24,962,Jun-21,PASIR RIS LINK,Resale,Strata,71,"10,352",-,Condominium,1,99 yrs lease commencing from 2011,18,Outside Central Region,01 to 05
-TROPICAL SPRING,"1,225,000","1,356.26",903,Jun-21,SIMEI STREET 4,Resale,Strata,126,"9,722",-,Condominium,1,99 yrs lease commencing from 1997,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,770,000","1,270.15","1,394",Jun-21,TAMPINES LANE,New Sale,Strata,118,"15,000",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-SAVANNAH CONDOPARK,"1,710,000","2,292.73",746,Jun-21,SIMEI RISE,Resale,Strata,213,"8,028",-,Condominium,1,99 yrs lease commencing from 2000,18,Outside Central Region,06 to 10
-WATERVIEW,"860,000",785.77,"1,094",Jun-21,TAMPINES AVENUE 1,Resale,Strata,73,"11,781",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
-D'NEST,"1,580,000","1,431.61","1,104",Jun-21,PASIR RIS GROVE,Resale,Strata,133,"11,880",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
-THE PALETTE,"840,000",753.48,"1,115",Jun-21,PASIR RIS GROVE,Resale,Strata,70,"12,000",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
-MELVILLE PARK,"690,000",968.76,712,Jun-21,SIMEI STREET 1,Resale,Strata,90,"7,667",-,Condominium,1,99 yrs lease commencing from 1992,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,017,000",678.13,"1,500",Jun-21,TAMPINES LANE,New Sale,Strata,63,"16,143",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
-TREASURE AT TAMPINES,"1,064,000",678.13,"1,569",Jun-21,TAMPINES LANE,New Sale,Strata,63,"16,889",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-MELVILLE PARK,"677,000",958,707,Jun-21,SIMEI STREET 1,Resale,Strata,89,"7,607",-,Condominium,1,99 yrs lease commencing from 1992,18,Outside Central Region,06 to 10
-STRATUM,"570,000",452.09,"1,261",Jun-21,ELIAS ROAD,Resale,Strata,42,"13,571",-,Condominium,1,99 yrs lease commencing from 2012,18,Outside Central Region,01 to 05
-THE PALETTE,"622,000",495.14,"1,256",Jun-21,PASIR RIS GROVE,Resale,Strata,46,"13,522",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,06 to 10
-TREASURE AT TAMPINES,"1,824,000","1,323.97","1,378",Jun-21,TAMPINES LANE,New Sale,Strata,123,"14,829",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,11 to 15
-TREASURE AT TAMPINES,"1,728,000","1,345.5","1,284",Jun-21,TAMPINES LANE,New Sale,Strata,125,"13,824",-,Condominium,1,99 yrs lease commencing from 2018,18,Outside Central Region,01 to 05
-SAVANNAH CONDOPARK,"2,180,000","2,680.24",813,Jun-21,SIMEI RISE,Resale,Strata,249,"8,755",-,Condominium,1,99 yrs lease commencing from 2000,18,Outside Central Region,06 to 10
-DOUBLE BAY RESIDENCES,"1,460,000","1,367.03","1,068",Jun-21,SIMEI STREET 4,Resale,Strata,127,"11,496",-,Condominium,1,99 yrs lease commencing from 2008,18,Outside Central Region,01 to 05
-VUE 8 RESIDENCE,"1,090,000","1,033.34","1,055",Jun-21,PASIR RIS HEIGHTS,Resale,Strata,96,"11,354",-,Condominium,1,99 yrs lease commencing from 2012,18,Outside Central Region,01 to 05
-MY MANHATTAN,"1,100,000",882.65,"1,246",Jun-21,SIMEI STREET 3,Resale,Strata,82,"13,415",-,Condominium,1,99 yrs lease commencing from 2010,18,Outside Central Region,01 to 05
-RIPPLE BAY,"592,000",484.38,"1,222",Jun-21,PASIR RIS LINK,Resale,Strata,45,"13,156",-,Condominium,1,99 yrs lease commencing from 2011,18,Outside Central Region,06 to 10

@@ -1,8 +1,21 @@
 Project Name,Transacted Price ($),Area (SQFT),Unit Price ($ PSF),Sale Date,Street Name,Type of Sale,Type of Area,Area (SQM),Unit Price ($ PSM),Nett Price($),Property Type,Number of Units,Tenure,Postal District,Market Segment,Floor Level
+PINERY RESIDENCES,"2,727,000","1,054.87","2,585",Jun-26,BEDOK RESERVOIR ROAD,New Sale,Strata,98,"27,827",-,Apartment,1,99 yrs lease commencing from 2025,16,Outside Central Region,11 to 15
+ARCHIPELAGO,"870,000",667.37,"1,304",Jun-26,BEDOK RESERVOIR ROAD,Resale,Strata,62,"14,032",-,Condominium,1,99 yrs lease commencing from 2011,16,Outside Central Region,01 to 05
+BAYWATER,"1,425,000","1,044.11","1,365",Jun-26,BEDOK RESERVOIR ROAD,Resale,Strata,97,"14,691",-,Condominium,1,99 yrs lease commencing from 2001,16,Outside Central Region,01 to 05
+SKY EDEN@BEDOK,"2,250,000",893.41,"2,518",Jun-26,BEDOK CENTRAL,Sub Sale,Strata,83,"27,108",-,Apartment,1,99 yrs lease commencing from 2022,16,Outside Central Region,11 to 15
+LAGUNA 88,"1,800,000","1,388.56","1,296",Jun-26,EASTWOOD ROAD,Resale,Strata,129,"13,953",-,Condominium,1,99 yrs lease commencing from 1995,16,Outside Central Region,01 to 05
+WATERFRONT ISLE,"2,695,000","1,377.79","1,956",Jun-26,BEDOK RESERVOIR ROAD,Resale,Strata,128,"21,055",-,Condominium,1,99 yrs lease commencing from 2009,16,Outside Central Region,11 to 15
+SKY EDEN@BEDOK,"2,400,000","1,087.16","2,208",Jun-26,BEDOK CENTRAL,Sub Sale,Strata,101,"23,762",-,Apartment,1,99 yrs lease commencing from 2022,16,Outside Central Region,16 to 20
+THE GLADES,"1,285,000",721.19,"1,782",Jun-26,BEDOK RISE,Resale,Strata,67,"19,179",-,Condominium,1,99 yrs lease commencing from 2013,16,Outside Central Region,11 to 15
+VILLAS LAGUNA,"2,510,000","1,496.2","1,678",Jun-26,UPPER EAST COAST ROAD,Resale,Strata,139,"18,058",-,Condominium,1,Freehold,16,Outside Central Region,01 to 05
+EASTWOOD REGENCY,"1,700,000","1,194.8","1,423",Jun-26,EASTWOOD ROAD,Resale,Strata,111,"15,315",-,Apartment,1,Freehold,16,Outside Central Region,01 to 05
 PINERY RESIDENCES,"3,236,000","1,237.86","2,614",Jun-26,BEDOK RESERVOIR ROAD,New Sale,Strata,115,"28,139",-,Apartment,1,99 yrs lease commencing from 2025,16,Outside Central Region,11 to 15
 SKY EDEN@BEDOK,"2,300,000",893.41,"2,574",Jun-26,BEDOK CENTRAL,Sub Sale,Strata,83,"27,711",-,Apartment,1,99 yrs lease commencing from 2022,16,Outside Central Region,11 to 15
 CASA MERAH,"1,550,000",958,"1,618",Jun-26,TANAH MERAH KECHIL AVENUE,Resale,Strata,89,"17,416",-,Apartment,1,99 yrs lease commencing from 2006,16,Outside Central Region,06 to 10
+WATERFRONT ISLE,"1,820,000","1,173.28","1,551",Jun-26,BEDOK RESERVOIR ROAD,Resale,Strata,109,"16,697",-,Condominium,1,99 yrs lease commencing from 2009,16,Outside Central Region,01 to 05
 COSTA DEL SOL,"3,350,000","1,754.53","1,909",Jun-26,BAYSHORE ROAD,Resale,Strata,163,"20,552",-,Condominium,1,99 yrs lease commencing from 1997,16,Outside Central Region,06 to 10
+URBAN VISTA,"903,000",592.02,"1,525",Jun-26,TANAH MERAH KECHIL LINK,Resale,Strata,55,"16,418",-,Condominium,1,99 yrs lease commencing from 2012,16,Outside Central Region,06 to 10
+CHANGI GREEN,"1,670,000","1,216.33","1,373",Jun-26,UPPER CHANGI ROAD EAST,Resale,Strata,113,"14,779",-,Condominium,1,Freehold,16,Outside Central Region,01 to 05
 ECO,"908,000",602.78,"1,506",Jun-26,BEDOK SOUTH AVENUE 3,Resale,Strata,56,"16,214",-,Condominium,1,99 yrs lease commencing from 2012,16,Outside Central Region,06 to 10
 SKY EDEN@BEDOK,"2,108,000",893.41,"2,359",Jun-26,BEDOK CENTRAL,Sub Sale,Strata,83,"25,398",-,Apartment,1,99 yrs lease commencing from 2022,16,Outside Central Region,06 to 10
 SKY EDEN@BEDOK,"2,145,000",893.41,"2,401",Jun-26,BEDOK CENTRAL,Sub Sale,Strata,83,"25,843",-,Apartment,1,99 yrs lease commencing from 2022,16,Outside Central Region,06 to 10
@@ -22,6 +35,7 @@ CASA MERAH,"2,000,000","1,259.39","1,588",Jun-26,TANAH MERAH KECHIL AVENUE,Resal
 ARCHIPELAGO,"2,400,000","1,560.78","1,538",Jun-26,BEDOK RESERVOIR ROAD,Resale,Strata,145,"16,552",-,Condominium,1,99 yrs lease commencing from 2011,16,Outside Central Region,01 to 05
 ECO,"910,000",581.26,"1,566",Jun-26,BEDOK SOUTH AVENUE 3,Resale,Strata,54,"16,852",-,Condominium,1,99 yrs lease commencing from 2012,16,Outside Central Region,06 to 10
 CASCADALE,"1,870,000","1,550.02","1,206",May-26,UPPER CHANGI ROAD EAST,Resale,Strata,144,"12,986",-,Condominium,1,Freehold,16,Outside Central Region,01 to 05
+BAYSHORE PARK,"1,660,000","1,291.68","1,285",May-26,BAYSHORE ROAD,Resale,Strata,120,"13,833",-,Condominium,1,99 yrs lease commencing from 1982,16,Outside Central Region,11 to 15
 BAYWATER,"1,980,000","1,291.68","1,533",May-26,BEDOK RESERVOIR ROAD,Resale,Strata,120,"16,500",-,Condominium,1,99 yrs lease commencing from 2001,16,Outside Central Region,06 to 10
 EASTWOOD GREEN,"1,250,000",979.52,"1,276",May-26,EASTWOOD ROAD,Resale,Strata,91,"13,736",-,Condominium,1,99 yrs lease commencing from 1995,16,Outside Central Region,01 to 05
 UBER 388,"1,700,000",925.7,"1,836",May-26,UPPER EAST COAST ROAD,Resale,Strata,86,"19,767",-,Condominium,1,Freehold,16,Outside Central Region,01 to 05
@@ -4760,17 +4774,3 @@ EASTWOOD LODGE,"780,000",785.77,993,Jun-21,EASTWOOD ROAD,Resale,Strata,73,"10,68
 THE GLADES,"1,100,000",839.59,"1,310",Jun-21,BEDOK RISE,Resale,Strata,78,"14,103",-,Condominium,1,99 yrs lease commencing from 2013,16,Outside Central Region,01 to 05
 ARCHIPELAGO,"962,000",839.59,"1,146",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,78,"12,333",-,Condominium,1,99 yrs lease commencing from 2011,16,Outside Central Region,01 to 05
 ARCHIPELAGO,"2,640,000","2,637.18","1,001",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,245,"10,776",-,Condominium,1,99 yrs lease commencing from 2011,16,Outside Central Region,01 to 05
-LAGUNA GREEN,"1,368,000","1,184.04","1,155",Jun-21,JALAN HAJIJAH,Resale,Strata,110,"12,436",-,Condominium,1,99 yrs lease commencing from 1995,16,Outside Central Region,01 to 05
-WATERFRONT GOLD,"1,288,000","1,130.22","1,140",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,105,"12,267",-,Condominium,1,99 yrs lease commencing from 2009,16,Outside Central Region,01 to 05
-WATERFRONT KEY,"1,075,000",914.94,"1,175",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,85,"12,647",-,Condominium,1,99 yrs lease commencing from 2007,16,Outside Central Region,11 to 15
-TANAMERA CREST,"980,000","1,173.28",835,Jun-21,PARI DEDAP WALK,Resale,Strata,109,"8,991",-,Condominium,1,99 yrs lease commencing from 2000,16,Outside Central Region,06 to 10
-GRANDEUR PARK RESIDENCES,"1,965,000","1,237.86","1,587",Jun-21,BEDOK SOUTH AVENUE 3,Sub Sale,Strata,115,"17,087",-,Condominium,1,99 yrs lease commencing from 2016,16,Outside Central Region,06 to 10
-CASAFINA,"1,270,000","1,313.21",967,Jun-21,BEDOK SOUTH AVENUE 1,Resale,Strata,122,"10,410",-,Condominium,1,99 yrs lease commencing from 1996,16,Outside Central Region,01 to 05
-BAYSHORE PARK,"1,268,000","1,291.68",982,Jun-21,BAYSHORE ROAD,Resale,Strata,120,"10,567",-,Condominium,1,99 yrs lease commencing from 1982,16,Outside Central Region,06 to 10
-CASA MERAH,"1,146,800",947.23,"1,211",Jun-21,TANAH MERAH KECHIL AVENUE,Resale,Strata,88,"13,032",-,Apartment,1,99 yrs lease commencing from 2006,16,Outside Central Region,06 to 10
-ARCHIPELAGO,"967,000",839.59,"1,152",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,78,"12,397",-,Condominium,1,99 yrs lease commencing from 2011,16,Outside Central Region,01 to 05
-BEDOK RESIDENCES,"895,000",592.02,"1,512",Jun-21,BEDOK NORTH DRIVE,Resale,Strata,55,"16,273",-,Apartment,1,99 yrs lease commencing from 2011,16,Outside Central Region,06 to 10
-CASA MERAH,"1,730,000","1,550.02","1,116",Jun-21,TANAH MERAH KECHIL AVENUE,Resale,Strata,144,"12,014",-,Apartment,1,99 yrs lease commencing from 2006,16,Outside Central Region,01 to 05
-THE BAYSHORE,"1,290,000","1,184.04","1,089",Jun-21,BAYSHORE ROAD,Resale,Strata,110,"11,727",-,Condominium,1,99 yrs lease commencing from 1993,16,Outside Central Region,11 to 15
-WATERFRONT GOLD,"1,635,000","1,442.38","1,134",Jun-21,BEDOK RESERVOIR ROAD,Resale,Strata,134,"12,201",-,Condominium,1,99 yrs lease commencing from 2009,16,Outside Central Region,01 to 05
-URBAN VISTA,"1,450,000","1,097.93","1,321",Jun-21,TANAH MERAH KECHIL LINK,Resale,Strata,102,"14,216",-,Condominium,1,99 yrs lease commencing from 2012,16,Outside Central Region,06 to 10
