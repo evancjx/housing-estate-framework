@@ -9,11 +9,11 @@ PASIR RIS,settling_single,3.278,C,3.814,B,0.536,↑,C→B
 PASIR RIS,ageing_in_place,3.644,B,3.962,B,0.318,↑,B→B
 PASIR RIS,downsizing,3.8,B,3.962,B,0.162,↑,B→B
 PASIR RIS,upgrader,3.312,C,3.753,B,0.441,↑,C→B
-JURONG EAST,forming_family,2.539,D,3.673,B,1.134,↑,D→B
-JURONG EAST,settling_single,2.397,F,3.858,B,1.461,↑,F→B
-JURONG EAST,ageing_in_place,2.405,F,3.643,B,1.238,↑,F→B
-JURONG EAST,downsizing,2.467,F,3.643,B,1.176,↑,F→B
-JURONG EAST,upgrader,2.539,D,3.639,B,1.1,↑,D→B
+JURONG EAST,forming_family,2.566,D,3.707,B,1.141,↑,D→B
+JURONG EAST,settling_single,2.421,F,3.897,B,1.476,↑,F→B
+JURONG EAST,ageing_in_place,2.421,F,3.666,B,1.245,↑,F→B
+JURONG EAST,downsizing,2.491,F,3.666,B,1.175,↑,F→B
+JURONG EAST,upgrader,2.566,D,3.674,B,1.108,↑,D→B
 BISHAN,forming_family,3.511,B,3.772,B,0.261,↑,B→B
 BISHAN,settling_single,3.392,C,3.628,B,0.236,↑,C→B
 BISHAN,ageing_in_place,3.551,B,3.626,B,0.075,→,B→B
@@ -44,21 +44,21 @@ SERANGOON,settling_single,2.08,F,3.616,B,1.536,↑,F→B
 SERANGOON,ageing_in_place,2.036,F,3.382,C,1.346,↑,F→C
 SERANGOON,downsizing,2.351,F,3.382,C,1.031,↑,F→C
 SERANGOON,upgrader,2.132,F,3.506,B,1.374,↑,F→B
-SEMBAWANG,forming_family,2.732,D,4.076,B+,1.344,↑,D→B+
-SEMBAWANG,settling_single,2.585,D,3.975,B,1.39,↑,D→B
-SEMBAWANG,ageing_in_place,2.563,D,3.798,B,1.235,↑,D→B
-SEMBAWANG,downsizing,2.786,D,3.798,B,1.012,↑,D→B
-SEMBAWANG,upgrader,2.732,D,3.762,B,1.03,↑,D→B
+SEMBAWANG,forming_family,2.745,D,4.126,B+,1.381,↑,D→B+
+SEMBAWANG,settling_single,2.59,D,3.994,B,1.404,↑,D→B
+SEMBAWANG,ageing_in_place,2.647,D,3.917,B,1.27,↑,D→B
+SEMBAWANG,downsizing,2.821,D,3.917,B,1.096,↑,D→B
+SEMBAWANG,upgrader,2.745,D,3.769,B,1.024,↑,D→B
 MARINE PARADE,forming_family,2.454,F,3.023,C,0.569,↑,F→C
 MARINE PARADE,settling_single,2.338,F,2.645,D,0.307,↑,F→D
 MARINE PARADE,ageing_in_place,2.674,D,2.882,D,0.208,↑,D→D
 MARINE PARADE,downsizing,2.805,D,2.882,D,0.077,→,D→D
 MARINE PARADE,upgrader,2.454,F,2.52,D,0.066,→,F→D
-CANBERRA,forming_family,2.476,F,3.751,B,1.275,↑,F→B
-CANBERRA,settling_single,2.337,F,3.586,B,1.249,↑,F→B
-CANBERRA,ageing_in_place,2.373,F,3.444,C,1.071,↑,F→C
-CANBERRA,downsizing,2.594,D,3.444,C,0.85,↑,D→C
-CANBERRA,upgrader,2.476,F,3.391,C,0.915,↑,F→C
+CANBERRA,forming_family,2.482,F,3.735,B,1.253,↑,F→B
+CANBERRA,settling_single,2.337,F,3.595,B,1.258,↑,F→B
+CANBERRA,ageing_in_place,2.449,F,3.553,B,1.104,↑,F→B
+CANBERRA,downsizing,2.583,D,3.553,B,0.97,↑,D→B
+CANBERRA,upgrader,2.482,F,3.39,C,0.908,↑,F→C
 BOON KENG,forming_family,3.837,B,3.973,B,0.136,↑,B→B
 BOON KENG,settling_single,3.638,B,3.837,B,0.199,↑,B→B
 BOON KENG,ageing_in_place,3.92,B,3.92,B,0.0,→,B→B
@@ -74,11 +74,11 @@ DOVER,settling_single,2.905,D,3.451,C,0.546,↑,D→C
 DOVER,ageing_in_place,2.961,D,3.335,C,0.374,↑,D→C
 DOVER,downsizing,3.122,C,3.335,C,0.213,↑,C→C
 DOVER,upgrader,3.065,C,3.272,C,0.207,↑,C→C
-TENGAH,forming_family,1.631,F,2.873,D,1.242,↑,F→D
-TENGAH,settling_single,1.528,F,3.209,C,1.681,↑,F→C
-TENGAH,ageing_in_place,1.571,F,2.867,D,1.296,↑,F→D
-TENGAH,downsizing,1.664,F,2.867,D,1.203,↑,F→D
-TENGAH,upgrader,1.631,F,3.013,C,1.382,↑,F→C
+TENGAH,forming_family,1.658,F,2.907,D,1.249,↑,F→D
+TENGAH,settling_single,1.552,F,3.248,C,1.696,↑,F→C
+TENGAH,ageing_in_place,1.587,F,2.89,D,1.303,↑,F→D
+TENGAH,downsizing,1.688,F,2.89,D,1.202,↑,F→D
+TENGAH,upgrader,1.658,F,3.048,C,1.39,↑,F→C
 TAMPINES WEST,forming_family,3.642,B,3.908,B,0.266,↑,B→B
 TAMPINES WEST,settling_single,3.537,B,3.642,B,0.105,↑,B→B
 TAMPINES WEST,ageing_in_place,3.773,B,3.773,B,0.0,→,B→B
@@ -119,36 +119,36 @@ HOUGANG,settling_single,3.803,B,4.093,B+,0.29,↑,B→B+
 HOUGANG,ageing_in_place,3.93,B,4.044,B+,0.114,↑,B→B+
 HOUGANG,downsizing,4.04,B+,4.044,B+,0.004,→,B+→B+
 HOUGANG,upgrader,3.964,B,3.927,B,-0.037,→,B→B
-CHOA CHU KANG,forming_family,3.463,C,3.818,B,0.355,↑,C→B
-CHOA CHU KANG,settling_single,3.33,C,3.669,B,0.339,↑,C→B
-CHOA CHU KANG,ageing_in_place,3.494,C,3.688,B,0.194,↑,C→B
-CHOA CHU KANG,downsizing,3.669,B,3.688,B,0.019,→,B→B
-CHOA CHU KANG,upgrader,3.463,C,3.523,B,0.06,→,C→B
-BUKIT BATOK,forming_family,3.562,B,3.856,B,0.294,↑,B→B
-BUKIT BATOK,settling_single,3.349,C,3.703,B,0.354,↑,C→B
-BUKIT BATOK,ageing_in_place,3.571,B,3.669,B,0.098,→,B→B
-BUKIT BATOK,downsizing,3.773,B,3.669,B,-0.104,↓,B→B
-BUKIT BATOK,upgrader,3.562,B,3.483,C,-0.079,→,B→C
+CHOA CHU KANG,forming_family,3.502,B,3.852,B,0.35,↑,B→B
+CHOA CHU KANG,settling_single,3.364,C,3.708,B,0.344,↑,C→B
+CHOA CHU KANG,ageing_in_place,3.516,B,3.711,B,0.195,↑,B→B
+CHOA CHU KANG,downsizing,3.703,B,3.711,B,0.008,→,B→B
+CHOA CHU KANG,upgrader,3.502,B,3.558,B,0.056,→,B→B
+BUKIT BATOK,forming_family,3.601,B,3.89,B,0.289,↑,B→B
+BUKIT BATOK,settling_single,3.384,C,3.743,B,0.359,↑,C→B
+BUKIT BATOK,ageing_in_place,3.594,B,3.693,B,0.099,→,B→B
+BUKIT BATOK,downsizing,3.807,B,3.693,B,-0.114,↓,B→B
+BUKIT BATOK,upgrader,3.601,B,3.518,B,-0.083,→,B→B
 BUKIT MERAH,forming_family,4.007,B+,4.137,B+,0.13,↑,B+→B+
 BUKIT MERAH,settling_single,3.804,B,4.015,B+,0.211,↑,B→B+
 BUKIT MERAH,ageing_in_place,4.021,B+,4.035,B+,0.014,→,B+→B+
 BUKIT MERAH,downsizing,4.123,B+,4.035,B+,-0.088,→,B+→B+
 BUKIT MERAH,upgrader,4.007,B+,3.812,B,-0.195,↓,B+→B
-BUKIT PANJANG,forming_family,3.747,B,4.046,B+,0.299,↑,B→B+
-BUKIT PANJANG,settling_single,3.538,B,4.048,B+,0.51,↑,B→B+
-BUKIT PANJANG,ageing_in_place,3.7,B,4.004,B+,0.304,↑,B→B+
-BUKIT PANJANG,downsizing,3.739,B,4.004,B+,0.265,↑,B→B+
-BUKIT PANJANG,upgrader,3.747,B,3.822,B,0.075,→,B→B
+BUKIT PANJANG,forming_family,3.784,B,4.08,B+,0.296,↑,B→B+
+BUKIT PANJANG,settling_single,3.57,B,4.087,B+,0.517,↑,B→B+
+BUKIT PANJANG,ageing_in_place,3.721,B,4.027,B+,0.306,↑,B→B+
+BUKIT PANJANG,downsizing,3.771,B,4.027,B+,0.256,↑,B→B+
+BUKIT PANJANG,upgrader,3.784,B,3.857,B,0.073,→,B→B
 GEYLANG,forming_family,2.919,D,3.851,B,0.932,↑,D→B
 GEYLANG,settling_single,2.77,D,3.667,B,0.897,↑,D→B
 GEYLANG,ageing_in_place,3.016,C,3.789,B,0.773,↑,C→B
 GEYLANG,downsizing,3.065,C,3.789,B,0.724,↑,C→B
 GEYLANG,upgrader,2.919,D,3.48,C,0.561,↑,D→C
-CLEMENTI,forming_family,2.492,F,3.78,B,1.288,↑,F→B
-CLEMENTI,settling_single,2.355,F,3.582,B,1.227,↑,F→B
-CLEMENTI,ageing_in_place,2.572,D,3.7,B,1.128,↑,D→B
-CLEMENTI,downsizing,2.631,D,3.7,B,1.069,↑,D→B
-CLEMENTI,upgrader,2.492,F,3.388,C,0.896,↑,F→C
+CLEMENTI,forming_family,2.519,D,3.814,B,1.295,↑,D→B
+CLEMENTI,settling_single,2.379,F,3.622,B,1.243,↑,F→B
+CLEMENTI,ageing_in_place,2.588,D,3.723,B,1.135,↑,D→B
+CLEMENTI,downsizing,2.655,D,3.723,B,1.068,↑,D→B
+CLEMENTI,upgrader,2.519,D,3.422,C,0.903,↑,D→C
 BUKIT TIMAH,forming_family,2.751,D,3.906,B,1.155,↑,D→B
 BUKIT TIMAH,settling_single,2.676,D,3.939,B,1.263,↑,D→B
 BUKIT TIMAH,ageing_in_place,2.629,D,3.77,B,1.141,↑,D→B
