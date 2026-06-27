@@ -8,6 +8,9 @@ TYPICAL USAGE:
     # Download missing districts for the estate framework (15, 16 = Marine Parade/Bedok private)
     python scrapers/run_download.py --districts 15 16 --out_dir data/ura_raw/
 
+    # Download landed transactions (Landed Properties (Non-Strata) + Strata Landed)
+    python scrapers/run_download.py --landed --districts 15 16 --out_dir data/ura_raw/
+
     # Download all non-central districts (Apts & Condos only, all years)
     python scrapers/run_download.py --mode all --out_dir data/ura_raw/
 
@@ -29,6 +32,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+try:
+    from scrapers.ura_pmi_playwright import (
+        PROP_TYPE_MAP,
+        normalize_prop_types,
+        raw_filename,
+    )
+except ModuleNotFoundError:
+    from ura_pmi_playwright import PROP_TYPE_MAP, normalize_prop_types, raw_filename
+
 # Districts with meaningful private residential transactions
 # (excludes D01/02/06/09/11/17/28 — central, industrial, or minimal residential)
 RESIDENTIAL_DISTRICTS = [
@@ -44,7 +56,13 @@ RESIDENTIAL_DISTRICTS = [
 ALREADY_DOWNLOADED = {"03", "04", "05", "07", "08", "21", "27"}
 
 
-async def run_playwright(districts: list, year_from: str, year_to: str, out_dir: Path) -> dict:
+async def run_playwright(
+    districts: list,
+    year_from: str,
+    year_to: str,
+    out_dir: Path,
+    prop_types: list[str],
+) -> dict:
     """Run the Playwright scraper for given districts. Returns {district: path_or_None}."""
     from scrapers.ura_pmi_playwright import run as pw_run
     import types
@@ -55,7 +73,8 @@ async def run_playwright(districts: list, year_from: str, year_to: str, out_dir:
         month_from="1",
         year_to=year_to,
         month_to="12",
-        prop_type="3",
+        prop_type=prop_types[0],
+        prop_types=prop_types,
         sale_type=[],
         out_dir=str(out_dir),
         headed=False,
@@ -67,7 +86,13 @@ async def run_playwright(districts: list, year_from: str, year_to: str, out_dir:
     return {}
 
 
-def run_playwright_subprocess(districts: list, year_from: str, year_to: str, out_dir: Path) -> bool:
+def run_playwright_subprocess(
+    districts: list,
+    year_from: str,
+    year_to: str,
+    out_dir: Path,
+    prop_types: list[str],
+) -> bool:
     """Run Playwright scraper as subprocess. Returns True on success."""
     script = Path(__file__).parent / "ura_pmi_playwright.py"
     cmd = [
@@ -75,6 +100,7 @@ def run_playwright_subprocess(districts: list, year_from: str, year_to: str, out
         "--districts", *districts,
         "--year_from", year_from,
         "--year_to", year_to,
+        "--prop_types", *prop_types,
         "--out_dir", str(out_dir),
     ]
     print(f"Running: {' '.join(cmd)}")
@@ -82,10 +108,12 @@ def run_playwright_subprocess(districts: list, year_from: str, year_to: str, out
     return result.returncode == 0
 
 
-def run_api_subprocess(out_dir: Path) -> bool:
+def run_api_subprocess(out_dir: Path, prop_types: list[str]) -> bool:
     """Run API client as subprocess. Returns True on success."""
     script = Path(__file__).parent / "ura_pmi_api.py"
     cmd = [sys.executable, str(script), "--out_dir", str(out_dir)]
+    if prop_types:
+        cmd.extend(["--prop_types", *prop_types])
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd)
     return result.returncode == 0
@@ -111,10 +139,25 @@ def main():
     ap.add_argument("--year_to", default="2026", help="End year (default: 2026)")
     ap.add_argument("--out_dir", default="data/ura_raw", help="Output directory")
     ap.add_argument(
+        "--prop_types", nargs="+", default=["3"],
+        help=(
+            "Property type(s): 1/landed, 2/strata_landed, 3/apt_condo, 4/ec. "
+            "Default: 3 (Apartments & Condominiums)."
+        ),
+    )
+    ap.add_argument(
+        "--landed", action="store_true",
+        help="Shortcut for --prop_types landed strata_landed",
+    )
+    ap.add_argument(
         "--include_existing", action="store_true",
         help="Re-download districts already in data/ura_private.csv",
     )
     args = ap.parse_args()
+    try:
+        prop_types = normalize_prop_types(["landed", "strata_landed"] if args.landed else args.prop_types)
+    except ValueError as e:
+        ap.error(str(e))
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -128,9 +171,16 @@ def main():
         districts = [d for d in RESIDENTIAL_DISTRICTS if d not in ALREADY_DOWNLOADED]
 
     if not args.include_existing:
-        # Check which files already exist
-        existing = {p.stem.split("_")[1].lstrip("d") for p in out_dir.glob("pmi_d*.csv")}
-        to_skip = set(districts) & existing
+        # Check which district/type files already exist. This must be property-type
+        # aware; a condo CSV must not cause landed downloads to be skipped.
+        to_skip = {
+            district
+            for district in districts
+            if all(
+                (out_dir / raw_filename(district, args.year_from, args.year_to, prop_type)).exists()
+                for prop_type in prop_types
+            )
+        }
         if to_skip:
             print(f"Skipping {sorted(to_skip)} (files exist). Use --include_existing to re-download.")
             districts = [d for d in districts if d not in to_skip]
@@ -140,11 +190,12 @@ def main():
         return
 
     print(f"Districts to download: {districts}")
+    print("Property types: " + ", ".join(PROP_TYPE_MAP[p] for p in prop_types))
     print(f"Output: {out_dir}")
     print()
 
     if args.mode in ("playwright", "both", "all"):
-        ok = run_playwright_subprocess(districts, args.year_from, args.year_to, out_dir)
+        ok = run_playwright_subprocess(districts, args.year_from, args.year_to, out_dir, prop_types)
         if ok or args.mode != "both":
             return
 
@@ -152,7 +203,7 @@ def main():
         print("\nPlaywright scraper failed. Trying API fallback...")
 
     if args.mode in ("api", "both"):
-        run_api_subprocess(out_dir)
+        run_api_subprocess(out_dir, prop_types)
 
 
 if __name__ == "__main__":

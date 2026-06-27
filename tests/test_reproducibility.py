@@ -36,6 +36,8 @@ def test_provision_reproduces(tmp_path):
           "--noise", f"{DATA}/expressways.csv", "--air_noise", f"{DATA}/air_noise_corridors.csv",
           "--eldercare", f"{DATA}/eldercare.csv", "--covered_linkway", f"{DATA}/covered_linkway.csv",
           "--jtc_industrial", f"{DATA}/jtc_industrial.csv", "--air_quality", f"{DATA}/air_quality.csv",
+          "--tree_canopy", f"{DATA}/tree_canopy.csv", "--hdb_density", f"{DATA}/hdb_density.csv",
+          "--hawker_v2", f"{DATA}/hawker_v2.csv", "--coastal", f"{DATA}/coastal.csv",
           "--tcmr", f"{DATA}/town_council_kpi.json", "--judged", f"{DATA}/judged_inputs.csv",
           "--out", out])
     _same(out, f"{DATA}/provision_scores.csv")
@@ -46,6 +48,7 @@ def test_liveability_reproduces(tmp_path):
     out = str(tmp_path / "live.csv")
     _run([f"{MODELS}/liveability_model.py", "--scores", f"{DATA}/provision_scores.csv",
           "--pipeline", f"{DATA}/pipeline_data.json", "--archetypes", f"{DATA}/archetype_assignments.csv",
+          "--bca", f"{DATA}/bca_permits.csv",
           "--out", out])
     _same(out, f"{DATA}/liveability_matrix.csv")
 

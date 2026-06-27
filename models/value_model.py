@@ -88,7 +88,7 @@ SEGMENTS = {
     "private_resale": {
         "price_col": "transacted_price",
         "area_col":  "area_sqm",
-        "controls":  ["property_type", "tenure", "project_age_years"],
+        "controls":  ["property_type", "type_of_area", "tenure", "project_age_years"],
         "month_col": "sale_month",
         "area_key":  "planning_area",
     },
@@ -324,6 +324,7 @@ if __name__ == "__main__":
 # (3) --private  ura_private.csv   [private resale]   source: URA REALIS / caveats
 #       required: planning_area, transacted_price, area_sqm, property_type,
 #                 tenure, project_age_years, sale_month
+#       optional: type_of_area, market_segment
 #
 # (4) --rental  ura_rental.csv   [private rental]   source: URA rental contracts
 #       required: planning_area, monthly_rent, area_sqm, property_type,

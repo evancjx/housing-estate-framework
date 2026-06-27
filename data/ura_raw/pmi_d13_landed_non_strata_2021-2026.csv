@@ -1,0 +1,434 @@
+Project Name,Transacted Price ($),Area (SQFT),Unit Price ($ PSF),Sale Date,Street Name,Type of Sale,Type of Area,Area (SQM),Unit Price ($ PSM),Nett Price($),Property Type,Number of Units,Tenure,Postal District,Market Segment,Floor Level
+BRADDELL HEIGHTS ESTATE,"10,450,000","5,562.84","1,879",Jun-26,DUNSFOLD DRIVE,Resale,Land,516.8,"20,221",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,600,000",884.8,"2,939",Jun-26,JALAN GEMBIRA,Resale,Land,82.2,"31,630",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,600,000","1,500.5","2,399",Jun-26,MACPHERSON ROAD,Resale,Land,139.4,"25,825",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,660,000","1,997.8","1,832",May-26,UPPER ALJUNIED ROAD,Resale,Land,185.6,"19,720",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,080,000","1,846.03","2,210",May-26,BUTTERFLY AVENUE,Resale,Land,171.5,"23,790",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"8,180,000","4,425.08","1,849",May-26,COTSWOLD CLOSE,Resale,Land,411.1,"19,898",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,288,000",885.88,"3,712",May-26,JALAN SETIA,Resale,Land,82.3,"39,951",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"17,200,000","12,923.26","1,331",May-26,LYNWOOD GROVE,Resale,Land,"1,200.6","14,326",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,350,000","1,500.5","2,233",Apr-26,KEE CHOE AVENUE,Resale,Land,139.4,"24,032",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,350,000","2,041.93","2,130",Apr-26,HAPPY AVENUE EAST,Resale,Land,189.7,"22,931",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,288,000","1,359.49","2,419",Apr-26,JALAN SETIA,Resale,Land,126.3,"26,033",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,100,000","1,325.05","2,340",Apr-26,MACPHERSON ROAD,Resale,Land,123.1,"25,183",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+VAUGHAN GARDEN,"6,280,000","2,389.61","2,628",Mar-26,VAUGHAN ROAD,Resale,Land,222,"28,288",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,800,000","1,655.5","2,295",Mar-26,JALAN GIRANG,Resale,Land,153.8,"24,707",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"11,180,000","4,471.37","2,500",Mar-26,SOMMERVILLE WALK,New Sale,Land,415.4,"26,914",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"13,000,000","4,792.13","2,713",Mar-26,LYNWOOD GROVE,New Sale,Land,445.2,"29,200",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"13,000,000","4,725.4","2,751",Mar-26,LYNWOOD GROVE,Resale,Land,439,"29,613",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,286,000","5,662.94","1,463",Mar-26,JALAN LATEH,Resale,Land,526.1,"15,750",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,250,000","1,356.26","2,396",Mar-26,JALAN SETIA,Resale,Land,126,"25,794",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"10,180,000","5,040.78","2,020",Mar-26,MATLOCK RISE,Resale,Land,468.3,"21,738",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,999,999","2,208.77","1,811",Feb-26,JALAN RIANG,Resale,Land,205.2,"19,493",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,950,000","1,063.48","2,774",Feb-26,JALAN KEMAJUAN,Resale,Land,98.8,"29,858",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"5,028,888","1,702.86","2,953",Feb-26,LICHI AVENUE,Resale,Land,158.2,"31,788",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"15,500,000","11,230.08","1,380",Feb-26,DUNSFOLD DRIVE,Resale,Land,"1,043.3","14,857",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,980,000","1,498.35","2,656",Feb-26,SIANG KUANG AVENUE,Resale,Land,139.2,"28,592",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,100,000","4,628.52","1,318",Feb-26,JALAN RAYA,Resale,Land,430,"14,186",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"10,500,000","6,979.38","1,504",Feb-26,SOMMERVILLE WALK,Resale,Land,648.4,"16,194",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,820,000",989.21,"3,862",Feb-26,JALAN MULIA,Resale,Land,91.9,"41,567",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,800,000","5,617.73","1,744",Feb-26,CROUCHER ROAD,Resale,Land,521.9,"18,778",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,500,000","1,500.5","2,333",Jan-26,MULBERRY AVENUE,Resale,Land,139.4,"25,108",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,300,000","2,629.65","1,635",Jan-26,JALAN CHENGKEK,Resale,Land,244.3,"17,601",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,280,000","1,500.5","2,186",Jan-26,MACPHERSON ROAD,Resale,Land,139.4,"23,529",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"4,300,000","1,652.27","2,602",Jan-26,JALAN RIANG,Resale,Land,153.5,"28,013",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,380,000","3,068.82","1,753",Jan-26,JALAN LATEH,Resale,Land,285.1,"18,871",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"11,500,000","4,317.44","2,664",Jan-26,CLIFTON VALE,New Sale,Land,401.1,"28,671",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,500,000","2,305.65","2,385",Jan-26,LICHI AVENUE,Resale,Land,214.2,"25,677",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"10,500,000","5,580.06","1,882",Dec-25,MUSWELL HILL,Resale,Land,518.4,"20,255",-,Detached House,1,Freehold,13,Outside Central Region,-
+GPL TERRACE,"4,700,000","1,968.74","2,387",Dec-25,PUAY HEE AVENUE,Resale,Land,182.9,"25,697",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,700,000",886.95,"3,044",Dec-25,JALAN GEMBIRA,Resale,Land,82.4,"32,767",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,280,000","1,499.43","2,188",Dec-25,MACPHERSON ROAD,Resale,Land,139.3,"23,546",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,000,000","3,737.26","1,338",Dec-25,JALAN ANGGEREK,Resale,Land,347.2,"14,401",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,218,888",884.8,"3,638",Dec-25,JALAN SETIA,Resale,Land,82.2,"39,159",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,635,000","3,720.04","1,515",Dec-25,JALAN JERMIN,Resale,Land,345.6,"16,305",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,050,000","4,180.74","1,447",Dec-25,SOMMERVILLE ROAD,Resale,Land,388.4,"15,577",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+OASIS @ MULBERRY,"4,838,000","1,701.79","2,843",Dec-25,CHEMPAKA AVENUE,Resale,Land,158.1,"30,601",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,850,000","1,702.86","2,261",Dec-25,LICHI AVENUE,Resale,Land,158.2,"24,336",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"5,100,000","2,043.01","2,496",Dec-25,JALAN MUHIBBAH,Resale,Land,189.8,"26,870",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"4,450,000","1,660.89","2,679",Dec-25,DAISY AVENUE,Resale,Land,154.3,"28,840",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,650,000","2,037.63","2,282",Dec-25,SOMMERVILLE ROAD,Resale,Land,189.3,"24,564",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"8,000,000","3,899.8","2,051",Dec-25,MACKERROW ROAD,Resale,Land,362.3,"22,081",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,170,000","1,500.5","2,113",Dec-25,MACPHERSON ROAD,Resale,Land,139.4,"22,740",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,380,000","3,898.72","1,636",Nov-25,JALAN MAWAR,Resale,Land,362.2,"17,615",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,500,000",884.8,"2,825",Nov-25,JALAN SETIA,Resale,Land,82.2,"30,414",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,960,000","3,610.25","1,374",Nov-25,WAN THO AVENUE,Resale,Land,335.4,"14,788",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,520,000","4,430.46","1,923",Nov-25,COTSWOLD CLOSE,Resale,Land,411.6,"20,700",-,Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"4,531,200","2,402.52","1,886",Nov-25,JALAN RIANG,Resale,Land,223.2,"20,301",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,700,000","1,503.73","2,461",Nov-25,JALAN KEMBOJA,Resale,Land,139.7,"26,485",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,400,000","4,172.13","1,534",Nov-25,JALAN MELOR,Resale,Land,387.6,"16,512",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,250,000","2,158.18","1,969",Nov-25,KWONG AVENUE,Resale,Land,200.5,"21,197",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,180,000","1,624.29","2,573",Oct-25,BELIMBING AVENUE,Resale,Land,150.9,"27,700",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,450,000",885.88,"2,766",Oct-25,JALAN MESRA,Resale,Land,82.3,"29,769",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,625,000","4,417.55","1,273",Oct-25,BELIMBING AVENUE,Resale,Land,410.4,"13,706",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"10,180,000","6,316.32","1,612",Oct-25,MACKERROW ROAD,Resale,Land,586.8,"17,348",-,Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"14,700,000","10,028.82","1,466",Oct-25,COTSWOLD CLOSE,Resale,Land,931.7,"15,778",-,Detached House,1,Freehold,13,Outside Central Region,-
+VAUGHAN GARDEN,"4,900,000","2,932.11","1,671",Oct-25,LORONG BIAWAK,Resale,Land,272.4,"17,988",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,600,000","4,357.27","1,744",Oct-25,MELROSE DRIVE,New Sale,Land,404.8,"18,775",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,750,000","1,351.96","2,774",Sep-25,JALAN SETIA,Resale,Land,125.6,"29,857",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,580,000","3,834.14","1,455",Sep-25,JALAN GIRANG,Resale,Land,356.2,"15,665",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,600,000","1,498.35","2,403",Sep-25,KEE CHOE AVENUE,Resale,Land,139.2,"25,862",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"4,640,000","2,289.5","2,027",Sep-25,JALAN MULIA,Resale,Land,212.7,"21,815",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"10,880,000","4,465.98","2,436",Aug-25,SOMMERVILLE WALK,Resale,Land,414.9,"26,223",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"6,850,000","3,475.7","1,971",Aug-25,BUTTERFLY AVENUE,Resale,Land,322.9,"21,214",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"4,838,000","1,702.86","2,841",Aug-25,BELIMBING AVENUE,Resale,Land,158.2,"30,582",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,700,000","1,702.86","2,173",Aug-25,LICHI AVENUE,Resale,Land,158.2,"23,388",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,000,000","3,005.31","1,664",Aug-25,JALAN RIANG,Resale,Land,279.2,"17,908",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"13,650,000","5,912.67","2,309",Aug-25,CARMICHAEL ROAD,Resale,Land,549.3,"24,850",-,Detached House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"4,700,000","1,701.79","2,762",Aug-25,CHEMPAKA AVENUE,Resale,Land,158.1,"29,728",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,350,000",988.14,"2,378",Aug-25,JALAN GEMBIRA,Resale,Land,91.8,"25,599",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"7,850,000","3,180.76","2,468",Jul-25,JALAN KEMBOJA,Resale,Land,295.5,"26,565",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,750,000","1,659.81","2,259",Jul-25,DAISY AVENUE,Resale,Land,154.2,"24,319",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,480,000","1,500.5","2,319",Jul-25,MULBERRY AVENUE,Resale,Land,139.4,"24,964",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,700,000",993.52,"2,718",Jul-25,PANG SENG ROAD,Resale,Land,92.3,"29,252",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,280,000","1,340.12","2,448",Jul-25,JALAN WANGI,Resale,Land,124.5,"26,345",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,500,000","1,500.5","2,333",Jul-25,KEE CHOE AVENUE,Resale,Land,139.4,"25,108",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,160,000","1,500.5","2,106",Jul-25,MACPHERSON ROAD,Resale,Land,139.4,"22,669",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,200,000","2,476.8","2,099",Jul-25,WAN THO AVENUE,Resale,Land,230.1,"22,599",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,100,000","4,049.42","1,506",Jul-25,HAPPY AVENUE CENTRAL,Resale,Land,376.2,"16,215",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,550,000","1,009.66","2,526",Jul-25,WAN THO AVENUE,Resale,Land,93.8,"27,186",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,000,000","4,751.23","1,473",Jul-25,MACKERROW ROAD,Resale,Land,441.4,"15,859",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"10,680,000","7,110.7","1,502",Jun-25,SIANG KUANG AVENUE,Resale,Land,660.6,"16,167",-,Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,810,000","1,297.06","2,166",Jun-25,JALAN HIBORAN,Resale,Land,120.5,"23,320",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,690,000",970.91,"2,771",Jun-25,JALAN KEMAJUAN,Resale,Land,90.2,"29,823",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,000,000","2,364.85","2,114",Jun-25,TANNERY LANE,Resale,Land,219.7,"22,758",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"5,338,888","3,815.84","1,399",Jun-25,JALAN RIANG,Resale,Land,354.5,"15,060",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,915,000","2,036.55","1,922",Jun-25,BELIMBING AVENUE,Resale,Land,189.2,"20,692",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,500,000","3,009.61","1,495",Jun-25,JALAN GIRANG,Resale,Land,279.6,"16,094",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,150,900","1,340.12","2,351",Jun-25,JALAN WANGI,Resale,Land,124.5,"25,308",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,230,000","3,514.45","1,204",Jun-25,LORONG SELANGAT,Resale,Land,326.5,"12,956",-,Terrace House,1,Freehold,13,Outside Central Region,-
+DAISY PARK,"6,010,000","2,692.08","2,232",Jun-25,DAISY AVENUE,Resale,Land,250.1,"24,030",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,188,000","2,336.86","1,792",Jun-25,ANGSANA AVENUE,Resale,Land,217.1,"19,291",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,138,000","1,500.5","2,091",May-25,MACPHERSON ROAD,Resale,Land,139.4,"22,511",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,100,000",884.8,"3,504",May-25,JALAN MULIA,Resale,Land,82.2,"37,713",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,380,000","2,084.99","2,101",May-25,JALAN RIANG,Resale,Land,193.7,"22,612",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,880,800","1,396.09","2,780",May-25,JALAN GEMBIRA,Resale,Land,129.7,"29,921",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,280,000","1,951.51","1,681",May-25,JALAN MESRA,Resale,Land,181.3,"18,092",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,680,000",884.8,"3,029",May-25,JALAN SETIA,Resale,Land,82.2,"32,603",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,650,000","1,702.86","2,143",Apr-25,LICHI AVENUE,Resale,Land,158.2,"23,072",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,600,000",885.88,"2,935",Apr-25,JALAN SETIA,Resale,Land,82.3,"31,592",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"4,058,888","1,298.14","3,127",Apr-25,JALAN GEMBIRA,Resale,Land,120.6,"33,656",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,650,000","1,298.14","2,041",Apr-25,JALAN MESRA,Resale,Land,120.6,"21,973",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,600,000","7,200.04","1,333",Apr-25,JALAN SIKUDANGAN,Resale,Land,668.9,"14,352",-,Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,300,000","4,720.01","1,123",Apr-25,JALAN MAWAR,Resale,Land,438.5,"12,087",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,288,000","1,660.89","2,582",Apr-25,DAISY AVENUE,Resale,Land,154.3,"27,790",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,800,000","2,483.25","2,336",Apr-25,PUAY HEE AVENUE,Resale,Land,230.7,"25,141",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,660,000","5,995.55","1,278",Apr-25,CARMICHAEL ROAD,Resale,Land,557,"13,752",-,Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"7,300,000","4,752.31","1,536",Mar-25,KWONG AVENUE,Resale,Land,441.5,"16,535",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,608,888","2,795.41","2,006",Mar-25,KEE CHOE AVENUE,Resale,Land,259.7,"21,598",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,250,000","4,900.85","1,071",Mar-25,SOMMERVILLE ROAD,Resale,Land,455.3,"11,531",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"6,080,000","3,431.56","1,772",Mar-25,BUTTERFLY AVENUE,Resale,Land,318.8,"19,072",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,280,000","1,641.51","2,607",Mar-25,CHEMPAKA AVENUE,Resale,Land,152.5,"28,066",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,800,000","1,660.89","2,288",Mar-25,DAISY AVENUE,Resale,Land,154.3,"24,627",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,528,000","1,969.81","2,299",Mar-25,PUAY HEE AVENUE,Resale,Land,183,"24,743",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"9,168,888","6,345.38","1,445",Feb-25,CLIFTON VALE,Resale,Land,589.5,"15,554",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,808,888","4,730.78","1,862",Feb-25,LYNWOOD GROVE,Resale,Land,439.5,"20,043",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"3,880,000","1,298.14","2,989",Feb-25,JALAN MESRA,Resale,Land,120.6,"32,172",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+GPL TERRACE,"5,200,000","2,614.58","1,989",Feb-25,PUAY HEE AVENUE,Resale,Land,242.9,"21,408",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,250,000","1,512.34","2,810",Feb-25,SIANG KUANG AVENUE,Resale,Land,140.5,"30,249",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,550,000","2,394.99","1,900",Feb-25,JALAN MELOR,Resale,Land,222.5,"20,449",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,780,000","2,281.97","2,533",Feb-25,JALAN GIRANG,Resale,Land,212,"27,264",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"5,600,000","1,652.27","3,389",Feb-25,JALAN RIANG,Resale,Land,153.5,"36,482",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,750,000","1,849.26","2,028",Feb-25,BELIMBING AVENUE,Resale,Land,171.8,"21,828",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,450,000","1,342.27","2,570",Feb-25,JALAN MUHIBBAH,Resale,Land,124.7,"27,666",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,380,000",884.8,"2,690",Feb-25,JALAN SETIA,Resale,Land,82.2,"28,954",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+GPL TERRACE,"5,020,000","2,156.03","2,328",Feb-25,KWONG AVENUE,Resale,Land,200.3,"25,062",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,510,000","1,852.48","1,895",Jan-25,PUAY HEE AVENUE,Resale,Land,172.1,"20,395",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,158,000","3,783.55","1,363",Jan-25,SOMMERVILLE WALK,Resale,Land,351.5,"14,674",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,700,000","4,344.35","1,772",Jan-25,LORONG SELANGAT,Resale,Land,403.6,"19,078",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,400,000","3,378.82","1,598",Jan-25,SIANG KUANG AVENUE,Resale,Land,313.9,"17,203",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,400,000","2,527.39","2,137",Jan-25,PUAY HEE AVENUE,Resale,Land,234.8,"22,998",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+GPL TERRACE,"4,620,000","2,171.1","2,128",Jan-25,KWONG AVENUE,Resale,Land,201.7,"22,905",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"5,790,000","3,307.78","1,750",Jan-25,JALAN GIRANG,Resale,Land,307.3,"18,842",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,486,000","1,977.35","2,269",Jan-25,BUTTERFLY AVENUE,Resale,Land,183.7,"24,420",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,688,888","1,741.62","2,118",Dec-24,WAN THO AVENUE,Resale,Land,161.8,"22,799",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,508,000",958,"2,618",Dec-24,JALAN KEMAJUAN,Resale,Land,89,"28,180",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,400,000","1,646.89","2,064",Dec-24,JALAN GIRANG,Resale,Land,153,"22,222",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"4,880,000","2,650.1","1,841",Dec-24,JALAN RIANG,Resale,Land,246.2,"19,821",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"12,380,000","4,342.2","2,851",Dec-24,COTSWOLD CLOSE,New Sale,Land,403.4,"30,689",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,480,000","4,249.63","1,290",Dec-24,SOMMERVILLE ROAD,Resale,Land,394.8,"13,880",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,200,000","3,143.09","1,654",Dec-24,MULBERRY AVENUE,Resale,Land,292,"17,808",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"12,230,000","4,439.07","2,755",Dec-24,COTSWOLD CLOSE,New Sale,Land,412.4,"29,656",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,580,000","1,607.07","2,228",Dec-24,JALAN KEMBOJA,Resale,Land,149.3,"23,979",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"26,588,000","10,826.43","2,456",Dec-24,SUNDRIDGE PARK ROAD,Resale,Land,"1,005.8","26,435",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,800,000","3,507.99","1,368",Dec-24,JALAN GIRANG,Resale,Land,325.9,"14,728",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,108,000","1,849.26","2,221",Dec-24,SIANG KUANG AVENUE,Resale,Land,171.8,"23,912",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,168,000","1,500.5","2,111",Nov-24,MACPHERSON ROAD,Resale,Land,139.4,"22,726",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"15,100,000","14,175.11","1,065",Nov-24,MELROSE DRIVE,Resale,Land,"1,316.9","11,466",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,300,000","1,500.5","2,866",Nov-24,MACPHERSON ROAD,Resale,Land,139.4,"30,846",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,800,000",989.21,"2,831",Nov-24,JALAN MULIA,Resale,Land,91.9,"30,468",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"4,150,000","1,660.89","2,499",Nov-24,DAISY AVENUE,Resale,Land,154.3,"26,896",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,530,000","6,823.3",810,Nov-24,JALAN MELATI,Resale,Land,633.9,"8,724",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,000,000","1,623.21","2,464",Nov-24,MULBERRY AVENUE,Resale,Land,150.8,"26,525",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,500,000","3,299.17","1,667",Nov-24,SIANG KUANG AVENUE,Resale,Land,306.5,"17,945",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,680,000",882.65,"3,036",Nov-24,JALAN GEMBIRA,Resale,Land,82,"32,683",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"6,990,000","4,961.13","1,409",Nov-24,PUAY HEE AVENUE,Resale,Land,460.9,"15,166",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,000,000","5,759.82","1,563",Nov-24,CARMICHAEL ROAD,Resale,Land,535.1,"16,819",-,Detached House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,500,000","1,659.81","2,109",Nov-24,DAISY AVENUE,Resale,Land,154.2,"22,698",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,230,000","1,500.5","2,153",Nov-24,MACPHERSON ROAD,Resale,Land,139.4,"23,171",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"15,700,000","11,013.72","1,425",Oct-24,COTSWOLD CLOSE,Resale,Land,"1,023.2","15,344",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,700,000","3,446.63","1,654",Oct-24,JALAN GIRANG,Resale,Land,320.2,"17,801",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,975,000","1,340.12","2,220",Oct-24,JALAN WANGI,Resale,Land,124.5,"23,896",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,100,000","2,559.68","1,992",Oct-24,PUAY HEE AVENUE,Resale,Land,237.8,"21,447",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,420,000","3,299.17","1,643",Oct-24,SIANG KUANG AVENUE,Resale,Land,306.5,"17,684",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"8,800,000","3,835.21","2,295",Oct-24,JALAN GIRANG,Resale,Land,356.3,"24,698",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,980,000","1,340.12","2,224",Oct-24,JALAN WANGI,Resale,Land,124.5,"23,936",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,280,000",885.88,"2,574",Oct-24,JALAN SETIA,Resale,Land,82.3,"27,704",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY TERRACE,"4,400,000","1,750.23","2,514",Oct-24,DAISY ROAD,Resale,Land,162.6,"27,060",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,400,000",883.72,"2,716",Oct-24,JALAN SETIA,Resale,Land,82.1,"29,233",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,530,000","2,810.48","1,612",Oct-24,JALAN CHENGKEK,Resale,Land,261.1,"17,350",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,438,000","1,009.66","2,415",Sep-24,WAN THO AVENUE,Resale,Land,93.8,"25,991",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,400,000","1,581.23","2,150",Sep-24,LICHI AVENUE,Resale,Land,146.9,"23,145",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,125,000","1,702.86","1,835",Sep-24,MULBERRY AVENUE,Resale,Land,158.2,"19,753",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,650,000","5,400.3","1,417",Sep-24,JALAN MELOR,Resale,Land,501.7,"15,248",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,100,000","4,049.42","1,259",Sep-24,KEE CHOE AVENUE,Resale,Land,376.2,"13,557",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,500,000","2,212","2,034",Sep-24,JALAN GIRANG,Resale,Land,205.5,"21,898",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,780,000","2,069.92","1,826",Sep-24,HAPPY AVENUE EAST,Resale,Land,192.3,"19,657",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,003,800","1,306.75","2,299",Sep-24,JALAN MUHIBBAH,Resale,Land,121.4,"24,743",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"13,500,000","12,757.49","1,058",Aug-24,CHILTERN DRIVE,Resale,Land,"1,185.2","11,390",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,250,000",884.8,"2,543",Aug-24,JALAN SETIA,Resale,Land,82.2,"27,372",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"11,000,000","6,671.53","1,649",Aug-24,CHILTERN DRIVE,Resale,Land,619.8,"17,748",-,Detached House,1,Freehold,13,Outside Central Region,-
+OASIS @ MULBERRY,"4,200,000","1,705.02","2,463",Aug-24,MULBERRY AVENUE,Resale,Land,158.4,"26,515",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,650,000","1,660.89","2,198",Aug-24,DAISY AVENUE,Resale,Land,154.3,"23,655",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,550,000",882.65,"2,889",Aug-24,JALAN MULIA,Resale,Land,82,"31,098",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,100,000","2,422.98","2,105",Aug-24,PUAY HEE AVENUE,Resale,Land,225.1,"22,657",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,445,288",884.8,"2,764",Aug-24,JALAN SETIA,Resale,Land,82.2,"29,748",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,660,000",883.72,"3,010",Aug-24,JALAN SETIA,Resale,Land,82.1,"32,400",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,460,000","1,358.42","2,547",Aug-24,JALAN SETIA,Resale,Land,126.2,"27,417",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,950,000","1,359.49","2,170",Aug-24,JALAN SETIA,Resale,Land,126.3,"23,357",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,520,000","2,527.39","2,184",Aug-24,PUAY HEE AVENUE,Resale,Land,234.8,"23,509",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,150,000","2,510.16","2,052",Jul-24,PUAY HEE AVENUE,Resale,Land,233.2,"22,084",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,530,000","1,799.74","1,961",Jul-24,HAPPY AVENUE EAST,Resale,Land,167.2,"21,112",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,925,000","2,669.47","1,845",Jul-24,KENANGA AVENUE,Resale,Land,248,"19,859",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,500,000","1,852.48","1,889",Jul-24,CEDAR AVENUE,Resale,Land,172.1,"20,337",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,300,000","1,500.5","2,199",Jul-24,KEE CHOE AVENUE,Resale,Land,139.4,"23,673",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"8,850,000","4,149.52","2,133",Jul-24,WOLSKEL ROAD,Resale,Land,385.5,"22,957",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,400,000","1,850.33","1,838",Jul-24,CHEMPAKA AVENUE,Resale,Land,171.9,"19,779",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,080,000","4,373.41","1,162",Jul-24,JALAN MAWAR,Resale,Land,406.3,"12,503",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"4,888,888","2,588.74","1,889",Jul-24,CHEMPAKA AVENUE,Resale,Land,240.5,"20,328",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,500,000",883.72,"2,829",Jul-24,JALAN SETIA,Resale,Land,82.1,"30,451",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,111,888",964.45,"3,227",Jun-24,JALAN KEMAJUAN,Resale,Land,89.6,"34,731",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"4,560,000","1,703.94","2,676",Jun-24,MULBERRY AVENUE,Resale,Land,158.3,"28,806",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+VAUGHAN GARDEN,"5,300,000","5,646.79",939,May-24,VAUGHAN ROAD,Resale,Land,524.6,"10,103",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"4,500,000","2,170.02","2,074",May-24,MACKERROW ROAD,Resale,Land,201.6,"22,321",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,488,000","2,265.82","1,539",May-24,MACPHERSON ROAD,Resale,Land,210.5,"16,570",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,070,000","1,353.03","2,269",May-24,JALAN SETIA,Resale,Land,125.7,"24,423",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"7,700,000","4,955.75","1,554",May-24,PHENG GECK AVENUE,Resale,Land,460.4,"16,725",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,025,000","3,419.72","1,469",May-24,JALAN MELATI,Resale,Land,317.7,"15,817",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,700,000","1,605.99","2,304",May-24,MACPHERSON ROAD,Resale,Land,149.2,"24,799",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,320,000","1,646.89","2,016",May-24,JALAN SUKACHITA,Resale,Land,153,"21,699",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"14,180,000","10,203.2","1,390",May-24,MATLOCK RISE,Resale,Land,947.9,"14,959",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,175,000",884.8,"2,458",Apr-24,JALAN SETIA,Resale,Land,82.2,"26,460",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,680,888","1,297.06","2,067",Apr-24,JALAN HIBORAN,Resale,Land,120.5,"22,248",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"4,060,000","2,443.43","1,662",Apr-24,MACKERROW ROAD,Resale,Land,227,"17,885",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,800,000",883.72,"3,168",Apr-24,JALAN SETIA,Resale,Land,82.1,"34,105",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,090,000","2,393.91","1,708",Apr-24,JALAN MELOR,Resale,Land,222.4,"18,390",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,480,000","2,303.5","2,379",Apr-24,KENANGA AVENUE,Resale,Land,214,"25,607",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,400,000","3,749.1","1,440",Apr-24,JALAN ANGGEREK,Resale,Land,348.3,"15,504",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,900,000","1,340.12","2,164",Apr-24,JALAN WANGI,Resale,Land,124.5,"23,293",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"14,000,000","10,194.58","1,373",Apr-24,MATLOCK RISE,Resale,Land,947.1,"14,782",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,730,000","2,069.92","1,802",Mar-24,HAPPY AVENUE EAST,Resale,Land,192.3,"19,397",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,688,000","2,483.25","1,888",Mar-24,PUAY HEE AVENUE,Resale,Land,230.7,"20,321",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"18,800,000","12,593.88","1,493",Mar-24,COTSWOLD CLOSE,Resale,Land,"1,170","16,068",-,Detached House,1,Freehold,13,Outside Central Region,-
+VAUGHAN GARDEN,"3,518,000","1,814.81","1,938",Mar-24,BUKIT ARANG ROAD,Resale,Land,168.6,"20,866",-,Terrace House,1,Freehold,13,Outside Central Region,-
+VAUGHAN GARDEN,"6,680,000","4,045.11","1,651",Mar-24,LORONG BIAWAK,Resale,Land,375.8,"17,775",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,500,000","5,712.45","1,663",Mar-24,JALAN BELANGKAS,Resale,Land,530.7,"17,901",-,Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"13,500,000","9,596.11","1,407",Mar-24,CHILTERN DRIVE,Resale,Land,891.5,"15,143",-,Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"14,200,000","10,223.65","1,389",Feb-24,MATLOCK RISE,Resale,Land,949.8,"14,951",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,200,000","3,440.17","2,093",Feb-24,HAPPY AVENUE CENTRAL,Resale,Land,319.6,"22,528",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,911,888","4,079.56","2,185",Feb-24,CROUCHER ROAD,Resale,Land,379,"23,514",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,250,000","2,092.52","2,031",Feb-24,MULBERRY AVENUE,Resale,Land,194.4,"21,862",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,666,666","7,305.53","1,323",Feb-24,WOLSKEL ROAD,Resale,Land,678.7,"14,243",-,Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"5,100,000","3,899.8","1,308",Feb-24,JALAN SUKACHITA,Resale,Land,362.3,"14,077",-,Terrace House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"16,800,000","14,288.13","1,176",Feb-24,SUNDRIDGE PARK ROAD,Resale,Land,"1,327.4","12,656",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,038,800","1,703.94","1,783",Feb-24,MULBERRY AVENUE,Resale,Land,158.3,"19,196",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,900,000","4,194.73","1,645",Jan-24,JALAN LATEH,Resale,Land,389.7,"17,706",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,530,000","6,264.65","1,521",Jan-24,SOMMERVILLE ROAD,Resale,Land,582,"16,375",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,940,000","2,361.62","2,092",Jan-24,LICHI AVENUE,Resale,Land,219.4,"22,516",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,900,000","1,851.41","2,107",Jan-24,WAN THO AVENUE,Resale,Land,172,"22,674",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"6,000,000","4,497.2","1,334",Jan-24,PUAY HEE AVENUE,Resale,Land,417.8,"14,361",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,150,000","1,800.82","2,305",Jan-24,WOODSVILLE CLOSE,Resale,Land,167.3,"24,806",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,180,000","1,439.15","2,210",Jan-24,JALAN KEMAJUAN,Resale,Land,133.7,"23,785",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,900,000","1,623.21","2,403",Dec-23,MULBERRY AVENUE,Resale,Land,150.8,"25,862",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,280,000",884.8,"2,577",Dec-23,JALAN SETIA,Resale,Land,82.2,"27,737",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY TERRACE,"4,950,000","4,067.72","1,217",Nov-23,DAISY ROAD,Resale,Land,377.9,"13,099",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,700,000","1,900.92","1,946",Nov-23,WOLSKEL ROAD,Resale,Land,176.6,"20,951",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,355,000",884.8,"2,662",Nov-23,JALAN MULIA,Resale,Land,82.2,"28,650",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,628,000","1,567.24","2,315",Oct-23,BELIMBING AVENUE,Resale,Land,145.6,"24,918",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,200,000","2,727.6","1,173",Oct-23,JALAN RAYA,Resale,Land,253.4,"12,628",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,050,000","1,508.04","2,022",Oct-23,MACPHERSON ROAD,Resale,Land,140.1,"21,770",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,300,000","1,646.89","2,004",Oct-23,JALAN SUKACHITA,Resale,Land,153,"21,569",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,180,000","2,591.97","1,613",Sep-23,JALAN CHENGKEK,Resale,Land,240.8,"17,359",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,250,000","6,345.38","1,143",Sep-23,HAPPY AVENUE CENTRAL,Resale,Land,589.5,"12,299",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,050,000","1,499.43","2,034",Sep-23,SIANG KUANG AVENUE,Resale,Land,139.3,"21,895",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"20,300,000","14,274.14","1,422",Aug-23,LYNWOOD GROVE,Resale,Land,"1,326.1","15,308",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,388,888","2,069.92","1,637",Aug-23,HAPPY AVENUE EAST,Resale,Land,192.3,"17,623",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,800,000","2,377.77","2,019",Aug-23,WAN THO AVENUE,Resale,Land,220.9,"21,729",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,825,800","1,569.39","2,438",Aug-23,BELIMBING AVENUE,Resale,Land,145.8,"26,240",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,200,000","3,609.17","1,441",Aug-23,JALAN ANGGEREK,Resale,Land,335.3,"15,508",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,200,000",920.32,"2,390",Aug-23,JALAN SETIA,Resale,Land,85.5,"25,731",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,080,000","2,434.82","2,086",Aug-23,BELIMBING AVENUE,Resale,Land,226.2,"22,458",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,800,000","1,646.89","2,307",Aug-23,JALAN SUKACHITA,Resale,Land,153,"24,837",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,500,000","3,180.76","1,415",Aug-23,JALAN KEMBOJA,Resale,Land,295.5,"15,228",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"10,500,000","4,429.39","2,371",Aug-23,COTSWOLD CLOSE,Resale,Land,411.5,"25,516",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,300,000","2,488.64","2,130",Jul-23,JALAN MELOR,Resale,Land,231.2,"22,924",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,260,000",884.8,"2,554",Jul-23,JALAN GEMBIRA,Resale,Land,82.2,"27,494",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,600,000","4,016.05","1,145",Jul-23,WOLSKEL ROAD,Resale,Land,373.1,"12,329",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,300,000","1,500.5","2,199",Jul-23,MULBERRY AVENUE,Resale,Land,139.4,"23,673",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,028,000",882.65,"2,298",Jun-23,JALAN MULIA,Resale,Land,82,"24,732",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,300,000","3,707.12","1,430",Jun-23,PUAY HEE AVENUE,Resale,Land,344.4,"15,389",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,600,000","3,721.11","1,505",May-23,LORONG BUNGA,Resale,Land,345.7,"16,199",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,586,000","1,702.86","2,106",May-23,LICHI AVENUE,Resale,Land,158.2,"22,668",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,888,888","3,597.33","1,359",May-23,JALAN MELATI,Resale,Land,334.2,"14,629",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"19,700,000","13,572.33","1,451",May-23,CLIFTON VALE,Resale,Land,"1,260.9","15,624",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,850,000","1,500.5","1,899",May-23,MACPHERSON ROAD,Resale,Land,139.4,"20,445",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,300,000","4,343.27","1,220",May-23,JALAN RAYA,Resale,Land,403.5,"13,135",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,570,000","1,552.17","2,300",May-23,PHENG GECK AVENUE,Resale,Land,144.2,"24,757",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,988,000","2,215.23","1,800",May-23,JALAN GIRANG,Resale,Land,205.8,"19,378",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,930,000","1,500.5","1,953",May-23,MACPHERSON ROAD,Resale,Land,139.4,"21,019",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,150,000",889.11,"2,418",Apr-23,JALAN GEMBIRA,Resale,Land,82.6,"26,029",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,050,000","1,501.58","1,365",Apr-23,MACPHERSON ROAD,Resale,Land,139.5,"14,695",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,401,388","1,705.02","1,995",Mar-23,MULBERRY AVENUE,Resale,Land,158.4,"21,473",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,350,000",990.29,"2,373",Mar-23,PANG SENG ROAD,Resale,Land,92,"25,543",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,480,000","2,642.56","1,317",Mar-23,JALAN CHENGKEK,Resale,Land,245.5,"14,175",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"2,998,000","1,500.5","1,998",Mar-23,MACPHERSON ROAD,Resale,Land,139.4,"21,506",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,500,000","5,608.04","1,337",Mar-23,DUNSFOLD DRIVE,Resale,Land,521,"14,395",-,Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"19,000,000","15,701.45","1,210",Mar-23,CLIFTON VALE,Resale,Land,"1,458.7","13,025",-,Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,008,000","1,646.89","1,826",Mar-23,JALAN SUKACHITA,Resale,Land,153,"19,660",-,Terrace House,1,Freehold,13,Outside Central Region,-
+VAUGHAN GARDEN,"6,300,000","6,646.77",948,Feb-23,VAUGHAN ROAD,Resale,Land,617.5,"10,202",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,480,000","1,646.89","2,113",Feb-23,JALAN SUKACHITA,Resale,Land,153,"22,745",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,900,000","2,382.07","1,637",Feb-23,LICHI AVENUE,Resale,Land,221.3,"17,623",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,300,000","1,646.89","2,004",Feb-23,JALAN SUKACHITA,Resale,Land,153,"21,569",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,200,000","4,492.89","2,048",Feb-23,PUAY HEE AVENUE,New Sale,Land,417.4,"22,041",-,Detached House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,228,000","1,652.27","1,954",Jan-23,JALAN RIANG,Resale,Land,153.5,"21,029",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,338,000","1,655.5","2,016",Jan-23,JALAN GIRANG,Resale,Land,153.8,"21,704",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,100,000",882.65,"2,379",Jan-23,JALAN GEMBIRA,Resale,Land,82,"25,610",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,000,000","4,324.98","1,156",Dec-22,JALAN RAYA,Resale,Land,401.8,"12,444",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+VAUGHAN GARDEN,"5,250,000","3,066.66","1,712",Dec-22,BUKIT ARANG ROAD,Resale,Land,284.9,"18,428",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"6,500,000","3,362.67","1,933",Dec-22,JALAN GIRANG,Resale,Land,312.4,"20,807",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"1,960,000",884.8,"2,215",Nov-22,JALAN MULIA,Resale,Land,82.2,"23,844",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,550,000","1,298.14","1,964",Nov-22,JALAN MESRA,Resale,Land,120.6,"21,144",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,950,000",884.8,"2,204",Nov-22,JALAN SETIA,Resale,Land,82.2,"23,723",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,400,000","1,850.33","1,838",Nov-22,CHEMPAKA AVENUE,Resale,Land,171.9,"19,779",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"6,800,000","4,315.29","1,576",Nov-22,MELROSE DRIVE,Resale,Land,400.9,"16,962",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,156,000","1,699.64","1,857",Nov-22,MULBERRY AVENUE,Resale,Land,157.9,"19,987",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"7,000,000","5,615.58","1,247",Oct-22,CARMICHAEL ROAD,Resale,Land,521.7,"13,418",-,Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,450,000","1,623.21","2,741",Oct-22,MULBERRY AVENUE,Resale,Land,150.8,"29,509",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"8,100,000","4,373.41","1,852",Oct-22,COTSWOLD CLOSE,Resale,Land,406.3,"19,936",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,850,000","4,162.44","1,165",Oct-22,JALAN BELANGKAS,Resale,Land,386.7,"12,542",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,180,000","1,567.24","2,029",Sep-22,BELIMBING AVENUE,Resale,Land,145.6,"21,841",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,070,000","1,500.5","2,046",Sep-22,MULBERRY AVENUE,Resale,Land,139.4,"22,023",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,600,000","1,900.92","1,894",Sep-22,WOLSKEL ROAD,Resale,Land,176.6,"20,385",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,588,000","1,340.12","1,931",Aug-22,JALAN WANGI,Resale,Land,124.5,"20,787",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+VAUGHAN GARDEN,"5,260,000","3,181.84","1,653",Aug-22,LORONG BIAWAK,Resale,Land,295.6,"17,794",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,812,888","1,298.14","2,167",Aug-22,JALAN GEMBIRA,Resale,Land,120.6,"23,324",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,150,000","1,851.41","1,701",Aug-22,WAN THO AVENUE,Resale,Land,172,"18,314",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,088,000",884.8,"2,360",Aug-22,JALAN SETIA,Resale,Land,82.2,"25,401",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,855,000","1,351.96","2,112",Aug-22,JALAN SETIA,Resale,Land,125.6,"22,731",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,650,000","1,624.29","2,247",Aug-22,BELIMBING AVENUE,Resale,Land,150.9,"24,188",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,680,000",883.72,"3,033",Aug-22,JALAN SETIA,Resale,Land,82.1,"32,643",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,100,000","1,581.23","1,960",Aug-22,LICHI AVENUE,Resale,Land,146.9,"21,103",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"5,880,000","3,835.21","1,533",Aug-22,JALAN GIRANG,Resale,Land,356.3,"16,503",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,528,000","3,306.7","1,672",Jul-22,SIAK KEW AVENUE,Resale,Land,307.2,"17,995",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,270,000",970.91,"2,338",Jul-22,JALAN KEMAJUAN,Resale,Land,90.2,"25,166",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"18,980,000","10,198.89","1,861",Jul-22,MELROSE DRIVE,Resale,Land,947.5,"20,032",-,Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"15,120,000","11,858.7","1,275",Jul-22,DUNSFOLD DRIVE,Resale,Land,"1,101.7","13,724",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,050,000","2,500.48","2,020",Jul-22,WILLOW AVENUE,Resale,Land,232.3,"21,739",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,575,000","3,299.17","1,387",Jul-22,SIANG KUANG AVENUE,Resale,Land,306.5,"14,927",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,020,000","2,122.66","1,894",Jul-22,JALAN MAWAR,Resale,Land,197.2,"20,385",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,980,000","1,952.59","2,038",Jul-22,HAPPY AVENUE NORTH,Resale,Land,181.4,"21,940",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,200,000","4,732.93","1,099",Jul-22,JALAN MAWAR,Resale,Land,439.7,"11,826",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,380,000","5,693.08","1,472",Jul-22,CARMICHAEL ROAD,Resale,Land,528.9,"15,844",-,Detached House,1,Freehold,13,Rest of Central Region,-
+VAUGHAN GARDEN,"4,628,000","3,167.85","1,461",Jul-22,LORONG BIAWAK,Resale,Land,294.3,"15,725",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"4,918,000","3,899.8","1,261",Jul-22,JALAN SUKACHITA,Resale,Land,362.3,"13,574",-,Terrace House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,050,000",884.8,"2,317",Jul-22,JALAN SETIA,Resale,Land,82.2,"24,939",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,100,000","2,498.32","2,041",Jun-22,WILLOW AVENUE,Resale,Land,232.1,"21,973",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,980,000",886.95,"2,232",Jun-22,JALAN GEMBIRA,Resale,Land,82.4,"24,029",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,850,000","2,547.84","1,904",Jun-22,PHENG GECK AVENUE,Resale,Land,236.7,"20,490",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"15,000,000","12,293.56","1,220",Jun-22,CHILTERN DRIVE,Resale,Land,"1,142.1","13,134",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,250,000","2,534.92","1,677",May-22,PUAY HEE AVENUE,Resale,Land,235.5,"18,047",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,600,000","1,605.99","2,242",May-22,MACPHERSON ROAD,Resale,Land,149.2,"24,129",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,080,000","3,597.33","1,690",May-22,JALAN LATEH,Resale,Land,334.2,"18,193",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,050,000","1,624.29","2,493",May-22,BELIMBING AVENUE,Resale,Land,150.9,"26,839",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,320,000","1,702.86","1,950",May-22,LICHI AVENUE,Resale,Land,158.2,"20,986",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"12,000,000","8,781.27","1,367",May-22,COTSWOLD CLOSE,Resale,Land,815.8,"14,709",-,Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,450,000","1,655.5","2,084",Apr-22,JALAN RIANG,Resale,Land,153.8,"22,432",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"5,650,000","3,570.42","1,582",Apr-22,MULBERRY AVENUE,Resale,Land,331.7,"17,033",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,100,000","2,995.62","1,702",Apr-22,PUAY HEE AVENUE,Resale,Land,278.3,"18,326",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,000,000","1,660.89","1,806",Apr-22,DAISY AVENUE,Resale,Land,154.3,"19,443",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,800,000","1,432.69","1,954",Apr-22,PANG SENG ROAD,Resale,Land,133.1,"21,037",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"4,100,000","1,739.46","2,357",Apr-22,WOLSKEL ROAD,Resale,Land,161.6,"25,371",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"5,430,000","3,834.14","1,416",Mar-22,WOLSKEL ROAD,Resale,Land,356.2,"15,244",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,750,000","1,312.13","2,096",Mar-22,JALAN KEMAJUAN,Resale,Land,121.9,"22,559",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"13,500,000","8,301.2","1,626",Mar-22,SUNDRIDGE PARK ROAD,Resale,Land,771.2,"17,505",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"12,980,000","12,034.15","1,079",Mar-22,SOMMERVILLE WALK,Resale,Land,"1,118","11,610",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,200,000","1,702.86","1,879",Mar-22,LICHI AVENUE,Resale,Land,158.2,"20,228",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,780,000","4,664.04","1,668",Feb-22,DUNSFOLD DRIVE,Resale,Land,433.3,"17,955",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,700,000","3,658.68","1,011",Feb-22,ANGSANA AVENUE,Resale,Land,339.9,"10,886",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"3,200,000","1,646.89","1,943",Jan-22,JALAN GIRANG,Resale,Land,153,"20,915",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"5,000,000","5,910.51",846,Jan-22,BRADDELL ROAD,Resale,Land,549.1,"9,106",-,Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,780,000","2,682.39","1,409",Jan-22,JALAN CHENGKEK,Resale,Land,249.2,"15,169",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"13,500,000","11,022.34","1,225",Jan-22,JALAN LATEH,Resale,Land,"1,024","13,184",-,Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,560,000","2,431.59","1,464",Dec-21,PUAY HEE AVENUE,Resale,Land,225.9,"15,759",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"8,100,000","5,111.82","1,585",Dec-21,MATLOCK RISE,Resale,Land,474.9,"17,056",-,Detached House,1,Freehold,13,Outside Central Region,-
+SERANGOON PARK,"3,539,000","2,680.24","1,320",Dec-21,JALAN SUKACHITA,Resale,Land,249,"14,213",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,700,000","1,727.62","2,142",Dec-21,JALAN LATEH,Resale,Land,160.5,"23,053",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"2,708,000","1,500.5","1,805",Dec-21,MULBERRY AVENUE,Resale,Land,139.4,"19,426",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,500,000","2,284.01","1,970",Dec-21,UPPER ALJUNIED ROAD,New Sale,Land,212.19,"21,207",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,000,000","2,207.7","1,812",Dec-21,BELIMBING AVENUE,Resale,Land,205.1,"19,503",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,700,000","2,721.14","1,727",Dec-21,KEE CHOE AVENUE,Resale,Land,252.8,"18,592",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+DAISY PARK,"3,000,000","1,659.81","1,807",Dec-21,DAISY AVENUE,Resale,Land,154.2,"19,455",-,Terrace House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"4,368,000","3,575.8","1,222",Dec-21,WAN THO AVENUE,Resale,Land,332.2,"13,149",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"4,320,000","4,149.52","1,041",Dec-21,WOLSKEL ROAD,Resale,Land,385.5,"11,206",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,500,000","1,297.06","1,927",Nov-21,JALAN HIBORAN,Resale,Land,120.5,"20,747",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,880,000",989.21,"1,901",Nov-21,JALAN MULIA,Resale,Land,91.9,"20,457",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,060,000",885.88,"2,325",Nov-21,JALAN SETIA,Resale,Land,82.3,"25,030",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+OASIS @ MULBERRY,"3,900,000","2,076.38","1,878",Nov-21,CHEMPAKA AVENUE,Resale,Land,192.9,"20,218",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,190,000","3,276.56","1,279",Nov-21,JALAN GIRANG,Resale,Land,304.4,"13,765",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"9,400,000","11,191.33",840,Nov-21,CLIFTON VALE,Resale,Land,"1,039.7","9,041",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,100,000","1,037.65","2,024",Nov-21,JALAN KEMAJUAN,Resale,Land,96.4,"21,784",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+HAPPY GARDENS,"4,730,000","2,858.92","1,654",Oct-21,HAPPY AVENUE EAST,Resale,Land,265.6,"17,809",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,500,888",920.32,"2,717",Oct-21,JALAN GEMBIRA,Resale,Land,85.5,"29,250",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,608,000","1,354.11","1,926",Oct-21,JALAN SETIA,Resale,Land,125.8,"20,731",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,680,000",903.1,"2,968",Oct-21,JALAN KEMAJUAN,Resale,Land,83.9,"31,943",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"5,490,000","4,972.97","1,104",Oct-21,KENANGA AVENUE,Resale,Land,462,"11,883",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"3,010,000","1,396.09","2,156",Sep-21,JALAN GEMBIRA,Resale,Land,129.7,"23,207",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,650,000","1,298.14","2,041",Sep-21,JALAN MESRA,Resale,Land,120.6,"21,973",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,080,000","4,355.11","1,855",Sep-21,COTSWOLD CLOSE,New Sale,Land,404.6,"19,970",-,Detached House,1,Freehold,13,Outside Central Region,-
+DAISY PARK,"2,680,000","1,799.74","1,489",Sep-21,DAISY AVENUE,Resale,Land,167.2,"16,029",-,Terrace House,1,Freehold,13,Outside Central Region,-
+OASIS @ MULBERRY,"3,700,000","2,075.3","1,783",Sep-21,BELIMBING AVENUE,Resale,Land,192.8,"19,191",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"5,800,000","4,497.2","1,290",Sep-21,WOLSKEL ROAD,Resale,Land,417.8,"13,882",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"2,400,266","1,500.5","1,600",Sep-21,MULBERRY AVENUE,Resale,Land,139.4,"17,219",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"4,308,888","2,828.78","1,523",Sep-21,PHENG GECK AVENUE,Resale,Land,262.8,"16,396",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,940,000","5,544.54","1,432",Sep-21,DUNSFOLD DRIVE,Resale,Land,515.1,"15,414",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,520,000","4,593","1,420",Aug-21,LORONG SELANGAT,Resale,Land,426.7,"15,280",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+SENNETT ESTATE,"3,633,000","1,852.48","1,961",Aug-21,CEDAR AVENUE,Resale,Land,172.1,"21,110",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,000,000","2,557.53","1,173",Aug-21,JALAN CHENGKEK,Resale,Land,237.6,"12,626",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,300,000","5,912.67","1,066",Aug-21,CARMICHAEL ROAD,Resale,Land,549.3,"11,469",-,Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,200,000",885.88,"2,483",Aug-21,JALAN MESRA,Resale,Land,82.3,"26,731",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,830,000","3,563.96","1,075",Aug-21,MULBERRY AVENUE,Resale,Land,331.1,"11,568",-,Semi-Detached House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,848,888",884.8,"2,090",Aug-21,JALAN SETIA,Resale,Land,82.2,"22,493",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,000,000","1,848.18","1,623",Aug-21,BUTTERFLY AVENUE,Resale,Land,171.7,"17,472",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"2,450,000","1,312.13","1,867",Aug-21,JALAN KEMAJUAN,Resale,Land,121.9,"20,098",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,680,000",885.88,"1,896",Aug-21,JALAN MESRA,Resale,Land,82.3,"20,413",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SERANGOON PARK,"5,250,000","3,515.52","1,493",Jul-21,JALAN GIRANG,Resale,Land,326.6,"16,075",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,600,000","5,562.84","1,366",Jul-21,DUNSFOLD DRIVE,Resale,Land,516.8,"14,706",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,250,000","2,547.84","1,668",Jul-21,ANGSANA AVENUE,Resale,Land,236.7,"17,955",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"6,988,888","4,730.78","1,477",Jul-21,LYNWOOD GROVE,Resale,Land,439.5,"15,902",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,160,000","1,031.19","2,095",Jul-21,JALAN KEMAJUAN,Resale,Land,95.8,"22,547",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"7,700,000","4,632.83","1,662",Jul-21,MUSWELL HILL,Resale,Land,430.4,"17,890",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"8,000,000","5,046.16","1,585",Jul-21,MATLOCK RISE,Resale,Land,468.8,"17,065",-,Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,510,000","1,702.86","2,061",Jul-21,LICHI AVENUE,Resale,Land,158.2,"22,187",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,860,000","2,557.53","1,509",Jul-21,WOLSKEL ROAD,Resale,Land,237.6,"16,246",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,548,000","2,074.22","1,711",Jul-21,PUAY HEE AVENUE,Resale,Land,192.7,"18,412",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,080,000","5,275.44",773,Jul-21,BRADDELL ROAD,Resale,Land,490.1,"8,325",-,Detached House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"2,750,000","2,285.2","1,203",Jul-21,JALAN WANGI,Resale,Land,212.3,"12,953",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"3,500,000","2,394.99","1,461",Jul-21,JALAN MELOR,Resale,Land,222.5,"15,730",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+SENNETT ESTATE,"3,075,000","1,641.51","1,873",Jul-21,CHEMPAKA AVENUE,Resale,Land,152.5,"20,164",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+LANDED HOUSING DEVELOPMENT,"18,000,000","10,223.65","1,761",Jul-21,MATLOCK RISE,Resale,Land,949.8,"18,951",-,Detached House,1,Freehold,13,Outside Central Region,-
+MACPHERSON GARDEN ESTATE,"2,080,000",883.72,"2,354",Jun-21,JALAN SETIA,Resale,Land,82.1,"25,335",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+BRADDELL HEIGHTS ESTATE,"3,850,000","2,931.04","1,314",Jun-21,LYNWOOD GROVE,Resale,Land,272.3,"14,139",-,Semi-Detached House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"2,500,000","1,660.89","1,505",Jun-21,DAISY AVENUE,Resale,Land,154.3,"16,202",-,Terrace House,1,Freehold,13,Outside Central Region,-
+VAUGHAN GARDEN,"3,250,000","2,768.5","1,174",Jun-21,VAUGHAN ROAD,Resale,Land,257.2,"12,636",-,Terrace House,1,Freehold,13,Outside Central Region,-
+LANDED HOUSING DEVELOPMENT,"4,400,000","2,949.34","1,492",Jun-21,JALAN KEMBOJA,Resale,Land,274,"16,058",-,Terrace House,1,Freehold,13,Rest of Central Region,-
+MACPHERSON GARDEN ESTATE,"1,680,000",885.88,"1,896",Jun-21,JALAN MESRA,Resale,Land,82.3,"20,413",-,Terrace House,1,Freehold,13,Rest of Central Region,-

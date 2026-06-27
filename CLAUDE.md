@@ -98,15 +98,13 @@ These are not stylistic preferences — they are framework rules the code active
   guards single-sourcing with `is`-identity checks; do not re-introduce a local copy.
 - **D multiplier holds LOSSES ONLY.** Positive additions go in S7 momentum / liveability T5, never
   in D. This avoids the v0.2–0.4 double-count.
-- **Tengah has no resale value.** Canberra is folded into Sembawang. Don't add synthetic rows for
-  these; the alias mechanism + manual overrides in `lease_risk_model.py` handle them.
-- **`pipeline_data.json` carries legacy NRP/LUP attribution (Phase-2 disclosure).** `ingest_hdb_upgrading.py`
-  now imports `aliases.PIPELINE_NAME_ALIAS` as its single-source alias map, but the committed
-  `pipeline_data.json` was generated under the OLD local map that credited some Jurong West and
-  Kallang precincts to Jurong East and Boon Keng respectively. The ingester fetches from data.gov.sg
-  (network required), so regenerating `pipeline_data.json` and the downstream momentum→provision
-  cascade is deferred to Phase 3. Until then, Jurong East momentum is mildly overstated by Jurong
-  West NRP precincts and Boon Keng may carry stray Kallang sites.
+- **Tengah has no HDB resale value.** Canberra HDB is folded into Sembawang. Don't add synthetic
+  HDB rows for these; the alias mechanism + manual overrides in `lease_risk_model.py` handle them.
+- **`pipeline_data.json` NRP/LUP attribution has been refreshed with the shared aliases.**
+  `ingest_hdb_upgrading.py` imports `aliases.PIPELINE_NAME_ALIAS` and the committed NRP/LUP items
+  were regenerated from data.gov.sg on 2026-06-27. Jurong West and Kallang attribution is no longer
+  folded into Jurong East / Boon Keng. Future refreshes still require network access and a reviewed
+  momentum→provision→liveability→value→master cascade.
 
 ## Commands
 
@@ -207,7 +205,7 @@ The framework documents are not stale documentation; they are the spec.
 
 - **[comparison_table.html](comparison_table.html)** — rendered cross-model comparison table (estates × Provision / Liveability / Value / Employment / Risk / Life-Path). The headline visual deliverable. ⚠ Estate/component counts lag after a pipeline regeneration — re-run `build_master.py` when counts change.
 - **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → 4 Models → `data/master_output.csv`). Same regeneration caveat.
-- **[scrapers/](scrapers/)** ([README](scrapers/README.md)) — URA private-transaction scrapers (Playwright primary, API fallback). Downloads raw private-sale data by postal district for `value_model.py --private`. Districts 15 & 16 (Marine Parade / Bedok private data) still missing.
+- **[scrapers/](scrapers/README.md)** — URA private-transaction scrapers (Playwright primary, API fallback). Downloads apartment/condo, landed, and strata-landed PMI data by postal district for `value_model.py --private`.
 - **[factor_audit_reports/](factor_audit_reports/)** — output from the `factor-audit` skill; proposed new framework components with evidence citations. Not auto-applied to any model.
 - **[docs/superpowers/plans/](docs/superpowers/plans/)** — internal planning docs from development sessions. Not framework content.
 - **[tests/snapshots/before/](tests/snapshots/before/)** — committed baseline CSVs (`provision_scores`, `liveability_matrix`, `value_output`) for the snapshot characterization tests. Update manually when a pipeline change intentionally alters output.

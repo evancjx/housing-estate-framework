@@ -11,7 +11,8 @@ INPUT:  Raw CSVs from the URA PMI portal or REALIS caveats.
 
 OUTPUT: data/ura_private.csv with columns:
     planning_area, transacted_price, area_sqm, property_type,
-    tenure, project_age_years, sale_month
+    tenure, project_age_years, sale_month, plus optional raw context
+    columns such as type_of_area and market_segment when present
 
 DISTRICT → PLANNING AREA mapping is used when the raw file doesn't have
 a planning_area column (portal downloads only have Postal District).
@@ -256,8 +257,8 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
         "planning_area", "transacted_price", "area_sqm",
         "property_type", "tenure", "project_age_years", "sale_month",
     ]
-    optional = ["project_name", "street_name", "postal_district", "floor_level",
-                "type_of_sale", "unit_price_psm"]
+    optional = ["project_name", "street_name", "postal_district", "market_segment",
+                "floor_level", "type_of_sale", "type_of_area", "unit_price_psm"]
     for c in optional:
         if c in df.columns:
             out_cols.append(c)
@@ -265,6 +266,17 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
     df = df[[c for c in out_cols if c in df.columns]]
     print(f"  {path.name}: {len(df)} rows → planning areas: {sorted(df['planning_area'].unique())}")
     return df
+
+
+def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """Drop duplicate raw transactions using the broadest stable key available."""
+    dedup_cols = ["planning_area", "transacted_price", "area_sqm", "sale_month", "property_type"]
+    for extra in ["type_of_area", "project_name", "street_name", "floor_level"]:
+        if extra in df.columns:
+            dedup_cols.append(extra)
+    before = len(df)
+    df = df.drop_duplicates(subset=dedup_cols, keep="last")
+    return df, before - len(df)
 
 
 def run(args):
@@ -300,16 +312,11 @@ def run(args):
     if args.merge and out_path.exists():
         existing = pd.read_csv(out_path)
         combined = pd.concat([existing, combined], ignore_index=True)
-        # Dedup: include project+street+floor if available (broader key avoids false positives)
-        dedup_cols = ["planning_area", "transacted_price", "area_sqm", "sale_month"]
-        for extra in ["project_name", "street_name", "floor_level"]:
-            if extra in combined.columns:
-                dedup_cols.append(extra)
-        before = len(combined)
-        combined = combined.drop_duplicates(subset=dedup_cols, keep="last")
-        print(f"Merged with existing ({len(existing)} rows) → {len(combined)} rows total (deduped {before-len(combined)} rows)")
+        combined, dropped = dedupe_transactions(combined)
+        print(f"Merged with existing ({len(existing)} rows) → {len(combined)} rows total (deduped {dropped} rows)")
     else:
-        print(f"Total: {len(combined)} rows")
+        combined, dropped = dedupe_transactions(combined)
+        print(f"Total: {len(combined)} rows (deduped {dropped} rows)")
 
     combined.to_csv(out_path, index=False)
     print(f"\nWritten: {out_path}")
@@ -319,7 +326,7 @@ def run(args):
 
     print("\nNext: re-run value model to pick up new areas:")
     print(f"  python models/value_model.py --scores data/provision_scores.csv \\")
-    print(f"      --hdb data/hdb_resale.csv --private {out_path} --out data/value_private.csv")
+    print(f"      --hdb data/hdb_resale.csv --private {out_path} --out data/value_output_private.csv")
 
 
 def main():

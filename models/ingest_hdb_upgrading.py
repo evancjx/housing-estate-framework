@@ -288,8 +288,16 @@ def merge_into_pipeline(pipeline_path: str, new_items: list[dict], out_path: str
     with open(pipeline_path) as f:
         data = json.load(f)
     existing = data.get("pipeline_items", [])
-    kept = [it for it in existing if it.get("type") not in {"NRP", "LUP"}]
-    data["pipeline_items"] = kept + new_items
+    replace_types = {"NRP", "LUP"}
+    insert_at = next(
+        (i for i, item in enumerate(existing) if item.get("type") in replace_types),
+        len(existing),
+    )
+    data["pipeline_items"] = [
+        *[it for it in existing[:insert_at] if it.get("type") not in replace_types],
+        *new_items,
+        *[it for it in existing[insert_at:] if it.get("type") not in replace_types],
+    ]
     with open(out_path, "w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 

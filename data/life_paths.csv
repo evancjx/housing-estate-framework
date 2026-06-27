@@ -159,13 +159,13 @@ JURONG WEST,settling_single,2.29,F,3.896,B,1.606,↑,F→B
 JURONG WEST,ageing_in_place,2.398,F,3.705,B,1.307,↑,F→B
 JURONG WEST,downsizing,2.552,D,3.705,B,1.153,↑,D→B
 JURONG WEST,upgrader,2.432,F,3.674,B,1.242,↑,F→B
-KALLANG,forming_family,3.882,B,3.837,B,-0.045,→,B→B
-KALLANG,settling_single,3.69,B,3.921,B,0.231,↑,B→B
-KALLANG,ageing_in_place,3.781,B,3.801,B,0.02,→,B→B
-KALLANG,downsizing,3.824,B,3.801,B,-0.023,→,B→B
-KALLANG,upgrader,3.882,B,3.726,B,-0.156,↓,B→B
-HOLLAND VILLAGE,forming_family,3.995,B,4.05,B+,0.055,→,B→B+
-HOLLAND VILLAGE,settling_single,3.797,B,3.995,B,0.198,↑,B→B
-HOLLAND VILLAGE,ageing_in_place,3.993,B,3.993,B,0.0,→,B→B
-HOLLAND VILLAGE,downsizing,4.05,B+,3.993,B,-0.057,→,B+→B
-HOLLAND VILLAGE,upgrader,3.995,B,3.797,B,-0.198,↓,B→B
+KALLANG,forming_family,3.742,B,3.857,B,0.115,↑,B→B
+KALLANG,settling_single,3.57,B,3.781,B,0.211,↑,B→B
+KALLANG,ageing_in_place,3.801,B,3.821,B,0.02,→,B→B
+KALLANG,downsizing,3.844,B,3.821,B,-0.023,→,B→B
+KALLANG,upgrader,3.742,B,3.606,B,-0.136,↓,B→B
+HOLLAND VILLAGE,forming_family,3.85,B,4.071,B+,0.221,↑,B→B+
+HOLLAND VILLAGE,settling_single,3.673,B,3.85,B,0.177,↑,B→B
+HOLLAND VILLAGE,ageing_in_place,4.014,B+,4.014,B+,0.0,→,B+→B+
+HOLLAND VILLAGE,downsizing,4.071,B+,4.014,B+,-0.057,→,B+→B+
+HOLLAND VILLAGE,upgrader,3.85,B,3.673,B,-0.177,↓,B→B

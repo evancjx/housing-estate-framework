@@ -1,5 +1,12 @@
 # 3 — Estate Growth & Liveability Framework (v0.3)
 
+> ⚠️ **SUPERSEDED / HISTORICAL RECORD** — this v0.3 unified design predates and is replaced by the
+> [Provision](1-provision-framework.md) + [Liveability](2-liveability-matrix.md) split and the current
+> 20-component model. It uses the **obsolete 9-component Core** and the single-number
+> `Final = Core × D × C` architecture the project deliberately discarded. **Do not use this as a
+> current spec.** Kept alongside [`sg-estate-liveability-framework.md`](sg-estate-liveability-framework.md)
+> as historical record only.
+
 > **Purpose:** Grade the liveability of Singapore residential estates for people deciding where to live — not for investment ranking, not for planning analytics.
 > **Status:** Framework locked. Data slots marked `[TBD]`.
 

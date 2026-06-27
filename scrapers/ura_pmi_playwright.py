@@ -11,6 +11,9 @@ USAGE:
     # Download Apartments & Condominiums for districts 03, 04, 05
     python scrapers/ura_pmi_playwright.py --districts 03 04 05 --out_dir data/ura_raw/
 
+    # Download landed transactions: Landed Properties (Non-Strata) + Strata Landed
+    python scrapers/ura_pmi_playwright.py --districts 15 16 --prop_types landed strata_landed
+
     # Full date range, resale only
     python scrapers/ura_pmi_playwright.py --districts 15 16 --year_from 2021 --sale_type 3
 
@@ -40,7 +43,9 @@ DISTRICT → ESTATE mapping (estates.csv names):
     28 → SELETAR
 
 OUTPUT:
-    CSV files: {out_dir}/pmi_d{district}_{year_from}-{year_to}.csv
+    CSV files: {out_dir}/pmi_d{district}_{property_type}_{year_from}-{year_to}.csv
+    Apartments & Condominiums keep the legacy filename
+    {out_dir}/pmi_d{district}_{year_from}-{year_to}.csv.
     Column names match URA REALIS caveat schema (no transformation applied).
 
 INSTALL:
@@ -98,12 +103,81 @@ PROP_TYPE_MAP = {
     "all": "",  # empty = all types (field stays disabled when not postal-district mode)
 }
 
+PROP_TYPE_SLUGS = {
+    "1": "landed_non_strata",
+    "2": "strata_landed",
+    "3": "apt_condo",
+    "4": "executive_condo",
+    "all": "all_residential",
+}
+
+PROP_TYPE_ALIASES = {
+    "landed": "1",
+    "landed_non_strata": "1",
+    "landed-non-strata": "1",
+    "non_strata_landed": "1",
+    "non-strata-landed": "1",
+    "strata_landed": "2",
+    "strata-landed": "2",
+    "apt_condo": "3",
+    "apt-condo": "3",
+    "apartment": "3",
+    "apartments": "3",
+    "condo": "3",
+    "condos": "3",
+    "ec": "4",
+    "executive_condo": "4",
+    "executive-condo": "4",
+}
+
 # Sale type values (multiselect#saleType)
 SALE_TYPE_MAP = {
     "1": "New Sale",
     "2": "Sub Sale",
     "3": "Resale",
 }
+
+
+def normalize_prop_type(value: str) -> str:
+    """Return the URA property type code for a CLI value or alias."""
+    v = str(value).strip().lower()
+    v = PROP_TYPE_ALIASES.get(v, v)
+    if v not in PROP_TYPE_MAP or v == "all":
+        raise ValueError(
+            f"Unknown property type '{value}'. Use one of: "
+            "1/landed, 2/strata_landed, 3/apt_condo, 4/ec"
+        )
+    return v
+
+
+def normalize_prop_types(values: list[str] | None) -> list[str]:
+    """Normalize property type values, preserving order and removing duplicates."""
+    raw = values or ["3"]
+    out = []
+    for value in raw:
+        code = normalize_prop_type(value)
+        if code not in out:
+            out.append(code)
+    return out
+
+
+def prop_type_slug(prop_type: str) -> str:
+    return PROP_TYPE_SLUGS[normalize_prop_type(prop_type)]
+
+
+def raw_filename(district: str, year_from: str, year_to: str, prop_type: str) -> str:
+    """
+    Return the raw CSV filename for a district/property-type download.
+
+    Apartments & Condominiums keep the historical filename so existing data and
+    README commands remain valid. Other property groups include a slug to avoid
+    overwriting apartment/condo downloads for the same district/date range.
+    """
+    district = str(district).zfill(2)
+    prop_type = normalize_prop_type(prop_type)
+    if prop_type == "3":
+        return f"pmi_d{district}_{year_from}-{year_to}.csv"
+    return f"pmi_d{district}_{prop_type_slug(prop_type)}_{year_from}-{year_to}.csv"
 
 
 async def download_district(
@@ -126,7 +200,8 @@ async def download_district(
         print(f"  [ERROR] Unknown district '{district}' — skipping", file=sys.stderr)
         return None
 
-    print(f"  District {district}: {label[:50]}...")
+    prop_label = PROP_TYPE_MAP.get(prop_type, prop_type)
+    print(f"  District {district}: {label[:50]}... / {prop_label}")
 
     await page.goto(PORTAL_URL, wait_until="commit", timeout=30000)
     await page.wait_for_timeout(5000)
@@ -215,7 +290,7 @@ async def download_district(
         return None
 
     # 9. Trigger CSV download via the resultForm submit
-    out_file = out_dir / f"pmi_d{district}_{year_from}-{year_to}.csv"
+    out_file = out_dir / raw_filename(district, year_from, year_to, prop_type)
 
     async with page.expect_download(timeout=60000) as dl_info:
         await page.evaluate("""
@@ -260,6 +335,7 @@ async def run(args):
         sys.exit(1)
 
     sale_types = args.sale_type if args.sale_type else []
+    prop_types = normalize_prop_types(getattr(args, "prop_types", None) or [args.prop_type])
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=not args.headed)
@@ -274,40 +350,45 @@ async def run(args):
         page = await ctx.new_page()
 
         results = {}
+        total = len(districts) * len(prop_types)
+        n = 0
         for district in districts:
-            print(f"\n[{district}/{len(districts)}] Downloading district {district}...")
-            try:
-                saved = await download_district(
-                    page=page,
-                    district=district,
-                    year_from=args.year_from,
-                    month_from=args.month_from,
-                    year_to=args.year_to,
-                    month_to=args.month_to,
-                    prop_type=args.prop_type,
-                    sale_types=sale_types,
-                    out_dir=out_dir,
-                    timeout_ms=args.timeout * 1000,
-                )
-                results[district] = str(saved) if saved else None
-            except Exception as e:
-                print(f"  [ERROR] District {district} failed: {e}", file=sys.stderr)
-                results[district] = None
+            for prop_type in prop_types:
+                n += 1
+                prop_label = PROP_TYPE_MAP[prop_type]
+                print(f"\n[{n}/{total}] Downloading district {district} / {prop_label}...")
+                try:
+                    saved = await download_district(
+                        page=page,
+                        district=district,
+                        year_from=args.year_from,
+                        month_from=args.month_from,
+                        year_to=args.year_to,
+                        month_to=args.month_to,
+                        prop_type=prop_type,
+                        sale_types=sale_types,
+                        out_dir=out_dir,
+                        timeout_ms=args.timeout * 1000,
+                    )
+                    results[(district, prop_type)] = str(saved) if saved else None
+                except Exception as e:
+                    print(f"  [ERROR] District {district} / {prop_label} failed: {e}", file=sys.stderr)
+                    results[(district, prop_type)] = None
 
-            # Brief pause between districts to avoid rate limiting
-            if districts.index(district) < len(districts) - 1:
-                await asyncio.sleep(3)
+                # Brief pause between searches to avoid rate limiting
+                if n < total:
+                    await asyncio.sleep(3)
 
         await browser.close()
 
     print("\n=== SUMMARY ===")
-    ok = [d for d, f in results.items() if f]
-    fail = [d for d, f in results.items() if not f]
-    for d in ok:
-        print(f"  D{d}: {results[d]}")
-    for d in fail:
-        print(f"  D{d}: FAILED")
-    print(f"\n{len(ok)}/{len(districts)} districts downloaded successfully.")
+    ok = [k for k, f in results.items() if f]
+    fail = [k for k, f in results.items() if not f]
+    for district, prop_type in ok:
+        print(f"  D{district} / {PROP_TYPE_MAP[prop_type]}: {results[(district, prop_type)]}")
+    for district, prop_type in fail:
+        print(f"  D{district} / {PROP_TYPE_MAP[prop_type]}: FAILED")
+    print(f"\n{len(ok)}/{len(results)} downloads completed successfully.")
     if ok:
         print(f"Files in: {out_dir}")
 
@@ -326,8 +407,17 @@ def main():
     ap.add_argument("--month_to", default="12", help="End month 1-12 (default: 12)")
     ap.add_argument(
         "--prop_type", default="3",
-        choices=["1", "2", "3", "4"],
-        help="Property type: 1=Landed, 2=Strata Landed, 3=Apts&Condos (default), 4=EC",
+        help=(
+            "Single property type, kept for backward compatibility: "
+            "1/landed, 2/strata_landed, 3/apt_condo (default), 4/ec"
+        ),
+    )
+    ap.add_argument(
+        "--prop_types", nargs="+",
+        help=(
+            "One or more property types. Example for landed coverage: "
+            "--prop_types landed strata_landed"
+        ),
     )
     ap.add_argument(
         "--sale_type", nargs="*", default=[],
@@ -338,6 +428,10 @@ def main():
     ap.add_argument("--headed", action="store_true", help="Run in headed mode (shows browser window)")
     ap.add_argument("--timeout", type=int, default=60, help="Results load timeout in seconds (default: 60)")
     args = ap.parse_args()
+    try:
+        args.prop_types = normalize_prop_types(args.prop_types or [args.prop_type])
+    except ValueError as e:
+        ap.error(str(e))
 
     asyncio.run(run(args))
 

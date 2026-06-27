@@ -1352,17 +1352,6 @@
       "notes": "NRP confirmed (2 sites): BISHAN ST 22/24(BIS04); BISHAN ST 23(BIS05)  [year=mode of U/C completions]"
     },
     {
-      "description": "NRP — 1 precinct in BOON KENG (confirmed)",
-      "benefiting_estates": [
-        "BOON KENG"
-      ],
-      "type": "NRP",
-      "significance": "LOW",
-      "certainty": "CONFIRMED",
-      "expected_year": 2025,
-      "notes": "NRP confirmed (1 site): MAUDE RD/KITCHENER RD/KING GEORGE'S AVE/FRENCH RD(FRE01)  [year=mode of U/C completions]"
-    },
-    {
       "description": "NRP — 3 precincts in BOON KENG (planned)",
       "benefiting_estates": [
         "BOON KENG"
@@ -1473,7 +1462,7 @@
       "notes": "NRP confirmed (2 sites): EUNOS RD 5(EUN01); ALJUNIED AVE 2/PAYA LEBAR WAY/BALAM/CIRCUIT RD(MAC03)  [year=mode of U/C completions]"
     },
     {
-      "description": "NRP — 4 precincts in GEYLANG (planned)",
+      "description": "NRP — 3 precincts in GEYLANG (planned)",
       "benefiting_estates": [
         "GEYLANG"
       ],
@@ -1481,7 +1470,7 @@
       "significance": "MEDIUM",
       "certainty": "PLANNED",
       "expected_year": 2030,
-      "notes": "NRP planned (4 sites): DAKOTA CRESCENT(MAR01); SIMS DR(GYL01); LOR 3 GEYLANG(GYL02); SIMS AVENUE(GYL03)  [no firm date — default horizon 2030]"
+      "notes": "NRP planned (3 sites): DAKOTA CRESCENT(MAR01); SIMS DR(GYL01); SIMS AVENUE(GYL03)  [no firm date — default horizon 2030]"
     },
     {
       "description": "NRP — 2 precincts in HOUGANG (confirmed)",
@@ -1506,9 +1495,20 @@
       "notes": "NRP planned (1 site): HOUGANG CENTRAL(HOU14)  [no firm date — default horizon 2030]"
     },
     {
-      "description": "NRP — 2 precincts in JURONG EAST (confirmed)",
+      "description": "NRP — 3 precincts in JURONG EAST (planned)",
       "benefiting_estates": [
         "JURONG EAST"
+      ],
+      "type": "NRP",
+      "significance": "MEDIUM",
+      "certainty": "PLANNED",
+      "expected_year": 2030,
+      "notes": "NRP planned (3 sites): JURONG EAST AVENUE 1/ STREET 31(JRE05); YUNG AN RD/CORPORATION DR(TJU04); TEBAN GARDENS ROAD/ PANDAN GARDENS(TPG01)  [no firm date — default horizon 2030]"
+    },
+    {
+      "description": "NRP — 2 precincts in JURONG WEST (confirmed)",
+      "benefiting_estates": [
+        "JURONG WEST"
       ],
       "type": "NRP",
       "significance": "LOW",
@@ -1517,15 +1517,37 @@
       "notes": "NRP confirmed (2 sites): JURONG WEST ST 73/75(JRW07); JURONG WEST ST 81(JRW09)  [year=mode of U/C completions]"
     },
     {
-      "description": "NRP — 9 precincts in JURONG EAST (planned)",
+      "description": "NRP — 6 precincts in JURONG WEST (planned)",
       "benefiting_estates": [
-        "JURONG EAST"
+        "JURONG WEST"
       ],
       "type": "NRP",
       "significance": "HIGH",
       "certainty": "PLANNED",
       "expected_year": 2030,
-      "notes": "NRP planned (9 sites): JURONG EAST AVENUE 1/ STREET 31(JRE05); JURONG WEST ST 91/92(JRW10); JURONG WEST ST 74(JRW11); JURONG WEST ST 71/91/92/93(JRW12); JURONG WEST ST 41(JRW13)…  [no firm date — default horizon 2030]"
+      "notes": "NRP planned (6 sites): JURONG WEST ST 91/92(JRW10); JURONG WEST ST 74(JRW11); JURONG WEST ST 71/91/92/93(JRW12); JURONG WEST ST 41(JRW13); JURONG WEST STREET 81(JRW14B)…  [no firm date — default horizon 2030]"
+    },
+    {
+      "description": "NRP — 1 precinct in KALLANG (confirmed)",
+      "benefiting_estates": [
+        "KALLANG"
+      ],
+      "type": "NRP",
+      "significance": "LOW",
+      "certainty": "CONFIRMED",
+      "expected_year": 2025,
+      "notes": "NRP confirmed (1 site): MAUDE RD/KITCHENER RD/KING GEORGE'S AVE/FRENCH RD(FRE01)  [year=mode of U/C completions]"
+    },
+    {
+      "description": "NRP — 1 precinct in KALLANG (planned)",
+      "benefiting_estates": [
+        "KALLANG"
+      ],
+      "type": "NRP",
+      "significance": "LOW",
+      "certainty": "PLANNED",
+      "expected_year": 2030,
+      "notes": "NRP planned (1 site): LOR 3 GEYLANG(GYL02)  [no firm date — default horizon 2030]"
     },
     {
       "description": "NRP — 1 precinct in MARINE PARADE (planned)",
@@ -1759,9 +1781,9 @@
       "notes": "LUP confirmed (3 sites): HOUGANG CENTRAL(HOU51); HOUGANG STREET 51(HOU52); HOUGANG AVE 8(HOU50)  [year=mode of U/C completions]"
     },
     {
-      "description": "LUP — 2 block-clusters in JURONG EAST (confirmed)",
+      "description": "LUP — 2 block-clusters in JURONG WEST (confirmed)",
       "benefiting_estates": [
-        "JURONG EAST"
+        "JURONG WEST"
       ],
       "type": "LUP",
       "significance": "LOW",

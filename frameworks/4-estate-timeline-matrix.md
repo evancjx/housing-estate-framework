@@ -2,6 +2,12 @@
 *Per-town maturation data for all 23 researched HDB new towns*
 *Generated 2026-06-15 via multi-agent web research across 24 subagents*
 
+> **Document type: Reference data — not a scoring spec.** Per-town maturation data (MRT lag, SERS
+> projects, polyclinic gaps, sequencing patterns). Not yet wired into any model. Candidate calibration
+> source for the S7 momentum component and archetype assignments in
+> [Document 1 — Provision](1-provision-framework.md). Some figures carry ⚠ caveats (see table footer);
+> the Geylang polyclinic ~1995 date is inferred, not primary-sourced.
+
 ---
 
 ## 1. Per-Town Timeline Matrix

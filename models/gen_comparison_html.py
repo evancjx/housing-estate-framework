@@ -176,6 +176,14 @@ HTML = f"""<!DOCTYPE html>
   }}
   h1 {{ font-size: 17px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; letter-spacing: -0.3px; }}
   .meta {{ font-size: 11px; color: #475569; margin-bottom: 24px; }}
+  .help-note {{
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    margin: -8px 0 16px; padding: 8px 10px;
+    border: 1px solid #1e293b; border-radius: 6px;
+    background: #0d1117; color: #64748b; font-size: 11px; line-height: 1.45;
+  }}
+  .help-note strong {{ color: #cbd5e1; font-weight: 700; }}
+  .help-note span {{ color: #475569; }}
 
   .controls {{ display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }}
   .filter-btn {{
@@ -209,6 +217,56 @@ HTML = f"""<!DOCTYPE html>
   thead tr.cols th.sorted {{ color: #a5b4fc; }}
   thead tr.cols th.sorted-asc::after {{ content: " ↑"; }}
   thead tr.cols th.sorted-desc::after {{ content: " ↓"; }}
+  .tip {{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 1px dotted #475569;
+    cursor: help;
+  }}
+  .tip::after {{
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    z-index: 50;
+    width: max-content;
+    max-width: 240px;
+    padding: 6px 8px;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    background: #020617;
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }}
+  .tip::before {{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 3px);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #334155;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }}
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {{
+    opacity: 1;
+  }}
 
   .g-id   {{ background: #0d1117; color: #334155; }}
   .g-prov {{ background: #0d1117; color: #1e40af; }}
@@ -290,6 +348,12 @@ HTML = f"""<!DOCTYPE html>
 <h1>SG Estate Comparison</h1>
 <p class="meta">{n_estates} estates · 20-component provision · 4 personas × 3 horizons · HDB + private value · {today}</p>
 
+<div class="help-note">
+  <strong>Liveability note:</strong>
+  <div>YF=young family, SP=single professional, Ret=retiree, <strong>LS=lifestyle persona</strong>.</div>
+  <span>LS trajectory shows the lifestyle persona band from T0 now to T5 2031 to T15 2041.</span>
+</div>
+
 <div class="controls">
   <button class="filter-btn active" onclick="filterArch('all',this)">All</button>
   <button class="filter-btn" onclick="filterArch('A',this)">A — Regional</button>
@@ -306,47 +370,47 @@ HTML = f"""<!DOCTYPE html>
 <table>
 <thead>
   <tr class="group">
-    <th colspan="2" class="g-id">IDENTITY</th>
-    <th colspan="3" class="g-prov">PROVISION</th>
-    <th colspan="4" class="g-live">LIVEABILITY (T0)</th>
-    <th colspan="2" class="g-live">LS TRAJECTORY</th>
-    <th colspan="4" class="g-gap">GAP (live−prov)</th>
-    <th colspan="2" class="g-val">HDB VALUE</th>
-    <th colspan="3" class="g-val">PRIVATE VALUE</th>
-    <th colspan="3" class="g-emp">EMPLOYMENT</th>
-    <th colspan="2" class="g-risk">RISK</th>
-    <th colspan="2" class="g-path">LIFE PATH</th>
-    <th class="g-path">FLAGS</th>
+    <th colspan="2" class="g-id"><span class="tip" data-tip="Estate name and archetype family.">IDENTITY</span></th>
+    <th colspan="3" class="g-prov"><span class="tip" data-tip="Objective supply-side provision score plus the T0 disruption multiplier.">PROVISION</span></th>
+    <th colspan="4" class="g-live"><span class="tip" data-tip="Current liveability bands by persona. These are person-relative, not a single estate ranking.">LIVEABILITY (T0)</span></th>
+    <th colspan="2" class="g-live"><span class="tip" data-tip="Lifestyle persona trajectory from T0 now to T5 2031 to T15 2041.">LS TRAJECTORY</span></th>
+    <th colspan="4" class="g-gap"><span class="tip" data-tip="Liveability minus provision. Positive means the persona rates the estate above its supply checklist score.">GAP (live−prov)</span></th>
+    <th colspan="2" class="g-val"><span class="tip" data-tip="HDB resale value segment. Value is kept separate from private value.">HDB VALUE</span></th>
+    <th colspan="3" class="g-val"><span class="tip" data-tip="Private resale value segment. Not blended or ranked against HDB.">PRIVATE VALUE</span></th>
+    <th colspan="3" class="g-emp"><span class="tip" data-tip="Employment access bands across current and future horizons.">EMPLOYMENT</span></th>
+    <th colspan="2" class="g-risk"><span class="tip" data-tip="Lease and noise risk indicators. Higher bands or scores are better.">RISK</span></th>
+    <th colspan="2" class="g-path"><span class="tip" data-tip="Life-stage paths with the largest and smallest modeled change.">LIFE PATH</span></th>
+    <th class="g-path"><span class="tip" data-tip="Flags for notable interpretation issues such as disruption or pricing signals.">FLAGS</span></th>
   </tr>
   <tr class="cols">
-    <th onclick="sortTable(0)">Estate</th>
-    <th onclick="sortTable(1)">Type</th>
-    <th onclick="sortTable(2)">D</th>
-    <th onclick="sortTable(3)">Prov</th>
-    <th onclick="sortTable(4)">Score</th>
-    <th onclick="sortTable(5)">YF</th>
-    <th onclick="sortTable(6)">SP</th>
-    <th onclick="sortTable(7)">Ret</th>
-    <th onclick="sortTable(8)">LS</th>
-    <th onclick="sortTable(9)">T0→T5→T15</th>
-    <th onclick="sortTable(10)">Arrow</th>
-    <th onclick="sortTable(11)">YF gap</th>
-    <th onclick="sortTable(12)">SP gap</th>
-    <th onclick="sortTable(13)">Ret gap</th>
-    <th onclick="sortTable(14)">LS gap</th>
-    <th onclick="sortTable(15)">Band</th>
-    <th onclick="sortTable(16)">Mult</th>
-    <th onclick="sortTable(17)">Band</th>
-    <th onclick="sortTable(18)">Mult</th>
-    <th onclick="sortTable(19)">n</th>
-    <th onclick="sortTable(20)">T0</th>
-    <th onclick="sortTable(21)">T5</th>
-    <th onclick="sortTable(22)">T15</th>
-    <th onclick="sortTable(23)">Lease</th>
-    <th onclick="sortTable(24)">Noise</th>
-    <th onclick="sortTable(25)">Best path</th>
-    <th onclick="sortTable(26)">Worst path</th>
-    <th onclick="sortTable(27)">Notes</th>
+    <th onclick="sortTable(0)"><span class="tip" data-tip="Estate or sub-estate name.">Estate</span></th>
+    <th onclick="sortTable(1)"><span class="tip" data-tip="Archetype code: A regional, B mature HDB, C coastal, D private enclave, E new central-edge, F infill MRT node, G new town, X not rated.">Type</span></th>
+    <th onclick="sortTable(2)"><span class="tip" data-tip="D = disruption multiplier at T0. 1.00 means no current construction penalty; lower values reduce liveability.">D</span></th>
+    <th onclick="sortTable(3)"><span class="tip" data-tip="Provision band: objective supply-side score for what is available in the estate.">Prov</span></th>
+    <th onclick="sortTable(4)"><span class="tip" data-tip="Numeric provision score on the 1 to 5 framework scale.">Score</span></th>
+    <th onclick="sortTable(5)"><span class="tip" data-tip="YF = young family liveability band at T0.">YF</span></th>
+    <th onclick="sortTable(6)"><span class="tip" data-tip="SP = single professional liveability band at T0.">SP</span></th>
+    <th onclick="sortTable(7)"><span class="tip" data-tip="Ret = retiree liveability band at T0.">Ret</span></th>
+    <th onclick="sortTable(8)"><span class="tip" data-tip="LS = lifestyle persona liveability band at T0.">LS</span></th>
+    <th onclick="sortTable(9)"><span class="tip" data-tip="Lifestyle persona band sequence from now to 2031 to 2041.">T0→T5→T15</span></th>
+    <th onclick="sortTable(10)"><span class="tip" data-tip="Net lifestyle trajectory: up, flat, or down from T0 to T15.">Arrow</span></th>
+    <th onclick="sortTable(11)"><span class="tip" data-tip="Young family liveability score minus provision score at T0.">YF gap</span></th>
+    <th onclick="sortTable(12)"><span class="tip" data-tip="Single professional liveability score minus provision score at T0.">SP gap</span></th>
+    <th onclick="sortTable(13)"><span class="tip" data-tip="Retiree liveability score minus provision score at T0.">Ret gap</span></th>
+    <th onclick="sortTable(14)"><span class="tip" data-tip="Lifestyle persona liveability score minus provision score at T0.">LS gap</span></th>
+    <th onclick="sortTable(15)"><span class="tip" data-tip="HDB value band. Below trust threshold, the model reports bands rather than decimal precision.">Band</span></th>
+    <th onclick="sortTable(16)"><span class="tip" data-tip="HDB value multiplier versus provision. Above 1 suggests underpriced; below 1 suggests overpriced.">Mult</span></th>
+    <th onclick="sortTable(17)"><span class="tip" data-tip="Private resale value band. This is separate from HDB value.">Band</span></th>
+    <th onclick="sortTable(18)"><span class="tip" data-tip="Private value multiplier versus provision. Above 1 suggests underpriced; below 1 suggests overpriced.">Mult</span></th>
+    <th onclick="sortTable(19)"><span class="tip" data-tip="Private resale sample count used for the value estimate.">n</span></th>
+    <th onclick="sortTable(20)"><span class="tip" data-tip="Current employment access band.">T0</span></th>
+    <th onclick="sortTable(21)"><span class="tip" data-tip="2031 employment access band after modeled near-term changes.">T5</span></th>
+    <th onclick="sortTable(22)"><span class="tip" data-tip="2041 employment access band after modeled long-horizon changes.">T15</span></th>
+    <th onclick="sortTable(23)"><span class="tip" data-tip="Lease risk band from HDB resale remaining lease years or manual override for new estates.">Lease</span></th>
+    <th onclick="sortTable(24)"><span class="tip" data-tip="Noise distance score from 1 to 5. Higher is quieter.">Noise</span></th>
+    <th onclick="sortTable(25)"><span class="tip" data-tip="Life-stage path with the largest modeled improvement for this estate.">Best path</span></th>
+    <th onclick="sortTable(26)"><span class="tip" data-tip="Life-stage path with the smallest modeled improvement or largest decline.">Worst path</span></th>
+    <th onclick="sortTable(27)"><span class="tip" data-tip="Interpretation flags such as not rated, disruption, underpriced, or overpriced.">Notes</span></th>
   </tr>
 </thead>
 <tbody id="tbody">
@@ -367,7 +431,7 @@ HTML = f"""<!DOCTYPE html>
   <div class="legend-item"><span style="color:#4ade80">+gap</span> lovable beyond checklist</div>
   <div class="legend-item"><span style="color:#f87171">−gap</span> over-equipped for persona</div>
   <div style="width:1px;height:14px;background:#1e293b;margin:0 4px"></div>
-  <div class="legend-item">YF=YoungFam · SP=SinglePro · Ret=Retiree · LS=Lifestyle</div>
+  <div class="legend-item">Liveability personas: YF=YoungFam · SP=SinglePro · Ret=Retiree · LS=Lifestyle</div>
   <div class="legend-item">T0=now · T5=2031 · T15=2041</div>
   <div class="legend-item">Noise in Risk = distance score 1–5 (5=quiet)</div>
   <div class="legend-item">Archetypes: A=Regional · B=Mature HDB · C=Coastal · D=Private Enclave · E=New Central-Edge · F=Infill Node · G=New Town · X=N/R</div>

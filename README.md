@@ -56,7 +56,7 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 
 ## 🔧 Other files & directories
 - **[Makefile](Makefile)** — `make smoke` (test gate), `make pipeline` (full regeneration), `make master` (rebuild master only). See [CLAUDE.md](CLAUDE.md) for details.
-- **[scrapers/](scrapers/)** ([README](scrapers/README.md)) — URA private-transaction scrapers. Downloads raw data by postal district for `value_model.py --private`. Districts 15 & 16 (Marine Parade / Bedok) still missing.
+- **[scrapers/](scrapers/)** ([README](scrapers/README.md)) — URA private-transaction scrapers. Downloads apartment/condo, landed, and strata-landed PMI data by postal district for `value_model.py --private`.
 - **[factor_audit_reports/](factor_audit_reports/)** — proposed new framework components from the factor-audit skill. Not auto-applied.
 - **[tests/](tests/)** — 62-test pytest suite. `make smoke` or `pytest -q`. Markers: `integration` (slow, real pipeline) and `snapshot` (manual).
 
@@ -64,8 +64,8 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 
 ## ⚠️ Status & honest limitations (read before trusting any number)
 1. **Provision is computed from real geospatial and derived layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, covered linkways, JTC industrial buffer (jtc_industrial), air-quality index proxy (air_quality), TC-KPI stewardship scores (stewardship), density, tree-canopy/UHI, hawker v2, and coastal blue-infra are all ingested. Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
-2. **Value is real where HDB resale exists.** It does NOT cover private/landed enclaves (East Coast, Siglap, Holland Village) — those need URA private transaction data (Postal Districts 15/16).
-3. **Tengah & Canberra have no resale Value** — Tengah pre-MOP (no market yet), Canberra folded into Sembawang town.
+2. **Value is segmented by tenure universe.** HDB resale Value is real where HDB resale exists. Private resale Value is also generated from URA PMI data where district coverage maps cleanly to framework estates, including landed and strata-landed raw rows. These are separate segments and must not be blended.
+3. **HDB gaps remain explicit.** Tengah has no HDB resale Value because it is pre-MOP, and Canberra HDB is folded into Sembawang town. Private-dominant gaps such as Holland Village still depend on clean mapped private coverage.
 4. **6 of 20 components remain PARTLY_MEASURED** (`dens`, `env`, `mom`, `air_quality`, `stewardship`, `hawker`). They use generated layers or curated public snapshots, but still carry approximation limits; `provision_model.py` flags missing PARTLY inputs and renormalises rather than imputing.
 5. **Report bands, not decimals.** Most established estates cluster within noise; the decimals are not real distinctions.
 6. **Re-verify all dated facts** (in the transcript) before any scoring run — MRT dates, polyclinic openings, etc. decay.
@@ -73,5 +73,5 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 ## Data file note
 `data/value_private.csv` is a stale pre-fix artifact superseded by `data/value_output_private.csv` (the canonical de-circularised private Value output) and is NOT consumed by the pipeline.
 
-## Next step to make it fully data-driven
-Upload the **MRT location layer** (coordinates) → lights up Connectivity + Infrastructure (34% of score). Then parks, schools, food layers. Then URA private data for the landed enclaves.
+## Next step to make it more data-driven
+Refresh `pipeline_data.json` through the networked ingesters, review the resulting momentum shifts, and add dedicated Value segments for rentals, ECs, and landed resale instead of folding all private resale into one segment.

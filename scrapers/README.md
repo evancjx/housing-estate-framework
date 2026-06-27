@@ -18,10 +18,10 @@ pip install playwright --break-system-packages
 playwright install chromium
 ```
 
-## Quick start — download missing districts
+## Quick start — apartment/condo transactions
 
 ```bash
-# Download Marine Parade (D15) and Bedok (D16) — still missing from ura_private.csv
+# Download apartment/condo transactions for selected districts.
 python scrapers/ura_pmi_playwright.py \
     --districts 15 16 \
     --year_from 2021 --year_to 2026 \
@@ -38,8 +38,40 @@ python models/value_model.py \
     --scores data/provision_scores.csv \
     --hdb data/hdb_resale.csv \
     --private data/ura_private.csv \
-    --out data/value_private.csv
+    --out data/value_output_private.csv
 ```
+
+## Quick start — landed private transactions
+
+URA's PMI portal exposes landed data as two residential property groups:
+
+- `Landed Properties (Non-Strata)` — scraper value `landed` or `1`
+- `Strata Landed` — scraper value `strata_landed` or `2`
+
+Download both groups without overwriting the existing apartment/condo raw CSVs:
+
+```bash
+python scrapers/ura_pmi_playwright.py \
+    --districts 15 16 \
+    --prop_types landed strata_landed \
+    --year_from 2021 --year_to 2026 \
+    --out_dir data/ura_raw/
+```
+
+Or use the orchestrator shortcut:
+
+```bash
+python scrapers/run_download.py \
+    --landed \
+    --districts 15 16 \
+    --year_from 2021 --year_to 2026 \
+    --out_dir data/ura_raw/
+```
+
+New landed raw files are written with property-type slugs, for example
+`pmi_d15_landed_non_strata_2021-2026.csv` and `pmi_d15_strata_landed_2021-2026.csv`.
+After downloading, run `ingest_ura_raw.py --merge`; the ingestor preserves `property_type` and the
+value model treats it as a private-resale control.
 
 ## District → Estate mapping
 
