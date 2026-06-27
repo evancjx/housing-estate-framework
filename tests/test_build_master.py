@@ -120,3 +120,23 @@ def test_real_private_value_surfaces_and_x_gated(inputs, tmp_path):
     assert hv["value_private_band"] == "not_covered"    # no_hdb_segment -> not borrowed
     ca = m[m["estate"] == "CENTRAL AREA"].iloc[0]
     assert ca["value_private_band"] == "N/R"            # X-gate applies to private cells
+
+
+def test_private_value_prefers_private_segment_over_hdb(inputs, tmp_path):
+    # value_output_private.csv carries BOTH an hdb_resale and a private_resale row for BISHAN
+    # (the value_model --private pass writes both). The published value_private_* must be the
+    # PRIVATE row, not the first (HDB) row that drop_duplicates(keep="first") would grab.
+    vp = pd.DataFrame({
+        "estate":      ["BISHAN", "BISHAN"],
+        "segment":     ["hdb_resale", "private_resale"],   # HDB row FIRST — the bug trap
+        "value_score": [2.77, 3.30],
+        "value_band":  ["D", "C"],
+        "value_basis": ["direct", "direct"],
+        "n":           [4063, 2697],
+    })
+    d = dict(inputs)
+    d["value_private"] = _write(str(tmp_path), "vp.csv", vp)
+    m = build_master.build(_ns(d))
+    bishan = m[m["estate"] == "BISHAN"].iloc[0]
+    assert bishan["value_private_band"] == "C"          # private segment, not HDB "D"
+    assert bishan["value_private_basis"] == "direct"

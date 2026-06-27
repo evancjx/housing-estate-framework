@@ -125,16 +125,9 @@ def build_estate_sums(pipeline_data):
             sums[estate] = sums.get(estate, 0.0) + contrib
     return sums
 
-# Canonical estate names from estates.csv (all 32)
-ESTATE_NAMES = [
-    'WOODLANDS','PASIR RIS','JURONG EAST','BISHAN','BEDOK','TAMPINES',
-    'TOA PAYOH','QUEENSTOWN','SERANGOON','SEMBAWANG','MARINE PARADE',
-    'CANBERRA','BOON KENG','WOODLEIGH','DOVER','TENGAH',
-    'TAMPINES WEST','TAMPINES EAST','ANG MO KIO','LENTOR',
-    'SENGKANG','PUNGGOL','YISHUN','HOUGANG','CHOA CHU KANG',
-    'BUKIT BATOK','BUKIT MERAH','BUKIT PANJANG','GEYLANG',
-    'CLEMENTI','CENTRAL AREA','BUKIT TIMAH',
-]
+# The estate universe is derived at runtime from the judged CSV (see main), NOT hardcoded.
+# A static list silently omitted estates added to estates.csv later
+# (JURONG WEST, KALLANG, HOLLAND VILLAGE), so they were never recomputed from pipeline_data.
 
 from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP, canonicalise_pipeline_name as canonical
 
@@ -216,9 +209,10 @@ def main():
     for estate, addition in MANUAL_ADDITIONS.items():
         raw_sums[estate] = raw_sums.get(estate, 0.0) + addition
 
-    # Compute mom scores for all 32 estates
+    # Compute mom scores for every estate in the judged universe (derived, not a hardcoded list).
+    universe = [str(e).strip().upper() for e in pd.read_csv(a.judged)["estate"]]
     rows = []
-    for estate in ESTATE_NAMES:
+    for estate in universe:
         raw  = raw_sums.get(estate, 0.0)
         adj  = raw * CONSERVATIVE_PENALTY
         mom  = score_from_adj(adj)

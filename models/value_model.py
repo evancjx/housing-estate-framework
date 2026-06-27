@@ -34,6 +34,7 @@ import argparse, sys, json
 import numpy as np
 import pandas as pd
 from aliases import ESTATE_TOWN_ALIAS, PRIVATE_DOMINANT_PROXIES
+from framework_config import band_label
 
 # ----------------------------------------------------------------------
 # 1. CONFIG — the only knobs. Documented so a future run can challenge them.
@@ -42,15 +43,16 @@ CFG = {
     "adj_cap_low": 0.75,        # min Value adjustment multiplier (framework lock)
     "adj_cap_high": 1.25,       # max Value adjustment multiplier
     "shrink_min_n": 30,         # below this many txns, shrink subzone toward town mean
-    "shrink_strength": 30.0,    # k in James-Stein-style pull: w = n/(n+k)
+    "shrink_strength": 30.0,    # k in James-Stein-style pull: w = n/(n+k).
+                                 # k=30 chosen so that estates with ~30 txns receive
+                                 # equal weight between their own residual and the
+                                 # segment mean; revisit if per-subzone n increases.
     "trust_decimal_n": 100,     # below this, report BAND only, not a decimal
     "band_edges": [(4.5,"A"),(4.0,"B+"),(3.5,"B"),(3.0,"C"),(2.5,"D"),(0,"F")],
 }
 
-def band(x):
-    for edge,b in CFG["band_edges"]:
-        if x >= edge: return b
-    return "F"
+# band() removed — use framework_config.band_label (single source of truth).
+# band_label(x) with no soft_floor is identical to the old local band(x).
 
 
 def build_formula(df, controls, month_col):
@@ -170,10 +172,19 @@ def value_scores(resid_df, scores, original_estate_names):
     # drop shadow town rows — they exist only to anchor the regression
     df = df[~df["estate"].isin(shadow_towns)]
 
-    # ValueScore = score * exp(-residual), capped multiplier
+    # Value base is segment-aware (invariant 2: HDB and private are separate universes).
+    # Private segments multiply by score_private (W_PRIVATE condo weights); HDB uses the public
+    # provision score. Fall back to the public score where score_private is absent/NaN.
+    _priv = df["segment"].isin(("private_resale", "private_rental"))
+    if "score_private" in df.columns:
+        base = df["score_private"].where(_priv & df["score_private"].notna(), df["score"])
+    else:
+        base = df["score"]
+
+    # ValueScore = base * exp(-residual), capped multiplier
     mult = np.exp(-df["resid_shrunk"]).clip(CFG["adj_cap_low"], CFG["adj_cap_high"])
-    df["value_score"] = (df["score"] * mult)
-    df["value_band"]  = df["value_score"].apply(band)
+    df["value_score"] = (base * mult)
+    df["value_band"]  = df["value_score"].apply(band_label)
     df["mult"] = mult
     df["value_basis"] = "direct"
     # honesty: blank the decimal where sample is thin
@@ -189,6 +200,12 @@ def value_scores(resid_df, scores, original_estate_names):
         if alias_score_row.empty or target_resid_row.empty:
             continue
         alias_score = float(alias_score_row["score"].iloc[0])
+        # segment-aware base for proxied estates too (invariant 2)
+        _alias_seg = str(target_resid_row.iloc[0]["segment"])
+        if _alias_seg in ("private_resale", "private_rental") and "score_private" in alias_score_row.columns:
+            _sp = alias_score_row["score_private"].iloc[0]
+            if pd.notna(_sp):
+                alias_score = float(_sp)
 
         if alias_estate in PRIVATE_DOMINANT_PROXIES:
             # invariant 2: never attribute an HDB residual to a private-dominant estate
@@ -209,7 +226,7 @@ def value_scores(resid_df, scores, original_estate_names):
                           CFG["adj_cap_low"], CFG["adj_cap_high"]))
         row["mult"] = m
         row["value_score"] = alias_score * m
-        row["value_band"] = band(row["value_score"])
+        row["value_band"] = band_label(row["value_score"])
         row["value_basis"] = f"proxy_from:{target_town}"   # non-independent: shares parent n
         row["reported"] = (str(round(row["value_score"], 2))
                            if row["trust"] == "decimal"

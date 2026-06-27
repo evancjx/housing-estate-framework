@@ -5,7 +5,7 @@ Shared framework constants for the Singapore estate scoring pipeline.
 This module is intentionally small and dependency-free. Model files import from
 here so framework constants cannot drift between pipeline stages.
 
-NOTE: Alias maps (HDB_TOWN_ALIAS / PIPELINE_ESTATE_ALIAS) are intentionally
+NOTE: Alias maps (ESTATE_TOWN_ALIAS / PIPELINE_NAME_ALIAS) are intentionally
 NOT here — they live in models/aliases.py as the single source of truth.
 See CLAUDE.md "Alias maps are single-sourced in models/aliases.py".
 """
@@ -89,7 +89,7 @@ PROVENANCE: Dict[str, str] = {
     "mom":            "PARTLY_MEASURED",
     "air_quality":    "PARTLY_MEASURED",
     "stewardship":    "PARTLY_MEASURED",
-    "hawker":         "JUDGED",
+    "hawker":         "PARTLY_MEASURED",
 }
 
 # Conceptual S-groups used by persona deltas. Every provision component must

@@ -60,3 +60,25 @@ def test_clean_psm_drops_zero_area():
     assert len(out) == 1
     assert np.isfinite(out["_lnpsm"]).all()
     assert (out["floor_area_sqm"] > 0).all()
+
+
+def test_private_segment_uses_score_private():
+    # Invariant 2: private value is a SEPARATE universe scored with W_PRIVATE weights.
+    # The value base for a private segment must be score_private, not the public provision score.
+    scores = pd.DataFrame({"estate": ["BISHAN"], "score": [3.61], "score_private": [3.65]})
+    resid = pd.DataFrame({"estate": ["BISHAN"], "segment": ["private_resale"], "n": [2697],
+                          "resid_raw": [0.0], "resid_shrunk": [0.0], "trust": ["decimal"]})
+    out = value_model.value_scores(resid, scores, {"BISHAN"})
+    row = out[out["estate"] == "BISHAN"].iloc[0]
+    # resid_shrunk=0 -> mult=exp(0)=1.0 -> value_score == base; base must be score_private (3.65).
+    assert abs(row["value_score"] - 3.65) < 1e-9
+
+
+def test_hdb_segment_still_uses_public_score():
+    # Guard the converse: HDB segments must keep using the public provision score.
+    scores = pd.DataFrame({"estate": ["BISHAN"], "score": [3.61], "score_private": [3.65]})
+    resid = pd.DataFrame({"estate": ["BISHAN"], "segment": ["hdb_resale"], "n": [4063],
+                          "resid_raw": [0.0], "resid_shrunk": [0.0], "trust": ["decimal"]})
+    out = value_model.value_scores(resid, scores, {"BISHAN"})
+    row = out[out["estate"] == "BISHAN"].iloc[0]
+    assert abs(row["value_score"] - 3.61) < 1e-9

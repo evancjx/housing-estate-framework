@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import pytest
 import liveability_model
 import provision_model
 
@@ -56,3 +57,42 @@ def test_nan_component_renormalises_not_floor():
         for p in liveability_model.PERSONAS:
             s = liveability_model.score_estate(comps, p, d=1.0)
             assert s > liveability_model.SOFT_FLOOR + 0.5, f"missing {missing} collapsed {p} to {s}"
+
+
+def test_rail_slip_premium_applied_to_mrt_t5_boost():
+    # frameworks/2:44 — T5 additions are discounted by Certainty x Time x SlipPremium (rail 0.85).
+    # A CONFIRMED MRT opening in 2027 for an estate that already has MRT (infra>=4) uses the
+    # marginal 0.25 branch: boost = 0.25 * (cf=1.0 * tf=1.0 * slip=0.85) = 0.2125.
+    item = {"type": "MRT", "certainty": "CONFIRMED", "expected_year": 2027,
+            "benefiting_estates": ["TESTTOWN"]}
+    boosts = liveability_model.compute_t5_boosts("TESTTOWN", [item], {"infra": 5.0})
+    assert abs(boosts["conn"] - 0.2125) < 1e-9
+    assert abs(boosts["infra"] - 0.2125) < 1e-9
+
+
+def test_rail_slip_premium_applied_to_mrt_t15_boost():
+    item = {"type": "MRT", "certainty": "CONFIRMED", "expected_year": 2027,
+            "benefiting_estates": ["TESTTOWN"]}
+    boosts = liveability_model.compute_t15_boosts("TESTTOWN", [item], {"infra": 5.0})
+    assert abs(boosts["conn"] - 0.2125) < 1e-9
+
+
+def test_missing_archetypes_path_fails_loudly(tmp_path, data_dir):
+    # A supplied-but-missing path must fail loudly, not silently disable X-archetype gating.
+    with pytest.raises(SystemExit):
+        liveability_model.run(
+            scores_path=os.path.join(data_dir, "provision_scores.csv"),
+            pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+            out_path=str(tmp_path / "x.csv"),
+            archetypes_path="/nonexistent/arch.csv",
+        )
+
+
+def test_missing_bca_path_fails_loudly(tmp_path, data_dir):
+    with pytest.raises(SystemExit):
+        liveability_model.run(
+            scores_path=os.path.join(data_dir, "provision_scores.csv"),
+            pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+            out_path=str(tmp_path / "x.csv"),
+            bca_path="/nonexistent/bca.csv",
+        )

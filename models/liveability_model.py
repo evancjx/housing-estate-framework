@@ -32,7 +32,8 @@ S-group → 20-component mapping (all 20 covered; see framework_config.PROVISION
   S7 (momentum)  → mom                                               (base 0.04)
   S9 (env)       → env+flood+noise+air_noise+air_quality+jtc_industrial (base 0.01+0.01+0.03+0.03+0.03+0.02=0.13)
 
-Delta table (percentage points, each column sums to 0):
+Delta table (percentage points; columns sum to 0 except YoungFam = +1, left visible by design —
+see frameworks/2 §2 and the v0.x calibration log):
               YoungFam  SinglePro  Retiree  Lifestyle
   S1 conn:       -7        +8        -3        +6
   S2 amen:       +1        +2        +4        +3
@@ -111,6 +112,7 @@ python liveability_model.py \\
 
 import argparse
 import json
+import os
 import sys
 from typing import Dict, Optional, Tuple
 
@@ -196,7 +198,7 @@ def _time_factor(end_year: int, current_year: int) -> float:
     return 0.20
 
 
-def compute_d_multipliers(disruptions: list, current_year: int) -> Dict[str, float]:
+def compute_d_multipliers(disruptions: list, current_year: int, bca_df: Optional[pd.DataFrame] = None) -> Dict[str, float]:
     """Compute D multiplier per estate from construction_disruptions list in pipeline JSON."""
     penalties: Dict[str, float] = {}
     for site in disruptions:
@@ -209,7 +211,22 @@ def compute_d_multipliers(disruptions: list, current_year: int) -> Dict[str, flo
         for estate in site.get("estates", []):
             e = estate.upper()
             penalties[e] = penalties.get(e, 0.0) + penalty
-    return {e: round(max(0.70, 1.0 - p), 4) for e, p in penalties.items()}
+
+    # Base multipliers map
+    d_map = {}
+    for e, p in penalties.items():
+        d_map[e] = 1.0 - p
+
+    if bca_df is not None:
+        for _, r in bca_df.iterrows():
+            e = str(r['estate']).strip().upper()
+            sev_score = float(r.get('severity_score', 0.0))
+            if pd.isna(sev_score):
+                sev_score = 0.0
+            d_current = d_map.get(e, 1.0)
+            d_map[e] = d_current - (sev_score / 1000.0)
+
+    return {e: round(max(0.70, val), 4) for e, val in d_map.items()}
 
 
 def get_d(estate: str, horizon: str = "T0",
@@ -373,6 +390,10 @@ CERTAINTY_FACTORS_T15: Dict[str, float] = {
     "RUMOUR":    0.0,
 }
 
+# frameworks/2-liveability-matrix.md §1.1: rail (MRT) additions are discounted by an extra
+# SlipPremium because rail projects routinely slip their announced opening dates.
+RAIL_SLIP_PREMIUM = 0.85
+
 def t5_time_factor(year: int) -> float:
     if year <= T5_OPEN_CUTOFF:
         return 0.0  # already open
@@ -431,7 +452,8 @@ def compute_t5_boosts(
             continue
 
         item_type = item.get("type", "").upper()
-        magnitude = cf * tf
+        # Certainty × Time × SlipPremium (frameworks/2 §1.1; rail items slip, so 0.85).
+        magnitude = cf * tf * (RAIL_SLIP_PREMIUM if item_type == "MRT" else 1.0)
 
         if item_type == "MRT":
             # Conditional: large boost if estate lacks MRT (infra < 4), marginal otherwise
@@ -484,7 +506,8 @@ def compute_t15_boosts(
             continue
 
         item_type = item.get("type", "").upper()
-        magnitude = cf * tf
+        # Certainty × Time × SlipPremium (frameworks/2 §1.1; rail items slip, so 0.85).
+        magnitude = cf * tf * (RAIL_SLIP_PREMIUM if item_type == "MRT" else 1.0)
 
         if item_type == "MRT":
             # Conditional: large boost if estate lacks MRT (infra < 4), marginal otherwise
@@ -615,6 +638,7 @@ def run(
     debug: bool = False,
     year: int = 2026,
     archetypes_path: Optional[str] = None,
+    bca_path: Optional[str] = None,
 ) -> pd.DataFrame:
 
     # -- Load provision scores
@@ -627,7 +651,9 @@ def run(
 
     # -- Load archetype tags (for the X = non-residential N/R gate, invariant 6)
     ARCH: Dict[str, str] = {}
-    if archetypes_path and __import__("os").path.exists(archetypes_path):
+    if archetypes_path:
+        if not os.path.exists(archetypes_path):
+            sys.exit(f"liveability_model: archetypes file not found: {archetypes_path}")
         adf = pd.read_csv(archetypes_path)
         adf["estate"] = adf["estate"].str.strip().str.upper()
         ARCH = dict(zip(adf["estate"], adf["archetype"].str.strip().str.upper()))
@@ -637,10 +663,17 @@ def run(
         pipeline_data = json.load(f)
     pipeline_items = pipeline_data.get("pipeline_items", [])
 
+    # -- Load BCA permits if provided
+    bca_df = None
+    if bca_path:
+        if not os.path.exists(bca_path):
+            sys.exit(f"liveability_model: bca file not found: {bca_path}")
+        bca_df = pd.read_csv(bca_path)
+
     # -- Compute D multipliers dynamically from construction_disruptions
     disruptions = pipeline_data.get("construction_disruptions", [])
-    d_t0_map = compute_d_multipliers(disruptions, year)
-    d_t5_map = compute_d_multipliers(disruptions, year + 5)
+    d_t0_map = compute_d_multipliers(disruptions, year, bca_df)
+    d_t5_map = compute_d_multipliers(disruptions, year + 5, None)
 
     if debug:
         print("\n=== PERSONA WEIGHTS (normalised) ===")
@@ -788,9 +821,13 @@ def main() -> None:
         default="SG-Estate-Framework/data/archetype_assignments.csv",
         help="archetype_assignments.csv (X = non-residential N/R gate)",
     )
+    parser.add_argument(
+        "--bca",
+        help="Path to bca_permits.csv",
+    )
     args = parser.parse_args()
     run(args.scores, args.pipeline, args.out, debug=args.debug, year=args.year,
-        archetypes_path=args.archetypes)
+        archetypes_path=args.archetypes, bca_path=args.bca)
 
 
 if __name__ == "__main__":

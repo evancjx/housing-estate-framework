@@ -11,15 +11,16 @@ HONEST SCOPE (read this — the model enforces it in output):
                         air_noise (geometric corridor proxy — see note),
                         eldercare (v1.3: carved from healthcare — AIC/MOH facilities),
                         jtc_industrial (v2.0: industrial-buffer/nuisance proximity)
-  PARTLY_MEASURED  (5): density (dwelling density yes; "feel" no),
+  PARTLY_MEASURED  (6): density (dwelling density yes; "feel" no),
                         env_comfort (heat/shade only; air-noise + expressway now
                         split out as siblings — see audit §2d),
                         momentum (HDB-side ingested from data.gov.sg NRP+LUP+SERS
                         via ingest_hdb_upgrading.py; private-side en-bloc / new
                         launches still JUDGED — see audit §2a),
                         air_quality (v2.0: PM2.5/NEA air-quality index proxy),
-                        stewardship (v2.0: TC-KPI / estate maintenance quality)
-  JUDGED           (1): hawker (fame/reputation — not a query)
+                        stewardship (v2.0: TC-KPI / estate maintenance quality),
+                        hawker (v2.0: count/distance/stall proxy; fame not measured)
+  JUDGED           (0): none in the canonical pipeline
 
 Note on `air_noise`: this is a geometric distance to runway centerlines + 12 km
 approach/departure corridor extensions for Changi, Seletar, and Paya Lebar
@@ -86,6 +87,10 @@ def count_within(lat, lon, pts, radius_m):
 def pts_of(df):
     if df is None: return []
     return list(zip(df['lat'].astype(float), df['lon'].astype(float)))
+
+def _safe_round_dist(d):
+    """Return round(d) as int, or None when d is infinite (no POI in layer)."""
+    return round(d) if math.isfinite(d) else None
 
 # ----------------------------------------------------------------------
 # ANCHORS — distance/count -> 1..5. Documented & challengeable thresholds.
@@ -155,8 +160,8 @@ def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None
         n_shelter = count_within(lat, lon, pts_of(covered_linkway), 800)
         s_shelter = score_by_count(n_shelter, C_SHELTER)
         return round(0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter, 2), {
-            'nearest_mrt_m': round(d_mrt), 'covered_linkways_800m': n_shelter}
-    return round(0.7*s_mrt + 0.3*s_bus, 2), {'nearest_mrt_m': round(d_mrt)}
+            'nearest_mrt_m': _safe_round_dist(d_mrt), 'covered_linkways_800m': n_shelter}
+    return round(0.7*s_mrt + 0.3*s_bus, 2), {'nearest_mrt_m': _safe_round_dist(d_mrt)}
 
 def score_amenities(lat, lon, markets, supers, clinics):
     s_mkt = score_by_count(count_within(lat, lon, pts_of(markets), 800), C_MARKET)
@@ -164,8 +169,13 @@ def score_amenities(lat, lon, markets, supers, clinics):
     s_cli = score_by_count(count_within(lat, lon, pts_of(clinics), 800), C_CLINIC)
     return round(0.4*s_mkt + 0.35*s_sup + 0.25*s_cli, 2), {}
 
-def score_green(lat, lon, parks):
-    return float(score_by_distance(nearest_m(lat, lon, pts_of(parks)), A_PARK)), {}
+def score_green(lat, lon, parks, coastal_row=None):
+    s_park = score_by_distance(nearest_m(lat, lon, pts_of(parks)), A_PARK)
+    if coastal_row is not None:
+        has_blue = coastal_row.get('has_blue_within_800m')
+        if has_blue is True or has_blue == 1 or str(has_blue).lower() in ('true', '1', 'yes', 'y'):
+            return float(round(min(5.0, s_park + 0.3), 2)), {}
+    return float(s_park), {}
 
 def score_schools(lat, lon, schools):
     d = nearest_m(lat, lon, pts_of(schools))
@@ -192,7 +202,7 @@ def score_infra(lat, lon, mrt, mrt_operational):
     op = mrt[mrt['operational'].astype(str).str.lower().isin(['1','true','yes','y'])] \
          if 'operational' in mrt.columns else mrt
     d = nearest_m(lat, lon, pts_of(op))
-    return float(score_by_distance(d, A_MRT)), {'nearest_operational_mrt_m': round(d)}
+    return float(score_by_distance(d, A_MRT)), {'nearest_operational_mrt_m': _safe_round_dist(d)}
 
 def score_childcare(lat, lon, childcare):
     n = count_within(lat, lon, pts_of(childcare), 500)
@@ -200,31 +210,80 @@ def score_childcare(lat, lon, childcare):
 
 def score_community(lat, lon, community):
     d = nearest_m(lat, lon, pts_of(community))
-    return float(score_by_distance(d, A_CC)), {'nearest_cc_m': round(d)}
+    return float(score_by_distance(d, A_CC)), {'nearest_cc_m': _safe_round_dist(d)}
 
 def score_sport(lat, lon, sport):
     d = nearest_m(lat, lon, pts_of(sport))
-    return float(score_by_distance(d, A_SPORT)), {'nearest_sport_m': round(d)}
+    return float(score_by_distance(d, A_SPORT)), {'nearest_sport_m': _safe_round_dist(d)}
 
 def score_flood_risk(lat, lon, flood_zones):
     d = nearest_m(lat, lon, pts_of(flood_zones))
     # inverted: farther from flood zone = higher score
-    return float(score_by_distance(d, A_FLOOD)), {'nearest_flood_zone_m': round(d) if d != np.inf else None}
+    return float(score_by_distance(d, A_FLOOD)), {'nearest_flood_zone_m': _safe_round_dist(d)}
 
 def score_noise(lat, lon, expressways):
     d = nearest_m(lat, lon, pts_of(expressways))
     # inverted: farther from expressway = quieter = higher score
-    return float(score_by_distance(d, A_NOISE)), {'nearest_expressway_m': round(d) if d != np.inf else None}
+    return float(score_by_distance(d, A_NOISE)), {'nearest_expressway_m': _safe_round_dist(d)}
 
 def score_air_noise(lat, lon, air_noise_corridors):
     d = nearest_m(lat, lon, pts_of(air_noise_corridors))
     # inverted: farther from runway/approach corridor = quieter = higher score
-    return float(score_by_distance(d, A_AIR_NOISE)), {'nearest_air_corridor_m': round(d) if d != np.inf else None}
+    return float(score_by_distance(d, A_AIR_NOISE)), {'nearest_air_corridor_m': _safe_round_dist(d)}
 
-# ----------------------------------------------------------------------
-# v2.0 new scorers — consume per-estate enrichment rows (ported from
-# worktree-provision-v2-audit branch; ev_charging deferred)
-# ----------------------------------------------------------------------
+def score_env(row):
+    if row is None or not isinstance(row, dict):
+        return np.nan
+    canopy = row.get('canopy_cover_pct')
+    uhi = row.get('uhi_delta_c')
+    if pd.isna(canopy) or pd.isna(uhi):
+        return np.nan
+    try:
+        score_canopy = score_by_count(float(canopy), [(30, 5), (20, 4), (10, 3), (5, 2), (0, 1)])
+        score_uhi = score_by_distance(float(uhi), [(0.2, 5), (0.6, 4), (1.2, 3), (1.8, 2), (99, 1)])
+        return round(0.5 * score_canopy + 0.5 * score_uhi, 2)
+    except (ValueError, TypeError):
+        return np.nan
+
+
+def score_dens(row):
+    if row is None or not isinstance(row, dict):
+        return np.nan
+    units = row.get('total_dwelling_units')
+    density = row.get('residents_per_net_hectare')
+    if pd.isna(units) or pd.isna(density):
+        return np.nan
+    try:
+        if float(units) == 0:
+            return np.nan
+        score = score_by_distance(float(density), [(150, 5), (300, 4), (450, 3), (600, 2), (99999, 1)])
+        return float(score)
+    except (ValueError, TypeError):
+        return np.nan
+
+
+def score_hawker_v2(row):
+    if row is None or not isinstance(row, dict):
+        return np.nan
+    dist = row.get('nearest_hawker_m')
+    stalls = row.get('total_stalls_800m')
+    cnt = row.get('n_hawker_centres_800m')
+    if pd.isna(dist) or pd.isna(stalls) or pd.isna(cnt):
+        return np.nan
+    try:
+        score_dist = score_by_distance(float(dist), [(400, 5), (800, 4), (1200, 3), (2000, 2), (99999, 1)])
+        score_stalls = score_by_count(float(stalls), [(150, 5), (80, 4), (40, 3), (10, 2), (0, 1)])
+        score_count = score_by_count(float(cnt), [(2, 5), (1, 3), (0, 1)])
+        score_combined = 0.4 * score_dist + 0.4 * score_stalls + 0.2 * score_count
+        
+        redundancy = row.get('has_redundancy_dayoff')
+        if redundancy is True or redundancy == 1 or str(redundancy).lower() in ('true', '1', 'yes', 'y'):
+            score_combined += 0.2
+        return round(min(5.0, score_combined), 2)
+    except (ValueError, TypeError):
+        return np.nan
+
+
 def score_jtc_industrial(row):
     """Inverse-distance from heavy-industrial polygons."""
     d = row.get('nearest_industrial_m')
@@ -286,6 +345,22 @@ def run(estates, layers, judged, tcmr_json=None):
     if layers.get('air_quality') is not None:
         for _, r in layers['air_quality'].iterrows():
             aq_lkp[str(r['estate']).upper()] = r.to_dict()
+    canopy_lkp = {}
+    if layers.get('tree_canopy') is not None:
+        for _, r in layers['tree_canopy'].iterrows():
+            canopy_lkp[str(r['estate']).upper()] = r.to_dict()
+    density_lkp = {}
+    if layers.get('hdb_density') is not None:
+        for _, r in layers['hdb_density'].iterrows():
+            density_lkp[str(r['estate']).upper()] = r.to_dict()
+    hawker_lkp = {}
+    if layers.get('hawker_v2') is not None:
+        for _, r in layers['hawker_v2'].iterrows():
+            hawker_lkp[str(r['estate']).upper()] = r.to_dict()
+    coastal_lkp = {}
+    if layers.get('coastal') is not None:
+        for _, r in layers['coastal'].iterrows():
+            coastal_lkp[str(r['estate']).upper()] = r.to_dict()
 
     rows = []
     for _, e in estates.iterrows():
@@ -294,7 +369,10 @@ def run(estates, layers, judged, tcmr_json=None):
         s['conn'],_      = score_connectivity(lat, lon, layers['mrt'], layers['bus'], None,
                                              layers.get('covered_linkway'))
         s['amen'],_      = score_amenities(lat, lon, layers['markets'], layers['supermarkets'], layers['clinics'])
-        s['green'],_     = score_green(lat, lon, layers['parks'])
+        
+        coastal_row = coastal_lkp.get(name.upper()) if layers.get('coastal') is not None else None
+        s['green'],_     = score_green(lat, lon, layers['parks'], coastal_row=coastal_row)
+        
         s['sch'],_       = score_schools(lat, lon, layers['schools'])
         s['hlth'],_      = score_healthcare(lat, lon, layers['clinics'], layers['polyclinics'])
         s['eldercare'],_ = score_eldercare(lat, lon, layers['eldercare'])
@@ -311,17 +389,46 @@ def run(estates, layers, judged, tcmr_json=None):
         s['air_quality'],_    = score_air_quality(aq_lkp.get(name.upper(), {}))
         s['stewardship'],_    = score_stewardship(name.upper(), tcmr_json)
 
-        # PARTLY/JUDGED: from judged_inputs.csv if provided, else NaN-flag
+        # PARTLY: prefer generated layers, then judged_inputs.csv, else NaN-flag
         jr = judged[judged['estate'] == name] if judged is not None else pd.DataFrame()
-        for k in ['dens', 'env', 'mom', 'hawker']:
-            if not jr.empty and k in jr.columns and not pd.isna(jr.iloc[0][k]):
-                s[k] = float(jr.iloc[0][k])
+        
+        # env
+        if layers.get('tree_canopy') is not None:
+            s['env'] = score_env(canopy_lkp.get(name.upper()))
+        else:
+            if not jr.empty and 'env' in jr.columns and not pd.isna(jr.iloc[0]['env']):
+                s['env'] = float(jr.iloc[0]['env'])
             else:
-                s[k] = np.nan  # explicitly missing -> flagged, not faked
+                s['env'] = np.nan
+
+        # dens
+        if layers.get('hdb_density') is not None:
+            s['dens'] = score_dens(density_lkp.get(name.upper()))
+        else:
+            if not jr.empty and 'dens' in jr.columns and not pd.isna(jr.iloc[0]['dens']):
+                s['dens'] = float(jr.iloc[0]['dens'])
+            else:
+                s['dens'] = np.nan
+
+        # mom
+        if not jr.empty and 'mom' in jr.columns and not pd.isna(jr.iloc[0]['mom']):
+            s['mom'] = float(jr.iloc[0]['mom'])
+        else:
+            s['mom'] = np.nan
+
+        # hawker
+        if layers.get('hawker_v2') is not None:
+            s['hawker'] = score_hawker_v2(hawker_lkp.get(name.upper()))
+        else:
+            if not jr.empty and 'hawker' in jr.columns and not pd.isna(jr.iloc[0]['hawker']):
+                s['hawker'] = float(jr.iloc[0]['hawker'])
+            else:
+                s['hawker'] = np.nan
+
         rows.append({'estate': name, **s})
     df = pd.DataFrame(rows)
 
-    # provision = weighted sum; if a JUDGED/PARTLY input is missing, report
+    # provision = weighted sum; if a PARTLY input is missing, report
     # MEASURED-only subscore + a 'completeness' flag instead of inventing it.
     def provision(row):
         present = {k: row[k] for k in W if not pd.isna(row[k])}
@@ -340,20 +447,24 @@ def run(estates, layers, judged, tcmr_json=None):
     df['provision_private'] = df.apply(provision_p, axis=1)
     df['score_private'] = df['provision_private']
 
-    df['measured_only'] = df[['dens','env','mom','hawker']].isna().any(axis=1)
+    # Flag renormalisation over a missing PARTLY_MEASURED input. Derive the column list from
+    # PROVENANCE so all 6 PARTLY components (incl. air_quality, stewardship) are covered and the
+    # flag can't drift from the provenance split.
+    _partly = [k for k, v in PROVENANCE.items() if v == "PARTLY_MEASURED"]
+    df['measured_only'] = df[_partly].isna().any(axis=1)
     return df
 
-def band(x):
-    for edge, b in [(4.5,"A"),(4.0,"B+"),(3.5,"B"),(3.0,"C"),(2.5,"D"),(0,"F")]:
-        if x >= edge: return b
-    return "F"
+# band() removed — use the canonical framework_config.band_label (imported as _fc_band_label).
+# provision_model.main() calls it directly via _fc_band_label; no external callers used
+# the local copy.
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--estates', required=True)
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
               'supermarkets','childcare','community','sport','flood','noise',
-              'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality']:
+              'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality',
+              'tree_canopy','hdb_density','hawker_v2','coastal']:
         ap.add_argument(f'--{L}')
     ap.add_argument('--tcmr', help='JSON path: town_council_kpi.json (for stewardship score)')
     ap.add_argument('--judged', help='CSV: estate,dens,env,mom,hawker (the 4 non-geospatial)')
@@ -362,11 +473,18 @@ def main():
 
     estates = pd.read_csv(a.estates)
     assert {'estate','lat','lon'} <= set(estates.columns), "estates.csv needs: estate,lat,lon"
-    def load(p): return pd.read_csv(p) if p else None
+    def load(p):
+        import os
+        if p and os.path.exists(p):
+            return pd.read_csv(p)
+        if p:
+            sys.exit(f"provision_model: input file not found: {p}")
+        return None
     layers = {L: load(getattr(a, L)) for L in
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
                'supermarkets','childcare','community','sport','flood','noise',
-               'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality']}
+               'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality',
+               'tree_canopy','hdb_density','hawker_v2','coastal']}
     judged = load(a.judged)
     tcmr_json = None
     if a.tcmr:
@@ -374,7 +492,7 @@ def main():
             tcmr_json = json.load(fh)
 
     df = run(estates, layers, judged, tcmr_json=tcmr_json)
-    df['band'] = df['provision'].apply(band)
+    df['band'] = df['provision'].apply(_fc_band_label)
     df.to_csv(a.out, index=False)
 
     cols = ['estate','conn','amen','green','sch','dens','hlth','eldercare','mom','hawker','infra','env',
@@ -383,8 +501,9 @@ def main():
             'provision','band','weight_covered','measured_only']
     print(df[cols].to_string(index=False))
     print("\nProvenance:", {k: PROVENANCE[k] for k in W})
-    print("measured_only=True  -> a JUDGED/PARTLY input (dens/env/mom/hawker) was MISSING;")
-    print("provision was renormalised over present components. Supply --judged to complete it.")
+    _partly = [k for k, v in PROVENANCE.items() if v == 'PARTLY_MEASURED']
+    print(f"measured_only=True  -> a PARTLY input ({'/'.join(_partly)}) was MISSING;")
+    print("provision was renormalised over present components. Supply --judged and derived layer flags to complete it.")
     print(f"\nWritten {a.out}  -> feed directly to value_model.py as --scores")
 
 if __name__ == '__main__':
@@ -422,12 +541,22 @@ if __name__ == '__main__':
 #                              0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter; top-level
 #                              conn weight (0.14) is unchanged. MEASURED provenance.)
 #
-# NON-GEOSPATIAL (judgement) COMPONENTS:
+# PER-ESTATE ENRICHMENT LAYERS:
+#   --tree_canopy tree_canopy.csv  columns: estate,canopy_cover_pct,uhi_delta_c
+#       Supplies env. If omitted, env falls back to judged_inputs.csv.
+#   --hdb_density hdb_density.csv  columns: estate,total_dwelling_units,residents_per_net_hectare
+#       Supplies dens. If omitted, dens falls back to judged_inputs.csv.
+#   --hawker_v2 hawker_v2.csv      columns: estate,nearest_hawker_m,total_stalls_800m,
+#                                  n_hawker_centres_800m,has_redundancy_dayoff
+#       Supplies hawker. If omitted, hawker falls back to judged_inputs.csv.
+#   --coastal coastal.csv          columns: estate,has_blue_within_800m
+#       Adds a small blue-infrastructure bonus to green.
+#
+# PARTLY MEASURED INPUTS:
 #   --judged judged.csv       columns: estate,dens,env,mom,hawker   (each 1-5)
-#       If omitted, those 4 components are left MISSING and provision is
-#       computed from the 16 geospatial/enrichment components (dens/env/mom/hawker excluded)
-#       (measured_only=True).
-#       NEVER auto-fill these — they are opinion by construction.
+#       The canonical pipeline still uses mom from judged_inputs.csv. dens/env/hawker
+#       are used only when their generated layers are omitted. Missing PARTLY inputs
+#       are left NaN and provision is renormalised over present components.
 #
 # WEIGHTS (v2.0, 20 components, sum=1.000):
 #   Authoritative source: framework_config.PROVISION_WEIGHTS (imported as W above).
@@ -441,6 +570,8 @@ if __name__ == '__main__':
 #       --childcare childcare.csv --community community.csv \
 #       --sport sport.csv --flood flood_risk.csv --noise expressways.csv \
 #       --air_noise air_noise_corridors.csv --eldercare eldercare.csv \
+#       --tree_canopy tree_canopy.csv --hdb_density hdb_density.csv \
+#       --hawker_v2 hawker_v2.csv --coastal coastal.csv \
 #       --judged judged_inputs.csv --out provision_scores.csv
 #   python value_model.py --scores provision_scores.csv --hdb hdb.csv
 # ======================================================================

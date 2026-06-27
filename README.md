@@ -5,46 +5,68 @@ Everything produced in the design session, organized. Start with the transcript.
 ## 📄 Start here
 - **CONVERSATION-TRANSCRIPT.md** — the full session: the arc v0.1→v0.9, key decisions, the "why rejected" reasoning, verified facts, and the real-data results.
 
-## 📁 frameworks/  (the actual framework — two cross-referencing documents)
-- **1-provision-framework.md** — Document 1. Supply-side, objective, comparable. "What is here." One score + archetype tag. This is the renamed "Core."
-- **2-liveability-matrix.md** — Document 2. Demand-side, person-relative. Persona × horizon matrix, Value, life-paths. **Contains the full 44-point decision log (Appendix A).**
-- **sg-estate-liveability-framework.md** — the original v0.1–v0.8 monolith, kept as the historical record (superseded by the two split documents but preserves the full version-by-version reasoning).
+## 📁 frameworks/  (active specs, reference data, historical record)
+
+**Active specs:**
+- **[1-provision-framework.md](frameworks/1-provision-framework.md)** — Document 1. Supply-side, objective, comparable. 20-component Provision score + archetype tag.
+- **[2-liveability-matrix.md](frameworks/2-liveability-matrix.md)** — Document 2. Demand-side, person-relative. 4-persona × horizon matrix, Value, life-paths. **Contains the full 44-point decision log (Appendix A).**
+
+**Reference data:**
+- **[4-estate-timeline-matrix.md](frameworks/4-estate-timeline-matrix.md)** — per-town maturation data (23 HDB towns: MRT lag, polyclinic gaps, SERS, sequencing). Not yet wired into any model; the empirical basis for the Canberra sequencing case and S7 momentum calibration.
+
+**Historical record:**
+- **[sg-estate-liveability-framework.md](frameworks/sg-estate-liveability-framework.md)** — v0.1–v0.8 monolith, superseded by the doc-1/doc-2 split; preserves full version-by-version reasoning.
+- **[3-estate-growth-framework.md](frameworks/3-estate-growth-framework.md)** — ⚠ SUPERSEDED v0.3 unified design on the obsolete 9-component model. Do not use as a current spec.
 
 ## 📁 models/  (runnable pipeline)
-- **provision_model.py** — computes Provision from geospatial layers (MRT, clinics, schools, parks, etc.). Measures 14 components geospatially, flags 5 as partly-measured and 1 (hawker) as judgment. INPUT CONTRACT at bottom of file.
-- **value_model.py** — computes Value = Provision × price-residual from transaction data. Segmented (HDB/private), shrinkage, band-only below n=100. INPUT CONTRACT at bottom.
-- **onemap_geocode_mrt.py** — RUN LOCALLY (needs internet). Converts station names → coordinates via OneMap. Produces the MRT layer the provision model needs.
+
+Core scoring models (see [CLAUDE.md](CLAUDE.md) for the full pipeline with all ingesters and flags):
+- **[provision_model.py](models/provision_model.py)** — 20-component Provision score from geospatial layers. Each model ends with an INPUT CONTRACT block (authoritative column spec).
+- **[liveability_model.py](models/liveability_model.py)** — 4-persona × 3-horizon (T0/T5/T15) liveability matrix + Provision–Liveability Gap.
+- **[value_model.py](models/value_model.py)** — Value = Provision × exp(−price_residual). HDB and private segmented; band-only below n=100.
+- **[momentum_model.py](models/momentum_model.py)** — S7 momentum score from `pipeline_data.json` → updates `judged_inputs.csv`.
+- **[build_master.py](models/build_master.py)** — joins all model outputs → [`data/master_output.csv`](data/master_output.csv) (headline deliverable).
+- **[onemap_geocode_mrt.py](models/onemap_geocode_mrt.py)** — RUN LOCALLY (needs internet + OneMap token). MRT names → `data/mrt_layer.csv`.
+- **12 `ingest_*.py` builders** — one per geospatial layer (jtc_industrial, air_quality, stewardship, tree_canopy, density, hawker v2, coastal, etc.). The canonical run now consumes derived `tree_canopy`, `hdb_density`, `hawker_v2`, `coastal`, and `bca_permits` outputs (see [CLAUDE.md](CLAUDE.md) for wiring status).
 
 ### Pipeline order
-```
-# 1. (local) geocode MRT if you don't have a coordinate file
-python onemap_geocode_mrt.py            # needs OneMap token + internet
 
-# 2. compute provision from geodata
-python provision_model.py --estates estates.csv --mrt mrt_layer.csv \
-    --clinics chas.csv --schools schools.csv --parks parks.csv ... \
-    --judged judged.csv --out provision_scores.csv
-
-# 3. compute value from provision + prices
-python value_model.py --scores provision_scores.csv --hdb hdb_resale.csv
+```bash
+make pipeline   # full regeneration: derived layers → provision → liveability → value → master
+make smoke      # pytest gate (run before and after changes)
 ```
 
-## 📁 data/  (real outputs + inputs from this session)
-- **value_real.csv** — Value scores from REAL HDB resale data (2025–26, ~36k txns). The headline result.
-- **scores_real.csv** — the provision scores (judgment-based) fed into the real value run.
-- **value_coastal.csv / scores_coastal.csv** — the Bedok / Marine Parade coastal comparison.
-- **provision_demo.csv** — sample provision-model output.
+See [CLAUDE.md](CLAUDE.md) or the [Makefile](Makefile) for the full per-flag command.
+
+## 📁 data/  (real data — inputs and committed model outputs)
+
+Canonical outputs from the most recent committed pipeline run (reproducible via `make pipeline`):
+- **[master_output.csv](data/master_output.csv)** — headline deliverable; estates × Provision/Liveability/Value/Employment/Risk/Life-Path joined across all models.
+- **provision_scores.csv**, **liveability_matrix.csv**, **value_output.csv** — intermediate model outputs.
+- **lease_risk.csv**, **employment_scores_{T0,T5,T15}.csv** — supporting model outputs.
+
+Legacy/comparison outputs kept for reference: `value_real.csv`, `scores_real.csv`, `value_coastal.csv`, `scores_coastal.csv`, `provision_demo.csv`.
 
 ## 📁 _demo-files/  (synthetic — safe to ignore/delete)
 Throwaway synthetic data used only to verify the scripts run end-to-end. NOT real. Kept only so the demo runs in the transcript are reproducible.
 
+## 📊 HTML deliverables
+- **[comparison_table.html](comparison_table.html)** — interactive cross-model comparison table (estates × Provision/Liveability/Value/Employment/Risk). The headline visual. ⚠ Component/estate counts may lag pipeline regeneration — re-run `python models/gen_comparison_html.py` when counts change.
+- **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → Models → `data/master_output.csv`). Same caveat.
+
+## 🔧 Other files & directories
+- **[Makefile](Makefile)** — `make smoke` (test gate), `make pipeline` (full regeneration), `make master` (rebuild master only). See [CLAUDE.md](CLAUDE.md) for details.
+- **[scrapers/](scrapers/)** ([README](scrapers/README.md)) — URA private-transaction scrapers. Downloads raw data by postal district for `value_model.py --private`. Districts 15 & 16 (Marine Parade / Bedok) still missing.
+- **[factor_audit_reports/](factor_audit_reports/)** — proposed new framework components from the factor-audit skill. Not auto-applied.
+- **[tests/](tests/)** — 62-test pytest suite. `make smoke` or `pytest -q`. Markers: `integration` (slow, real pipeline) and `snapshot` (manual).
+
 ---
 
 ## ⚠️ Status & honest limitations (read before trusting any number)
-1. **Provision is computed from real geospatial layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, covered linkways, JTC industrial buffer (jtc_industrial), air-quality index proxy (air_quality), and TC-KPI stewardship scores (stewardship) are all ingested. The remaining judgement inputs are the 5 PARTLY/JUDGED components (dens/env "feel", momentum, air_quality, stewardship, hawker fame). Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
+1. **Provision is computed from real geospatial and derived layers** — MRT, bus, CHAS clinics, polyclinics, schools, parks, markets, supermarkets, childcare, community clubs, sport centres, flood-prone areas, expressway noise, aircraft-corridor (air_noise), eldercare, covered linkways, JTC industrial buffer (jtc_industrial), air-quality index proxy (air_quality), TC-KPI stewardship scores (stewardship), density, tree-canopy/UHI, hawker v2, and coastal blue-infra are all ingested. Provision numbers still carry a ±0.3 cross-grader noise bar. Run `make smoke` for the test gate, `make pipeline` to regenerate.
 2. **Value is real where HDB resale exists.** It does NOT cover private/landed enclaves (East Coast, Siglap, Holland Village) — those need URA private transaction data (Postal Districts 15/16).
 3. **Tengah & Canberra have no resale Value** — Tengah pre-MOP (no market yet), Canberra folded into Sembawang town.
-4. **3 of 9 components are irreducibly judgment** (density-feel, environmental comfort, momentum) — they cannot come from a shapefile and are flagged as such in the model.
+4. **6 of 20 components remain PARTLY_MEASURED** (`dens`, `env`, `mom`, `air_quality`, `stewardship`, `hawker`). They use generated layers or curated public snapshots, but still carry approximation limits; `provision_model.py` flags missing PARTLY inputs and renormalises rather than imputing.
 5. **Report bands, not decimals.** Most established estates cluster within noise; the decimals are not real distinctions.
 6. **Re-verify all dated facts** (in the transcript) before any scoring run — MRT dates, polyclinic openings, etc. decay.
 

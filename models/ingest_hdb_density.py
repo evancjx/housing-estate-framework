@@ -32,7 +32,7 @@ ASSUMPTIONS:
 
 ALIASING (estate → HDB town):
   CANBERRA → SEMBAWANG  (Canberra BTOs share SB town code)
-  BOON KENG → KWN town code directly
+  BOON KENG / KALLANG → KWN town code directly
   WOODLEIGH → TOA PAYOH  (Bidadari/Woodleigh is under TP)
   DOVER → QUEENSTOWN
   TAMPINES WEST/EAST → TAMPINES
@@ -61,6 +61,8 @@ import urllib.error
 
 import pandas as pd
 
+from aliases import ESTATE_TOWN_ALIAS
+
 DATASET_ID = "d_17f5382f26140b1fdae0ba2ef6239d2f"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
 _UA = "Mozilla/5.0 (housing-estate-framework/2.0)"
@@ -83,8 +85,8 @@ TOWN_TO_ESTATE = {
     "GL":  "GEYLANG",
     "HG":  "HOUGANG",
     "JE":  "JURONG EAST",
-    "JW":  "JURONG EAST",       # alias: Jurong West rolls into JURONG EAST
-    "KWN": "BOON KENG",          # Kallang/Whampoa town is BOON KENG estate
+    "JW":  "JURONG WEST",
+    "KWN": ("BOON KENG", "KALLANG"),
     "MP":  "MARINE PARADE",
     "PG":  "PUNGGOL",
     "PRC": "PASIR RIS",
@@ -99,16 +101,10 @@ TOWN_TO_ESTATE = {
     "YS":  "YISHUN",
 }
 
-# Estate-to-source-estate alias (mirrors value_model.py:ESTATE_TOWN_ALIAS)
-# When an estates.csv estate has no direct HDB town code, inherit from alias.
-ESTATE_ALIAS = {
-    "CANBERRA":      "SEMBAWANG",
-    "WOODLEIGH":     "TOA PAYOH",
-    "DOVER":         "QUEENSTOWN",
-    "TAMPINES WEST": "TAMPINES",
-    "TAMPINES EAST": "TAMPINES",
-    "LENTOR":        "ANG MO KIO",
-}
+# Estate→HDB-town alias is single-sourced in models/aliases.py (ESTATE_TOWN_ALIAS).
+# When an estates.csv estate has no direct HDB town code, it inherits that town's density.
+# Do NOT re-introduce a local copy — a stale local map here dropped HOLLAND VILLAGE→QUEENSTOWN,
+# leaving Holland Village with zero density (CLAUDE.md alias single-sourcing invariant).
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
@@ -147,25 +143,28 @@ def aggregate_by_estate(csv_text: str) -> dict:
         if row.get("residential", "").upper() != "Y":
             continue   # skip non-residential blocks (multistorey carpark only, etc.)
         town = (row.get("bldg_contract_town") or "").strip()
-        estate = TOWN_TO_ESTATE.get(town)
-        if estate is None:
+        estates = TOWN_TO_ESTATE.get(town)
+        if estates is None:
             skipped_codes.add(town)
             continue
+        if isinstance(estates, str):
+            estates = (estates,)
         try:
             dus = int(row.get("total_dwelling_units") or 0)
             year = int(row.get("year_completed") or 0)
             storey = int(row.get("max_floor_lvl") or 0)
         except ValueError:
             continue
-        a = agg.setdefault(estate, {
-            "dus": 0, "blocks": 0, "storeys": [], "years": [],
-        })
-        a["dus"] += dus
-        a["blocks"] += 1
-        if storey > 0:
-            a["storeys"].append(storey)
-        if 1960 <= year <= 2030:
-            a["years"].append(year)
+        for estate in estates:
+            a = agg.setdefault(estate, {
+                "dus": 0, "blocks": 0, "storeys": [], "years": [],
+            })
+            a["dus"] += dus
+            a["blocks"] += 1
+            if storey > 0:
+                a["storeys"].append(storey)
+            if 1960 <= year <= 2030:
+                a["years"].append(year)
     if skipped_codes:
         print(f"  Skipped unmapped town codes: {sorted(skipped_codes)}",
               file=sys.stderr)
@@ -222,9 +221,9 @@ def main():
         name = str(est.estate).upper()
         # Try direct first
         a = by_estate.get(name)
-        # Then alias
-        if a is None and name in ESTATE_ALIAS:
-            a = by_estate.get(ESTATE_ALIAS[name])
+        # Then alias (single-sourced estate→town map)
+        if a is None and name in ESTATE_TOWN_ALIAS:
+            a = by_estate.get(ESTATE_TOWN_ALIAS[name])
         m = metrics_for(a) if a else empty_metrics()
         m["estate"] = name
         rows.append(m)

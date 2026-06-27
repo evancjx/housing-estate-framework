@@ -35,17 +35,18 @@ OUTPUT (data/bca_permits.csv):
 
 INPUT CONTRACT:
   --pipeline  data/pipeline_data.json
+  --estates   data/estates.csv
   --out       output CSV path
 
 RUN:
   python3 models/ingest_bca_permits.py \\
       --pipeline data/pipeline_data.json \\
+      --estates data/estates.csv \\
       --out data/bca_permits.csv
 """
 import argparse
 import json
 import sys
-from datetime import date
 
 import pandas as pd
 
@@ -100,7 +101,12 @@ def derive_severity(pipeline_items, this_year):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--pipeline", required=True)
+    ap.add_argument("--estates", default="data/estates.csv")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--year", type=int, default=2026,
+                    help="scoring year for the [now, now+3] window. Default 2026 matches "
+                         "liveability_model's scoring year; avoids date.today() non-determinism "
+                         "across calendar boundaries (committed bca_permits.csv would otherwise drift).")
     args = ap.parse_args()
 
     with open(args.pipeline) as f:
@@ -108,12 +114,12 @@ def main():
     items = data.get("pipeline_items", [])
     print(f"Loaded {len(items)} pipeline items", file=sys.stderr)
 
-    this_year = date.today().year
+    this_year = args.year
     sev = derive_severity(items, this_year)
     print(f"Estates with active construction: {len(sev)}", file=sys.stderr)
 
     # Union with master estate list (zero-fill the rest)
-    estates_df = pd.read_csv("data/estates.csv")
+    estates_df = pd.read_csv(args.estates)
     rows = []
     for est in estates_df["estate"]:
         e = str(est).upper()

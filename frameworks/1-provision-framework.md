@@ -57,7 +57,7 @@ Sourced verbatim from `models/framework_config.py:PROVISION_WEIGHTS`. Do not edi
 | 7 | `childcare` | 0.05 | MEASURED | Licensed childcare / infant care centres within 800m |
 | 8 | `hlth` | 0.04 | MEASURED | Primary-care-first: GP/CHAS/pharmacy + polyclinic access, THEN A&E time |
 | 9 | `mom` | 0.04 | PARTLY_MEASURED | Confirmed *additions* only, time-discounted. HDB-side ingested from data.gov.sg NRP+LUP+SERS; private-side en-bloc / new-launch pipeline still JUDGED |
-| 10 | `hawker` | 0.04 | JUDGED | Fame/reputation of hawker culture — not a spatial query; must come from `judged_inputs.csv` |
+| 10 | `hawker` | 0.04 | PARTLY_MEASURED | Count, distance, stall-capacity and redundancy from `hawker_v2.csv`; fame/reputation remains approximate |
 | 11 | `noise` | 0.03 | MEASURED | Expressway exposure: distance-weighted proximity to major expressways |
 | 12 | `air_noise` | 0.03 | MEASURED | Geometric runway-centerline + 12 km approach/departure corridor proxy for Changi, Seletar, Paya Lebar (v1.2) |
 | 13 | `eldercare` | 0.03 | MEASURED | Eldercare day-centres / AAC / nursing-home density (AIC Silver Pages / MOH registry; v1.3: carved from hlth) |
@@ -85,6 +85,10 @@ mapped to a 1–5 scale (GREEN→5, AMBER→3, RED→1). Captures observable est
 cleanliness, lighting, lift reliability, estate maintenance responsiveness. **This is explicitly NOT
 social mix** — it measures observable physical upkeep, not resident demographics. PARTLY_MEASURED
 because TCMR publication cadence is annual and band changes lag reality by up to 12 months.
+
+**`hawker` (PARTLY_MEASURED, w=0.04):** The canonical pipeline uses `data/hawker_v2.csv`, generated
+from NEA hawker-centre points plus embedded stall-count overrides. It measures access, capacity and
+redundancy, not cultural fame; older `judged_inputs.csv` hawker values are fallback-only.
 
 **DEFERRED — `ev_charging` (stub, NOT in live model):** EV charging infrastructure density was
 identified as a future component but is deferred pending LTA token / data access. Weight is not
