@@ -52,6 +52,8 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 
 ## 📊 HTML deliverables
 - **[comparison_table.html](comparison_table.html)** — interactive cross-model comparison table (estates × Provision/Liveability/Value/Employment/Risk). The headline visual. ⚠ Component/estate counts may lag pipeline regeneration — re-run `python models/gen_comparison_html.py` when counts change.
+- **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project table with MRT station and postal-district filters. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/private_project_locations.csv`, then `make private-project-table`.
+- **`data/school_selectivity.csv` + `make private-project-school-metrics`** — seed school-demand/selectivity proxies and build private-project diagnostics such as primary schools within 1km and best-ranked school within level-specific radii. These are private-buyer diagnostics, not official MOE rankings.
 - **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → Models → `data/master_output.csv`). Same caveat.
 
 ## 🔧 Other files & directories
@@ -72,6 +74,11 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 
 ## Data file note
 `data/value_private.csv` is a stale pre-fix artifact superseded by `data/value_output_private.csv` (the canonical de-circularised private Value output) and is NOT consumed by the pipeline.
+
+`data/private_project_locations.csv`, when present, is the reviewed OneMap geocode cache for private project coordinates. Without it, `private_project_comparison_table.html` falls back to estate/planning-area centroids and marks those rows as centroid fallback.
+
+`data/school_selectivity.csv` is a sourced seed of unofficial ranking proxies: primary P1 demand, secondary PSLE AL cut-off, and JC/JAE cut-off. It is intentionally not blended into Provision until the source treatment is reviewed.
+
 
 ## Next step to make it more data-driven
 Refresh `pipeline_data.json` through the networked ingesters, review the resulting momentum shifts, and add dedicated Value segments for rentals, ECs, and landed resale instead of folding all private resale into one segment.

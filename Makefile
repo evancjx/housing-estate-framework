@@ -1,4 +1,4 @@
-.PHONY: smoke master pipeline
+.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -7,6 +7,20 @@ smoke:
 # Rebuild the joined master_output.csv from the current model outputs.
 master:
 	python3 models/build_master.py
+
+# Geocode unique private apartment/condo project locations with OneMap.
+# Requires ONEMAP_TOKEN and network access; review data/private_project_locations.csv before relying on it.
+private-project-locations:
+	python3 models/geocode_private_projects.py --resume
+
+# Build project-level school proximity/selectivity diagnostics.
+# Requires reviewed data/private_project_locations.csv from the target above.
+private-project-school-metrics:
+	python3 models/private_school_metrics.py
+
+# Generate the private project comparison table from committed transactions and optional geocodes.
+private-project-table:
+	python3 models/gen_private_project_comparison_html.py
 
 # Regenerate the whole pipeline from real data, then the master.
 # Includes derived provision layers and BCA disruption severity; see CLAUDE.md.
