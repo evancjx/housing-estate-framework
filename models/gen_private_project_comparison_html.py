@@ -562,6 +562,56 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
   thead tr.cols th.sorted { color: #bae6fd; }
   thead tr.cols th.sorted-asc::after { content: " asc"; }
   thead tr.cols th.sorted-desc::after { content: " desc"; }
+  .tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 1px dotted #475569;
+    cursor: help;
+  }
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    z-index: 50;
+    width: max-content;
+    max-width: 260px;
+    padding: 6px 8px;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    background: #020617;
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }
+  .tip::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 3px);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #334155;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {
+    opacity: 1;
+  }
   .g-project { background:#0d1117; color:#38bdf8; }
   .g-location { background:#0d1117; color:#22c55e; }
   .g-school { background:#0d1117; color:#14b8a6; }
@@ -664,49 +714,49 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
 <table>
 <thead>
   <tr class="group">
-    <th colspan="3" class="g-project">Project</th>
-    <th colspan="7" class="g-location">Location Filters</th>
-    <th colspan="8" class="g-school">Schools</th>
-    <th colspan="7" class="g-price">Price Comparison</th>
-    <th colspan="5" class="g-txn">Transaction Profile</th>
-    <th colspan="4" class="g-model">Estate Context</th>
+    <th colspan="3" class="g-project"><span class="tip" data-tip="Project identity from URA private transaction records.">Project</span></th>
+    <th colspan="7" class="g-location"><span class="tip" data-tip="Postal, planning-area, MRT, and coordinate-source fields used for filtering and spatial context.">Location Filters</span></th>
+    <th colspan="8" class="g-school"><span class="tip" data-tip="Project-level school access diagnostics from matched geocodes and sourced selectivity proxies.">Schools</span></th>
+    <th colspan="7" class="g-price"><span class="tip" data-tip="Project transaction prices compared with district and recent project medians.">Price Comparison</span></th>
+    <th colspan="5" class="g-txn"><span class="tip" data-tip="Transaction sample depth, dates, sale types, tenure, and market segment.">Transaction Profile</span></th>
+    <th colspan="4" class="g-model"><span class="tip" data-tip="Estate-level framework context joined to the private project row; not project-level scores.">Estate Context</span></th>
   </tr>
   <tr class="cols">
-    <th data-sort="project" onclick="sortTable('project', this)">Project</th>
-    <th data-sort="street" onclick="sortTable('street', this)">Street</th>
-    <th data-sort="property_type" onclick="sortTable('property_type', this)">Type</th>
-    <th data-sort="district" onclick="sortTable('district', this)">District</th>
-    <th data-sort="planning_area" onclick="sortTable('planning_area', this)">Planning area</th>
-    <th data-sort="station" onclick="sortTable('station', this)">MRT station</th>
-    <th data-sort="line" onclick="sortTable('line', this)">Line</th>
-    <th data-sort="station_distance_m" onclick="sortTable('station_distance_m', this)">MRT dist</th>
-    <th data-sort="location_source" onclick="sortTable('location_source', this)">Source</th>
-    <th data-sort="geocode_score" onclick="sortTable('geocode_score', this)">Geocode</th>
-    <th data-sort="primary_1km_count" onclick="sortTable('primary_1km_count', this)">Primary 1km</th>
-    <th data-sort="best_primary_1km_school" onclick="sortTable('best_primary_1km_school', this)">Best primary</th>
-    <th data-sort="best_primary_1km_rank" onclick="sortTable('best_primary_1km_rank', this)">P rank</th>
-    <th data-sort="best_primary_1km_distance_m" onclick="sortTable('best_primary_1km_distance_m', this)">P dist</th>
-    <th data-sort="best_secondary_2km_school" onclick="sortTable('best_secondary_2km_school', this)">Best sec</th>
-    <th data-sort="best_secondary_2km_rank" onclick="sortTable('best_secondary_2km_rank', this)">S rank</th>
-    <th data-sort="best_jc_5km_school" onclick="sortTable('best_jc_5km_school', this)">Best JC</th>
-    <th data-sort="best_jc_5km_rank" onclick="sortTable('best_jc_5km_rank', this)">JC rank</th>
-    <th data-sort="n" onclick="sortTable('n', this)">n</th>
-    <th data-sort="recent_n" onclick="sortTable('recent_n', this)">Recent n</th>
-    <th data-sort="median_psm" onclick="sortTable('median_psm', this)">Median $psm</th>
-    <th data-sort="recent_median_psm" onclick="sortTable('recent_median_psm', this)">Recent $psm</th>
-    <th data-sort="district_delta_pct" onclick="sortTable('district_delta_pct', this)">vs district</th>
-    <th data-sort="recent_delta_pct" onclick="sortTable('recent_delta_pct', this)">Recent move</th>
-    <th data-sort="median_price_mil" onclick="sortTable('median_price_mil', this)">Median price</th>
-    <th data-sort="median_area_sqm" onclick="sortTable('median_area_sqm', this)">Median sqm</th>
-    <th data-sort="first_sale" onclick="sortTable('first_sale', this)">First sale</th>
-    <th data-sort="last_sale" onclick="sortTable('last_sale', this)">Last sale</th>
-    <th data-sort="sale_mix" onclick="sortTable('sale_mix', this)">Sale mix</th>
-    <th data-sort="tenure" onclick="sortTable('tenure', this)">Tenure</th>
-    <th data-sort="market_segment" onclick="sortTable('market_segment', this)">Market</th>
-    <th data-sort="context_area" onclick="sortTable('context_area', this)">Context estate</th>
-    <th data-sort="provision_band" onclick="sortTable('provision_band', this)">Prov</th>
-    <th data-sort="private_value_band" onclick="sortTable('private_value_band', this)">Private value</th>
-    <th data-sort="private_value_n" onclick="sortTable('private_value_n', this)">Value n</th>
+    <th data-sort="project" onclick="sortTable('project', this)"><span class="tip" data-tip="Private project name from URA transactions, grouped with street, district, and planning area.">Project</span></th>
+    <th data-sort="street" onclick="sortTable('street', this)"><span class="tip" data-tip="Street name reported in the URA private transaction feed.">Street</span></th>
+    <th data-sort="property_type" onclick="sortTable('property_type', this)"><span class="tip" data-tip="Dominant private property type in this project group.">Type</span></th>
+    <th data-sort="district" onclick="sortTable('district', this)"><span class="tip" data-tip="Postal district from the private transaction record.">District</span></th>
+    <th data-sort="planning_area" onclick="sortTable('planning_area', this)"><span class="tip" data-tip="Planning area used to join project rows to estate-level framework context.">Planning area</span></th>
+    <th data-sort="station" onclick="sortTable('station', this)"><span class="tip" data-tip="Nearest MRT or LRT station from the project geocode, or from centroid fallback when no project geocode exists.">MRT station</span></th>
+    <th data-sort="line" onclick="sortTable('line', this)"><span class="tip" data-tip="Line code for the nearest MRT or LRT station.">Line</span></th>
+    <th data-sort="station_distance_m" onclick="sortTable('station_distance_m', this)"><span class="tip" data-tip="Straight-line distance in metres to the nearest MRT or LRT station.">MRT dist</span></th>
+    <th data-sort="location_source" onclick="sortTable('location_source', this)"><span class="tip" data-tip="Whether spatial fields use a project OneMap geocode or a planning-area/estate centroid fallback.">Source</span></th>
+    <th data-sort="geocode_score" onclick="sortTable('geocode_score', this)"><span class="tip" data-tip="OneMap match score for project geocodes; blank for centroid fallback rows.">Geocode</span></th>
+    <th data-sort="primary_1km_count" onclick="sortTable('primary_1km_count', this)"><span class="tip" data-tip="Number of MOE primary schools within 1km of the matched project coordinate.">Primary 1km</span></th>
+    <th data-sort="best_primary_1km_school" onclick="sortTable('best_primary_1km_school', this)"><span class="tip" data-tip="Best ranked primary school within 1km, using the sourced selectivity proxy when available.">Best primary</span></th>
+    <th data-sort="best_primary_1km_rank" onclick="sortTable('best_primary_1km_rank', this)"><span class="tip" data-tip="Rank of the best primary proxy within 1km; lower rank is more selective.">P rank</span></th>
+    <th data-sort="best_primary_1km_distance_m" onclick="sortTable('best_primary_1km_distance_m', this)"><span class="tip" data-tip="Distance in metres to the best ranked primary school within 1km.">P dist</span></th>
+    <th data-sort="best_secondary_2km_school" onclick="sortTable('best_secondary_2km_school', this)"><span class="tip" data-tip="Best ranked secondary school within 2km, using the sourced selectivity proxy when available.">Best sec</span></th>
+    <th data-sort="best_secondary_2km_rank" onclick="sortTable('best_secondary_2km_rank', this)"><span class="tip" data-tip="Rank of the best secondary proxy within 2km; lower rank is more selective.">S rank</span></th>
+    <th data-sort="best_jc_5km_school" onclick="sortTable('best_jc_5km_school', this)"><span class="tip" data-tip="Best ranked junior college or Year 5 school within 5km, using the sourced selectivity proxy when available.">Best JC</span></th>
+    <th data-sort="best_jc_5km_rank" onclick="sortTable('best_jc_5km_rank', this)"><span class="tip" data-tip="Rank of the best JC proxy within 5km; lower rank is more selective.">JC rank</span></th>
+    <th data-sort="n" onclick="sortTable('n', this)"><span class="tip" data-tip="Total transaction count in the grouped project record.">n</span></th>
+    <th data-sort="recent_n" onclick="sortTable('recent_n', this)"><span class="tip" data-tip="Transaction count from the recent comparison window.">Recent n</span></th>
+    <th data-sort="median_psm" onclick="sortTable('median_psm', this)"><span class="tip" data-tip="Median transacted price per square metre across project transactions.">Median $psm</span></th>
+    <th data-sort="recent_median_psm" onclick="sortTable('recent_median_psm', this)"><span class="tip" data-tip="Recent-window median transacted price per square metre for this project.">Recent $psm</span></th>
+    <th data-sort="district_delta_pct" onclick="sortTable('district_delta_pct', this)"><span class="tip" data-tip="Project median price per square metre versus its postal-district median.">vs district</span></th>
+    <th data-sort="recent_delta_pct" onclick="sortTable('recent_delta_pct', this)"><span class="tip" data-tip="Recent median price per square metre versus the full project median.">Recent move</span></th>
+    <th data-sort="median_price_mil" onclick="sortTable('median_price_mil', this)"><span class="tip" data-tip="Median transacted price in Singapore dollars, shown in millions.">Median price</span></th>
+    <th data-sort="median_area_sqm" onclick="sortTable('median_area_sqm', this)"><span class="tip" data-tip="Median transacted unit area in square metres.">Median sqm</span></th>
+    <th data-sort="first_sale" onclick="sortTable('first_sale', this)"><span class="tip" data-tip="Earliest transaction month observed for this project group.">First sale</span></th>
+    <th data-sort="last_sale" onclick="sortTable('last_sale', this)"><span class="tip" data-tip="Latest transaction month observed for this project group.">Last sale</span></th>
+    <th data-sort="sale_mix" onclick="sortTable('sale_mix', this)"><span class="tip" data-tip="Sale types present in the project record, such as New Sale, Resale, or Sub Sale.">Sale mix</span></th>
+    <th data-sort="tenure" onclick="sortTable('tenure', this)"><span class="tip" data-tip="Dominant tenure text reported for transactions in this project group.">Tenure</span></th>
+    <th data-sort="market_segment" onclick="sortTable('market_segment', this)"><span class="tip" data-tip="URA market segment, such as CCR, RCR, or OCR.">Market</span></th>
+    <th data-sort="context_area" onclick="sortTable('context_area', this)"><span class="tip" data-tip="Estate or planning-area context used for framework joins.">Context estate</span></th>
+    <th data-sort="provision_band" onclick="sortTable('provision_band', this)"><span class="tip" data-tip="Estate-level Provision band. This is context for the project, not a project-level score.">Prov</span></th>
+    <th data-sort="private_value_band" onclick="sortTable('private_value_band', this)"><span class="tip" data-tip="Estate-level private value band from the framework, kept separate from HDB value.">Private value</span></th>
+    <th data-sort="private_value_n" onclick="sortTable('private_value_n', this)"><span class="tip" data-tip="Estate-level private value sample count used by the value model.">Value n</span></th>
   </tr>
 </thead>
 <tbody id="tbody"></tbody>
