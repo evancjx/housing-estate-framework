@@ -255,6 +255,7 @@ def school_context(metrics: dict[str, Any] | None) -> dict[str, Any]:
             "has_primary_1km": None,
             "has_ranked_primary_1km": None,
             "primary_1km_count": None,
+            "primary_1km_schools": None,
             "primary_1km_ranked_count": None,
             "top_primary_1km_count": None,
             "best_primary_1km_school": None,
@@ -275,6 +276,7 @@ def school_context(metrics: dict[str, Any] | None) -> dict[str, Any]:
         "has_primary_1km": bool_or_none(metrics.get("has_primary_1km")),
         "has_ranked_primary_1km": bool_or_none(metrics.get("has_ranked_primary_1km")),
         "primary_1km_count": int_or_none(metrics.get("primary_1km_count")),
+        "primary_1km_schools": value_or_none(metrics.get("primary_1km_schools")),
         "primary_1km_ranked_count": int_or_none(metrics.get("primary_1km_ranked_count")),
         "top_primary_1km_count": int_or_none(metrics.get("top_primary_1km_count")),
         "best_primary_1km_school": value_or_none(metrics.get("best_primary_1km_school")),
@@ -533,12 +535,19 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
     grid-template-columns: minmax(200px, 1.4fr) minmax(125px, 0.7fr) minmax(150px, 0.8fr) minmax(125px, 0.7fr) minmax(125px, 0.7fr) minmax(150px, 0.85fr) auto;
     gap: 8px;
     margin-bottom: 16px;
-    align-items: center;
+    align-items: start;
   }
   .search, select {
     padding: 6px 10px; border-radius: 5px; border: 1px solid #1e293b;
     background: #111827; color: #e2e8f0; font-size: 11px; outline: none;
     min-height: 30px;
+  }
+  select[multiple] {
+    min-height: 92px;
+    padding: 5px 8px;
+  }
+  select[multiple] option {
+    padding: 2px 4px;
   }
   .search::placeholder { color: #475569; }
   .search:focus, select:focus { border-color: #38bdf8; }
@@ -612,6 +621,52 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
   .tip:focus-visible::before {
     opacity: 1;
   }
+  .row-tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .row-tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    z-index: 60;
+    width: max-content;
+    max-width: 320px;
+    padding: 7px 9px;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    background: #020617;
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }
+  .row-tip::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 3px);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #334155;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }
+  .row-tip:hover::after,
+  .row-tip:hover::before,
+  .row-tip:focus-visible::after,
+  .row-tip:focus-visible::before {
+    opacity: 1;
+  }
   .g-project { background:#0d1117; color:#38bdf8; }
   .g-location { background:#0d1117; color:#22c55e; }
   .g-school { background:#0d1117; color:#14b8a6; }
@@ -682,27 +737,27 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
 
 <div class="controls">
   <input class="search" id="search" placeholder="Search project, street, district, station..." oninput="applyFilters()">
-  <select id="districtFilter" onchange="applyFilters()">
-    <option value="all">All districts</option>
+  <select id="districtFilter" multiple size="5" onchange="applyFilters()" aria-label="District filter">
+    <option value="all" selected>All districts</option>
 {{DISTRICT_OPTIONS}}
   </select>
-  <select id="stationFilter" onchange="applyFilters()">
-    <option value="all">All MRT stations</option>
+  <select id="stationFilter" multiple size="5" onchange="applyFilters()" aria-label="MRT station filter">
+    <option value="all" selected>All MRT stations</option>
 {{STATION_OPTIONS}}
   </select>
-  <select id="saleFilter" onchange="applyFilters()">
-    <option value="all">All sale mixes</option>
+  <select id="saleFilter" multiple size="5" onchange="applyFilters()" aria-label="Sale mix filter">
+    <option value="all" selected>All sale mixes</option>
     <option value="New Sale">Has new sales</option>
     <option value="Resale">Has resale</option>
     <option value="Sub Sale">Has sub sales</option>
   </select>
-  <select id="sourceFilter" onchange="applyFilters()">
-    <option value="all">All locations</option>
+  <select id="sourceFilter" multiple size="4" onchange="applyFilters()" aria-label="Location source filter">
+    <option value="all" selected>All locations</option>
     <option value="project_geocode">Project geocode</option>
     <option value="centroid_proxy">Centroid fallback</option>
   </select>
-  <select id="primaryFilter" onchange="applyFilters()">
-    <option value="all">All primary access</option>
+  <select id="primaryFilter" multiple size="4" onchange="applyFilters()" aria-label="Primary access filter">
+    <option value="all" selected>All primary access</option>
     <option value="has_primary_1km">Has primary <=1km</option>
     <option value="has_ranked_primary_1km">Has ranked primary <=1km</option>
     <option value="no_primary_1km">No primary <=1km</option>
@@ -837,7 +892,8 @@ function primaryHTML(row) {
   if (row.primary_1km_count === null || row.primary_1km_count === undefined) return '<span class="muted">-</span>';
   const cls = row.has_primary_1km ? "school-yes" : "school-no";
   const label = row.has_primary_1km ? "yes" : "no";
-  return `<span class="source ${cls}">${label}</span> <span class="muted">${Number(row.primary_1km_count).toLocaleString()}</span>`;
+  const schools = row.primary_1km_schools ? row.primary_1km_schools : "No primary schools within 1km";
+  return `<span class="row-tip" data-tip="${escapeHTML(schools)}"><span class="source ${cls}">${label}</span> <span class="muted">${Number(row.primary_1km_count).toLocaleString()}</span></span>`;
 }
 function schoolHTML(value) {
   if (!value) return '<span class="muted">-</span>';
@@ -909,13 +965,32 @@ function renderRows() {
   document.getElementById("tbody").innerHTML = filtered.map(renderRow).join("");
   document.getElementById("visibleCount").textContent = filtered.length.toLocaleString();
 }
+function selectedValues(id) {
+  return Array.from(document.getElementById(id).selectedOptions)
+    .map(option => option.value)
+    .filter(value => value !== "all");
+}
+function matchesSelected(values, value) {
+  return values.length === 0 || values.includes(String(value));
+}
+function matchesSale(values, saleMix) {
+  return values.length === 0 || values.some(value => String(saleMix ?? "").includes(value));
+}
+function matchesPrimary(values, row) {
+  if (values.length === 0) return true;
+  return values.some(value =>
+    (value === "has_primary_1km" && row.has_primary_1km === true) ||
+    (value === "has_ranked_primary_1km" && row.has_ranked_primary_1km === true) ||
+    (value === "no_primary_1km" && row.has_primary_1km === false)
+  );
+}
 function applyFilters() {
   const search = document.getElementById("search").value.trim().toLowerCase();
-  const district = document.getElementById("districtFilter").value;
-  const station = document.getElementById("stationFilter").value;
-  const sale = document.getElementById("saleFilter").value;
-  const source = document.getElementById("sourceFilter").value;
-  const primary = document.getElementById("primaryFilter").value;
+  const districts = selectedValues("districtFilter");
+  const stations = selectedValues("stationFilter");
+  const sales = selectedValues("saleFilter");
+  const sources = selectedValues("sourceFilter");
+  const primaryValues = selectedValues("primaryFilter");
   filtered = DATA.filter(row => {
     const searchText = [
       row.project, row.street, row.district, row.planning_area, row.station, row.station_code,
@@ -923,15 +998,11 @@ function applyFilters() {
       row.best_jc_5km_school
     ].join(" ").toLowerCase();
     const searchOk = !search || searchText.includes(search);
-    const districtOk = district === "all" || row.district === district;
-    const stationOk = station === "all" || row.station_key === station;
-    const saleOk = sale === "all" || row.sale_mix.includes(sale);
-    const sourceOk = source === "all" || row.location_source === source;
-    const primaryOk =
-      primary === "all" ||
-      (primary === "has_primary_1km" && row.has_primary_1km === true) ||
-      (primary === "has_ranked_primary_1km" && row.has_ranked_primary_1km === true) ||
-      (primary === "no_primary_1km" && row.has_primary_1km === false);
+    const districtOk = matchesSelected(districts, row.district);
+    const stationOk = matchesSelected(stations, row.station_key);
+    const saleOk = matchesSale(sales, row.sale_mix);
+    const sourceOk = matchesSelected(sources, row.location_source);
+    const primaryOk = matchesPrimary(primaryValues, row);
     return searchOk && districtOk && stationOk && saleOk && sourceOk && primaryOk;
   });
   filtered.sort((a, b) => {

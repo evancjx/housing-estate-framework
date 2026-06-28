@@ -68,6 +68,14 @@ def test_build_project_school_metrics_uses_level_specific_radii():
             "mainlevel_code": "PRIMARY",
         },
         {
+            "school_name": "NEAR PRIMARY",
+            "school_name_norm": psm.normalise_school_name("NEAR PRIMARY"),
+            "level": "primary",
+            "school_lat": 1.001,
+            "school_lon": 103.0,
+            "mainlevel_code": "PRIMARY",
+        },
+        {
             "school_name": "TOP SECONDARY",
             "school_name_norm": psm.normalise_school_name("TOP SECONDARY"),
             "level": "secondary",
@@ -125,7 +133,8 @@ def test_build_project_school_metrics_uses_level_specific_radii():
     row = out.iloc[0]
 
     assert bool(row["has_primary_1km"]) is True
-    assert row["primary_1km_count"] == 1
+    assert row["primary_1km_count"] == 2
+    assert row["primary_1km_schools"] == "TOP PRIMARY; NEAR PRIMARY"
     assert row["best_primary_1km_school"] == "TOP PRIMARY"
     assert row["best_primary_1km_rank"] == 2
     assert row["secondary_2km_count"] == 1

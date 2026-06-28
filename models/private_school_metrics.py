@@ -198,6 +198,8 @@ def metrics_for_project(
             out[f"{prefix}_count"] = 0
             out[f"{prefix}_ranked_count"] = 0
             out[f"top_{prefix}_count"] = 0
+            if level == "primary":
+                out[f"{prefix}_schools"] = ""
             out[f"best_{prefix}_school"] = ""
             out[f"best_{prefix}_rank"] = ""
             out[f"best_{prefix}_distance_m"] = ""
@@ -219,6 +221,9 @@ def metrics_for_project(
         out[f"{prefix}_count"] = int(len(nearby))
         out[f"{prefix}_ranked_count"] = int(len(ranked))
         out[f"top_{prefix}_count"] = int((ranked["rank"] <= top_rank_cutoff).sum())
+        if level == "primary":
+            primary_names = nearby.sort_values(["distance_m", "school_name"])["school_name"].tolist()
+            out[f"{prefix}_schools"] = "; ".join(primary_names)
         if best is None:
             out[f"best_{prefix}_school"] = ""
             out[f"best_{prefix}_rank"] = ""
