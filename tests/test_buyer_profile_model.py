@@ -43,6 +43,17 @@ def _life_paths():
     })
 
 
+def _private_values():
+    return pd.DataFrame({
+        "estate": ["ALPHA", "ALPHA", "BETA"],
+        "property_segment": ["condo", "landed", "condo"],
+        "value_score": [4.4, 3.1, 3.6],
+        "value_band": ["B+", "C", "B"],
+        "value_basis": ["direct", "direct", "direct"],
+        "n": [120, 80, 110],
+    })
+
+
 def test_hard_filters_apply_before_scoring():
     profile = {
         "profile_id": "hdb-family",
@@ -80,17 +91,21 @@ def test_tenure_segments_are_output_separately():
         "horizon": "T5",
         "hard_filters": {"exclude_archetypes": []},
     }
-    out = bpm.run(_master(), _life_paths(), profile)
+    out = bpm.run(_master(), _life_paths(), profile, private_values=_private_values())
     alpha = out[out["estate"] == "ALPHA"].sort_values("tenure")
 
-    assert list(alpha["tenure"]) == ["hdb", "private"]
+    assert list(alpha["tenure"]) == ["condo", "hdb", "landed"]
     hdb = alpha[alpha["tenure"] == "hdb"].iloc[0]
-    private = alpha[alpha["tenure"] == "private"].iloc[0]
+    condo = alpha[alpha["tenure"] == "condo"].iloc[0]
+    landed = alpha[alpha["tenure"] == "landed"].iloc[0]
     assert hdb["value_band"] == "B"
     assert hdb["lease_band"] == "B+"
-    assert private["value_band"] == "B+"
-    assert private["lease_band"] == ""
-    assert hdb["profile_score"] != private["profile_score"]
+    assert condo["value_band"] == "B+"
+    assert condo["lease_band"] == ""
+    assert landed["value_band"] == "C"
+    assert landed["lease_band"] == ""
+    assert hdb["profile_score"] != condo["profile_score"]
+    assert condo["profile_score"] != landed["profile_score"]
 
 
 def test_missing_private_value_can_be_filtered_or_renormalised():
@@ -117,6 +132,28 @@ def test_missing_private_value_can_be_filtered_or_renormalised():
     assert beta["soft_weight_covered"] < 1.0
 
 
+def test_landed_segment_does_not_borrow_combined_private_value():
+    profile = {
+        "profile_id": "landed-strict",
+        "tenure": "landed",
+        "persona": "YoungFam",
+        "horizon": "T5",
+        "hard_filters": {
+            "exclude_archetypes": [],
+            "min_value_band": "C",
+        },
+    }
+    out = bpm.run(_master(), _life_paths(), profile, private_values=_private_values())
+
+    alpha = out[out["estate"] == "ALPHA"].iloc[0]
+    beta = out[out["estate"] == "BETA"].iloc[0]
+    assert bool(alpha["eligible"]) is True
+    assert alpha["value_band"] == "C"
+    assert bool(beta["eligible"]) is False
+    assert beta["value_band"] == "no_data"
+    assert "value_below:C" in beta["filter_reasons"]
+
+
 def test_life_path_scores_are_merged_when_requested():
     profile = {
         "profile_id": "family-path",
@@ -131,3 +168,38 @@ def test_life_path_scores_are_merged_when_requested():
 
     assert alpha["life_path_end_score"] == 4.2
     assert alpha["life_path_delta"] == 0.4
+
+
+def test_multi_profile_payload_keeps_profile_local_ranks():
+    payload = {
+        "defaults": {"hard_filters": {"exclude_archetypes": ["X"]}},
+        "profiles": [
+            {
+                "profile_id": "hdb-family",
+                "tenure": "hdb",
+                "persona": "YoungFam",
+                "horizon": "T5",
+                "life_path": "forming_family",
+            },
+            {
+                "profile_id": "private-lifestyle",
+                "tenure": "private",
+                "persona": "Lifestyle",
+                "horizon": "T0",
+            },
+        ],
+    }
+    profiles = bpm._profiles_from_payload(payload)
+    out = bpm.run_many(_master(), _life_paths(), profiles)
+
+    assert set(out["profile_id"]) == {"hdb-family", "private-lifestyle"}
+    assert len(out) == 6
+    top_by_profile = (
+        out[out["eligible"]]
+        .sort_values(["profile_id", "rank"])
+        .groupby("profile_id")
+        .first()
+    )
+    assert set(top_by_profile["rank"]) == {1}
+    central = out[out["estate"] == "CENTRAL AREA"]
+    assert (central["filter_reasons"].str.contains("excluded_archetype:X")).all()

@@ -1,30 +1,131 @@
 {
-  "profile_id": "forming-family-hdb-balanced",
-  "description": "Young-family HDB buyer using a T5 horizon. Hard filters remove infeasible estate choices before scoring remaining trade-offs.",
-  "tenure": "hdb",
-  "persona": "YoungFam",
-  "horizon": "T5",
-  "life_path": "forming_family",
-  "hard_filters": {
-    "exclude_archetypes": ["X"],
-    "min_liveability_band": "C",
-    "min_value_band": "C",
-    "min_employment_band": "D",
-    "min_lease_band": "C",
-    "min_value_n": 100,
-    "exclude_measured_only": false
+  "schema_version": 2,
+  "description": "Example buyer scenarios. Each profile produces estate-tenure rows with hard-filter reasons and profile-local ranks.",
+  "defaults": {
+    "hard_filters": {
+      "exclude_archetypes": ["X"],
+      "exclude_measured_only": false
+    },
+    "buyer_requirements": {
+      "monthly_payment_comfort": "Apply before this estate model using household financing data.",
+      "minimum_layout": "Project/unit-level diagnostic, not estate-level Provision.",
+      "care_network_proximity": "Future profile-specific distance filter for parents, in-laws, childcare, and eldercare anchors."
+    }
   },
-  "soft_weights": {
-    "liveability": 0.45,
-    "value": 0.25,
-    "employment": 0.1,
-    "lease": 0.1,
-    "provision": 0.05,
-    "life_path": 0.05
-  },
-  "buyer_requirements": {
-    "monthly_payment_comfort": "Apply before this estate model using household financing data.",
-    "minimum_layout": "Project/unit-level diagnostic, not estate-level Provision.",
-    "care_network_proximity": "Future profile-specific distance filter for parents, in-laws, childcare, and eldercare anchors."
-  }
+  "profiles": [
+    {
+      "profile_id": "forming-family-hdb-balanced",
+      "description": "Young-family HDB buyer using a T5 horizon.",
+      "tenure": "hdb",
+      "persona": "YoungFam",
+      "horizon": "T5",
+      "life_path": "forming_family",
+      "hard_filters": {
+        "exclude_archetypes": ["X"],
+        "min_liveability_band": "C",
+        "min_value_band": "C",
+        "min_employment_band": "D",
+        "min_lease_band": "C",
+        "min_value_n": 100,
+        "exclude_measured_only": false
+      },
+      "soft_weights": {
+        "liveability": 0.45,
+        "value": 0.25,
+        "employment": 0.1,
+        "lease": 0.1,
+        "provision": 0.05,
+        "life_path": 0.05
+      }
+    },
+    {
+      "profile_id": "single-pro-condo-commute-value",
+      "description": "Condo buyer who cares most about current single-professional fit, direct condo value coverage, and employment access.",
+      "tenure": "condo",
+      "persona": "SinglePro",
+      "horizon": "T0",
+      "life_path": "settling_single",
+      "hard_filters": {
+        "exclude_archetypes": ["X"],
+        "min_liveability_band": "C",
+        "min_value_band": "C",
+        "min_employment_band": "C",
+        "min_value_n": 100,
+        "require_direct_value": true
+      },
+      "soft_weights": {
+        "liveability": 0.4,
+        "value": 0.3,
+        "employment": 0.2,
+        "provision": 0.05,
+        "life_path": 0.05
+      }
+    },
+    {
+      "profile_id": "forming-family-condo-balanced",
+      "description": "Young-family condo buyer using the same T5 family horizon as the HDB profile, with condo-specific value coverage.",
+      "tenure": "condo",
+      "persona": "YoungFam",
+      "horizon": "T5",
+      "life_path": "forming_family",
+      "hard_filters": {
+        "exclude_archetypes": ["X"],
+        "min_liveability_band": "C",
+        "min_value_band": "C",
+        "min_employment_band": "D",
+        "min_value_n": 100
+      },
+      "soft_weights": {
+        "liveability": 0.5,
+        "value": 0.25,
+        "employment": 0.1,
+        "provision": 0.1,
+        "life_path": 0.05
+      }
+    },
+    {
+      "profile_id": "landed-family-amenity-upside",
+      "description": "Landed buyer using the same estate liveability lens, with landed-specific value coverage so nearby amenities and estate fit are not ignored.",
+      "tenure": "landed",
+      "persona": "Lifestyle",
+      "horizon": "T5",
+      "life_path": "upgrader",
+      "hard_filters": {
+        "exclude_archetypes": ["X"],
+        "min_liveability_band": "C",
+        "min_value_band": "D",
+        "min_value_n": 30
+      },
+      "soft_weights": {
+        "liveability": 0.45,
+        "value": 0.3,
+        "provision": 0.1,
+        "employment": 0.1,
+        "life_path": 0.05
+      }
+    },
+    {
+      "profile_id": "ageing-in-place-hdb-care-lease",
+      "description": "Retiree-oriented HDB profile prioritising current and near-term liveability, lease tolerance, and value.",
+      "tenure": "hdb",
+      "persona": "Retiree",
+      "horizon": "T5",
+      "life_path": "ageing_in_place",
+      "hard_filters": {
+        "exclude_archetypes": ["X"],
+        "min_liveability_band": "C",
+        "min_value_band": "D",
+        "min_lease_band": "C",
+        "min_value_n": 100,
+        "min_D_T0": 0.8
+      },
+      "soft_weights": {
+        "liveability": 0.5,
+        "value": 0.2,
+        "lease": 0.2,
+        "provision": 0.05,
+        "life_path": 0.05
+      }
+    }
+  ]
 }

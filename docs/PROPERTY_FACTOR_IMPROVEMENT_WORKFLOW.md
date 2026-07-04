@@ -158,6 +158,8 @@ Recommended route:
 - Hard filters constrain the accessible estate/project set.
 - Soft preferences adjust Liveability overlays by persona and horizon.
 - Cost and liquidity stay in Value, segmented by tenure.
+- Condo and landed profiles inherit estate liveability, but their Value evidence
+  stays segment-specific instead of borrowing a blended private score.
 - Unit-level facts remain diagnostics, not estate Provision.
 
 Implemented first-slice artifacts:
@@ -166,12 +168,15 @@ Implemented first-slice artifacts:
 - `models/buyer_profile_model.py`
 - `data/buyer_profile_output.csv`
 - `tests/test_buyer_profile_model.py`
+- multi-profile JSON support for comparing several household scenarios in one
+  run
+- `models/private_segment_value_model.py` and `data/private_segment_value.csv`
+  for separate condo and landed private Value evidence
+- `models/gen_buyer_profile_html.py` and `buyer_profile_table.html` for a
+  filterable profile evaluation table
 
 Remaining product work:
 
-- comparison-table controls for profile filters
-- additional profile examples for private buyers, retirees, and single
-  professionals
 - anchor-specific distance filters for workplaces, schools, in-laws, childcare,
   and eldercare
 

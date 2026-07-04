@@ -3,9 +3,9 @@
 Buyer-profile intake model.
 
 This is a demand-side wrapper around the existing estate outputs. It does not
-change Provision, Liveability, or Value. It reads a buyer profile, applies hard
-filters first, then computes a profile-relative score over the remaining estate
-and tenure choices.
+change Provision, Liveability, or Value. It reads one or more buyer profiles,
+applies hard filters first, then computes a profile-relative score over the
+remaining estate and tenure choices.
 
 Hard filters represent buy/no-buy constraints: tenure segment, minimum bands,
 transaction coverage, X-archetype exclusion, lease tolerance, and similar gates.
@@ -21,11 +21,17 @@ RUN:
 INPUT CONTRACT
 ==============
 --profile JSON:
+  Either a single profile object or:
+    profiles: list[profile]
+
+  A profile has:
   Required:
     profile_id: string
   Optional:
-    tenure: "hdb" | "private" | "any"
-    tenures: list of "hdb" and/or "private" (overrides tenure)
+    tenure: "hdb" | "private" | "condo" | "landed" | "any"
+    tenures: list of tenure/property segments (overrides tenure). `private`
+      uses the legacy combined private bucket; `condo` and `landed` use
+      data/private_segment_value.csv when available.
     persona: yf|youngfam|young_family|sp|singlepro|ret|retiree|ls|lifestyle
     horizon: T0|T5|T15
     life_path: one of data/life_paths.csv path values
@@ -54,6 +60,11 @@ INPUT CONTRACT
 --life-paths CSV:
   data/life_paths.csv from build_master.py. Required only when profile.life_path
   is provided. Columns: estate,path,start_score,end_score,delta.
+
+--private-values CSV:
+  data/private_segment_value.csv from private_segment_value_model.py. Required
+  only for segment-specific condo/landed Value. Missing rows stay no_data rather
+  than borrowing from the combined private bucket.
 
 OUTPUT CSV:
   One row per estate x requested tenure segment, with eligibility status,
@@ -98,7 +109,8 @@ PREFIX_LABEL = {
 }
 
 VALID_HORIZONS = {"T0", "T5", "T15"}
-VALID_TENURES = {"hdb", "private"}
+VALID_TENURES = {"hdb", "private", "condo", "landed"}
+PROPERTY_SEGMENT_TENURES = {"condo", "landed"}
 
 DEFAULT_SOFT_WEIGHTS = {
     "liveability": 0.45,
@@ -213,7 +225,7 @@ def _normalise_tenures(profile: Dict[str, Any]) -> List[str]:
     raw = profile.get("tenures", profile.get("tenure", "any"))
     values = [_clean_text(v).lower() for v in _as_list(raw)]
     if not values or values == ["any"] or "any" in values or "all" in values:
-        return ["hdb", "private"]
+        return ["hdb", "condo", "landed"]
     invalid = sorted(set(values) - VALID_TENURES)
     if invalid:
         raise ValueError(f"Unknown tenure(s): {invalid}. Use hdb, private, or any.")
@@ -240,6 +252,29 @@ def _load_json(path: str) -> Dict[str, Any]:
         raise FileNotFoundError(f"profile JSON not found: {path}")
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def _profiles_from_payload(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Accept both the original single-profile JSON and a multi-profile wrapper."""
+    if "profiles" not in payload:
+        return [payload]
+    profiles = payload.get("profiles")
+    if not isinstance(profiles, list) or not profiles:
+        raise ValueError("profile JSON 'profiles' must be a non-empty list")
+    defaults = payload.get("defaults", {}) or {}
+    if not isinstance(defaults, dict):
+        raise ValueError("profile JSON 'defaults' must be an object when present")
+
+    merged = []
+    for i, profile in enumerate(profiles):
+        if not isinstance(profile, dict):
+            raise ValueError(f"profile at index {i} must be an object")
+        p = dict(defaults)
+        p.update(profile)
+        if not _clean_text(p.get("profile_id", "")):
+            raise ValueError(f"profile at index {i} is missing profile_id")
+        merged.append(p)
+    return merged
 
 
 def _load_csv(path: str, name: str) -> pd.DataFrame:
@@ -269,7 +304,32 @@ def _life_path_frame(life_paths: Optional[pd.DataFrame], path_name: str) -> pd.D
     )
 
 
-def _value_metrics(row: pd.Series, tenure: str) -> Dict[str, Any]:
+def _private_value_lookup(private_values: Optional[pd.DataFrame]) -> Dict[Tuple[str, str], Dict[str, Any]]:
+    if private_values is None or private_values.empty:
+        return {}
+    required = {"estate", "property_segment", "value_score", "value_band", "value_basis", "n"}
+    missing = required - set(private_values.columns)
+    if missing:
+        raise ValueError(f"private-values CSV missing columns: {sorted(missing)}")
+
+    lookup: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    for _, r in private_values.iterrows():
+        estate = _clean_text(r["estate"]).upper()
+        segment = _clean_text(r["property_segment"]).lower()
+        lookup[(estate, segment)] = {
+            "score": _number(r.get("value_score")),
+            "band": _clean_text(r.get("value_band", "")),
+            "basis": _clean_text(r.get("value_basis", "")),
+            "n": _number(r.get("n")),
+        }
+    return lookup
+
+
+def _value_metrics(
+    row: pd.Series,
+    tenure: str,
+    private_value_lookup: Optional[Dict[Tuple[str, str], Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
     if tenure == "hdb":
         return {
             "score": _number(row.get("value_hdb_score")),
@@ -277,6 +337,12 @@ def _value_metrics(row: pd.Series, tenure: str) -> Dict[str, Any]:
             "basis": _clean_text(row.get("value_hdb_basis", "")),
             "n": _number(row.get("value_hdb_n")),
         }
+    if tenure in PROPERTY_SEGMENT_TENURES:
+        key = (_clean_text(row.get("estate", "")).upper(), tenure)
+        found = (private_value_lookup or {}).get(key)
+        if found is not None:
+            return found
+        return {"score": None, "band": "no_data", "basis": "no_data", "n": None}
     return {
         "score": _number(row.get("value_private_score")),
         "band": _clean_text(row.get("value_private_band", "")),
@@ -286,7 +352,7 @@ def _value_metrics(row: pd.Series, tenure: str) -> Dict[str, Any]:
 
 
 def _provision_metrics(row: pd.Series, tenure: str) -> Tuple[Optional[float], str]:
-    if tenure == "private":
+    if tenure in {"private", "condo", "landed"}:
         score = _number(row.get("provision_private"))
         return score, ""
     return _number(row.get("provision_score")), _clean_text(row.get("provision_band", ""))
@@ -415,13 +481,19 @@ def _soft_score(
     return round(weighted / covered, 3), round(covered / denominator, 3)
 
 
-def run(master: pd.DataFrame, life_paths: Optional[pd.DataFrame], profile: Dict[str, Any]) -> pd.DataFrame:
+def run(
+    master: pd.DataFrame,
+    life_paths: Optional[pd.DataFrame],
+    profile: Dict[str, Any],
+    private_values: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
     """Apply one buyer profile to master/life-path outputs."""
     profile_id = _clean_text(profile.get("profile_id", "profile"))
     persona_prefix = _normalise_persona(profile)
     horizon = _normalise_horizon(profile)
     tenures = _normalise_tenures(profile)
     life_path = _clean_text(profile.get("life_path", ""))
+    private_lookup = _private_value_lookup(private_values)
 
     master = master.copy()
     master["estate"] = master["estate"].astype(str).str.strip().str.upper()
@@ -442,7 +514,7 @@ def run(master: pd.DataFrame, life_paths: Optional[pd.DataFrame], profile: Dict[
     rows = []
     for _, row in master.iterrows():
         for tenure in tenures:
-            value = _value_metrics(row, tenure)
+            value = _value_metrics(row, tenure, private_lookup)
             provision_score, provision_band = _provision_metrics(row, tenure)
             liveability_score = _number(row.get(live_col))
             employment_score = _number(row.get("emp_score"))
@@ -512,31 +584,53 @@ def run(master: pd.DataFrame, life_paths: Optional[pd.DataFrame], profile: Dict[
     return out
 
 
+def run_many(
+    master: pd.DataFrame,
+    life_paths: Optional[pd.DataFrame],
+    profiles: List[Dict[str, Any]],
+    private_values: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
+    """Apply multiple profiles and concatenate outputs. Ranks remain profile-local."""
+    frames = [run(master, life_paths, profile, private_values=private_values) for profile in profiles]
+    if not frames:
+        return pd.DataFrame(columns=OUTPUT_COLUMNS)
+    records = []
+    for frame in frames:
+        records.extend(frame.to_dict("records"))
+    return pd.DataFrame.from_records(records, columns=OUTPUT_COLUMNS)
+
+
 def main() -> None:
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
     parser = argparse.ArgumentParser(description="Apply a buyer profile to estate outputs")
     parser.add_argument("--profile", default=os.path.join(data_dir, "buyer_profiles.example.json"))
     parser.add_argument("--master", default=os.path.join(data_dir, "master_output.csv"))
     parser.add_argument("--life-paths", default=os.path.join(data_dir, "life_paths.csv"))
+    parser.add_argument("--private-values", default=os.path.join(data_dir, "private_segment_value.csv"))
     parser.add_argument("--out", default=os.path.join(data_dir, "buyer_profile_output.csv"))
     args = parser.parse_args()
 
     try:
-        profile = _load_json(args.profile)
+        payload = _load_json(args.profile)
+        profiles = _profiles_from_payload(payload)
         master = _load_csv(args.master, "master")
         life_paths = _load_csv(args.life_paths, "life_paths") if args.life_paths else None
-        out = run(master, life_paths, profile)
+        private_values = _load_csv(args.private_values, "private-values") if os.path.exists(args.private_values) else None
+        out = run_many(master, life_paths, profiles, private_values=private_values)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
         sys.exit(f"buyer_profile_model: {exc}")
 
     out.to_csv(args.out, index=False)
     eligible = out[out["eligible"]]
     print(f"buyer_profile_model: wrote {len(out)} rows -> {args.out}")
-    print(f"eligible choices: {len(eligible)} / {len(out)}")
+    for profile_id, group in out.groupby("profile_id", sort=False):
+        n_eligible = int(group["eligible"].sum())
+        print(f"  {profile_id}: {n_eligible} / {len(group)} eligible choices")
     if not eligible.empty:
         show = [
-            "rank", "estate", "tenure", "profile_score", "liveability_band",
-            "value_band", "employment_band", "lease_band", "filter_reasons",
+            "profile_id", "rank", "estate", "tenure", "profile_score",
+            "liveability_band", "value_band", "employment_band", "lease_band",
+            "filter_reasons",
         ]
         print(eligible[show].head(12).to_string(index=False))
 
