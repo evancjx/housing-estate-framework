@@ -271,11 +271,31 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
 def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     """Drop duplicate raw transactions using the broadest stable key available."""
     dedup_cols = ["planning_area", "transacted_price", "area_sqm", "sale_month", "property_type"]
-    for extra in ["type_of_area", "project_name", "street_name", "floor_level"]:
+    for extra in ["project_name", "street_name", "floor_level"]:
         if extra in df.columns:
             dedup_cols.append(extra)
     before = len(df)
-    df = df.drop_duplicates(subset=dedup_cols, keep="last")
+
+    if "type_of_area" not in df.columns:
+        df = df.drop_duplicates(subset=dedup_cols, keep="last")
+        return df, before - len(df)
+
+    type_key = df["type_of_area"]
+    has_type = type_key.notna() & type_key.astype(str).str.strip().ne("")
+    typed = df[has_type].drop_duplicates(subset=dedup_cols + ["type_of_area"], keep="last")
+    legacy_blank = df[~has_type]
+
+    if not typed.empty and not legacy_blank.empty:
+        typed_keys = typed[dedup_cols].drop_duplicates().assign(_has_typed_area=True)
+        blank_key_matches = legacy_blank[dedup_cols].merge(
+            typed_keys,
+            on=dedup_cols,
+            how="left",
+        )["_has_typed_area"].fillna(False)
+        legacy_blank = legacy_blank[~blank_key_matches.to_numpy()]
+
+    legacy_blank = legacy_blank.drop_duplicates(subset=dedup_cols, keep="last")
+    df = pd.concat([legacy_blank, typed]).sort_index()
     return df, before - len(df)
 
 

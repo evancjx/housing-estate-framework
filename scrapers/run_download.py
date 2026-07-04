@@ -108,10 +108,16 @@ def run_playwright_subprocess(
     return result.returncode == 0
 
 
-def run_api_subprocess(out_dir: Path, prop_types: list[str]) -> bool:
+def run_api_subprocess(
+    out_dir: Path,
+    prop_types: list[str],
+    districts: list[str] | None = None,
+) -> bool:
     """Run API client as subprocess. Returns True on success."""
     script = Path(__file__).parent / "ura_pmi_api.py"
     cmd = [sys.executable, str(script), "--out_dir", str(out_dir)]
+    if districts:
+        cmd.extend(["--districts", *districts])
     if prop_types:
         cmd.extend(["--prop_types", *prop_types])
     print(f"Running: {' '.join(cmd)}")
@@ -203,7 +209,7 @@ def main():
         print("\nPlaywright scraper failed. Trying API fallback...")
 
     if args.mode in ("api", "both"):
-        run_api_subprocess(out_dir, prop_types)
+        run_api_subprocess(out_dir, prop_types, districts)
 
 
 if __name__ == "__main__":

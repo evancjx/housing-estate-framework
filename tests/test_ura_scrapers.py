@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scrapers import ingest_ura_raw
+from scrapers import ingest_ura_raw, run_download
 from scrapers.ura_pmi_api import flatten_project_transactions
 from scrapers.ura_pmi_playwright import normalize_prop_types, raw_filename
 
@@ -162,3 +162,58 @@ def test_dedupe_keeps_land_and_strata_landed_apart():
 
     assert len(deduped) == 2
     assert dropped == 0
+
+
+def test_dedupe_matches_legacy_blank_type_of_area_to_populated_row():
+    df = pd.DataFrame(
+        [
+            {
+                "planning_area": "MARINE PARADE",
+                "transacted_price": 3210000,
+                "area_sqm": 188,
+                "sale_month": "2025-01",
+                "property_type": "Terrace House",
+                "type_of_area": pd.NA,
+                "project_name": "A",
+                "street_name": "TEST ROAD",
+                "floor_level": "",
+            },
+            {
+                "planning_area": "MARINE PARADE",
+                "transacted_price": 3210000,
+                "area_sqm": 188,
+                "sale_month": "2025-01",
+                "property_type": "Terrace House",
+                "type_of_area": "Strata",
+                "project_name": "A",
+                "street_name": "TEST ROAD",
+                "floor_level": "",
+            },
+        ]
+    )
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert len(deduped) == 1
+    assert dropped == 1
+    assert deduped.iloc[0]["type_of_area"] == "Strata"
+
+
+def test_run_download_api_subprocess_passes_selected_districts(monkeypatch, tmp_path):
+    captured = {}
+
+    class Result:
+        returncode = 0
+
+    def fake_run(cmd):
+        captured["cmd"] = cmd
+        return Result()
+
+    monkeypatch.setattr(run_download.subprocess, "run", fake_run)
+
+    assert run_download.run_api_subprocess(tmp_path, ["3"], ["15", "16"])
+
+    cmd = captured["cmd"]
+    assert "--districts" in cmd
+    district_pos = cmd.index("--districts")
+    assert cmd[district_pos:district_pos + 3] == ["--districts", "15", "16"]
