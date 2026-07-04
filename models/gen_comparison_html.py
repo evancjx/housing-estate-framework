@@ -580,6 +580,7 @@ function sortTable(col) {{
   }});
   rows.forEach(r => tbody.appendChild(r));
 }}
+sortTable(0);
 </script>
 </body>
 </html>"""
