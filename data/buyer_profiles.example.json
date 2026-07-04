@@ -1,0 +1,30 @@
+{
+  "profile_id": "forming-family-hdb-balanced",
+  "description": "Young-family HDB buyer using a T5 horizon. Hard filters remove infeasible estate choices before scoring remaining trade-offs.",
+  "tenure": "hdb",
+  "persona": "YoungFam",
+  "horizon": "T5",
+  "life_path": "forming_family",
+  "hard_filters": {
+    "exclude_archetypes": ["X"],
+    "min_liveability_band": "C",
+    "min_value_band": "C",
+    "min_employment_band": "D",
+    "min_lease_band": "C",
+    "min_value_n": 100,
+    "exclude_measured_only": false
+  },
+  "soft_weights": {
+    "liveability": 0.45,
+    "value": 0.25,
+    "employment": 0.1,
+    "lease": 0.1,
+    "provision": 0.05,
+    "life_path": 0.05
+  },
+  "buyer_requirements": {
+    "monthly_payment_comfort": "Apply before this estate model using household financing data.",
+    "minimum_layout": "Project/unit-level diagnostic, not estate-level Provision.",
+    "care_network_proximity": "Future profile-specific distance filter for parents, in-laws, childcare, and eldercare anchors."
+  }
+}
