@@ -25,7 +25,8 @@ private-project-table:
 # Regenerate the whole pipeline from real data, then the master.
 # Includes derived provision layers and BCA disruption severity; see CLAUDE.md.
 pipeline:
-	python3 models/ingest_tree_canopy.py --estates data/estates.csv --parks data/parks.csv --out data/tree_canopy.csv
+	python3 models/ingest_tree_canopy.py --estates data/estates.csv --parks data/parks.csv \
+	  --out data/tree_canopy.csv --mss-fallback data/tree_canopy.csv
 	python3 models/ingest_hdb_density.py --estates data/estates.csv --out data/hdb_density.csv
 	python3 models/ingest_hawker_v2.py --estates data/estates.csv --markets data/markets.csv --out data/hawker_v2.csv
 	python3 models/ingest_coastal.py --estates data/estates.csv --out data/coastal.csv

@@ -32,6 +32,7 @@ INPUT CONTRACT:
   --parks    NParks parks.csv (lat, lon, name)
   --out      output CSV path
   --cache-dir  (optional) cache fetched MSS responses
+  --mss-fallback  (optional) existing tree_canopy.csv to preserve MSS fields
 
 RUN:
   python3 models/ingest_tree_canopy.py \\
@@ -47,6 +48,7 @@ import sys
 import urllib.request
 import urllib.error
 from datetime import date, timedelta
+from pathlib import Path
 
 import pandas as pd
 
@@ -139,6 +141,31 @@ def fetch_station_means(cache_dir):
     return result
 
 
+def load_mss_fallback(path):
+    """Load previously committed MSS fields for offline pipeline runs."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+
+    df = pd.read_csv(path)
+    required = {"estate", "mss_station", "annual_mean_temp_c", "uhi_delta_c"}
+    if not required <= set(df.columns):
+        return {}
+
+    fallback = {}
+    for _, row in df.iterrows():
+        if pd.isna(row["annual_mean_temp_c"]) or pd.isna(row["uhi_delta_c"]):
+            continue
+        estate = str(row["estate"]).upper().strip()
+        station = "" if pd.isna(row["mss_station"]) else str(row["mss_station"])
+        fallback[estate] = {
+            "mss_station": station,
+            "annual_mean_temp_c": float(row["annual_mean_temp_c"]),
+            "uhi_delta_c": float(row["uhi_delta_c"]),
+        }
+    return fallback
+
+
 def nearest_station(estate_lat, estate_lon, stations):
     best_id, best_d = None, float("inf")
     for sid, (lat, lon, _name, _mean) in stations.items():
@@ -182,6 +209,10 @@ def main():
     ap.add_argument("--parks", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--cache-dir", help="cache MSS responses")
+    ap.add_argument(
+        "--mss-fallback",
+        help="existing tree_canopy.csv whose MSS fields are preserved if station fetches fail",
+    )
     args = ap.parse_args()
 
     estates = pd.read_csv(args.estates)
@@ -193,27 +224,54 @@ def main():
     stations = fetch_station_means(args.cache_dir)
     print(f"  {len(stations)} stations with valid means", file=sys.stderr)
 
-    if REFERENCE_STATION not in stations:
+    use_mss_fallback = not stations
+    mss_fallback = {}
+    if use_mss_fallback:
+        fallback_path = args.mss_fallback or args.out
+        mss_fallback = load_mss_fallback(fallback_path)
+        estate_names = [str(e).upper().strip() for e in estates["estate"]]
+        missing = [e for e in estate_names if e not in mss_fallback]
+        if missing:
+            preview = ", ".join(missing[:5])
+            suffix = "..." if len(missing) > 5 else ""
+            sys.exit(
+                "ERROR: no MSS station data retrieved and fallback "
+                f"{fallback_path} lacks usable rows for: {preview}{suffix}"
+            )
+        print(
+            f"WARNING: no MSS station data; preserving MSS fields from {fallback_path}",
+            file=sys.stderr,
+        )
+    elif REFERENCE_STATION not in stations:
         print(f"WARNING: reference station {REFERENCE_STATION} missing; "
               f"using min-mean station as cool baseline", file=sys.stderr)
         ref_mean = min(m for _, _, _, m in stations.values())
     else:
         ref_mean = stations[REFERENCE_STATION][3]
-    print(f"  reference mean = {ref_mean:.2f}°C", file=sys.stderr)
+    if not use_mss_fallback:
+        print(f"  reference mean = {ref_mean:.2f}°C", file=sys.stderr)
 
     rows = []
     for est in estates.itertuples():
+        estate = str(est.estate).upper().strip()
         elat, elon = float(est.lat), float(est.lon)
-        sid, _ = nearest_station(elat, elon, stations)
-        mean_c = stations[sid][3] if sid else 0.0
         cover, pct = canopy_proxy(elat, elon, parks)
+        if use_mss_fallback:
+            cached = mss_fallback[estate]
+            sid = cached["mss_station"]
+            mean_c = cached["annual_mean_temp_c"]
+            uhi_delta = cached["uhi_delta_c"]
+        else:
+            sid, _ = nearest_station(elat, elon, stations)
+            mean_c = stations[sid][3] if sid else 0.0
+            uhi_delta = mean_c - ref_mean
         rows.append({
-            "estate": str(est.estate).upper(),
+            "estate": estate,
             "ndvi_proxy": cover,
             "canopy_cover_pct": pct,
             "mss_station": sid or "",
             "annual_mean_temp_c": round(mean_c, 2),
-            "uhi_delta_c": round(mean_c - ref_mean, 2),
+            "uhi_delta_c": round(uhi_delta, 2),
         })
 
     out_df = pd.DataFrame(rows)[
