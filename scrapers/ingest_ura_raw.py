@@ -119,12 +119,37 @@ PORTAL_COLS = {
     "no. of units":           "n_units",
 }
 
+# Columns commonly seen in EdgeProp sales tables.
+EDGEPROP_COLS = {
+    "date":                   "sale_date",
+    "date of sale":           "sale_date",
+    "address":                "street_name",
+    "street":                 "street_name",
+    "price (s$ psf)":         "unit_price_psf",
+    "unit price ($psf)":      "unit_price_psf",
+    "price (s$)":             "transacted_price",
+    "price ($)":              "transacted_price",
+    "property type":          "property_type",
+    "type":                   "property_type",
+    "type of sale":           "type_of_sale",
+    "sale type":              "type_of_sale",
+    "area (sqft)":            "area_sqft",
+    "area (sqm)":             "area_sqm",
+    "type of area":           "type_of_area",
+    "purchaser address":      "purchaser_address",
+    "source":                 "source",
+    "planning_area":          "planning_area",
+    "postal district":        "postal_district",
+    "project":                "project_name",
+    "project name":           "project_name",
+}
+
 
 def normalise_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Map raw column names to internal names (case-insensitive)."""
     rename = {}
     cols_lower = {c.strip().lower(): c for c in df.columns}
-    for raw, internal in {**REALIS_COLS, **PORTAL_COLS}.items():
+    for raw, internal in {**REALIS_COLS, **PORTAL_COLS, **EDGEPROP_COLS}.items():
         if raw.lower() in cols_lower:
             rename[cols_lower[raw.lower()]] = internal
     return df.rename(columns=rename)
@@ -202,7 +227,7 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
 
     df = normalise_columns(df)
 
-    required = ["transacted_price", "area_sqm"]
+    required = ["transacted_price"]
     missing_req = [c for c in required if c not in df.columns]
     if missing_req:
         print(f"  [WARN] {path.name}: missing columns {missing_req} — skipping")
@@ -212,9 +237,18 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
     df["transacted_price"] = pd.to_numeric(
         df["transacted_price"].astype(str).str.replace(",", ""), errors="coerce"
     )
-    df["area_sqm"] = pd.to_numeric(
-        df["area_sqm"].astype(str).str.replace(",", ""), errors="coerce"
-    )
+    if "area_sqm" in df.columns:
+        df["area_sqm"] = pd.to_numeric(
+            df["area_sqm"].astype(str).str.replace(",", ""), errors="coerce"
+        )
+    elif "area_sqft" in df.columns:
+        area_sqft = pd.to_numeric(
+            df["area_sqft"].astype(str).str.replace(",", ""), errors="coerce"
+        )
+        df["area_sqm"] = area_sqft * 0.09290304
+    else:
+        print(f"  [WARN] {path.name}: missing area_sqm/area_sqft — skipping")
+        return pd.DataFrame()
     df = df.dropna(subset=["transacted_price", "area_sqm"])
     df = df[(df["transacted_price"] > 0) & (df["area_sqm"] > 0)]
 
@@ -258,7 +292,8 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
         "property_type", "tenure", "project_age_years", "sale_month",
     ]
     optional = ["project_name", "street_name", "postal_district", "market_segment",
-                "floor_level", "type_of_sale", "type_of_area", "unit_price_psm"]
+                "floor_level", "type_of_sale", "type_of_area", "unit_price_psf",
+                "unit_price_psm", "purchaser_address", "source"]
     for c in optional:
         if c in df.columns:
             out_cols.append(c)

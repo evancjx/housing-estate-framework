@@ -10,6 +10,7 @@ Downloads private residential transaction data from URA for use in the estate va
 | `ura_pmi_api.py` | Fallback — URA Data Service API client (requires `URA_ACCESS_KEY` env var) |
 | `ingest_ura_raw.py` | Converts raw downloaded CSVs to `ura_private.csv` schema for `value_model.py` |
 | `run_download.py` | Orchestrator — runs Playwright first, falls back to API |
+| `edgeprop_landed.py` | EdgeProp landed directory scraper and EdgeProp sales-table parser |
 
 ## Setup
 
@@ -72,6 +73,41 @@ New landed raw files are written with property-type slugs, for example
 `pmi_d15_landed_non_strata_2021-2026.csv` and `pmi_d15_strata_landed_2021-2026.csv`.
 After downloading, run `ingest_ura_raw.py --merge`; the ingestor preserves `property_type` and the
 value model treats it as a private-resale control.
+
+## EdgeProp landed project metadata and saved transaction tables
+
+EdgeProp's public landed pages expose project metadata and directory links. Full sales rows can be
+login/Pro-gated, so `edgeprop_landed.py` does not bypass authentication; it either scrapes public
+metadata or parses saved/copied transaction text that you are authorised to view.
+
+```bash
+# Discover public landed project links.
+python scrapers/edgeprop_landed.py discover \
+    --out data/edgeprop_landed_projects.csv
+
+# Fetch public metadata from discovered project pages.
+python scrapers/edgeprop_landed.py details \
+    --input data/edgeprop_landed_projects.csv \
+    --out data/edgeprop_landed_project_details.csv \
+    --limit 25
+
+# Parse copied/saved EdgeProp sales-table text into a raw CSV.
+python scrapers/edgeprop_landed.py parse-transactions \
+    --text-file data/edgeprop_raw/kembangan.txt \
+    --project-name "KEMBANGAN ESTATE" \
+    --planning-area BEDOK \
+    --postal-district 14 \
+    --out data/ura_raw/edgeprop_kembangan.csv
+
+# Merge parsed EdgeProp rows into the private transaction input.
+python scrapers/ingest_ura_raw.py \
+    --files data/ura_raw/edgeprop_kembangan.csv \
+    --out data/ura_private.csv \
+    --merge
+```
+
+The parser writes `Area (sqm)` from EdgeProp's sqft value, and the ingestor keeps `type_of_area`,
+`unit_price_psf`, `purchaser_address`, and `source` when present.
 
 ## District → Estate mapping
 

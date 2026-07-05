@@ -57,6 +57,43 @@ def test_ingest_landed_pmi_file_preserves_property_type_and_schema(tmp_path):
     assert row["sale_month"] == "2025-01"
 
 
+def test_ingest_edgeprop_style_file_converts_sqft_and_preserves_context(tmp_path):
+    raw = tmp_path / "edgeprop_kembangan.csv"
+    pd.DataFrame(
+        {
+            "Project": ["KEMBANGAN ESTATE"],
+            "planning_area": ["BEDOK"],
+            "Postal District": ["14"],
+            "Date of Sale": ["7 Oct 2020"],
+            "Street": ["XX JALAN KEMBANGAN"],
+            "Unit Price ($psf)": ["965"],
+            "Price ($)": ["3,760,000"],
+            "Type": ["Terrace House"],
+            "Tenure": ["Freehold"],
+            "Sale Type": ["Resale"],
+            "Area (sqft)": ["3,895"],
+            "Type of Area": ["Land"],
+            "Purchaser Address": ["Private"],
+            "Source": ["URA"],
+        }
+    ).to_csv(raw, index=False)
+
+    out = ingest_ura_raw.ingest_file(raw)
+
+    row = out.iloc[0]
+    assert row["planning_area"] == "BEDOK"
+    assert row["project_name"] == "KEMBANGAN ESTATE"
+    assert row["street_name"] == "XX JALAN KEMBANGAN"
+    assert row["property_type"] == "Terrace House"
+    assert row["transacted_price"] == 3760000
+    assert round(row["area_sqm"], 3) == 361.857
+    assert row["unit_price_psf"] == 965
+    assert row["type_of_area"] == "Land"
+    assert row["purchaser_address"] == "Private"
+    assert row["source"] == "URA"
+    assert row["sale_month"] == "2020-10"
+
+
 def test_api_project_records_flatten_to_ingestor_schema():
     rows = flatten_project_transactions([
         {
