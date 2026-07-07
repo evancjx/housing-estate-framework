@@ -337,15 +337,25 @@ def test_bedroom_labels_mode_share_rule(tmp_path):
         + [_edgeprop_row(**{"Project": "NOETHER", "Bedrooms": "-", "Area (sqm)": "80"}) for _ in range(3)]
     )
     path = _write_edgeprop(tmp_path, rows)
-    labels = gen.load_edgeprop_bedroom_labels(path, "27")
-    assert labels[("SELETARIS", "100to130")] == "≈3BR"
+    labels = gen.load_edgeprop_bedroom_counts(path, "27")
+    assert labels[("SELETARIS", "100to130")] == 3
     assert ("EULER", "50to70") not in labels
     assert ("GAUSS", "50to70") not in labels
     assert not any(proj == "NOETHER" for proj, _ in labels)
 
 
 def test_bedroom_labels_missing_file(tmp_path):
-    assert gen.load_edgeprop_bedroom_labels(tmp_path / "nope.csv", "27") == {}
+    assert gen.load_edgeprop_bedroom_counts(tmp_path / "nope.csv", "27") == {}
+
+
+def test_bedroom_class():
+    assert gen.bedroom_class(1) == "br1"
+    assert gen.bedroom_class(4) == "br4"
+    assert gen.bedroom_class(5) == "br5plus"
+    assert gen.bedroom_class(7) == "br5plus"
+    assert gen.bedroom_class(None) == "brunknown"
+    assert gen.BEDROOM_ORDER == ["br1", "br2", "br3", "br4", "br5plus", "brunknown"]
+    assert gen.BEDROOM_LABELS["br5plus"] == "5BR+"
 
 def _band_section(html_text, key):
     import re

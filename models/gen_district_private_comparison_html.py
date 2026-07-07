@@ -292,8 +292,8 @@ def band_of(area_sqm: float) -> str:
     return AREA_BANDS[0][0]  # loaders guarantee area > 0; defensive default
 
 
-def load_edgeprop_bedroom_labels(path: pathlib.Path, district: str) -> dict:
-    """(display_project, band_key) -> '≈nBR'. Labels only; prices never merged from here."""
+def load_edgeprop_bedroom_counts(path: pathlib.Path, district: str) -> dict:
+    """(display_project, band_key) -> modal bedroom count. Labels only; prices never merged."""
     if not path.exists():
         return {}
     df = pd.read_csv(path, dtype={"Postal District": str, "Bedrooms": str})
@@ -315,8 +315,21 @@ def load_edgeprop_bedroom_labels(path: pathlib.Path, district: str) -> dict:
             continue
         counts = grp["bedrooms"].value_counts()
         if counts.iloc[0] / len(grp) >= 0.7:
-            labels[(proj, band)] = f"≈{counts.index[0]}BR"
+            labels[(proj, band)] = int(counts.index[0])
     return labels
+
+
+BEDROOM_ORDER = ["br1", "br2", "br3", "br4", "br5plus", "brunknown"]
+BEDROOM_LABELS = {"br1": "1BR", "br2": "2BR", "br3": "3BR", "br4": "4BR",
+                  "br5plus": "5BR+", "brunknown": "Unknown"}
+
+
+def bedroom_class(count) -> str:
+    if count is None:
+        return "brunknown"
+    if count >= 5:
+        return "br5plus"
+    return f"br{int(count)}"
 
 
 def _render_summary_cards(summary: dict, growth_list_fn) -> str:
