@@ -157,3 +157,17 @@ def load_ura_raw_backfill(raw_dir: pathlib.Path, district: str) -> pd.DataFrame:
     if not frames:
         return _empty_unified()
     return pd.concat(frames, ignore_index=True)
+
+
+def annualised_growth(year_stats: dict) -> tuple | None:
+    qualifying = sorted(
+        year for year, (median, n) in year_stats.items()
+        if n >= MIN_YEAR_N and median is not None and median > 0
+    )
+    if len(qualifying) < 2:
+        return None
+    y0, y1 = qualifying[0], qualifying[-1]
+    p0 = year_stats[y0][0]
+    p1 = year_stats[y1][0]
+    rate = (p1 / p0) ** (1.0 / (y1 - y0)) - 1.0
+    return rate, y0, y1

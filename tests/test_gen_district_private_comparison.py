@@ -152,3 +152,23 @@ def test_ura_raw_backfill_missing_files_warns_and_returns_empty(tmp_path, capsys
     assert out.empty
     assert list(out.columns) == gen.UNIFIED_COLUMNS
     assert "WARN" in capsys.readouterr().out
+
+
+def test_annualised_growth_uses_first_and_last_qualifying_years():
+    stats = {2019: (1000.0, 5), 2021: (900.0, 2), 2023: (1200.0, 4)}
+    rate, y0, y1 = gen.annualised_growth(stats)
+    assert (y0, y1) == (2019, 2023)  # 2021 skipped: n < MIN_YEAR_N
+    assert rate == pytest.approx((1200.0 / 1000.0) ** (1 / 4) - 1)
+
+
+def test_annualised_growth_none_when_fewer_than_two_qualifying_years():
+    assert gen.annualised_growth({2019: (1000.0, 5)}) is None
+    assert gen.annualised_growth({2019: (1000.0, 2), 2020: (1100.0, 2)}) is None
+    assert gen.annualised_growth({}) is None
+
+
+def test_annualised_growth_ignores_none_medians():
+    stats = {2019: (None, 5), 2020: (1000.0, 3), 2022: (1210.0, 3)}
+    rate, y0, y1 = gen.annualised_growth(stats)
+    assert (y0, y1) == (2020, 2022)
+    assert rate == pytest.approx(0.1)
