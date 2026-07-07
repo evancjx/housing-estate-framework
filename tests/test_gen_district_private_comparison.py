@@ -101,3 +101,54 @@ def test_edgeprop_backfill_missing_file_returns_empty(tmp_path):
     out = gen.load_edgeprop_backfill(tmp_path / "nope.csv", "27")
     assert list(out.columns) == gen.UNIFIED_COLUMNS
     assert out.empty
+
+
+def _ura_raw_row(**over):
+    row = {"Project Name": "LANDED HOUSING DEVELOPMENT", "Transacted Price ($)": "4,653,000",
+           "Area (SQFT)": "3,614.55", "Unit Price ($ PSF)": "1,287", "Sale Date": "Jun-19",
+           "Street Name": "JALAN PERNAMA", "Type of Sale": "Resale", "Type of Area": "Land",
+           "Area (SQM)": "335.8", "Unit Price ($ PSM)": "13,856", "Nett Price($)": "-",
+           "Property Type": "Semi-Detached House", "Number of Units": "1", "Tenure": "Freehold",
+           "Postal District": "17", "Market Segment": "Outside Central Region", "Floor Level": "-"}
+    row.update(over)
+    return row
+
+
+def _write_ura_raw(tmp_path, district, rows):
+    raw_dir = tmp_path / "ura_raw"
+    raw_dir.mkdir(exist_ok=True)
+    path = raw_dir / f"pmi_d{district}_landed_non_strata_2019-2026.csv"
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return raw_dir
+
+
+def test_ura_raw_backfill_parses_commas_and_dates(tmp_path):
+    raw_dir = _write_ura_raw(tmp_path, "17", [_ura_raw_row()])
+    out = gen.load_ura_raw_backfill(raw_dir, "17")
+    assert len(out) == 1
+    row = out.iloc[0]
+    assert row["price"] == pytest.approx(4_653_000)
+    assert row["area_sqm"] == pytest.approx(335.8)
+    assert row["psf"] == pytest.approx(1287)
+    assert row["sale_year"] == 2019
+    assert row["source"] == "ura_raw_backfill"
+
+
+def test_ura_raw_backfill_keeps_only_2019_2020(tmp_path):
+    raw_dir = _write_ura_raw(tmp_path, "17", [
+        _ura_raw_row(),
+        _ura_raw_row(**{"Sale Date": "Dec-20"}),
+        _ura_raw_row(**{"Sale Date": "Jan-21"}),
+        _ura_raw_row(**{"Sale Date": "Jun-26"}),
+    ])
+    out = gen.load_ura_raw_backfill(raw_dir, "17")
+    assert sorted(out["sale_year"]) == [2019, 2020]
+
+
+def test_ura_raw_backfill_missing_files_warns_and_returns_empty(tmp_path, capsys):
+    empty_dir = tmp_path / "ura_raw"
+    empty_dir.mkdir()
+    out = gen.load_ura_raw_backfill(empty_dir, "17")
+    assert out.empty
+    assert list(out.columns) == gen.UNIFIED_COLUMNS
+    assert "WARN" in capsys.readouterr().out

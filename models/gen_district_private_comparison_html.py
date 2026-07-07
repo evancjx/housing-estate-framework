@@ -111,3 +111,49 @@ def load_edgeprop_backfill(path: pathlib.Path, district: str) -> pd.DataFrame:
         "source": "edgeprop_backfill",
     })
     return out[UNIFIED_COLUMNS].reset_index(drop=True)
+
+
+def _comma_numeric(series: pd.Series) -> pd.Series:
+    return pd.to_numeric(
+        series.astype(str).str.replace(",", "", regex=False).str.strip(),
+        errors="coerce",
+    )
+
+
+def load_ura_raw_backfill(raw_dir: pathlib.Path, district: str) -> pd.DataFrame:
+    frames = []
+    stems = (
+        f"pmi_d{district}_landed_non_strata_2019-2026.csv",
+        f"pmi_d{district}_strata_landed_2019-2026.csv",
+    )
+    for stem in stems:
+        path = raw_dir / stem
+        if not path.exists():
+            print(f"WARN: {path} missing; skipping landed backfill file")
+            continue
+        df = pd.read_csv(path, dtype={"Postal District": str})
+        df = df[df["Postal District"].map(normalise_district) == district].copy()
+        df["sale_dt"] = pd.to_datetime(df["Sale Date"], format="%b-%y", errors="coerce")
+        df = df.dropna(subset=["sale_dt"])
+        df["sale_year"] = df["sale_dt"].dt.year
+        df = df[df["sale_year"].between(2019, 2020)]
+        if df.empty:
+            continue
+        out = pd.DataFrame({
+            "project": df["Project Name"].astype(str).str.strip().str.upper(),
+            "street": df["Street Name"].astype(str).str.strip().str.upper(),
+            "property_type": df["Property Type"].astype(str).str.strip(),
+            "tenure": df["Tenure"].astype(str).str.strip(),
+            "sale_year": df["sale_year"].astype(int),
+            "price": _comma_numeric(df["Transacted Price ($)"]),
+            "area_sqm": _comma_numeric(df["Area (SQM)"]),
+            "psf": _comma_numeric(df["Unit Price ($ PSF)"]),
+            "sale_type": df["Type of Sale"].astype(str).str.strip(),
+            "source": "ura_raw_backfill",
+        })
+        out = out.dropna(subset=["price", "area_sqm"])
+        out = out[(out["price"] > 0) & (out["area_sqm"] > 0)]
+        frames.append(out[UNIFIED_COLUMNS])
+    if not frames:
+        return _empty_unified()
+    return pd.concat(frames, ignore_index=True)
