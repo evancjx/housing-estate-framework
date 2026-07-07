@@ -391,3 +391,35 @@ def test_generate_shows_bedroom_label_in_band_table(tmp_path):
     out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
     section = _band_section(out_path.read_text(encoding="utf-8"), "100to130")
     assert "≈3BR" in section
+
+
+def test_generate_renders_bedroom_tabs_and_membership(tmp_path):
+    canonical = _write_canonical(tmp_path)
+    edgeprop = _write_edgeprop(tmp_path, [
+        _edgeprop_row(),
+        _edgeprop_row(**{"Date of Sale": "16 Mar 2019"}),
+        _edgeprop_row(**{"Date of Sale": "17 Mar 2019"}),
+    ])  # SELETARIS 116.1 sqm -> (SELETARIS, 100to130) -> 3BR
+    raw_dir = _write_ura_raw(tmp_path, "27", [_ura_raw_row(**{"Postal District": "27"})])
+    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    text = out_path.read_text(encoding="utf-8")
+    for label in ("1BR", "2BR", "3BR", "4BR", "5BR+", "Unknown"):
+        assert label in text
+    assert "SELETARIS" in _band_section(text, "br3")
+    assert "SELETARIS" not in _band_section(text, "br2")
+    # landed + unlabelled canonical rows -> Unknown
+    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in _band_section(text, "brunknown")
+    assert "THE SHAUGHNESSY" in _band_section(text, "brunknown")
+    # bedroom sections do not carry the ≈nBR column
+    assert "≈3BR" not in _band_section(text, "br3")
+    assert "≈3BR" in _band_section(text, "100to130")
+
+
+def test_render_html_two_tab_rows():
+    year_stats = {y: (None, 0) for y in gen.YEARS}
+    rows_summary = ([], {"total_txns": 0, "yearly": year_stats, "top_growth": [], "bottom_growth": []})
+    per_band = {k: rows_summary for k in gen.BAND_ORDER + gen.BEDROOM_ORDER}
+    html_text = gen.render_html("27", per_band, {})
+    assert "Size:" in html_text and "Bedrooms:" in html_text
+    for key in gen.BAND_ORDER + gen.BEDROOM_ORDER:
+        assert f'id="band-{key}"' in html_text

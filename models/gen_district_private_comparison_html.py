@@ -332,6 +332,10 @@ def bedroom_class(count) -> str:
     return f"br{int(count)}"
 
 
+SIZE_BAND_KEYS = frozenset(key for key, _, _, _ in AREA_BANDS)
+ALL_TAB_LABELS = {**BAND_LABELS, **BEDROOM_LABELS}
+
+
 def _render_summary_cards(summary: dict, growth_list_fn) -> str:
     yearly_cells = "".join(
         f"<td class='num'>{_fmt(summary['yearly'][y][0])}"
@@ -349,8 +353,8 @@ def _render_summary_cards(summary: dict, growth_list_fn) -> str:
     )
 
 
-def _render_project_table(band_key: str, rows: list[dict], bedroom_labels: dict) -> str:
-    show_bedrooms = band_key != "all"
+def _render_project_table(band_key: str, rows: list[dict], bedroom_counts: dict) -> str:
+    show_bedrooms = band_key in SIZE_BAND_KEYS
     year_heads = "".join(f"<th class='num sortable'>{y}</th>" for y in YEARS)
     bedroom_head = "<th class='sortable'>Bedrooms</th>" if show_bedrooms else ""
     body_rows = []
@@ -380,8 +384,8 @@ def _render_project_table(band_key: str, rows: list[dict], bedroom_labels: dict)
         )
         bedroom_cell = ""
         if show_bedrooms:
-            label = bedroom_labels.get((r["project"], band_key), "")
-            v = _esc(label) if label else ""
+            count = bedroom_counts.get((r["project"], band_key))
+            v = f"≈{count}BR" if count is not None else ""
             bedroom_cell = f"<td data-v='{v}'>{v or '&mdash;'}</td>"
         psf_v = "" if r["latest_median_psf"] is None else f"{r['latest_median_psf']:.0f}"
         price_v = "" if r["latest_median_price"] is None else f"{r['latest_median_price']:.0f}"
@@ -413,7 +417,7 @@ def _render_project_table(band_key: str, rows: list[dict], bedroom_labels: dict)
     )
 
 
-def render_html(district: str, per_band: dict, bedroom_labels: dict) -> str:
+def render_html(district: str, per_band: dict, bedroom_counts: dict) -> str:
     district_name = DISTRICT_NAMES.get(district, f"District {district}")
 
     def _growth_list(items):
@@ -425,22 +429,32 @@ def render_html(district: str, per_band: dict, bedroom_labels: dict) -> str:
             for i in items
         )
 
-    band_keys = [k for k in BAND_ORDER if k in per_band]
-    tab_buttons = "".join(
-        f"<button class=\"tab{' active' if key == band_keys[0] else ''}\" "
-        f"data-band=\"{key}\">{BAND_LABELS[key]}</button>"
-        for key in band_keys
+    def _tab_buttons(keys, active_key):
+        return "".join(
+            f"<button class=\"tab{' active' if key == active_key else ''}\" "
+            f"data-band=\"{key}\">{ALL_TAB_LABELS[key]}</button>"
+            for key in keys
+        )
+
+    size_keys = [k for k in BAND_ORDER if k in per_band]
+    bedroom_keys = [k for k in BEDROOM_ORDER if k in per_band]
+    band_keys = size_keys + bedroom_keys
+    active_key = band_keys[0]
+    tab_bar = (
+        f"<div class=\"tabrow\"><span class=\"tablabel\">Size:</span>{_tab_buttons(size_keys, active_key)}</div>"
+        + (f"<div class=\"tabrow\"><span class=\"tablabel\">Bedrooms:</span>{_tab_buttons(bedroom_keys, active_key)}</div>"
+           if bedroom_keys else "")
     )
     sections = []
     for key in band_keys:
         rows, summary = per_band[key]
-        active = " active" if key == band_keys[0] else ""
+        active = " active" if key == active_key else ""
         sections.append(
             f"<section id=\"band-{key}\" class=\"band{active}\">"
-            f"<div class=\"bandmeta\">{BAND_LABELS[key]} &middot; "
+            f"<div class=\"bandmeta\">{ALL_TAB_LABELS[key]} &middot; "
             f"{summary['total_txns']:,} transactions &middot; {len(rows)} projects</div>"
             + _render_summary_cards(summary, _growth_list)
-            + _render_project_table(key, rows, bedroom_labels)
+            + _render_project_table(key, rows, bedroom_counts)
             + "</section>"
         )
     total_txns = per_band[band_keys[0]][1]["total_txns"]
@@ -456,7 +470,9 @@ def render_html(district: str, per_band: dict, bedroom_labels: dict) -> str:
   h1 {{ font-size: 22px; margin: 0 0 4px; }}
   .caveat {{ background: #fff7e0; border: 1px solid #e8c96a; border-radius: 8px;
              padding: 10px 14px; margin: 12px 0 20px; font-size: 13px; max-width: 900px; }}
-  .tabs {{ margin: 0 0 16px; display: flex; gap: 6px; flex-wrap: wrap; }}
+  .tabs {{ margin: 0 0 16px; }}
+  .tabrow {{ display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }}
+  .tablabel {{ font-size: 12px; color: #555; min-width: 72px; }}
   .tab {{ border: 1px solid #ccd; background: #f4f4fa; border-radius: 6px 6px 0 0;
           padding: 6px 14px; font-size: 13px; cursor: pointer; }}
   .tab.active {{ background: #1a1a2e; color: #fff; border-color: #1a1a2e; }}
@@ -486,8 +502,10 @@ def render_html(district: str, per_band: dict, bedroom_labels: dict) -> str:
 projects using that data carry a <span class="badge">backfill</span> badge. Landed 2019&ndash;2020 rows
 come from raw URA PMI downloads. Year cells show &mdash; when the year has fewer than {MIN_YEAR_N} transactions.
 Bedroom labels (&asymp;nBR) are estimates derived from EdgeProp unit listings per size band, shown only when
-at least 3 units agree &ge;70%.</div>
-<div class="tabs">{tab_buttons}</div>
+at least 3 units agree &ge;70%. Bedroom tabs classify each transaction by its project + size band&rsquo;s
+EdgeProp label; atypical units can be misclassified, and Unknown collects unlabelled transactions
+(including all landed).</div>
+<div class="tabs">{tab_bar}</div>
 {"".join(sections)}
 <script>
 document.querySelectorAll('.tab').forEach(function (btn) {{
@@ -534,7 +552,7 @@ def generate(district, private_path, edgeprop_path, raw_dir, out_dir):
     ]
     non_empty = [f for f in frames if not f.empty]
     merged = pd.concat(non_empty, ignore_index=True) if non_empty else _empty_unified()
-    bedroom_labels = load_edgeprop_bedroom_labels(edgeprop_path, district)
+    bedroom_counts = load_edgeprop_bedroom_counts(edgeprop_path, district)
     per_band = {}
     all_rows = aggregate_projects(merged)
     per_band["all"] = (all_rows, district_summary(merged, all_rows))
@@ -542,8 +560,17 @@ def generate(district, private_path, edgeprop_path, raw_dir, out_dir):
         sub = merged[(merged["area_sqm"] > lo) & (merged["area_sqm"] <= hi)]
         band_rows = aggregate_projects(sub)
         per_band[key] = (band_rows, district_summary(sub, band_rows))
+    disp = [display_project(p, s) for p, s in zip(merged["project"], merged["street"])]
+    bands = [band_of(a) for a in merged["area_sqm"]]
+    merged["bed_class"] = [
+        bedroom_class(bedroom_counts.get((d, b))) for d, b in zip(disp, bands)
+    ]
+    for key in BEDROOM_ORDER:
+        sub = merged[merged["bed_class"] == key]
+        class_rows = aggregate_projects(sub)
+        per_band[key] = (class_rows, district_summary(sub, class_rows))
     out_path = pathlib.Path(out_dir) / f"private_project_comparison_D{district}.html"
-    out_path.write_text(render_html(district, per_band, bedroom_labels), encoding="utf-8")
+    out_path.write_text(render_html(district, per_band, bedroom_counts), encoding="utf-8")
     return out_path, len(all_rows)
 
 
