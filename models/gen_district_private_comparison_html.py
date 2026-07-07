@@ -240,3 +240,190 @@ def district_summary(df: pd.DataFrame, rows: list[dict]) -> dict:
         "top_growth": ranked[:3],
         "bottom_growth": ranked[::-1][:3],
     }
+
+
+def _fmt(value, digits=0):
+    if value is None:
+        return "—"
+    return f"{value:,.{digits}f}"
+
+
+def _esc(value) -> str:
+    return html_mod.escape(str(value))
+
+
+def render_html(district: str, rows: list[dict], summary: dict) -> str:
+    district_name = DISTRICT_NAMES.get(district, f"District {district}")
+    year_heads = "".join(f"<th class='num sortable'>{y}</th>" for y in YEARS)
+
+    body_rows = []
+    for r in rows:
+        year_cells = []
+        for y in YEARS:
+            median, n = r["year_stats"][y]
+            if n >= MIN_YEAR_N and median is not None:
+                year_cells.append(
+                    f"<td class='num' data-v='{median:.0f}' title='n={n}'>{_fmt(median)}</td>"
+                )
+            else:
+                year_cells.append(f"<td class='num muted' data-v='' title='n={n}'>—</td>")
+        growth = r["growth_pct"]
+        if growth is None:
+            growth_cell = "<td class='num muted' data-v=''>—</td>"
+        else:
+            cls = "pos" if growth >= 0 else "neg"
+            growth_cell = (
+                f"<td class='num {cls}' data-v='{growth:.2f}' "
+                f"title='{r['growth_from']}&rarr;{r['growth_to']}'>{growth:+.1f}%/yr</td>"
+            )
+        badge = (
+            " <span class='badge' title='includes EdgeProp 2019&ndash;2020 backfill rows"
+            " (incomplete coverage)'>backfill</span>"
+            if r["has_edgeprop_backfill"] else ""
+        )
+        psf_v = "" if r["latest_median_psf"] is None else f"{r['latest_median_psf']:.0f}"
+        price_v = "" if r["latest_median_price"] is None else f"{r['latest_median_price']:.0f}"
+        body_rows.append(
+            "<tr>"
+            f"<td data-v='{_esc(r['project'])}'>{_esc(r['project'])}{badge}</td>"
+            f"<td data-v='{_esc(r['property_types'])}'>{_esc(r['property_types'])}</td>"
+            f"<td data-v='{_esc(r['tenure'])}'>{_esc(r['tenure'])}</td>"
+            f"<td class='num' data-v='{r['n_total']}'>{r['n_total']}</td>"
+            + "".join(year_cells)
+            + growth_cell
+            + f"<td class='num' data-v='{psf_v}'>{_fmt(r['latest_median_psf'])}</td>"
+            + f"<td class='num' data-v='{price_v}'>{_fmt(r['latest_median_price'])}</td>"
+            "</tr>"
+        )
+
+    yearly_cells = "".join(
+        f"<td class='num'>{_fmt(summary['yearly'][y][0])}"
+        f"<div class='n'>n={summary['yearly'][y][1]}</div></td>"
+        for y in YEARS
+    )
+    yearly_heads = "".join(f"<th class='num'>{y}</th>" for y in YEARS)
+
+    def _growth_list(items):
+        if not items:
+            return "<li class='muted'>—</li>"
+        return "".join(
+            f"<li>{_esc(i['project'])} <span class='{'pos' if i['growth_pct'] >= 0 else 'neg'}'>"
+            f"{i['growth_pct']:+.1f}%/yr</span></li>"
+            for i in items
+        )
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D{district} Private Property Comparison ({district_name})</title>
+<style>
+  body {{ font-family: -apple-system, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1a1a2e; }}
+  h1 {{ font-size: 22px; margin: 0 0 4px; }}
+  .caveat {{ background: #fff7e0; border: 1px solid #e8c96a; border-radius: 8px;
+             padding: 10px 14px; margin: 12px 0 20px; font-size: 13px; max-width: 900px; }}
+  .summary {{ display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }}
+  .summary .card {{ border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; font-size: 13px; }}
+  .summary h3 {{ margin: 0 0 6px; font-size: 13px; }}
+  .summary ul {{ margin: 0; padding-left: 18px; }}
+  table {{ border-collapse: collapse; font-size: 13px; }}
+  th, td {{ padding: 5px 9px; border-bottom: 1px solid #e4e4ee; text-align: left; white-space: nowrap; }}
+  th {{ background: #f4f4fa; position: sticky; top: 0; cursor: pointer; user-select: none; }}
+  td.num, th.num {{ text-align: right; }}
+  .muted {{ color: #9a9ab0; }}
+  .pos {{ color: #0a7a3d; }}
+  .neg {{ color: #b02a2a; }}
+  .badge {{ background: #fdecc8; color: #8a6100; border-radius: 4px; padding: 1px 5px; font-size: 11px; }}
+  .n {{ font-size: 10px; color: #9a9ab0; }}
+</style>
+</head>
+<body>
+<h1>District {district} &mdash; {_esc(district_name)}: Private Property Comparison</h1>
+<div>Window: 2019&ndash;2026 &middot; median PSF (S$) by sale year &middot; {summary['total_txns']:,} transactions</div>
+<div class="caveat">&#9888; 2019&ndash;2020 condo/apartment rows are backfilled from an incomplete EdgeProp scrape
+(the canonical URA feed only reaches back to 2021). Pre-2021 medians are indicative only &mdash;
+projects using that data carry a <span class="badge">backfill</span> badge. Landed 2019&ndash;2020 rows
+come from raw URA PMI downloads. Year cells show &mdash; when the year has fewer than {MIN_YEAR_N} transactions.</div>
+<div class="summary">
+  <div class="card"><h3>District median PSF by year</h3>
+    <table><tr>{yearly_heads}</tr><tr>{yearly_cells}</tr></table>
+  </div>
+  <div class="card"><h3>Top growth</h3><ul>{_growth_list(summary['top_growth'])}</ul></div>
+  <div class="card"><h3>Bottom growth</h3><ul>{_growth_list(summary['bottom_growth'])}</ul></div>
+</div>
+<table id="projects">
+<thead><tr>
+  <th class="sortable">Project</th><th class="sortable">Type</th><th class="sortable">Tenure</th>
+  <th class="num sortable">Txns</th>{year_heads}
+  <th class="num sortable">Growth %/yr</th>
+  <th class="num sortable">Latest median PSF</th><th class="num sortable">Latest median price</th>
+</tr></thead>
+<tbody>
+{"".join(body_rows)}
+</tbody>
+</table>
+<script>
+document.querySelectorAll('#projects th').forEach(function (th, idx) {{
+  th.addEventListener('click', function () {{
+    var tbody = document.querySelector('#projects tbody');
+    var rows = Array.from(tbody.rows);
+    var dir = th.dataset.dir === 'asc' ? -1 : 1;
+    document.querySelectorAll('#projects th').forEach(function (h) {{ delete h.dataset.dir; }});
+    th.dataset.dir = dir === 1 ? 'asc' : 'desc';
+    rows.sort(function (a, b) {{
+      var av = a.cells[idx].dataset.v, bv = b.cells[idx].dataset.v;
+      if (av === '' && bv === '') return 0;
+      if (av === '') return 1;
+      if (bv === '') return -1;
+      var an = parseFloat(av), bn = parseFloat(bv);
+      if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+      return av.localeCompare(bv) * dir;
+    }});
+    rows.forEach(function (r) {{ tbody.appendChild(r); }});
+  }});
+}});
+</script>
+</body>
+</html>
+"""
+
+
+def generate(district, private_path, edgeprop_path, raw_dir, out_dir):
+    district = normalise_district(district)
+    frames = [
+        load_canonical(private_path, district),
+        load_edgeprop_backfill(edgeprop_path, district),
+        load_ura_raw_backfill(raw_dir, district),
+    ]
+    non_empty = [f for f in frames if not f.empty]
+    merged = pd.concat(non_empty, ignore_index=True) if non_empty else _empty_unified()
+    rows = aggregate_projects(merged)
+    summary = district_summary(merged, rows)
+    out_path = pathlib.Path(out_dir) / f"private_project_comparison_D{district}.html"
+    out_path.write_text(render_html(district, rows, summary), encoding="utf-8")
+    return out_path, len(rows)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate per-district private comparison HTML")
+    parser.add_argument("--district", action="append", required=True,
+                        help="Postal district (repeatable), e.g. --district 17 --district 27")
+    parser.add_argument("--private", default=str(DEFAULT_PRIVATE))
+    parser.add_argument("--edgeprop", default=str(DEFAULT_EDGEPROP))
+    parser.add_argument("--ura-raw-dir", default=str(DEFAULT_URA_RAW_DIR))
+    parser.add_argument("--out-dir", default=str(ROOT))
+    args = parser.parse_args()
+    for district in args.district:
+        out_path, n_rows = generate(
+            district,
+            pathlib.Path(args.private),
+            pathlib.Path(args.edgeprop),
+            pathlib.Path(args.ura_raw_dir),
+            pathlib.Path(args.out_dir),
+        )
+        print(f"Written: {out_path} ({out_path.stat().st_size // 1024} KB, {n_rows} projects)")
+
+
+if __name__ == "__main__":
+    main()

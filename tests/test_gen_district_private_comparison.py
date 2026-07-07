@@ -238,3 +238,45 @@ def test_district_summary_totals_and_growth_rankings():
     assert summary["bottom_growth"][0]["project"] == "BETA"
     growth_names = {r["project"] for r in summary["top_growth"] + summary["bottom_growth"]}
     assert "GAMMA" not in growth_names
+
+
+def _full_fixture(tmp_path):
+    """Canonical + edgeprop + ura_raw covering district 27."""
+    canonical = _write_canonical(tmp_path)  # has 1 valid D27 row (THE SHAUGHNESSY 2023)
+    edgeprop = _write_edgeprop(tmp_path, [_edgeprop_row()])  # SELETARIS 2019, D27
+    raw_dir = _write_ura_raw(tmp_path, "27", [_ura_raw_row(**{"Postal District": "27"})])
+    return canonical, edgeprop, raw_dir
+
+
+def test_generate_writes_self_contained_page(tmp_path):
+    canonical, edgeprop, raw_dir = _full_fixture(tmp_path)
+    out_path, n_rows = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    assert out_path.name == "private_project_comparison_D27.html"
+    assert out_path.exists()
+    assert n_rows >= 3  # SHAUGHNESSY + SELETARIS + landed street group
+    text = out_path.read_text(encoding="utf-8")
+    assert "THE SHAUGHNESSY" in text
+    assert "SELETARIS" in text
+    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in text
+    assert "2019" in text and "2026" in text
+    assert "EdgeProp" in text          # caveat banner mentions the backfill source
+    assert "http://" not in text and "https://" not in text  # self-contained
+
+
+def test_render_html_marks_low_n_years_and_backfill():
+    year_stats = {y: (None, 0) for y in gen.YEARS}
+    year_stats[2021] = (1000.0, 3)
+    year_stats[2022] = (1050.0, 1)
+    rows = [{
+        "project": "ALPHA", "street": "S", "property_types": "Condominium",
+        "tenure": "Freehold", "n_total": 4,
+        "year_stats": year_stats,
+        "growth_pct": None, "growth_from": None, "growth_to": None,
+        "latest_year": 2022, "latest_median_psf": 1050.0, "latest_median_price": 1_000_000.0,
+        "has_edgeprop_backfill": True,
+    }]
+    summary = {"total_txns": 4, "yearly": year_stats,
+               "top_growth": [], "bottom_growth": []}
+    html_text = gen.render_html("27", rows, summary)
+    assert "1,000" in html_text        # 2021 median shown (n>=3)
+    assert "backfill" in html_text.lower()
