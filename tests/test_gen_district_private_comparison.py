@@ -301,3 +301,17 @@ def test_generate_real_d17_d27(tmp_path):
         text = out_path.read_text(encoding="utf-8")
         assert anchor in text
         assert "2019" in text
+
+
+def test_band_of_boundaries():
+    assert gen.band_of(30.0) == "le50"
+    assert gen.band_of(50.0) == "le50"
+    assert gen.band_of(50.1) == "50to70"
+    assert gen.band_of(70.0) == "50to70"
+    assert gen.band_of(100.0) == "70to100"
+    assert gen.band_of(130.0) == "100to130"
+    assert gen.band_of(130.5) == "gt130"
+    assert gen.band_of(500.0) == "gt130"
+    assert gen.BAND_ORDER == ["all", "le50", "50to70", "70to100", "100to130", "gt130"]
+    assert gen.BAND_LABELS["all"] == "All"
+    assert gen.BAND_LABELS["gt130"] == ">130 sqm"

@@ -427,3 +427,21 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+AREA_BANDS = [
+    ("le50", "≤50 sqm", 0.0, 50.0),
+    ("50to70", "50–70 sqm", 50.0, 70.0),
+    ("70to100", "70–100 sqm", 70.0, 100.0),
+    ("100to130", "100–130 sqm", 100.0, 130.0),
+    ("gt130", ">130 sqm", 130.0, float("inf")),
+]
+BAND_ORDER = ["all"] + [key for key, _, _, _ in AREA_BANDS]
+BAND_LABELS = {"all": "All", **{key: label for key, label, _, _ in AREA_BANDS}}
+
+
+def band_of(area_sqm: float) -> str:
+    for key, _, lo, hi in AREA_BANDS:
+        if lo < area_sqm <= hi:
+            return key
+    return AREA_BANDS[0][0]  # loaders guarantee area > 0; defensive default
