@@ -445,3 +445,30 @@ def band_of(area_sqm: float) -> str:
         if lo < area_sqm <= hi:
             return key
     return AREA_BANDS[0][0]  # loaders guarantee area > 0; defensive default
+
+
+def load_edgeprop_bedroom_labels(path: pathlib.Path, district: str) -> dict:
+    """(display_project, band_key) -> '≈nBR'. Labels only; prices never merged from here."""
+    if not path.exists():
+        return {}
+    df = pd.read_csv(path, dtype={"Postal District": str, "Bedrooms": str})
+    df = df[df["Postal District"].map(normalise_district) == district].copy()
+    df["bedrooms"] = pd.to_numeric(df["Bedrooms"], errors="coerce")
+    df["area_sqm"] = pd.to_numeric(df["Area (sqm)"], errors="coerce")
+    df = df.dropna(subset=["bedrooms", "area_sqm"])
+    df = df[(df["bedrooms"] > 0) & (df["area_sqm"] > 0)]
+    if df.empty:
+        return {}
+    df["bedrooms"] = df["bedrooms"].astype(int)
+    project = df["Project"].astype(str).str.strip().str.upper()
+    street = df["Street"].astype(str).str.strip().str.upper()
+    df["display_project"] = [display_project(p, s) for p, s in zip(project, street)]
+    df["band"] = df["area_sqm"].map(band_of)
+    labels = {}
+    for (proj, band), grp in df.groupby(["display_project", "band"]):
+        if len(grp) < 3:
+            continue
+        counts = grp["bedrooms"].value_counts()
+        if counts.iloc[0] / len(grp) >= 0.7:
+            labels[(proj, band)] = f"≈{counts.index[0]}BR"
+    return labels
