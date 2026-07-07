@@ -301,6 +301,10 @@ def test_generate_real_d17_d27(tmp_path):
         text = out_path.read_text(encoding="utf-8")
         assert anchor in text
         assert "2019" in text
+        for label in ("≤50 sqm", "50–70 sqm", "70–100 sqm", "100–130 sqm", ">130 sqm"):
+            assert label in text
+        assert 'id="band-gt130"' in text
+        assert "≈" in text  # at least one bedroom label rendered from real EdgeProp data
 
 
 def test_band_of_boundaries():
