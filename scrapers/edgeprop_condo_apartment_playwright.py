@@ -393,6 +393,17 @@ async def scrape_project(
     if wait_ms:
         await page.wait_for_timeout(wait_ms)
 
+    # The sales table (and its "ALL SALES TRANSACTIONS (n)" counter) lazy-loads
+    # only once #SalesTransaction scrolls into view; without this, the counter
+    # reads (0) and the retry loop below bails with zero rows.
+    section = page.locator("#SalesTransaction")
+    if await section.count():
+        try:
+            await section.first.scroll_into_view_if_needed(timeout=10_000)
+        except Exception:
+            pass
+        await page.wait_for_timeout(1_000)
+
     text = await page.locator("body").inner_text(timeout=15_000)
     project_name, planning_area, district, property_type, tenure = project_context(text, project.get("name", ""))
 
@@ -404,7 +415,7 @@ async def scrape_project(
     while pages_scraped < max_pages:
         text = ""
         page_rows: list[dict[str, Any]] = []
-        for _ in range(20):
+        for attempt in range(20):
             text = await page.locator("body").inner_text(timeout=15_000)
             page_rows = parse_transaction_text(
                 text,
@@ -414,8 +425,17 @@ async def scrape_project(
                 property_type=property_type,
                 tenure=tenure,
             )
-            if page_rows or advertised_sales_count(text) == 0:
+            if page_rows:
                 break
+            # Only trust an advertised (0) once the lazy-loaded counter has had
+            # time to settle after the scroll above (~3s in).
+            if advertised_sales_count(text) == 0 and attempt >= 6:
+                break
+            if attempt % 4 == 3 and await section.count():
+                try:
+                    await section.first.scroll_into_view_if_needed(timeout=5_000)
+                except Exception:
+                    pass
             await page.wait_for_timeout(500)
         pages_scraped += 1
         if not page_rows:
