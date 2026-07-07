@@ -305,6 +305,10 @@ def test_generate_real_d17_d27(tmp_path):
             assert label in text
         assert 'id="band-gt130"' in text
         assert "≈" in text  # at least one bedroom label rendered from real EdgeProp data
+        for label in ("1BR", "2BR", "3BR", "4BR", "5BR+", "Unknown"):
+            assert label in text
+        assert 'id="band-brunknown"' in text
+        assert 'id="band-br3"' in text
 
 
 def test_band_of_boundaries():
