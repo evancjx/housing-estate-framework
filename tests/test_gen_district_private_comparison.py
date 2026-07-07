@@ -46,3 +46,58 @@ def test_load_canonical_filters_district_and_maps_schema(tmp_path):
     assert row["sale_year"] == 2023
     assert row["source"] == "ura_private"
     assert row["psf"] == pytest.approx(15_000 / gen.SQM_TO_SQFT)
+
+
+def _edgeprop_row(**over):
+    row = {"Project": "SELETARIS", "planning_area": "SEMBAWANG", "Postal District": "27",
+           "Date of Sale": "15 Mar 2019", "Address": "X #05-XX", "Street": "SEMBAWANG ROAD",
+           "Bedrooms": "3", "Unit Price ($psf)": "800", "Price ($)": "1000000",
+           "Type": "Condominium", "Tenure": "Freehold", "Sale Type": "Resale",
+           "Area (sqft)": "1250", "Area (sqm)": "116.1", "Type of Area": "Strata",
+           "Purchaser Address": "Private", "Source": "URA", "source_quality": "not_clean",
+           "source_url": "u", "source_slug": "s"}
+    row.update(over)
+    return row
+
+
+def _write_edgeprop(tmp_path, rows):
+    path = tmp_path / "edgeprop.csv"
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
+
+
+def test_edgeprop_backfill_keeps_only_2019_2020(tmp_path):
+    path = _write_edgeprop(tmp_path, [
+        _edgeprop_row(),
+        _edgeprop_row(**{"Date of Sale": "10 Jun 2020", "Price ($)": "1100000"}),
+        _edgeprop_row(**{"Date of Sale": "10 Jun 2021", "Price ($)": "1200000"}),
+        _edgeprop_row(**{"Date of Sale": "10 Jun 2018", "Price ($)": "900000"}),
+    ])
+    out = gen.load_edgeprop_backfill(path, "27")
+    assert list(out.columns) == gen.UNIFIED_COLUMNS
+    assert sorted(out["sale_year"]) == [2019, 2020]
+    assert set(out["source"]) == {"edgeprop_backfill"}
+
+
+def test_edgeprop_backfill_dedupes_and_drops_bad_rows(tmp_path):
+    dup = _edgeprop_row()
+    path = _write_edgeprop(tmp_path, [
+        dup, dict(dup),                                    # exact duplicate
+        _edgeprop_row(**{"Price ($)": "", "Date of Sale": "16 Mar 2019"}),   # missing price
+        _edgeprop_row(**{"Area (sqm)": "0", "Date of Sale": "17 Mar 2019"}), # bad area
+    ])
+    out = gen.load_edgeprop_backfill(path, "27")
+    assert len(out) == 1
+
+
+def test_edgeprop_backfill_derives_psf_when_missing(tmp_path):
+    path = _write_edgeprop(tmp_path, [_edgeprop_row(**{"Unit Price ($psf)": ""})])
+    out = gen.load_edgeprop_backfill(path, "27")
+    expected = 1_000_000 / (116.1 * gen.SQM_TO_SQFT)
+    assert out.iloc[0]["psf"] == pytest.approx(expected, rel=1e-6)
+
+
+def test_edgeprop_backfill_missing_file_returns_empty(tmp_path):
+    out = gen.load_edgeprop_backfill(tmp_path / "nope.csv", "27")
+    assert list(out.columns) == gen.UNIFIED_COLUMNS
+    assert out.empty

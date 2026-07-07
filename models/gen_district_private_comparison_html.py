@@ -76,3 +76,38 @@ def load_canonical(path: pathlib.Path, district: str) -> pd.DataFrame:
     out = out[(out["price"] > 0) & (out["area_sqm"] > 0)]
     out["sale_year"] = out["sale_year"].astype(int)
     return out[UNIFIED_COLUMNS].reset_index(drop=True)
+
+
+def _empty_unified() -> pd.DataFrame:
+    return pd.DataFrame(columns=UNIFIED_COLUMNS)
+
+
+def load_edgeprop_backfill(path: pathlib.Path, district: str) -> pd.DataFrame:
+    if not path.exists():
+        return _empty_unified()
+    df = pd.read_csv(path, dtype={"Postal District": str})
+    df = df[df["Postal District"].map(normalise_district) == district].copy()
+    df["sale_dt"] = pd.to_datetime(df["Date of Sale"], format="%d %b %Y", errors="coerce")
+    df = df.dropna(subset=["sale_dt"])
+    df["sale_year"] = df["sale_dt"].dt.year
+    df = df[df["sale_year"].between(2019, 2020)]
+    df["price"] = pd.to_numeric(df["Price ($)"], errors="coerce")
+    df["area_sqm"] = pd.to_numeric(df["Area (sqm)"], errors="coerce")
+    df["psf_raw"] = pd.to_numeric(df["Unit Price ($psf)"], errors="coerce")
+    df = df.dropna(subset=["price", "area_sqm"])
+    df = df[(df["price"] > 0) & (df["area_sqm"] > 0)]
+    df = df.drop_duplicates(subset=["Project", "Date of Sale", "Price ($)", "Area (sqft)"])
+    derived_psf = df["price"] / (df["area_sqm"] * SQM_TO_SQFT)
+    out = pd.DataFrame({
+        "project": df["Project"].astype(str).str.strip().str.upper(),
+        "street": df["Street"].astype(str).str.strip().str.upper(),
+        "property_type": df["Type"].astype(str).str.strip(),
+        "tenure": df["Tenure"].astype(str).str.strip(),
+        "sale_year": df["sale_year"].astype(int),
+        "price": df["price"],
+        "area_sqm": df["area_sqm"],
+        "psf": df["psf_raw"].where(df["psf_raw"] > 0, derived_psf),
+        "sale_type": df["Sale Type"].astype(str).str.strip(),
+        "source": "edgeprop_backfill",
+    })
+    return out[UNIFIED_COLUMNS].reset_index(drop=True)
