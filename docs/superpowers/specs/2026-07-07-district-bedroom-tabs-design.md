@@ -14,7 +14,7 @@ size tabs.
 
 - The EdgeProp label loader is refactored: `load_edgeprop_bedroom_counts(path, district) ->
   dict[tuple[str, str], int]` — same learning rule as before (per (display_project, band_key):
-  n ≥ 3 EdgeProp rows, modal share ≥ 0.7) but returns the **integer** modal bedroom count.
+  n ≥ 2 EdgeProp rows, modal share ≥ 0.6 (relaxed 2026-07-08)) but returns the **integer** modal bedroom count.
   The `≈nBR` display string is built at render time (`f"≈{n}BR"`). The two existing label tests
   update their assertions from `"≈3BR"` to `3`.
 - Every merged transaction gets a bedroom class from its `(display_project, band_of(area_sqm))`

@@ -331,20 +331,27 @@ def test_bedroom_labels_mode_share_rule(tmp_path):
         [_edgeprop_row(**{"Date of Sale": "10 Jun 2021"}),
          _edgeprop_row(**{"Date of Sale": "10 Jun 2023"}),
          _edgeprop_row()]
-        # EULER: only 2 rows -> no label
+        # EULER: 2 unanimous rows -> label (n >= 2)
         + [_edgeprop_row(**{"Project": "EULER", "Bedrooms": "2", "Area (sqm)": "65"}) for _ in range(2)]
-        # GAUSS: 3 rows split 2/1 -> share 0.67 < 0.7 -> no label
+        # GAUSS: 3 rows split 2/1 -> share 0.67 >= 0.6 -> label
         + [_edgeprop_row(**{"Project": "GAUSS", "Bedrooms": "2", "Area (sqm)": "65"}),
            _edgeprop_row(**{"Project": "GAUSS", "Bedrooms": "2", "Area (sqm)": "66"}),
            _edgeprop_row(**{"Project": "GAUSS", "Bedrooms": "3", "Area (sqm)": "67"})]
+        # HILBERT: single row -> below n >= 2 -> no label
+        + [_edgeprop_row(**{"Project": "HILBERT", "Bedrooms": "2", "Area (sqm)": "65"})]
+        # RIEMANN: 2 rows split 1/1 -> share 0.5 < 0.6 -> no label
+        + [_edgeprop_row(**{"Project": "RIEMANN", "Bedrooms": "2", "Area (sqm)": "65"}),
+           _edgeprop_row(**{"Project": "RIEMANN", "Bedrooms": "3", "Area (sqm)": "66"})]
         # NOETHER: unparseable bedrooms ignored entirely
         + [_edgeprop_row(**{"Project": "NOETHER", "Bedrooms": "-", "Area (sqm)": "80"}) for _ in range(3)]
     )
     path = _write_edgeprop(tmp_path, rows)
     labels = gen.load_edgeprop_bedroom_counts(path, "27")
     assert labels[("SELETARIS", "100to130")] == 3
-    assert ("EULER", "50to70") not in labels
-    assert ("GAUSS", "50to70") not in labels
+    assert labels[("EULER", "50to70")] == 2
+    assert labels[("GAUSS", "50to70")] == 2
+    assert ("HILBERT", "50to70") not in labels
+    assert ("RIEMANN", "50to70") not in labels
     assert not any(proj == "NOETHER" for proj, _ in labels)
 
 

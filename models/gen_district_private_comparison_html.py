@@ -38,6 +38,8 @@ ROOT = pathlib.Path(__file__).parent.parent
 YEARS = list(range(2019, 2027))
 SQM_TO_SQFT = 10.7639
 MIN_YEAR_N = 3
+MIN_LABEL_N = 2          # EdgeProp units needed before a project+band gets a bedroom label
+MIN_LABEL_SHARE = 0.6    # modal bedroom count must reach this share
 UNIFIED_COLUMNS = [
     "project", "street", "property_type", "tenure", "sale_year",
     "price", "area_sqm", "psf", "sale_type", "source",
@@ -311,10 +313,10 @@ def load_edgeprop_bedroom_counts(path: pathlib.Path, district: str) -> dict:
     df["band"] = df["area_sqm"].map(band_of)
     labels = {}
     for (proj, band), grp in df.groupby(["display_project", "band"]):
-        if len(grp) < 3:
+        if len(grp) < MIN_LABEL_N:
             continue
         counts = grp["bedrooms"].value_counts()
-        if counts.iloc[0] / len(grp) >= 0.7:
+        if counts.iloc[0] / len(grp) >= MIN_LABEL_SHARE:
             labels[(proj, band)] = int(counts.index[0])
     return labels
 
@@ -502,7 +504,7 @@ def render_html(district: str, per_band: dict, bedroom_counts: dict) -> str:
 projects using that data carry a <span class="badge">backfill</span> badge. Landed 2019&ndash;2020 rows
 come from raw URA PMI downloads. Year cells show &mdash; when the year has fewer than {MIN_YEAR_N} transactions.
 Bedroom labels (&asymp;nBR) are estimates derived from EdgeProp unit listings per size band, shown only when
-at least 3 units agree &ge;70%. Bedroom tabs classify each transaction by its project + size band&rsquo;s
+at least {MIN_LABEL_N} units agree &ge;{MIN_LABEL_SHARE:.0%}. Bedroom tabs classify each transaction by its project + size band&rsquo;s
 EdgeProp label; atypical units can be misclassified, and Unknown collects unlabelled transactions
 (including all landed).</div>
 <div class="tabs">{tab_bar}</div>

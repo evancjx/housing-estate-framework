@@ -39,8 +39,8 @@ Display labels: `≤50 sqm`, `50–70 sqm`, `70–100 sqm`, `100–130 sqm`, `>1
   district. Labels only — prices/areas from these rows are NEVER merged into the transaction
   dataset (the 2019–2020-only backfill rule from the parent spec is unchanged).
 - Learning rule, per (display_project, band): collect EdgeProp rows with a parseable integer
-  `Bedrooms`, band their `Area (sqm)`; if the group has **n ≥ 3** rows and the modal bedroom
-  count has **≥ 70% share**, the label is `≈{mode}BR`. Otherwise: no label (blank cell).
+  `Bedrooms`, band their `Area (sqm)`; if the group has **n ≥ 2** rows and the modal bedroom
+  count has **≥ 60% share** (relaxed 2026-07-08 from n ≥ 3 / 70% to lift coverage), the label is `≈{mode}BR`. Otherwise: no label (blank cell).
 - `load_edgeprop_bedroom_labels(path, district) -> dict[tuple[str, str], str]`
   keyed by (display_project, band_key). Projects are display-grouped with the same
   `display_project()` rule as transactions (generic landed split by street; in practice
