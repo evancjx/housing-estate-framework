@@ -172,3 +172,69 @@ def test_annualised_growth_ignores_none_medians():
     rate, y0, y1 = gen.annualised_growth(stats)
     assert (y0, y1) == (2020, 2022)
     assert rate == pytest.approx(0.1)
+
+
+def _unified(rows):
+    return pd.DataFrame(rows, columns=gen.UNIFIED_COLUMNS)
+
+
+def _u_row(project, year, psf, street="STREET A", ptype="Condominium",
+           tenure="Freehold", source="ura_private", price=1_000_000, area=100.0):
+    return [project, street, ptype, tenure, year, price, area, psf, "Resale", source]
+
+
+def test_display_project_splits_generic_landed_by_street():
+    assert gen.display_project("LANDED HOUSING DEVELOPMENT", "TOH CRESCENT") == \
+        "LANDED HOUSING DEVELOPMENT (TOH CRESCENT)"
+    assert gen.display_project("LOYANG VILLAS", "LOYANG RISE") == "LOYANG VILLAS"
+
+
+def test_aggregate_projects_groups_and_computes_year_stats():
+    df = _unified(
+        [_u_row("ALPHA", 2021, 1000.0) for _ in range(3)]
+        + [_u_row("ALPHA", 2023, 1100.0) for _ in range(3)]
+        + [_u_row("ALPHA", 2022, 1050.0)]  # n=1 -> below MIN_YEAR_N
+        + [_u_row("LANDED HOUSING DEVELOPMENT", 2021, 900.0, street="TOH CRESCENT")]
+        + [_u_row("LANDED HOUSING DEVELOPMENT", 2021, 950.0, street="JALAN PERNAMA")]
+    )
+    rows = gen.aggregate_projects(df)
+    names = [r["project"] for r in rows]
+    assert names[0] == "ALPHA"  # most txns first
+    assert "LANDED HOUSING DEVELOPMENT (TOH CRESCENT)" in names
+    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in names
+    alpha = rows[0]
+    assert alpha["n_total"] == 7
+    assert alpha["year_stats"][2021] == (1000.0, 3)
+    assert alpha["year_stats"][2019] == (None, 0)
+    assert alpha["growth_pct"] == pytest.approx(((1100 / 1000) ** 0.5 - 1) * 100)
+    assert (alpha["growth_from"], alpha["growth_to"]) == (2021, 2023)
+    assert alpha["latest_year"] == 2023
+    assert alpha["latest_median_psf"] == pytest.approx(1100.0)
+    assert alpha["has_edgeprop_backfill"] is False
+
+
+def test_aggregate_projects_flags_edgeprop_backfill():
+    df = _unified([
+        _u_row("BETA", 2019, 800.0, source="edgeprop_backfill"),
+        _u_row("BETA", 2022, 1000.0),
+    ])
+    rows = gen.aggregate_projects(df)
+    assert rows[0]["has_edgeprop_backfill"] is True
+
+
+def test_district_summary_totals_and_growth_rankings():
+    df = _unified(
+        [_u_row("ALPHA", 2021, 1000.0) for _ in range(3)]
+        + [_u_row("ALPHA", 2023, 1200.0) for _ in range(3)]
+        + [_u_row("BETA", 2021, 1000.0) for _ in range(3)]
+        + [_u_row("BETA", 2023, 900.0) for _ in range(3)]
+        + [_u_row("GAMMA", 2021, 500.0)]  # no growth (single low-n year)
+    )
+    rows = gen.aggregate_projects(df)
+    summary = gen.district_summary(df, rows)
+    assert summary["total_txns"] == 13
+    assert summary["yearly"][2021] == (1000.0, 7)
+    assert summary["top_growth"][0]["project"] == "ALPHA"
+    assert summary["bottom_growth"][0]["project"] == "BETA"
+    growth_names = {r["project"] for r in summary["top_growth"] + summary["bottom_growth"]}
+    assert "GAMMA" not in growth_names

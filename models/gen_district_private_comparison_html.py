@@ -171,3 +171,72 @@ def annualised_growth(year_stats: dict) -> tuple | None:
     p1 = year_stats[y1][0]
     rate = (p1 / p0) ** (1.0 / (y1 - y0)) - 1.0
     return rate, y0, y1
+
+
+GENERIC_LANDED_NAME = "LANDED HOUSING DEVELOPMENT"
+
+
+def display_project(project: str, street: str) -> str:
+    if project == GENERIC_LANDED_NAME:
+        return f"{GENERIC_LANDED_NAME} ({street})"
+    return project
+
+
+def mode_text(series: pd.Series, default: str = "-") -> str:
+    values = series.dropna()
+    values = values[values.astype(str).str.strip() != ""]
+    if values.empty:
+        return default
+    return str(values.mode().iloc[0])
+
+
+def _year_stats(grp: pd.DataFrame) -> dict:
+    stats = {}
+    for year in YEARS:
+        sub = grp[grp["sale_year"] == year]
+        median = float(sub["psf"].median()) if len(sub) else None
+        stats[year] = (median, int(len(sub)))
+    return stats
+
+
+def aggregate_projects(df: pd.DataFrame) -> list[dict]:
+    df = df.copy()
+    df["display_project"] = [
+        display_project(p, s) for p, s in zip(df["project"], df["street"])
+    ]
+    rows = []
+    for name, grp in df.groupby("display_project"):
+        stats = _year_stats(grp)
+        growth = annualised_growth(stats)
+        active_years = [y for y in YEARS if stats[y][1] > 0]
+        latest_year = active_years[-1] if active_years else None
+        latest = grp[grp["sale_year"] == latest_year] if latest_year else grp.iloc[0:0]
+        types = sorted(t for t in grp["property_type"].dropna().unique() if str(t).strip())
+        rows.append({
+            "project": name,
+            "street": mode_text(grp["street"]),
+            "property_types": " / ".join(types) if types else "-",
+            "tenure": mode_text(grp["tenure"]),
+            "n_total": int(len(grp)),
+            "year_stats": stats,
+            "growth_pct": growth[0] * 100.0 if growth else None,
+            "growth_from": growth[1] if growth else None,
+            "growth_to": growth[2] if growth else None,
+            "latest_year": latest_year,
+            "latest_median_psf": float(latest["psf"].median()) if len(latest) else None,
+            "latest_median_price": float(latest["price"].median()) if len(latest) else None,
+            "has_edgeprop_backfill": bool((grp["source"] == "edgeprop_backfill").any()),
+        })
+    rows.sort(key=lambda r: (-r["n_total"], r["project"]))
+    return rows
+
+
+def district_summary(df: pd.DataFrame, rows: list[dict]) -> dict:
+    with_growth = [r for r in rows if r["growth_pct"] is not None]
+    ranked = sorted(with_growth, key=lambda r: r["growth_pct"], reverse=True)
+    return {
+        "total_txns": int(len(df)),
+        "yearly": _year_stats(df),
+        "top_growth": ranked[:3],
+        "bottom_growth": ranked[::-1][:3],
+    }
