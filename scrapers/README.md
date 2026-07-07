@@ -103,11 +103,12 @@ python scrapers/edgeprop_landed.py parse-transactions \
 python scrapers/ingest_ura_raw.py \
     --files data/ura_raw/edgeprop_kembangan.csv \
     --out data/ura_private.csv \
-    --merge
+    --merge \
+    --source_quality not_clean
 ```
 
 The parser writes `Area (sqm)` from EdgeProp's sqft value, and the ingestor keeps `type_of_area`,
-`unit_price_psf`, `purchaser_address`, and `source` when present.
+`unit_price_psf`, `purchaser_address`, `source`, and `source_quality` when present.
 
 ## District → Estate mapping
 

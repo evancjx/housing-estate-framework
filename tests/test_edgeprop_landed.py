@@ -114,3 +114,45 @@ def test_parse_transaction_text_writes_ingestor_compatible_rows(tmp_path):
     with out.open(newline="", encoding="utf-8") as handle:
         written = list(csv.DictReader(handle))
     assert written[0]["Price ($)"] == "3760000"
+
+
+def test_parse_playwright_rendered_transaction_text_with_combined_area_and_buyer():
+    text = """
+    Sales Transaction of KEMBANGAN ESTATE
+    Date
+    Address
+    Price (S$ psf)
+    Price (S$)
+    Property Type
+    Tenure
+    Type of Sale
+    Area (sqft)
+    Type of Area
+    Purchaser Address
+    Source
+    17 APR 2026
+    XX LORONG MARICAN
+    2,851
+    6,160,000
+    Semi-Detached House
+    Freehold
+    New Sale
+    2,160
+    Land\tPrivate
+    URA
+    """
+
+    rows = edgeprop_landed.parse_transaction_text(
+        text,
+        project_name="KEMBANGAN ESTATE",
+        planning_area="Bedok",
+        postal_district="14",
+    )
+
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["Date of Sale"] == "17 Apr 2026"
+    assert row["Unit Price ($psf)"] == 2851
+    assert row["Price ($)"] == 6160000
+    assert row["Type of Area"] == "Land"
+    assert row["Purchaser Address"] == "Private"

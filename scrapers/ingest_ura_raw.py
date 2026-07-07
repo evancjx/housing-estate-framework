@@ -12,7 +12,8 @@ INPUT:  Raw CSVs from the URA PMI portal or REALIS caveats.
 OUTPUT: data/ura_private.csv with columns:
     planning_area, transacted_price, area_sqm, property_type,
     tenure, project_age_years, sale_month, plus optional raw context
-    columns such as type_of_area and market_segment when present
+    columns such as type_of_area, market_segment, source, and source_quality
+    when present
 
 DISTRICT → PLANNING AREA mapping is used when the raw file doesn't have
 a planning_area column (portal downloads only have Postal District).
@@ -214,7 +215,11 @@ def compute_project_age(df: pd.DataFrame) -> pd.Series:
     return pd.Series([5.0] * len(df), index=df.index)
 
 
-def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
+def ingest_file(
+    path: Path,
+    district: str | None = None,
+    source_quality: str | None = None,
+) -> pd.DataFrame:
     """Read one raw CSV and return a normalised DataFrame."""
     try:
         df = pd.read_csv(path, thousands=",", encoding="utf-8")
@@ -286,6 +291,9 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
     # project_age_years
     df["project_age_years"] = compute_project_age(df)
 
+    if source_quality:
+        df["source_quality"] = source_quality
+
     # Keep only the columns value_model.py needs
     out_cols = [
         "planning_area", "transacted_price", "area_sqm",
@@ -293,7 +301,7 @@ def ingest_file(path: Path, district: str | None = None) -> pd.DataFrame:
     ]
     optional = ["project_name", "street_name", "postal_district", "market_segment",
                 "floor_level", "type_of_sale", "type_of_area", "unit_price_psf",
-                "unit_price_psm", "purchaser_address", "source"]
+                "unit_price_psm", "purchaser_address", "source", "source_quality"]
     for c in optional:
         if c in df.columns:
             out_cols.append(c)
@@ -355,7 +363,7 @@ def run(args):
         # Try to extract district from filename: pmi_d03_2021-2026.csv → "03"
         m = re.search(r"pmi_d(\d{2})", p.stem)
         district = m.group(1) if m else None
-        df = ingest_file(p, district)
+        df = ingest_file(p, district, source_quality=args.source_quality)
         if not df.empty:
             frames.append(df)
 
@@ -390,6 +398,10 @@ def main():
     ap.add_argument("--files", nargs="*", help="Specific file(s) to ingest (overrides --raw_dir)")
     ap.add_argument("--out", default="data/ura_private.csv", help="Output file")
     ap.add_argument("--merge", action="store_true", help="Merge with existing --out file")
+    ap.add_argument(
+        "--source_quality",
+        help="Optional provenance marker applied to all ingested rows, e.g. not_clean",
+    )
     args = ap.parse_args()
     run(args)
 

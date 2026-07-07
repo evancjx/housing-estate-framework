@@ -324,7 +324,7 @@ def parse_transaction_text(
         if not DATE_RE.match(lines[i]):
             i += 1
             continue
-        if i + 10 >= len(lines):
+        if i + 9 >= len(lines):
             break
 
         date = lines[i]
@@ -337,7 +337,24 @@ def parse_transaction_text(
         area_sqft = parse_number(lines[i + 7])
         type_of_area = lines[i + 8]
         purchaser_address = lines[i + 9]
-        source = lines[i + 10]
+        source_idx = i + 10
+
+        if "\t" in type_of_area:
+            parts = [part.strip() for part in type_of_area.split("\t") if part.strip()]
+            if len(parts) >= 2:
+                type_of_area = parts[0]
+                purchaser_address = parts[1]
+                source_idx = i + 9
+        else:
+            combined = re.match(r"^(Land|Strata)\s+(.+)$", type_of_area, flags=re.I)
+            if combined and purchaser_address.upper() in {"URA", "EDGEPROP", "REALIS"}:
+                type_of_area = combined.group(1)
+                purchaser_address = combined.group(2).strip()
+                source_idx = i + 9
+
+        if source_idx >= len(lines):
+            break
+        source = lines[source_idx]
 
         valid = (
             unit_price_psf is not None
@@ -366,7 +383,7 @@ def parse_transaction_text(
             "Purchaser Address": purchaser_address,
             "Source": source,
         })
-        i += 11
+        i = source_idx + 1
     return rows
 
 

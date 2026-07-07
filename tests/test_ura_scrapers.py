@@ -36,7 +36,7 @@ def test_ingest_landed_pmi_file_preserves_property_type_and_schema(tmp_path):
         }
     ).to_csv(raw, index=False)
 
-    out = ingest_ura_raw.ingest_file(raw)
+    out = ingest_ura_raw.ingest_file(raw, source_quality="not_clean")
 
     assert list(out.columns[:7]) == [
         "planning_area",
@@ -78,7 +78,7 @@ def test_ingest_edgeprop_style_file_converts_sqft_and_preserves_context(tmp_path
         }
     ).to_csv(raw, index=False)
 
-    out = ingest_ura_raw.ingest_file(raw)
+    out = ingest_ura_raw.ingest_file(raw, source_quality="not_clean")
 
     row = out.iloc[0]
     assert row["planning_area"] == "BEDOK"
@@ -91,6 +91,7 @@ def test_ingest_edgeprop_style_file_converts_sqft_and_preserves_context(tmp_path
     assert row["type_of_area"] == "Land"
     assert row["purchaser_address"] == "Private"
     assert row["source"] == "URA"
+    assert row["source_quality"] == "not_clean"
     assert row["sale_month"] == "2020-10"
 
 
