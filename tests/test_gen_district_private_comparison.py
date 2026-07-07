@@ -280,3 +280,24 @@ def test_render_html_marks_low_n_years_and_backfill():
     html_text = gen.render_html("27", rows, summary)
     assert "1,000" in html_text        # 2021 median shown (n>=3)
     assert "backfill" in html_text.lower()
+
+
+import pathlib
+
+ROOT = pathlib.Path(__file__).parent.parent
+
+
+@pytest.mark.integration
+def test_generate_real_d17_d27(tmp_path):
+    for district, anchor in (("17", "LOYANG VILLAS"), ("27", "THE SHAUGHNESSY")):
+        out_path, n_rows = gen.generate(
+            district,
+            ROOT / "data/ura_private.csv",
+            ROOT / "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv",
+            ROOT / "data/ura_raw",
+            tmp_path,
+        )
+        assert n_rows > 20
+        text = out_path.read_text(encoding="utf-8")
+        assert anchor in text
+        assert "2019" in text
