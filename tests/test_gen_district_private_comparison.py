@@ -277,7 +277,7 @@ def test_render_html_marks_low_n_years_and_backfill():
     }]
     summary = {"total_txns": 4, "yearly": year_stats,
                "top_growth": [], "bottom_growth": []}
-    html_text = gen.render_html("27", rows, summary)
+    html_text = gen.render_html("27", {"all": (rows, summary)}, {})
     assert "1,000" in html_text        # 2021 median shown (n>=3)
     assert "backfill" in html_text.lower()
 
@@ -342,3 +342,38 @@ def test_bedroom_labels_mode_share_rule(tmp_path):
 
 def test_bedroom_labels_missing_file(tmp_path):
     assert gen.load_edgeprop_bedroom_labels(tmp_path / "nope.csv", "27") == {}
+
+def _band_section(html_text, key):
+    import re
+    m = re.search(rf'<section id="band-{key}".*?</section>', html_text, re.S)
+    assert m, f"missing section band-{key}"
+    return m.group(0)
+
+
+def test_generate_renders_band_tabs_and_membership(tmp_path):
+    canonical, edgeprop, raw_dir = _full_fixture(tmp_path)
+    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    text = out_path.read_text(encoding="utf-8")
+    for label in ("All", "≤50 sqm", "50–70 sqm", "70–100 sqm", "100–130 sqm", ">130 sqm"):
+        assert label in text
+    # canonical SHAUGHNESSY row is 100.0 sqm -> band 70to100 only
+    assert "THE SHAUGHNESSY" in _band_section(text, "70to100")
+    assert "THE SHAUGHNESSY" not in _band_section(text, "gt130")
+    # ura_raw landed row is 335.8 sqm -> gt130 only
+    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in _band_section(text, "gt130")
+    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" not in _band_section(text, "70to100")
+
+
+def test_generate_shows_bedroom_label_in_band_table(tmp_path):
+    canonical = _write_canonical(tmp_path)
+    # 3 SELETARIS rows (116.1 sqm -> 100to130), all 3BR -> label ≈3BR
+    edgeprop = _write_edgeprop(tmp_path, [
+        _edgeprop_row(),
+        _edgeprop_row(**{"Date of Sale": "16 Mar 2019"}),
+        _edgeprop_row(**{"Date of Sale": "17 Mar 2019"}),
+    ])
+    raw_dir = tmp_path / "ura_raw"
+    raw_dir.mkdir()
+    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    section = _band_section(out_path.read_text(encoding="utf-8"), "100to130")
+    assert "≈3BR" in section
