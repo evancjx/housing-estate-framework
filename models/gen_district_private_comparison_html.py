@@ -42,6 +42,7 @@ UNIFIED_COLUMNS = [
 ]
 DISTRICT_NAMES = {
     "17": "Changi / Loyang / Pasir Ris",
+    "18": "Tampines / Pasir Ris",
     "27": "Yishun / Sembawang",
 }
 DEFAULT_PRIVATE = ROOT / "data/ura_private.csv"
