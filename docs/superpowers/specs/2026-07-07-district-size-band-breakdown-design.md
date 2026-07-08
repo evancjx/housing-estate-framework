@@ -96,3 +96,10 @@ Extend `tests/test_gen_district_private_comparison.py`:
 - No changes to loaders' price/area behaviour or the backfill window rule.
 - No bedroom inference beyond the mode-share rule (no area-based guessing).
 - No per-band pages or cross-district views.
+
+## Amendment 2026-07-08: landed excluded
+
+Per user direction, landed property types (`*House`) are excluded from the district
+comparison pages entirely. `load_canonical` filters them; the `ura_raw` landed backfill
+ingestion and the `LANDED HOUSING DEVELOPMENT (street)` grouping were removed from
+`gen_district_private_comparison_html.py`. Pages are condo/apartment only.

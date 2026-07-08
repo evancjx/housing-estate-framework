@@ -64,3 +64,10 @@ All in `models/gen_district_private_comparison_html.py`:
 
 - No bedroom inference beyond the existing project+band label mapping.
 - No changes to loaders' price windows or the size-band logic.
+
+## Amendment 2026-07-08: landed excluded
+
+Per user direction, landed property types (`*House`) are excluded from the district
+comparison pages entirely. `load_canonical` filters them; the `ura_raw` landed backfill
+ingestion and the `LANDED HOUSING DEVELOPMENT (street)` grouping were removed from
+`gen_district_private_comparison_html.py`. Pages are condo/apartment only.

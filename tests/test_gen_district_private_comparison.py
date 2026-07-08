@@ -18,6 +18,12 @@ def _write_canonical(tmp_path):
          "street_name": "LOYANG RISE", "postal_district": "17",
          "market_segment": "Outside Central Region", "floor_level": "-",
          "type_of_sale": "Resale", "type_of_area": "Strata", "unit_price_psm": 13_000},
+        {"planning_area": "SEMBAWANG", "transacted_price": 4_000_000, "area_sqm": 300.0,
+         "property_type": "Terrace House", "tenure": "Freehold",
+         "project_age_years": 20, "sale_month": "2023-05", "project_name": "THE SHAUGHNESSY",
+         "street_name": "MILTONIA CLOSE", "postal_district": "27",
+         "market_segment": "Outside Central Region", "floor_level": "-",
+         "type_of_sale": "Resale", "type_of_area": "Land", "unit_price_psm": 14_000},
         {"planning_area": "SEMBAWANG", "transacted_price": 0, "area_sqm": 100.0,
          "property_type": "Condominium", "tenure": "Freehold",
          "project_age_years": 8, "sale_month": "2023-04", "project_name": "BAD ROW",
@@ -41,7 +47,8 @@ def test_load_canonical_filters_district_and_maps_schema(tmp_path):
     path = _write_canonical(tmp_path)
     out = gen.load_canonical(path, "27")
     assert list(out.columns) == gen.UNIFIED_COLUMNS
-    assert set(out["project"]) == {"THE SHAUGHNESSY"}  # D17 row and zero-price row excluded
+    assert set(out["project"]) == {"THE SHAUGHNESSY"}  # D17, zero-price AND landed rows excluded
+    assert len(out) == 1  # the Terrace House row is gone despite valid price/area
     row = out.iloc[0]
     assert row["sale_year"] == 2023
     assert row["source"] == "ura_private"
@@ -103,57 +110,6 @@ def test_edgeprop_backfill_missing_file_returns_empty(tmp_path):
     assert out.empty
 
 
-def _ura_raw_row(**over):
-    row = {"Project Name": "LANDED HOUSING DEVELOPMENT", "Transacted Price ($)": "4,653,000",
-           "Area (SQFT)": "3,614.55", "Unit Price ($ PSF)": "1,287", "Sale Date": "Jun-19",
-           "Street Name": "JALAN PERNAMA", "Type of Sale": "Resale", "Type of Area": "Land",
-           "Area (SQM)": "335.8", "Unit Price ($ PSM)": "13,856", "Nett Price($)": "-",
-           "Property Type": "Semi-Detached House", "Number of Units": "1", "Tenure": "Freehold",
-           "Postal District": "17", "Market Segment": "Outside Central Region", "Floor Level": "-"}
-    row.update(over)
-    return row
-
-
-def _write_ura_raw(tmp_path, district, rows):
-    raw_dir = tmp_path / "ura_raw"
-    raw_dir.mkdir(exist_ok=True)
-    path = raw_dir / f"pmi_d{district}_landed_non_strata_2019-2026.csv"
-    pd.DataFrame(rows).to_csv(path, index=False)
-    return raw_dir
-
-
-def test_ura_raw_backfill_parses_commas_and_dates(tmp_path):
-    raw_dir = _write_ura_raw(tmp_path, "17", [_ura_raw_row()])
-    out = gen.load_ura_raw_backfill(raw_dir, "17")
-    assert len(out) == 1
-    row = out.iloc[0]
-    assert row["price"] == pytest.approx(4_653_000)
-    assert row["area_sqm"] == pytest.approx(335.8)
-    assert row["psf"] == pytest.approx(1287)
-    assert row["sale_year"] == 2019
-    assert row["source"] == "ura_raw_backfill"
-
-
-def test_ura_raw_backfill_keeps_only_2019_2020(tmp_path):
-    raw_dir = _write_ura_raw(tmp_path, "17", [
-        _ura_raw_row(),
-        _ura_raw_row(**{"Sale Date": "Dec-20"}),
-        _ura_raw_row(**{"Sale Date": "Jan-21"}),
-        _ura_raw_row(**{"Sale Date": "Jun-26"}),
-    ])
-    out = gen.load_ura_raw_backfill(raw_dir, "17")
-    assert sorted(out["sale_year"]) == [2019, 2020]
-
-
-def test_ura_raw_backfill_missing_files_warns_and_returns_empty(tmp_path, capsys):
-    empty_dir = tmp_path / "ura_raw"
-    empty_dir.mkdir()
-    out = gen.load_ura_raw_backfill(empty_dir, "17")
-    assert out.empty
-    assert list(out.columns) == gen.UNIFIED_COLUMNS
-    assert "WARN" in capsys.readouterr().out
-
-
 def test_annualised_growth_uses_first_and_last_qualifying_years():
     stats = {2019: (1000.0, 5), 2021: (900.0, 2), 2023: (1200.0, 4)}
     rate, y0, y1 = gen.annualised_growth(stats)
@@ -183,25 +139,17 @@ def _u_row(project, year, psf, street="STREET A", ptype="Condominium",
     return [project, street, ptype, tenure, year, price, area, psf, "Resale", source]
 
 
-def test_display_project_splits_generic_landed_by_street():
-    assert gen.display_project("LANDED HOUSING DEVELOPMENT", "TOH CRESCENT") == \
-        "LANDED HOUSING DEVELOPMENT (TOH CRESCENT)"
-    assert gen.display_project("LOYANG VILLAS", "LOYANG RISE") == "LOYANG VILLAS"
-
-
 def test_aggregate_projects_groups_and_computes_year_stats():
     df = _unified(
         [_u_row("ALPHA", 2021, 1000.0) for _ in range(3)]
         + [_u_row("ALPHA", 2023, 1100.0) for _ in range(3)]
         + [_u_row("ALPHA", 2022, 1050.0)]  # n=1 -> below MIN_YEAR_N
-        + [_u_row("LANDED HOUSING DEVELOPMENT", 2021, 900.0, street="TOH CRESCENT")]
-        + [_u_row("LANDED HOUSING DEVELOPMENT", 2021, 950.0, street="JALAN PERNAMA")]
+        + [_u_row("DELTA", 2021, 900.0, street="TOH CRESCENT")]
     )
     rows = gen.aggregate_projects(df)
     names = [r["project"] for r in rows]
     assert names[0] == "ALPHA"  # most txns first
-    assert "LANDED HOUSING DEVELOPMENT (TOH CRESCENT)" in names
-    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in names
+    assert "DELTA" in names
     alpha = rows[0]
     assert alpha["n_total"] == 7
     assert alpha["year_stats"][2021] == (1000.0, 3)
@@ -241,23 +189,22 @@ def test_district_summary_totals_and_growth_rankings():
 
 
 def _full_fixture(tmp_path):
-    """Canonical + edgeprop + ura_raw covering district 27."""
-    canonical = _write_canonical(tmp_path)  # has 1 valid D27 row (THE SHAUGHNESSY 2023)
+    """Canonical + edgeprop covering district 27."""
+    canonical = _write_canonical(tmp_path)  # has 1 valid D27 condo row (THE SHAUGHNESSY 2023)
     edgeprop = _write_edgeprop(tmp_path, [_edgeprop_row()])  # SELETARIS 2019, D27
-    raw_dir = _write_ura_raw(tmp_path, "27", [_ura_raw_row(**{"Postal District": "27"})])
-    return canonical, edgeprop, raw_dir
+    return canonical, edgeprop
 
 
 def test_generate_writes_self_contained_page(tmp_path):
-    canonical, edgeprop, raw_dir = _full_fixture(tmp_path)
-    out_path, n_rows = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    canonical, edgeprop = _full_fixture(tmp_path)
+    out_path, n_rows = gen.generate("27", canonical, edgeprop, tmp_path)
     assert out_path.name == "private_project_comparison_D27.html"
     assert out_path.exists()
-    assert n_rows >= 3  # SHAUGHNESSY + SELETARIS + landed street group
+    assert n_rows >= 2  # SHAUGHNESSY + SELETARIS
     text = out_path.read_text(encoding="utf-8")
     assert "THE SHAUGHNESSY" in text
     assert "SELETARIS" in text
-    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in text
+    assert "LANDED HOUSING DEVELOPMENT" not in text  # landed excluded from the comparison
     assert "2019" in text and "2026" in text
     assert "EdgeProp" in text          # caveat banner mentions the backfill source
     assert "http://" not in text and "https://" not in text  # self-contained
@@ -289,12 +236,11 @@ ROOT = pathlib.Path(__file__).parent.parent
 
 @pytest.mark.integration
 def test_generate_real_d17_d27(tmp_path):
-    for district, anchor in (("17", "LOYANG VILLAS"), ("27", "THE SHAUGHNESSY")):
+    for district, anchor in (("17", "CARISSA PARK CONDOMINIUM"), ("27", "EIGHT COURTYARDS")):
         out_path, n_rows = gen.generate(
             district,
             ROOT / "data/ura_private.csv",
             ROOT / "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv",
-            ROOT / "data/ura_raw",
             tmp_path,
         )
         assert n_rows > 20
@@ -309,6 +255,8 @@ def test_generate_real_d17_d27(tmp_path):
             assert label in text
         assert 'id="band-brunknown"' in text
         assert 'id="band-br3"' in text
+        assert "LANDED HOUSING DEVELOPMENT" not in text
+        assert "Terrace House" not in text
 
 
 def test_band_of_boundaries():
@@ -376,17 +324,14 @@ def _band_section(html_text, key):
 
 
 def test_generate_renders_band_tabs_and_membership(tmp_path):
-    canonical, edgeprop, raw_dir = _full_fixture(tmp_path)
-    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    canonical, edgeprop = _full_fixture(tmp_path)
+    out_path, _ = gen.generate("27", canonical, edgeprop, tmp_path)
     text = out_path.read_text(encoding="utf-8")
     for label in ("All", "≤50 sqm", "50–70 sqm", "70–100 sqm", "100–130 sqm", ">130 sqm"):
         assert label in text
-    # canonical SHAUGHNESSY row is 100.0 sqm -> band 70to100 only
+    # canonical SHAUGHNESSY condo row is 100.0 sqm -> band 70to100 only
     assert "THE SHAUGHNESSY" in _band_section(text, "70to100")
     assert "THE SHAUGHNESSY" not in _band_section(text, "gt130")
-    # ura_raw landed row is 335.8 sqm -> gt130 only
-    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in _band_section(text, "gt130")
-    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" not in _band_section(text, "70to100")
 
 
 def test_generate_shows_bedroom_label_in_band_table(tmp_path):
@@ -397,9 +342,7 @@ def test_generate_shows_bedroom_label_in_band_table(tmp_path):
         _edgeprop_row(**{"Date of Sale": "16 Mar 2019"}),
         _edgeprop_row(**{"Date of Sale": "17 Mar 2019"}),
     ])
-    raw_dir = tmp_path / "ura_raw"
-    raw_dir.mkdir()
-    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    out_path, _ = gen.generate("27", canonical, edgeprop, tmp_path)
     section = _band_section(out_path.read_text(encoding="utf-8"), "100to130")
     assert "≈3BR" in section
 
@@ -411,15 +354,13 @@ def test_generate_renders_bedroom_tabs_and_membership(tmp_path):
         _edgeprop_row(**{"Date of Sale": "16 Mar 2019"}),
         _edgeprop_row(**{"Date of Sale": "17 Mar 2019"}),
     ])  # SELETARIS 116.1 sqm -> (SELETARIS, 100to130) -> 3BR
-    raw_dir = _write_ura_raw(tmp_path, "27", [_ura_raw_row(**{"Postal District": "27"})])
-    out_path, _ = gen.generate("27", canonical, edgeprop, raw_dir, tmp_path)
+    out_path, _ = gen.generate("27", canonical, edgeprop, tmp_path)
     text = out_path.read_text(encoding="utf-8")
     for label in ("1BR", "2BR", "3BR", "4BR", "5BR+", "Unknown"):
         assert label in text
     assert "SELETARIS" in _band_section(text, "br3")
     assert "SELETARIS" not in _band_section(text, "br2")
-    # landed + unlabelled canonical rows -> Unknown
-    assert "LANDED HOUSING DEVELOPMENT (JALAN PERNAMA)" in _band_section(text, "brunknown")
+    # unlabelled condo rows -> Unknown
     assert "THE SHAUGHNESSY" in _band_section(text, "brunknown")
     # bedroom sections do not carry the ≈nBR column
     assert "≈3BR" not in _band_section(text, "br3")

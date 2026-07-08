@@ -1,13 +1,12 @@
 """
 Generate per-district private property comparison pages (trend-focused).
 
+Scope: condo/apartment ONLY - landed property types (*House) are excluded.
+
 Reads:
   data/ura_private.csv - canonical URA private transactions (2021+; owns 2021-2026)
   data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv
                        - EdgeProp scrape; ONLY 2019-2020 rows used (condo/apartment backfill)
-  data/ura_raw/pmi_d{NN}_landed_non_strata_2019-2026.csv   (optional per district)
-  data/ura_raw/pmi_d{NN}_strata_landed_2019-2026.csv       (optional per district)
-                       - raw URA PMI landed downloads; ONLY 2019-2020 rows used
 
 Writes:
   private_project_comparison_D{NN}.html  (repo root; one per --district)
@@ -20,10 +19,7 @@ INPUT CONTRACT
     tenure, sale_month (YYYY-MM), transacted_price, area_sqm, unit_price_psm, type_of_sale
   edgeprop csv columns: Project, Street, Postal District, Date of Sale (DD Mon YYYY),
     Type, Tenure, Sale Type, Price ($), Area (sqm), Area (sqft), Unit Price ($psf)
-  ura_raw pmi csv columns: Project Name, Street Name, Postal District, Property Type,
-    Tenure, Sale Date (Mon-YY), Transacted Price ($), Area (SQFT), Area (SQM),
-    Unit Price ($ PSF), Type of Sale
-  Backfill invariant: EdgeProp and ura_raw loaders never emit sale_year outside 2019-2020.
+  Backfill invariant: the EdgeProp loader never emits sale_year outside 2019-2020.
 """
 
 from __future__ import annotations
@@ -50,7 +46,6 @@ DISTRICT_NAMES = {
 }
 DEFAULT_PRIVATE = ROOT / "data/ura_private.csv"
 DEFAULT_EDGEPROP = ROOT / "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
-DEFAULT_URA_RAW_DIR = ROOT / "data/ura_raw"
 
 
 def normalise_district(value) -> str:
@@ -76,6 +71,7 @@ def load_canonical(path: pathlib.Path, district: str) -> pd.DataFrame:
     })
     out = out.dropna(subset=["sale_year", "price", "area_sqm"])
     out = out[(out["price"] > 0) & (out["area_sqm"] > 0)]
+    out = out[~out["property_type"].str.contains("House", case=False, na=False)]
     out["sale_year"] = out["sale_year"].astype(int)
     return out[UNIFIED_COLUMNS].reset_index(drop=True)
 
@@ -115,52 +111,6 @@ def load_edgeprop_backfill(path: pathlib.Path, district: str) -> pd.DataFrame:
     return out[UNIFIED_COLUMNS].reset_index(drop=True)
 
 
-def _comma_numeric(series: pd.Series) -> pd.Series:
-    return pd.to_numeric(
-        series.astype(str).str.replace(",", "", regex=False).str.strip(),
-        errors="coerce",
-    )
-
-
-def load_ura_raw_backfill(raw_dir: pathlib.Path, district: str) -> pd.DataFrame:
-    frames = []
-    stems = (
-        f"pmi_d{district}_landed_non_strata_2019-2026.csv",
-        f"pmi_d{district}_strata_landed_2019-2026.csv",
-    )
-    for stem in stems:
-        path = raw_dir / stem
-        if not path.exists():
-            print(f"WARN: {path} missing; skipping landed backfill file")
-            continue
-        df = pd.read_csv(path, dtype={"Postal District": str})
-        df = df[df["Postal District"].map(normalise_district) == district].copy()
-        df["sale_dt"] = pd.to_datetime(df["Sale Date"], format="%b-%y", errors="coerce")
-        df = df.dropna(subset=["sale_dt"])
-        df["sale_year"] = df["sale_dt"].dt.year
-        df = df[df["sale_year"].between(2019, 2020)]
-        if df.empty:
-            continue
-        out = pd.DataFrame({
-            "project": df["Project Name"].astype(str).str.strip().str.upper(),
-            "street": df["Street Name"].astype(str).str.strip().str.upper(),
-            "property_type": df["Property Type"].astype(str).str.strip(),
-            "tenure": df["Tenure"].astype(str).str.strip(),
-            "sale_year": df["sale_year"].astype(int),
-            "price": _comma_numeric(df["Transacted Price ($)"]),
-            "area_sqm": _comma_numeric(df["Area (SQM)"]),
-            "psf": _comma_numeric(df["Unit Price ($ PSF)"]),
-            "sale_type": df["Type of Sale"].astype(str).str.strip(),
-            "source": "ura_raw_backfill",
-        })
-        out = out.dropna(subset=["price", "area_sqm"])
-        out = out[(out["price"] > 0) & (out["area_sqm"] > 0)]
-        frames.append(out[UNIFIED_COLUMNS])
-    if not frames:
-        return _empty_unified()
-    return pd.concat(frames, ignore_index=True)
-
-
 def annualised_growth(year_stats: dict) -> tuple | None:
     qualifying = sorted(
         year for year, (median, n) in year_stats.items()
@@ -173,15 +123,6 @@ def annualised_growth(year_stats: dict) -> tuple | None:
     p1 = year_stats[y1][0]
     rate = (p1 / p0) ** (1.0 / (y1 - y0)) - 1.0
     return rate, y0, y1
-
-
-GENERIC_LANDED_NAME = "LANDED HOUSING DEVELOPMENT"
-
-
-def display_project(project: str, street: str) -> str:
-    if project == GENERIC_LANDED_NAME:
-        return f"{GENERIC_LANDED_NAME} ({street})"
-    return project
 
 
 def mode_text(series: pd.Series, default: str = "-") -> str:
@@ -203,11 +144,8 @@ def _year_stats(grp: pd.DataFrame) -> dict:
 
 def aggregate_projects(df: pd.DataFrame) -> list[dict]:
     df = df.copy()
-    df["display_project"] = [
-        display_project(p, s) for p, s in zip(df["project"], df["street"])
-    ]
     rows = []
-    for name, grp in df.groupby("display_project"):
+    for name, grp in df.groupby("project"):
         stats = _year_stats(grp)
         growth = annualised_growth(stats)
         active_years = [y for y in YEARS if stats[y][1] > 0]
@@ -260,7 +198,6 @@ def main() -> None:
                         help="Postal district (repeatable), e.g. --district 17 --district 27")
     parser.add_argument("--private", default=str(DEFAULT_PRIVATE))
     parser.add_argument("--edgeprop", default=str(DEFAULT_EDGEPROP))
-    parser.add_argument("--ura-raw-dir", default=str(DEFAULT_URA_RAW_DIR))
     parser.add_argument("--out-dir", default=str(ROOT))
     args = parser.parse_args()
     for district in args.district:
@@ -268,7 +205,6 @@ def main() -> None:
             district,
             pathlib.Path(args.private),
             pathlib.Path(args.edgeprop),
-            pathlib.Path(args.ura_raw_dir),
             pathlib.Path(args.out_dir),
         )
         print(f"Written: {out_path} ({out_path.stat().st_size // 1024} KB, {n_rows} projects)")
@@ -307,9 +243,7 @@ def load_edgeprop_bedroom_counts(path: pathlib.Path, district: str) -> dict:
     if df.empty:
         return {}
     df["bedrooms"] = df["bedrooms"].astype(int)
-    project = df["Project"].astype(str).str.strip().str.upper()
-    street = df["Street"].astype(str).str.strip().str.upper()
-    df["display_project"] = [display_project(p, s) for p, s in zip(project, street)]
+    df["display_project"] = df["Project"].astype(str).str.strip().str.upper()
     df["band"] = df["area_sqm"].map(band_of)
     labels = {}
     for (proj, band), grp in df.groupby(["display_project", "band"]):
@@ -498,15 +432,13 @@ def render_html(district: str, per_band: dict, bedroom_counts: dict) -> str:
 </head>
 <body>
 <h1>District {district} &mdash; {_esc(district_name)}: Private Property Comparison</h1>
-<div>Window: 2019&ndash;2026 &middot; median PSF (S$) by sale year &middot; {total_txns:,} transactions</div>
+<div>Window: 2019&ndash;2026 &middot; condo &amp; apartment only (landed excluded) &middot; median PSF (S$) by sale year &middot; {total_txns:,} transactions</div>
 <div class="caveat">&#9888; 2019&ndash;2020 condo/apartment rows are backfilled from an incomplete EdgeProp scrape
 (the canonical URA feed only reaches back to 2021). Pre-2021 medians are indicative only &mdash;
-projects using that data carry a <span class="badge">backfill</span> badge. Landed 2019&ndash;2020 rows
-come from raw URA PMI downloads. Year cells show &mdash; when the year has fewer than {MIN_YEAR_N} transactions.
+projects using that data carry a <span class="badge">backfill</span> badge. Year cells show &mdash; when the year has fewer than {MIN_YEAR_N} transactions.
 Bedroom labels (&asymp;nBR) are estimates derived from EdgeProp unit listings per size band, shown only when
 at least {MIN_LABEL_N} units agree &ge;{MIN_LABEL_SHARE:.0%}. Bedroom tabs classify each transaction by its project + size band&rsquo;s
-EdgeProp label; atypical units can be misclassified, and Unknown collects unlabelled transactions
-(including all landed).</div>
+EdgeProp label; atypical units can be misclassified, and Unknown collects unlabelled transactions.</div>
 <div class="tabs">{tab_bar}</div>
 {"".join(sections)}
 <script>
@@ -545,12 +477,11 @@ document.querySelectorAll('.ptable').forEach(function (table) {{
 """
 
 
-def generate(district, private_path, edgeprop_path, raw_dir, out_dir):
+def generate(district, private_path, edgeprop_path, out_dir):
     district = normalise_district(district)
     frames = [
         load_canonical(private_path, district),
         load_edgeprop_backfill(edgeprop_path, district),
-        load_ura_raw_backfill(raw_dir, district),
     ]
     non_empty = [f for f in frames if not f.empty]
     merged = pd.concat(non_empty, ignore_index=True) if non_empty else _empty_unified()
@@ -562,10 +493,10 @@ def generate(district, private_path, edgeprop_path, raw_dir, out_dir):
         sub = merged[(merged["area_sqm"] > lo) & (merged["area_sqm"] <= hi)]
         band_rows = aggregate_projects(sub)
         per_band[key] = (band_rows, district_summary(sub, band_rows))
-    disp = [display_project(p, s) for p, s in zip(merged["project"], merged["street"])]
     bands = [band_of(a) for a in merged["area_sqm"]]
     merged["bed_class"] = [
-        bedroom_class(bedroom_counts.get((d, b))) for d, b in zip(disp, bands)
+        bedroom_class(bedroom_counts.get((proj, b)))
+        for proj, b in zip(merged["project"], bands)
     ]
     for key in BEDROOM_ORDER:
         sub = merged[merged["bed_class"] == key]

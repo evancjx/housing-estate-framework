@@ -128,3 +128,10 @@ python3 models/gen_district_private_comparison_html.py --district 17 --district 
 - No new committed intermediate CSV (merge happens in-memory).
 - No MRT/school/model-context columns in the district pages.
 - No cleaning pass promoted to `data/` — the `not_clean` EdgeProp files stay as-is on disk.
+
+## Amendment 2026-07-08: landed excluded
+
+Per user direction, landed property types (`*House`) are excluded from the district
+comparison pages entirely. `load_canonical` filters them; the `ura_raw` landed backfill
+ingestion and the `LANDED HOUSING DEVELOPMENT (street)` grouping were removed from
+`gen_district_private_comparison_html.py`. Pages are condo/apartment only.
