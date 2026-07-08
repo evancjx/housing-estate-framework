@@ -41,8 +41,8 @@ except ModuleNotFoundError:
 
 BASE_URL = "https://www.edgeprop.sg"
 DEFAULT_INDEX_URL = f"{BASE_URL}/condo-apartment/all"
-DEFAULT_PROJECTS = "data/edgeprop_condo_apartment_projects.csv"
-DEFAULT_OUTPUT = "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
+DEFAULT_PROJECTS = "data/raw/edgeprop/edgeprop_condo_apartment_projects.csv"
+DEFAULT_OUTPUT = "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
 
 DATE_RE = re.compile(r"^\d{1,2}\s+[A-Z]{3}\s+\d{4}$", re.I)
 MONEY_RE = re.compile(r"^-?\d[\d,]*(?:\.\d+)?$")

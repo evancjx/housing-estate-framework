@@ -12,7 +12,7 @@ Score rubric:
     >= 55 years  -> 2.0  (C)
     <  55 years  -> 1.0  (D)
 
-Output: data/lease_risk.csv  (estate, mean_lease_years, lease_score, lease_band)
+Output: data/outputs/lease_risk.csv  (estate, mean_lease_years, lease_score, lease_band)
 
 RUN:
     python3 models/lease_risk_model.py
@@ -49,9 +49,9 @@ def lease_score(years: float) -> float:
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir   = os.path.join(script_dir, "..", "data")
-    hdb_path   = os.path.join(data_dir, "hdb_resale.csv")
-    out_path   = os.path.join(data_dir, "lease_risk.csv")
-    estates_path = os.path.join(data_dir, "estates.csv")
+    hdb_path   = os.path.join(data_dir, "inputs", "hdb_resale.csv")
+    out_path   = os.path.join(data_dir, "outputs", "lease_risk.csv")
+    estates_path = os.path.join(data_dir, "inputs", "estates.csv")
 
     if not os.path.exists(hdb_path):
         sys.exit(f"ERROR: {hdb_path} not found")

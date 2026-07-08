@@ -9,7 +9,7 @@ INPUT:  Raw CSVs from the URA PMI portal or REALIS caveats.
         Column names vary slightly between the portal download and
         REALIS export. This script normalises both.
 
-OUTPUT: data/ura_private.csv with columns:
+OUTPUT: data/inputs/ura_private.csv with columns:
     planning_area, transacted_price, area_sqm, property_type,
     tenure, project_age_years, sale_month, plus optional raw context
     columns such as type_of_area, market_segment, source, and source_quality
@@ -19,17 +19,17 @@ DISTRICT → PLANNING AREA mapping is used when the raw file doesn't have
 a planning_area column (portal downloads only have Postal District).
 
 USAGE:
-    # Ingest new files from data/ura_raw/ and merge with existing ura_private.csv
+    # Ingest new files from data/raw/ura/ and merge with existing ura_private.csv
     python scrapers/ingest_ura_raw.py \\
-        --raw_dir data/ura_raw/ \\
-        --out data/ura_private.csv \\
+        --raw_dir data/raw/ura/ \\
+        --out data/inputs/ura_private.csv \\
         --merge   # append to existing, deduplicate
 
     # Rebuild from scratch (replaces existing ura_private.csv)
-    python scrapers/ingest_ura_raw.py --raw_dir data/ura_raw/ --out data/ura_private.csv
+    python scrapers/ingest_ura_raw.py --raw_dir data/raw/ura/ --out data/inputs/ura_private.csv
 
     # Ingest a specific file
-    python scrapers/ingest_ura_raw.py --files data/ura_raw/pmi_d15_2021-2026.csv --out data/ura_private.csv --merge
+    python scrapers/ingest_ura_raw.py --files data/raw/ura/pmi_d15_2021-2026.csv --out data/inputs/ura_private.csv --merge
 """
 
 import argparse
@@ -388,15 +388,15 @@ def run(args):
         print(f"  {area}: {count}")
 
     print("\nNext: re-run value model to pick up new areas:")
-    print(f"  python models/value_model.py --scores data/provision_scores.csv \\")
-    print(f"      --hdb data/hdb_resale.csv --private {out_path} --out data/value_output_private.csv")
+    print(f"  python models/value_model.py --scores data/outputs/provision_scores.csv \\")
+    print(f"      --hdb data/inputs/hdb_resale.csv --private {out_path} --out data/outputs/value_output_private.csv")
 
 
 def main():
     ap = argparse.ArgumentParser(description="Ingest URA raw CSVs into ura_private.csv schema")
-    ap.add_argument("--raw_dir", default="data/ura_raw", help="Directory of raw PMI CSVs")
+    ap.add_argument("--raw_dir", default="data/raw/ura", help="Directory of raw PMI CSVs")
     ap.add_argument("--files", nargs="*", help="Specific file(s) to ingest (overrides --raw_dir)")
-    ap.add_argument("--out", default="data/ura_private.csv", help="Output file")
+    ap.add_argument("--out", default="data/inputs/ura_private.csv", help="Output file")
     ap.add_argument("--merge", action="store_true", help="Merge with existing --out file")
     ap.add_argument(
         "--source_quality",

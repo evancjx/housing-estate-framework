@@ -17,7 +17,7 @@ def test_min_expected_acute_guard_hard_fails_below_threshold():
     ]
 
     with pytest.raises(SystemExit) as exc:
-        ingest_moh_hospitals.require_min_acute(rows, "data/hospitals.csv")
+        ingest_moh_hospitals.require_min_acute(rows, "data/inputs/hospitals.csv")
 
     assert "only 7 acute public hospitals resolved/geocoded" in str(exc.value)
-    assert "refusing to write data/hospitals.csv" in str(exc.value)
+    assert "refusing to write data/inputs/hospitals.csv" in str(exc.value)

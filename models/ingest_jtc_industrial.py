@@ -13,7 +13,7 @@ PROVENANCE: PARTLY_MEASURED.
   Promotion to MEASURED would require the URA Master Plan B1/B2/B3 zoning
   GeoJSON — which is not directly downloadable from data.gov.sg.
 
-OUTPUT (data/jtc_industrial.csv):
+OUTPUT (data/inputs/jtc_industrial.csv):
   estate, nearest_industrial_m, area_share_800m, area_share_1500m,
          area_share_3km, intensity_tag
 
@@ -36,8 +36,8 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_jtc_industrial.py \\
-      --estates data/estates.csv \\
-      --out data/jtc_industrial.csv
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/jtc_industrial.csv
 """
 import argparse
 import math

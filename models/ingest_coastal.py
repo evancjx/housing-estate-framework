@@ -16,7 +16,7 @@ PROVENANCE: PARTLY_MEASURED.
   Canal, Stamford Canal). Minor concrete drains are excluded — they do
   not constitute meaningful blue amenity.
 
-OUTPUT (data/coastal.csv):
+OUTPUT (data/inputs/coastal.csv):
   estate, nearest_coast_m, nearest_reservoir_m, nearest_waterway_m,
          has_blue_within_800m, blue_type
 
@@ -39,8 +39,8 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_coastal.py \\
-      --estates data/estates.csv \\
-      --out data/coastal.csv
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/coastal.csv
 """
 import argparse
 import math

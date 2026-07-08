@@ -3,10 +3,10 @@
 Geocode private condominium projects with OneMap.
 
 Reads:
-  data/ura_private.csv
+  data/inputs/ura_private.csv
 
 Writes:
-  data/private_project_locations.csv
+  data/outputs/private_project_locations.csv
 
 Run locally with network access:
   export ONEMAP_TOKEN="..."
@@ -312,8 +312,8 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Geocode private condo projects with OneMap")
-    parser.add_argument("--private", default=str(ROOT / "data/ura_private.csv"), help="URA private transaction CSV")
-    parser.add_argument("--out", default=str(ROOT / "data/private_project_locations.csv"), help="Output geocode CSV")
+    parser.add_argument("--private", default=str(ROOT / "data/inputs/ura_private.csv"), help="URA private transaction CSV")
+    parser.add_argument("--out", default=str(ROOT / "data/outputs/private_project_locations.csv"), help="Output geocode CSV")
     parser.add_argument("--token", help="OneMap token; defaults to ONEMAP_TOKEN")
     parser.add_argument("--resume", action="store_true", default=True, help="Reuse existing non-empty geocode rows")
     parser.add_argument("--no-resume", dest="resume", action="store_false", help="Requery all project rows")

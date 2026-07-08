@@ -4,8 +4,8 @@ Generate per-district private property comparison pages (trend-focused).
 Scope: condo/apartment ONLY - landed property types (*House) are excluded.
 
 Reads:
-  data/ura_private.csv - canonical URA private transactions (2021+; owns 2021-2026)
-  data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv
+  data/inputs/ura_private.csv - canonical URA private transactions (2021+; owns 2021-2026)
+  data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv
                        - EdgeProp scrape; ONLY 2019-2020 rows used (condo/apartment backfill)
 
 Writes:
@@ -45,8 +45,8 @@ DISTRICT_NAMES = {
     "18": "Tampines / Pasir Ris",
     "27": "Yishun / Sembawang",
 }
-DEFAULT_PRIVATE = ROOT / "data/ura_private.csv"
-DEFAULT_EDGEPROP = ROOT / "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
+DEFAULT_PRIVATE = ROOT / "data/inputs/ura_private.csv"
+DEFAULT_EDGEPROP = ROOT / "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
 
 
 def normalise_district(value) -> str:

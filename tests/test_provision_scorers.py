@@ -7,7 +7,7 @@ import numpy as np
 import provision_model as p
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(HERE, "data")
+DATA = os.path.join(HERE, "data", "inputs")
 
 
 def test_jtc_missing_returns_nan():

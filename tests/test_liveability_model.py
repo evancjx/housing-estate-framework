@@ -9,10 +9,10 @@ import provision_model
 def test_x_archetype_emits_nr(tmp_path, data_dir):
     out = tmp_path / "lv.csv"
     liveability_model.run(
-        scores_path=os.path.join(data_dir, "provision_scores.csv"),
-        pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+        scores_path=os.path.join(data_dir, "outputs", "provision_scores.csv"),
+        pipeline_path=os.path.join(data_dir, "inputs", "pipeline_data.json"),
         out_path=str(out),
-        archetypes_path=os.path.join(data_dir, "archetype_assignments.csv"),
+        archetypes_path=os.path.join(data_dir, "inputs", "archetype_assignments.csv"),
     )
     df = pd.read_csv(out)
     ca = df[df["estate"] == "CENTRAL AREA"]
@@ -81,8 +81,8 @@ def test_missing_archetypes_path_fails_loudly(tmp_path, data_dir):
     # A supplied-but-missing path must fail loudly, not silently disable X-archetype gating.
     with pytest.raises(SystemExit):
         liveability_model.run(
-            scores_path=os.path.join(data_dir, "provision_scores.csv"),
-            pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+            scores_path=os.path.join(data_dir, "outputs", "provision_scores.csv"),
+            pipeline_path=os.path.join(data_dir, "inputs", "pipeline_data.json"),
             out_path=str(tmp_path / "x.csv"),
             archetypes_path="/nonexistent/arch.csv",
         )
@@ -91,8 +91,8 @@ def test_missing_archetypes_path_fails_loudly(tmp_path, data_dir):
 def test_missing_bca_path_fails_loudly(tmp_path, data_dir):
     with pytest.raises(SystemExit):
         liveability_model.run(
-            scores_path=os.path.join(data_dir, "provision_scores.csv"),
-            pipeline_path=os.path.join(data_dir, "pipeline_data.json"),
+            scores_path=os.path.join(data_dir, "outputs", "provision_scores.csv"),
+            pipeline_path=os.path.join(data_dir, "inputs", "pipeline_data.json"),
             out_path=str(tmp_path / "x.csv"),
             bca_path="/nonexistent/bca.csv",
         )

@@ -1,7 +1,7 @@
 # SG-Estate-Framework — Data Flow, Criteria & Conditions
 
 A map of how the Singapore housing-estate scoring pipeline turns raw open data into the
-headline `data/master_output.csv`. Two load-bearing conceptual pillars — **Provision**
+headline `data/outputs/master_output.csv`. Two load-bearing conceptual pillars — **Provision**
 (supply-side, objective, comparable) and **Liveability/Value** (demand-side, person-relative,
 non-comparable by design). The split is structural: a single number cannot be both
 objectively-comparable AND person-relevant.

@@ -93,7 +93,7 @@ def test_missing_required_input_fails_loudly(inputs):
 def test_archetype_coverage_complete():
     import os
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data = os.path.join(here, "data")
+    data = os.path.join(here, "data", "inputs")
     est = pd.read_csv(os.path.join(data, "estates.csv"))
     arch = pd.read_csv(os.path.join(data, "archetype_assignments.csv"))
     est_names = set(est["estate"].str.strip().str.upper())

@@ -9,20 +9,20 @@ PROVENANCE: PARTLY_MEASURED.
     samples (12 monthly readings via data.gov.sg).
   - canopy_cover_pct / ndvi_proxy are APPROXIMATED: the NParks full
     tree-census layer is gated, and OSM landuse=forest polygons are sparse
-    over Singapore HDB estates. We use the existing data/parks.csv layer
+    over Singapore HDB estates. We use the existing data/inputs/parks.csv layer
     as a green-area proxy: % of 1km circle around estate centroid that
     falls within 250m of any park point. This systematically under-counts
     street-tree canopy (which NParks does not publish), so the figure is a
     relative comparator only, not an absolute %.
 
-OUTPUT (data/tree_canopy.csv):
+OUTPUT (data/inputs/tree_canopy.csv):
   estate, ndvi_proxy, canopy_cover_pct, mss_station,
          annual_mean_temp_c, uhi_delta_c
 
 DATA SOURCES:
   - MSS: api.data.gov.sg/v1/environment/air-temperature?date=YYYY-MM-DD
     (15 stations; we sample 12 monthly noon readings and average).
-  - Parks: data/parks.csv (already ingested NParks layer).
+  - Parks: data/inputs/parks.csv (already ingested NParks layer).
 
 REFERENCE STATION: Changi-area S24 (Upper Changi Road North) — coastal,
   typically the coolest. uhi_delta_c = estate_mean - changi_mean.
@@ -36,9 +36,9 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_tree_canopy.py \\
-      --estates data/estates.csv \\
-      --parks data/parks.csv \\
-      --out data/tree_canopy.csv
+      --estates data/inputs/estates.csv \\
+      --parks data/inputs/parks.csv \\
+      --out data/inputs/tree_canopy.csv
 """
 import argparse
 import json

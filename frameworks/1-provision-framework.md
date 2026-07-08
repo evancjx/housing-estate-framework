@@ -86,7 +86,7 @@ cleanliness, lighting, lift reliability, estate maintenance responsiveness. **Th
 social mix** — it measures observable physical upkeep, not resident demographics. PARTLY_MEASURED
 because TCMR publication cadence is annual and band changes lag reality by up to 12 months.
 
-**`hawker` (PARTLY_MEASURED, w=0.04):** The canonical pipeline uses `data/hawker_v2.csv`, generated
+**`hawker` (PARTLY_MEASURED, w=0.04):** The canonical pipeline uses `data/inputs/hawker_v2.csv`, generated
 from NEA hawker-centre points plus embedded stall-count overrides. It measures access, capacity and
 redundancy, not cultural fame; older `judged_inputs.csv` hawker values are fallback-only.
 
@@ -168,7 +168,7 @@ persona in Doc 2). S3/S5/S7/S9=1 → no cap.
 
 ## 5. Provision pilot scores (8 estates — illustrative, analyst judgement, NOT GIS)
 
-> **Note:** §5 numbers predate the 20-component re-weight; regenerate from `data/provision_scores.csv` after a full pipeline run with the v2.0 weights.
+> **Note:** §5 numbers predate the 20-component re-weight; regenerate from `data/outputs/provision_scores.csv` after a full pipeline run with the v2.0 weights.
 
 | Estate | Archetype | Provision band | (pilot decimal — noise ±0.3) |
 |--------|:--:|:--:|:--:|

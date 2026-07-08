@@ -8,12 +8,12 @@ diagnostics at the project coordinate level when reviewed OneMap geocodes are
 available.
 
 Reads:
-  data/private_project_locations.csv
-  data/schools.csv
-  data/school_selectivity.csv
+  data/outputs/private_project_locations.csv
+  data/inputs/schools.csv
+  data/inputs/school_selectivity.csv
 
 Writes:
-  data/private_project_school_metrics.csv
+  data/outputs/private_project_school_metrics.csv
 """
 
 from __future__ import annotations
@@ -30,10 +30,10 @@ import pandas as pd
 
 ROOT = Path(__file__).parent.parent
 
-DEFAULT_LOCATIONS = ROOT / "data/private_project_locations.csv"
-DEFAULT_SCHOOLS = ROOT / "data/schools.csv"
-DEFAULT_SELECTIVITY = ROOT / "data/school_selectivity.csv"
-DEFAULT_OUT = ROOT / "data/private_project_school_metrics.csv"
+DEFAULT_LOCATIONS = ROOT / "data/outputs/private_project_locations.csv"
+DEFAULT_SCHOOLS = ROOT / "data/inputs/schools.csv"
+DEFAULT_SELECTIVITY = ROOT / "data/inputs/school_selectivity.csv"
+DEFAULT_OUT = ROOT / "data/outputs/private_project_school_metrics.csv"
 DEFAULT_ELIGIBLE_MATCH_STATUSES = {"matched"}
 
 

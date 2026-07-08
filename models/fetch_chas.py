@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 Fetch CHAS clinics — tries data.gov.sg first, falls back to OneMap Search.
-Writes SG-Estate-Framework/data/chas.csv  (lat, lon, name)
+Writes SG-Estate-Framework/data/inputs/chas.csv  (lat, lon, name)
 """
 import csv, html, json, os, re, sys, time, urllib.request, urllib.parse, urllib.error
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "inputs")
 OUT = os.path.join(DATA_DIR, "chas.csv")
 ONEMAP_SEARCH = "https://www.onemap.gov.sg/api/common/elastic/search"
 POLL_BASE = "https://api-open.data.gov.sg/v1/public/api/datasets/{}/poll-download"
@@ -224,7 +224,7 @@ def main():
         w.writerows(rows)
 
     print(f"\nDone — {len(rows)} clinics written to {OUT}")
-    print("Re-run provision_model.py adding:  --clinics ../data/chas.csv")
+    print("Re-run provision_model.py adding:  --clinics ../data/inputs/chas.csv")
 
 if __name__ == "__main__":
     main()

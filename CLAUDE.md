@@ -29,42 +29,43 @@ all assume the split.
 
 ## Pipeline architecture
 
-The Python models in `models/` form a directed pipeline. Outputs land in `data/`. Run order matters:
+The Python models in `models/` form a directed pipeline. Curated/refreshed layers live in
+`data/inputs/`, model results in `data/outputs/`. Run order matters:
 
 ```
 # --- SHARED CONFIG (imported libraries, not pipeline stages) ---
 # framework_config.py       → PROVISION_WEIGHTS×20, PROVENANCE, BAND_EDGES, PERSONA_DELTAS (see invariants)
 # aliases.py                → PIPELINE_NAME_ALIAS, ESTATE_TOWN_ALIAS — single-sourced; do not copy locally
 
-# --- BASE LAYER INGESTERS (NETWORK required; each builds a data/* file for provision_model.py) ---
-data_ingest.py               → data/{parks,markets,schools,polyclinics,hdb_resale,...}.csv  (data.gov.sg)
-fetch_chas.py                → data/chas.csv                        (CHAS clinics via OneMap fallback)
-onemap_geocode_mrt.py        → data/mrt_layer.csv                   (RUN LOCALLY; needs OneMap token)
+# --- BASE LAYER INGESTERS (NETWORK required; each builds a data/inputs/* file for provision_model.py) ---
+data_ingest.py               → data/inputs/{parks,markets,schools,polyclinics,hdb_resale,...}.csv  (data.gov.sg)
+fetch_chas.py                → data/inputs/chas.csv                        (CHAS clinics via OneMap fallback)
+onemap_geocode_mrt.py        → data/inputs/mrt_layer.csv                   (RUN LOCALLY; needs OneMap token)
 
-# WIRED — output committed to data/ and consumed by the canonical pipeline:
-ingest_jtc_industrial.py     → data/jtc_industrial.csv              (--jtc_industrial)
-ingest_nea_air.py            → data/air_quality.csv                 (--air_quality)
-ingest_tcmr.py               → data/town_council_kpi.json           (--tcmr; stewardship component)
-ingest_tree_canopy.py        → data/tree_canopy.csv                 (--tree_canopy; env)
-ingest_hdb_density.py        → data/hdb_density.csv                 (--hdb_density; dens)
-ingest_hawker_v2.py          → data/hawker_v2.csv                   (--hawker_v2; hawker PARTLY_MEASURED)
-ingest_coastal.py            → data/coastal.csv                     (--coastal; green sub-metric)
-ingest_bca_permits.py        → data/bca_permits.csv                 (--bca; D-multiplier severity)
+# WIRED — output committed to data/inputs/ and consumed by the canonical pipeline:
+ingest_jtc_industrial.py     → data/inputs/jtc_industrial.csv              (--jtc_industrial)
+ingest_nea_air.py            → data/inputs/air_quality.csv                 (--air_quality)
+ingest_tcmr.py               → data/inputs/town_council_kpi.json           (--tcmr; stewardship component)
+ingest_tree_canopy.py        → data/inputs/tree_canopy.csv                 (--tree_canopy; env)
+ingest_hdb_density.py        → data/inputs/hdb_density.csv                 (--hdb_density; dens)
+ingest_hawker_v2.py          → data/inputs/hawker_v2.csv                   (--hawker_v2; hawker PARTLY_MEASURED)
+ingest_coastal.py            → data/inputs/coastal.csv                     (--coastal; green sub-metric)
+ingest_bca_permits.py        → data/inputs/bca_permits.csv                 (--bca; D-multiplier severity)
 ingest_hdb_upgrading.py  ↘
-ingest_private_pipeline.py   → data/pipeline_data.json              (momentum S7 + liveability T5)
+ingest_private_pipeline.py   → data/inputs/pipeline_data.json              (momentum S7 + liveability T5)
 
 # STUBS — zero-filled, explicitly deferred, not consumed by any model:
 # ingest_ev_chargers.py        (EV coverage — fetcher not yet implemented)
 # ingest_pedestrian_paths.py   (walking/cycling — fetcher not yet implemented)
 
 # --- SCORING PIPELINE ---
-momentum_model.py            → data/pipeline_data.json → data/judged_inputs_updated.csv  (S7 score)
-provision_model.py           → all geospatial layers + data/judged_inputs.csv → data/provision_scores.csv
-liveability_model.py         → data/provision_scores.csv + data/pipeline_data.json → data/liveability_matrix.csv
-value_model.py               → data/provision_scores.csv + data/hdb_resale.csv → data/value_output.csv
-lease_risk_model.py          → data/hdb_resale.csv → data/lease_risk.csv           (standalone, joined later)
-employment_model.py          → (embedded station data) → data/employment_scores_{T0,T5,T15}.csv
-build_master.py              → all above → data/master_output.csv                  (headline deliverable)
+momentum_model.py            → data/inputs/pipeline_data.json → data/outputs/judged_inputs_updated.csv  (S7 score)
+provision_model.py           → all geospatial layers + data/inputs/judged_inputs.csv → data/outputs/provision_scores.csv
+liveability_model.py         → data/outputs/provision_scores.csv + data/inputs/pipeline_data.json → data/outputs/liveability_matrix.csv
+value_model.py               → data/outputs/provision_scores.csv + data/inputs/hdb_resale.csv → data/outputs/value_output.csv
+lease_risk_model.py          → data/inputs/hdb_resale.csv → data/outputs/lease_risk.csv           (standalone, joined later)
+employment_model.py          → (embedded station data) → data/outputs/employment_scores_{T0,T5,T15}.csv
+build_master.py              → all above → data/outputs/master_output.csv                  (headline deliverable)
 ```
 
 Each model file ends with an **INPUT CONTRACT** block in its docstring — the authoritative spec for
@@ -114,44 +115,44 @@ pip install pandas numpy statsmodels shapely --break-system-packages
 
 # End-to-end run against the real data already checked in
 python models/provision_model.py \
-    --estates data/estates.csv \
-    --mrt data/mrt_layer.csv --bus data/bus_routes.csv \
-    --clinics data/chas.csv --polyclinics data/polyclinics.csv \
-    --schools data/schools.csv --parks data/parks.csv \
-    --markets data/markets.csv --supermarkets data/supermarkets.csv \
-    --childcare data/childcare.csv --community data/community.csv \
-    --sport data/sport.csv --flood data/flood_risk.csv \
-    --noise data/expressways.csv --air_noise data/air_noise_corridors.csv \
-    --eldercare data/eldercare.csv \
-    --covered_linkway data/covered_linkway.csv \
-    --jtc_industrial data/jtc_industrial.csv --air_quality data/air_quality.csv \
-    --tree_canopy data/tree_canopy.csv --hdb_density data/hdb_density.csv \
-    --hawker_v2 data/hawker_v2.csv --coastal data/coastal.csv \
-    --tcmr data/town_council_kpi.json \
-    --judged data/judged_inputs.csv \
-    --out data/provision_scores.csv
+    --estates data/inputs/estates.csv \
+    --mrt data/inputs/mrt_layer.csv --bus data/inputs/bus_routes.csv \
+    --clinics data/inputs/chas.csv --polyclinics data/inputs/polyclinics.csv \
+    --schools data/inputs/schools.csv --parks data/inputs/parks.csv \
+    --markets data/inputs/markets.csv --supermarkets data/inputs/supermarkets.csv \
+    --childcare data/inputs/childcare.csv --community data/inputs/community.csv \
+    --sport data/inputs/sport.csv --flood data/inputs/flood_risk.csv \
+    --noise data/inputs/expressways.csv --air_noise data/inputs/air_noise_corridors.csv \
+    --eldercare data/inputs/eldercare.csv \
+    --covered_linkway data/inputs/covered_linkway.csv \
+    --jtc_industrial data/inputs/jtc_industrial.csv --air_quality data/inputs/air_quality.csv \
+    --tree_canopy data/inputs/tree_canopy.csv --hdb_density data/inputs/hdb_density.csv \
+    --hawker_v2 data/inputs/hawker_v2.csv --coastal data/inputs/coastal.csv \
+    --tcmr data/inputs/town_council_kpi.json \
+    --judged data/inputs/judged_inputs.csv \
+    --out data/outputs/provision_scores.csv
 # eldercare, air_noise, jtc_industrial, air_quality, tree_canopy, hdb_density, hawker_v2,
 # coastal, and tcmr (stewardship) are all wired into the
 # canonical run. This command is kept in sync with the `pipeline` target in the Makefile — if you add
 # a scoring flag, update BOTH. Supplying a missing file now fails loudly.
 
 python models/liveability_model.py \
-    --scores data/provision_scores.csv \
-    --pipeline data/pipeline_data.json \
-    --archetypes data/archetype_assignments.csv \
-    --bca data/bca_permits.csv \
-    --out data/liveability_matrix.csv
+    --scores data/outputs/provision_scores.csv \
+    --pipeline data/inputs/pipeline_data.json \
+    --archetypes data/inputs/archetype_assignments.csv \
+    --bca data/inputs/bca_permits.csv \
+    --out data/outputs/liveability_matrix.csv
 
 python models/value_model.py \
-    --scores data/provision_scores.csv \
-    --hdb data/hdb_resale.csv \
-    --out data/value_output.csv
+    --scores data/outputs/provision_scores.csv \
+    --hdb data/inputs/hdb_resale.csv \
+    --out data/outputs/value_output.csv
 
 # Refresh the momentum (S7) component from pipeline_data.json, then re-run provision
 python models/momentum_model.py \
-    --pipeline data/pipeline_data.json \
-    --judged data/judged_inputs.csv \
-    --out data/judged_inputs_updated.csv
+    --pipeline data/inputs/pipeline_data.json \
+    --judged data/inputs/judged_inputs.csv \
+    --out data/outputs/judged_inputs_updated.csv
 
 # Consolidate all model outputs into master_output.csv
 python3 models/build_master.py
@@ -164,7 +165,7 @@ Dev deps: `pip install -r requirements-dev.txt`.
 
 ```bash
 make smoke                       # full suite: python3 -m pytest -q (the reproducibility + correctness gate)
-make master                      # rebuild data/master_output.csv from current model outputs
+make master                      # rebuild data/outputs/master_output.csv from current model outputs
 make pipeline                    # regenerate everything from real data, then the master
 
 pytest -q                        # same as `make smoke`
@@ -184,13 +185,19 @@ against the committed versions.
 
 ## Data conventions
 
-- `data/` holds canonical real-data inputs AND outputs from the most recent committed run. The CSVs
-  are intentionally version-controlled so anyone can reproduce the headline results without re-running.
+- `data/` is split four ways, and every file is version-controlled so anyone can reproduce the
+  headline results without re-running:
+  - `data/inputs/` — curated + ingester-refreshed layers the models consume (incl. `ura_private.csv`,
+    the cleaned URA transaction layer assembled from `data/raw/ura/`).
+  - `data/outputs/` — results from the most recent committed model run.
+  - `data/raw/` — scraper artifacts: `raw/ura/` (per-district URA PMI dumps) and `raw/edgeprop/`
+    (not-clean EdgeProp scrape dumps + project lists consumed by the HTML generators).
+  - `data/_archive/` — superseded one-off experiment outputs kept for reference; nothing reads them.
 - `_demo-files/` is synthetic data used only to smoke-test the scripts. Do not treat it as truthful.
-- `data/pipeline_data.json` is the curated list of announced infrastructure additions (MRT, schools,
+- `data/inputs/pipeline_data.json` is the curated list of announced infrastructure additions (MRT, schools,
   polyclinics, etc.) with significance/certainty/year. It is the source of truth for both momentum
   (S7) and liveability T5/T15 horizons.
-- CSV outputs use UPPERCASE estate names matching `data/estates.csv`. Joins assume that casing.
+- CSV outputs use UPPERCASE estate names matching `data/inputs/estates.csv`. Joins assume that casing.
 
 ## When you change the framework
 
@@ -204,7 +211,7 @@ The framework documents are not stale documentation; they are the spec.
 ## Artifacts & ancillary files
 
 - **[comparison_table.html](comparison_table.html)** — rendered cross-model comparison table (estates × Provision / Liveability / Value / Employment / Risk / Life-Path). The headline visual deliverable. ⚠ Estate/component counts lag after a pipeline regeneration — re-run `build_master.py` when counts change.
-- **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → 4 Models → `data/master_output.csv`). Same regeneration caveat.
+- **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → 4 Models → `data/outputs/master_output.csv`). Same regeneration caveat.
 - **[scrapers/](scrapers/README.md)** — URA private-transaction scrapers (Playwright primary, API fallback). Downloads apartment/condo, landed, and strata-landed PMI data by postal district for `value_model.py --private`.
 - **[factor_audit_reports/](factor_audit_reports/)** — output from the `factor-audit` skill; proposed new framework components with evidence citations. Not auto-applied to any model.
 - **[docs/superpowers/plans/](docs/superpowers/plans/)** — internal planning docs from development sessions. Not framework content.

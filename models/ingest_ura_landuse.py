@@ -5,7 +5,7 @@ URA Master Plan 2019 mixed-use ingester
 Fetches URA Master Plan 2019 Land Use polygons from data.gov.sg dataset
 d_90d86daa5bfaa371668b84fa5f01424f via the poll-download API and computes
 the commercial/mixed-use share inside a 2 km buffer around each estate
-centroid in data/estates.csv.
+centroid in data/inputs/estates.csv.
 
 PROVENANCE: MEASURED.
   Land-use polygons are from the URA Master Plan 2019 public GeoJSON layer.
@@ -22,7 +22,7 @@ LAND-USE ATTRIBUTE ASSUMPTION:
 MATCHED LAND-USE CATEGORY STRINGS:
   COMMERCIAL, WHITE, BUSINESS PARK
 
-OUTPUT (data/mixed_use.csv):
+OUTPUT (data/inputs/mixed_use.csv):
   estate, mixed_use_share, commercial_share, white_share,
          business_park_share, buffer_km
 
@@ -34,8 +34,8 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_ura_landuse.py \\
-      --estates data/estates.csv \\
-      --out data/mixed_use.csv
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/mixed_use.csv
 """
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-downlo
 _UA = "sg-estate-ingest/1.0 (ura-landuse)"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(SCRIPT_DIR, "..", "data")
+DATA_DIR = os.path.join(SCRIPT_DIR, "..", "data", "inputs")
 DEFAULT_ESTATES = os.path.join(DATA_DIR, "estates.csv")
 DEFAULT_OUT = os.path.join(DATA_DIR, "mixed_use.csv")
 

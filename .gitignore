@@ -16,8 +16,14 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Large raw downloads (reproducible via pipeline)
-data/bus_services.json
-data/bus_stops_raw.json
+data/inputs/bus_services.json
+data/inputs/bus_stops_raw.json
+
+# Scraper scratch: attempt/error logs and probe dumps must never be committed
+*_attempts.csv
+*_retry_errors.csv
+data/raw/edgeprop/probe/
+data/**/*probe*/
 
 # Snapshot scratch (after_* are ephemeral; before/ is committed baseline)
 tests/snapshots/after_*/

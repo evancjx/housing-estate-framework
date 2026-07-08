@@ -26,8 +26,8 @@ STEP 4 — upload the output  mrt_layer.csv  back to the chat.
 import csv, json, os, sys, time, urllib.request, urllib.parse
 
 TOKEN = os.environ.get("ONEMAP_TOKEN", "PASTE_FRESH_TOKEN_HERE")
-INPUT  = os.path.join(os.path.dirname(__file__), "..", "data", "mrt_layer_names.csv")
-OUTPUT = os.path.join(os.path.dirname(__file__), "..", "data", "mrt_layer.csv")
+INPUT  = os.path.join(os.path.dirname(__file__), "..", "data", "inputs", "mrt_layer_names.csv")
+OUTPUT = os.path.join(os.path.dirname(__file__), "..", "data", "inputs", "mrt_layer.csv")
 SEARCH_URL = "https://www.onemap.gov.sg/api/common/elastic/search"
 
 def geocode(station_name, token):

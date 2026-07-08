@@ -17,13 +17,13 @@ PROVENANCE: PARTLY_MEASURED.
   filter pattern from ingest_hdb_upgrading.py:merge_into_pipeline).
 
 INPUT CONTRACT:
-  --pipeline  data/pipeline_data.json (existing pipeline file)
+  --pipeline  data/inputs/pipeline_data.json (existing pipeline file)
   --out       output JSON path (can be same as --pipeline)
 
 RUN:
   python3 models/ingest_private_pipeline.py \\
-      --pipeline data/pipeline_data.json \\
-      --out data/pipeline_data.json
+      --pipeline data/inputs/pipeline_data.json \\
+      --out data/inputs/pipeline_data.json
 """
 import argparse
 import json

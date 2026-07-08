@@ -25,8 +25,8 @@ Core scoring models (see [CLAUDE.md](CLAUDE.md) for the full pipeline with all i
 - **[liveability_model.py](models/liveability_model.py)** — 4-persona × 3-horizon (T0/T5/T15) liveability matrix + Provision–Liveability Gap.
 - **[value_model.py](models/value_model.py)** — Value = Provision × exp(−price_residual). HDB and private segmented; band-only below n=100.
 - **[momentum_model.py](models/momentum_model.py)** — S7 momentum score from `pipeline_data.json` → updates `judged_inputs.csv`.
-- **[build_master.py](models/build_master.py)** — joins all model outputs → [`data/master_output.csv`](data/master_output.csv) (headline deliverable).
-- **[onemap_geocode_mrt.py](models/onemap_geocode_mrt.py)** — RUN LOCALLY (needs internet + OneMap token). MRT names → `data/mrt_layer.csv`.
+- **[build_master.py](models/build_master.py)** — joins all model outputs → [`data/outputs/master_output.csv`](data/outputs/master_output.csv) (headline deliverable).
+- **[onemap_geocode_mrt.py](models/onemap_geocode_mrt.py)** — RUN LOCALLY (needs internet + OneMap token). MRT names → `data/inputs/mrt_layer.csv`.
 - **12 `ingest_*.py` builders** — one per geospatial layer (jtc_industrial, air_quality, stewardship, tree_canopy, density, hawker v2, coastal, etc.). The canonical run now consumes derived `tree_canopy`, `hdb_density`, `hawker_v2`, `coastal`, and `bca_permits` outputs (see [CLAUDE.md](CLAUDE.md) for wiring status).
 
 ### Pipeline order
@@ -40,22 +40,28 @@ See [CLAUDE.md](CLAUDE.md) or the [Makefile](Makefile) for the full per-flag com
 
 ## 📁 data/  (real data — inputs and committed model outputs)
 
+Organised into four subdirectories:
+- **`data/inputs/`** — curated + ingester-refreshed layers the models consume (incl. `ura_private.csv`, the cleaned URA transaction layer).
+- **`data/outputs/`** — model results from the most recent committed run.
+- **`data/raw/`** — scraper artifacts: `raw/ura/` (per-district URA PMI dumps) and `raw/edgeprop/` (not-clean EdgeProp scrape dumps + project lists).
+- **`data/_archive/`** — superseded one-off experiment outputs kept for reference; nothing reads them.
+
 Canonical outputs from the most recent committed pipeline run (reproducible via `make pipeline`):
-- **[master_output.csv](data/master_output.csv)** — headline deliverable; estates × Provision/Liveability/Value/Employment/Risk/Life-Path joined across all models.
+- **[master_output.csv](data/outputs/master_output.csv)** — headline deliverable; estates × Provision/Liveability/Value/Employment/Risk/Life-Path joined across all models.
 - **provision_scores.csv**, **liveability_matrix.csv**, **value_output.csv** — intermediate model outputs.
 - **lease_risk.csv**, **employment_scores_{T0,T5,T15}.csv** — supporting model outputs.
 
-Legacy/comparison outputs kept for reference: `value_real.csv`, `scores_real.csv`, `value_coastal.csv`, `scores_coastal.csv`, `provision_demo.csv`.
+Superseded one-off experiment outputs live in `data/_archive/`.
 
 ## 📁 _demo-files/  (synthetic — safe to ignore/delete)
 Throwaway synthetic data used only to verify the scripts run end-to-end. NOT real. Kept only so the demo runs in the transcript are reproducible.
 
 ## 📊 HTML deliverables
 - **[comparison_table.html](comparison_table.html)** — interactive cross-model comparison table (estates × Provision/Liveability/Value/Employment/Risk). The headline visual. ⚠ Component/estate counts may lag pipeline regeneration — re-run `python models/gen_comparison_html.py` when counts change.
-- **[mrt_comparison_table.html](mrt_comparison_table.html)** — interactive MRT/LRT station table with nearest-estate model context. Re-run `python models/gen_mrt_comparison_html.py` after `data/mrt_layer.csv` or estate outputs change.
-- **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project table with MRT station and postal-district filters. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/private_project_locations.csv`, then `make private-project-table`.
-- **`data/school_selectivity.csv` + `make private-project-school-metrics`** — seed school-demand/selectivity proxies and build private-project diagnostics such as primary schools within 1km and best-ranked school within level-specific radii. These are private-buyer diagnostics, not official MOE rankings.
-- **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → Models → `data/master_output.csv`). Same caveat.
+- **[mrt_comparison_table.html](mrt_comparison_table.html)** — interactive MRT/LRT station table with nearest-estate model context. Re-run `python models/gen_mrt_comparison_html.py` after `data/inputs/mrt_layer.csv` or estate outputs change.
+- **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project table with MRT station and postal-district filters. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/outputs/private_project_locations.csv`, then `make private-project-table`.
+- **`data/inputs/school_selectivity.csv` + `make private-project-school-metrics`** — seed school-demand/selectivity proxies and build private-project diagnostics such as primary schools within 1km and best-ranked school within level-specific radii. These are private-buyer diagnostics, not official MOE rankings.
+- **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → Models → `data/outputs/master_output.csv`). Same caveat.
 
 ## 🔧 Other files & directories
 - **[Makefile](Makefile)** — `make smoke` (test gate), `make pipeline` (full regeneration), `make master` (rebuild master only). See [CLAUDE.md](CLAUDE.md) for details.
@@ -74,11 +80,11 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 6. **Re-verify all dated facts** (in the transcript) before any scoring run — MRT dates, polyclinic openings, etc. decay.
 
 ## Data file note
-`data/value_private.csv` is a stale pre-fix artifact superseded by `data/value_output_private.csv` (the canonical de-circularised private Value output) and is NOT consumed by the pipeline.
+`data/_archive/value_private.csv` is a stale pre-fix artifact superseded by `data/outputs/value_output_private.csv` (the canonical de-circularised private Value output) and is NOT consumed by the pipeline.
 
-`data/private_project_locations.csv`, when present, is the reviewed OneMap geocode cache for private project coordinates. Without it, `private_project_comparison_table.html` falls back to estate/planning-area centroids and marks those rows as centroid fallback.
+`data/outputs/private_project_locations.csv`, when present, is the reviewed OneMap geocode cache for private project coordinates. Without it, `private_project_comparison_table.html` falls back to estate/planning-area centroids and marks those rows as centroid fallback.
 
-`data/school_selectivity.csv` is a sourced seed of unofficial ranking proxies: primary P1 demand, secondary PSLE AL cut-off, and JC/JAE cut-off. It is intentionally not blended into Provision until the source treatment is reviewed.
+`data/inputs/school_selectivity.csv` is a sourced seed of unofficial ranking proxies: primary P1 demand, secondary PSLE AL cut-off, and JC/JAE cut-off. It is intentionally not blended into Provision until the source treatment is reviewed.
 
 ## Next step to make it more data-driven
 Refresh `pipeline_data.json` through the networked ingesters, review the resulting momentum shifts, and add dedicated Value segments for rentals, ECs, and landed resale instead of folding all private resale into one segment.

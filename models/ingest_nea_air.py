@@ -21,18 +21,18 @@ SAMPLING:
   fetched daily means; haze_days_y is scaled from sampled count to
   annual estimate.
 
-OUTPUT (data/air_quality.csv):
+OUTPUT (data/inputs/air_quality.csv):
   estate, region, pm25_annual_mean, no2_annual_mean, haze_days_y,
          road_buffer_correction
 
 ROAD-BUFFER CORRECTION:
   For each estate, count distinct expressway points (vertices from
-  data/expressways.csv) within 100m. If count >= 1, add +0.2 (i.e. 20% PM2.5
+  data/inputs/expressways.csv) within 100m. If count >= 1, add +0.2 (i.e. 20% PM2.5
   penalty). Documented in `score_air_quality` (Task 2.3).
 
 INPUT CONTRACT:
   --estates       CSV with estate, lat, lon (UPPERCASE)
-  --expressways   data/expressways.csv with lat, lon (point series)
+  --expressways   data/inputs/expressways.csv with lat, lon (point series)
   --out           output CSV path
   --cache-dir     (optional) cache fetched daily JSONs
   --sample-days   sampling interval in days (default 14)
@@ -40,9 +40,9 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_nea_air.py \\
-      --estates data/estates.csv \\
-      --expressways data/expressways.csv \\
-      --out data/air_quality.csv
+      --estates data/inputs/estates.csv \\
+      --expressways data/inputs/expressways.csv \\
+      --out data/inputs/air_quality.csv
 """
 import argparse
 import datetime as dt

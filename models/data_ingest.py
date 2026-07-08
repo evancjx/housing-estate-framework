@@ -19,7 +19,7 @@ Outputs written to ../data/:
 
 Layers NOT fetched (require LTA DataMall or OneMap token):
     mrt_layer.csv       use onemap_geocode_mrt.py with ONEMAP_TOKEN
-    bus.csv             requires LTA DataMall API key
+    bus_routes.csv      requires LTA DataMall API key
     chas.csv            CHAS clinic layer requires OneMap token
 
 Column contract for provision_model.py geospatial layers:
@@ -45,7 +45,7 @@ import pandas as pd
 # Paths — resolve relative to this script so it works from any cwd
 # ---------------------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR   = os.path.join(SCRIPT_DIR, "..", "data")
+DATA_DIR   = os.path.join(SCRIPT_DIR, "..", "data", "inputs")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # ---------------------------------------------------------------------------
@@ -740,7 +740,7 @@ def main():
     print("LAYERS REQUIRING MANUAL STEPS:")
     print("  [X] mrt_layer.csv        — run onemap_geocode_mrt.py with ONEMAP_TOKEN")
     print("                             mrt_layer_names.csv (above) provides the name/code list")
-    print("  [X] bus.csv              — requires LTA DataMall API key")
+    print("  [X] bus_routes.csv       — requires LTA DataMall API key")
     print("                             https://datamall.lta.gov.sg/content/datamall/en/request-for-api.html")
     print("  [X] chas.csv             — CHAS clinic layer requires OneMap token")
     print("                             https://www.onemap.gov.sg/apidocs/")
@@ -748,26 +748,26 @@ def main():
     print()
     print("NEXT STEPS:")
     print("  1. Obtain ONEMAP_TOKEN, run onemap_geocode_mrt.py to produce mrt_layer.csv")
-    print("  2. Obtain LTA DataMall key, download bus stops to bus.csv (lat,lon)")
+    print("  2. Obtain LTA DataMall key, download bus stops to bus_routes.csv (lat,lon)")
     print("  3. (Optional) With OneMap token: download CHAS clinics to chas.csv (lat,lon)")
     print("  4. Prepare estates.csv  (estate,lat,lon) and judged_inputs.csv (estate,dens,env,mom)")
     print("  5. Run provision_model.py:")
     print("       python provision_model.py \\")
-    print("           --estates ../data/estates.csv \\")
-    print("           --mrt     ../data/mrt_layer.csv \\")
-    print("           --bus     ../data/bus.csv \\")
-    print("           --clinics ../data/chas.csv \\")
-    print("           --polyclinics ../data/polyclinics.csv \\")
-    print("           --schools ../data/schools.csv \\")
-    print("           --parks   ../data/parks.csv \\")
-    print("           --markets ../data/markets.csv \\")
-    print("           --judged  ../data/judged_inputs.csv \\")
-    print("           --out     ../data/provision_scores.csv")
+    print("           --estates ../data/inputs/estates.csv \\")
+    print("           --mrt     ../data/inputs/mrt_layer.csv \\")
+    print("           --bus     ../data/inputs/bus_routes.csv \\")
+    print("           --clinics ../data/inputs/chas.csv \\")
+    print("           --polyclinics ../data/inputs/polyclinics.csv \\")
+    print("           --schools ../data/inputs/schools.csv \\")
+    print("           --parks   ../data/inputs/parks.csv \\")
+    print("           --markets ../data/inputs/markets.csv \\")
+    print("           --judged  ../data/inputs/judged_inputs.csv \\")
+    print("           --out     ../data/outputs/provision_scores.csv")
     print("  6. Run value_model.py:")
     print("       python value_model.py \\")
-    print("           --scores ../data/provision_scores.csv \\")
-    print("           --hdb    ../data/hdb_resale.csv \\")
-    print("           --out    ../data/value_output.csv")
+    print("           --scores ../data/outputs/provision_scores.csv \\")
+    print("           --hdb    ../data/inputs/hdb_resale.csv \\")
+    print("           --out    ../data/outputs/value_output.csv")
 
     # Return exit code 1 if any FAIL, for CI/scripting use
     failed = [k for k, v in status.items() if v.startswith("FAIL")]

@@ -4,7 +4,7 @@ MOH public-hospital ingester
 ============================
 Fetches Singapore public hospital records from MOH health-facilities data
 on data.gov.sg collection 521 where available, geocodes the retained
-hospital names through OneMap Search, and writes data/hospitals.csv.
+hospital names through OneMap Search, and writes data/inputs/hospitals.csv.
 
 PROVENANCE: PARTLY_MEASURED.
   Hospital names are sourced from MOH/data.gov.sg health-facilities data.
@@ -19,7 +19,7 @@ DATA SOURCE ASSUMPTION:
   public dataset search API for "MOH health facilities" candidates and the
   standard poll-download flow.
 
-OUTPUT (data/hospitals.csv):
+OUTPUT (data/inputs/hospitals.csv):
   name, lat, lon, has_ae, tier
 
   tier in {"acute", "community"}. The acute tier is the public acute-hospital
@@ -28,11 +28,11 @@ OUTPUT (data/hospitals.csv):
   layer this ingester is intended to support.
 
 INPUT CONTRACT:
-  --out        output CSV path (default: data/hospitals.csv)
+  --out        output CSV path (default: data/inputs/hospitals.csv)
   --cache-dir  optional directory for fetched data.gov.sg payload bytes
 
 RUN:
-  python3 models/ingest_moh_hospitals.py --out data/hospitals.csv
+  python3 models/ingest_moh_hospitals.py --out data/inputs/hospitals.csv
 """
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ import urllib.request
 
 import pandas as pd
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "inputs")
 OUT = os.path.join(DATA_DIR, "hospitals.csv")
 
 COLLECTION_ID = "521"

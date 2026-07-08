@@ -200,7 +200,7 @@ if __name__ == "__main__":
                   "emp_band_T15","emp_score_T15","delta_T15"]].to_string(index=False))
 
     # Write outputs — __file__-relative so it works from any cwd (matches build_master/lease_risk).
-    _D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+    _D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "outputs")
     df0.to_csv(os.path.join(_D, "employment_scores_T0.csv"), index=False)
     df5.to_csv(os.path.join(_D, "employment_scores_T5.csv"), index=False)
     df15.to_csv(os.path.join(_D, "employment_scores_T15.csv"), index=False)

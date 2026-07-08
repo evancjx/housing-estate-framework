@@ -25,7 +25,7 @@ from edgeprop_condo_apartment_playwright import (  # noqa: E402
 )
 from playwright.async_api import async_playwright  # noqa: E402
 
-PROBE_DIR = Path("data/edgeprop_playwright_probe")
+PROBE_DIR = Path("data/raw/edgeprop/probe")
 
 
 async def probe(slug: str) -> None:

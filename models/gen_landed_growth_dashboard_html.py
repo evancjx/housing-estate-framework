@@ -3,7 +3,7 @@
 Generate landed_growth_dashboard.html from EdgeProp public landed transactions.
 
 Reads:
-  data/edgeprop_landed_transactions_playwright_not_clean.csv
+  data/raw/edgeprop/edgeprop_landed_transactions_playwright_not_clean.csv
 
 Writes:
   landed_growth_dashboard.html
@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).parent.parent
-DEFAULT_INPUT = ROOT / "data/edgeprop_landed_transactions_playwright_not_clean.csv"
+DEFAULT_INPUT = ROOT / "data/raw/edgeprop/edgeprop_landed_transactions_playwright_not_clean.csv"
 DEFAULT_OUTPUT = ROOT / "landed_growth_dashboard.html"
 
 START_YEAR = 2019

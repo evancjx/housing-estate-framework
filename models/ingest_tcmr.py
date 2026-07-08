@@ -28,7 +28,7 @@ INPUT CONTRACT:
   --out PATH    JSON destination
 
 RUN:
-  python3 models/ingest_tcmr.py --year 2024 --out data/town_council_kpi.json
+  python3 models/ingest_tcmr.py --year 2024 --out data/inputs/town_council_kpi.json
 """
 import argparse
 import json
@@ -41,7 +41,7 @@ from datetime import date
 # Source: MND TCMR FY2023 (published 2024). Bands transcribed from the
 # published summary table; OneService figures not yet available — null.
 # Each TC's `estates` list uses canonical UPPERCASE names matching
-# data/estates.csv. Mapping derived from public constituency/town-council
+# data/inputs/estates.csv. Mapping derived from public constituency/town-council
 # boundary records (TC websites + Parliament constituency lists).
 
 TOWN_COUNCILS = [

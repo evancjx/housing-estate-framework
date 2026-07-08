@@ -239,8 +239,8 @@ def test_generate_real_d17_d27(tmp_path):
     for district, anchor in (("17", "CARISSA PARK CONDOMINIUM"), ("27", "EIGHT COURTYARDS")):
         out_path, n_rows = gen.generate(
             district,
-            ROOT / "data/ura_private.csv",
-            ROOT / "data/edgeprop_condo_apartment_transactions_playwright_not_clean.csv",
+            ROOT / "data/inputs/ura_private.csv",
+            ROOT / "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv",
             tmp_path,
         )
         assert n_rows > 20

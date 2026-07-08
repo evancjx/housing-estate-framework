@@ -44,11 +44,11 @@ scores unless there is a documented reason.
 |---|---|---|
 | Provision component | Universal, objective, supply-side estate condition | `models/provision_model.py`, `models/framework_config.py`, `frameworks/1-provision-framework.md` |
 | Provision sub-metric | Refines an existing component without new top-level weight | `models/provision_model.py`, relevant `models/ingest_*.py`, Provision doc anchors |
-| Liveability profile | Depends on household, persona, anchor location, or tolerance | `models/liveability_model.py`, `frameworks/2-liveability-matrix.md`, `data/life_paths.csv` |
+| Liveability profile | Depends on household, persona, anchor location, or tolerance | `models/liveability_model.py`, `frameworks/2-liveability-matrix.md`, `data/outputs/life_paths.csv` |
 | Buyer intake/filter | Hard constraints before scoring, such as affordability, layout, lease tolerance, school/in-law/care proximity | new profile module, `frameworks/2-liveability-matrix.md`, comparison UI |
 | Value segment | Price, affordability, rental fallback, exit liquidity, or tenure economics | `models/value_model.py`, transaction data, segment-specific output columns |
-| Momentum/future upside | Confirmed or planned public additions | `data/pipeline_data.json`, `models/momentum_model.py`, Liveability T5/T15 boosts |
-| Temporary disruption | Active construction or temporary inconvenience | D multiplier in `models/liveability_model.py`, `data/bca_permits.csv` |
+| Momentum/future upside | Confirmed or planned public additions | `data/inputs/pipeline_data.json`, `models/momentum_model.py`, Liveability T5/T15 boosts |
+| Temporary disruption | Active construction or temporary inconvenience | D multiplier in `models/liveability_model.py`, `data/inputs/bca_permits.csv` |
 | Employment/access | Job-node access or commute opportunity | `models/employment_model.py` |
 | Lease risk | Remaining lease and tenure decay | `models/lease_risk_model.py` |
 | Project/unit diagnostic | Project, block, floor, facing, layout, view, sun, privacy | private-project tooling or separate diagnostics, not estate Provision |
@@ -164,13 +164,13 @@ Recommended route:
 
 Implemented first-slice artifacts:
 
-- `data/buyer_profiles.example.json`
+- `data/inputs/buyer_profiles.example.json`
 - `models/buyer_profile_model.py`
-- `data/buyer_profile_output.csv`
+- `data/outputs/buyer_profile_output.csv`
 - `tests/test_buyer_profile_model.py`
 - multi-profile JSON support for comparing several household scenarios in one
   run
-- `models/private_segment_value_model.py` and `data/private_segment_value.csv`
+- `models/private_segment_value_model.py` and `data/outputs/private_segment_value.csv`
   for separate condo and landed private Value evidence
 - `models/gen_buyer_profile_html.py` and `buyer_profile_table.html` for a
   filterable profile evaluation table

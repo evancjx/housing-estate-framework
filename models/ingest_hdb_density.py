@@ -20,7 +20,7 @@ DATASET:
           commercial, market_hawker, miscellaneous, multistorey_carpark,
           precinct_pavilion, bldg_contract_town, total_dwelling_units, …
 
-OUTPUT (data/hdb_density.csv):
+OUTPUT (data/inputs/hdb_density.csv):
   estate, total_dwelling_units, residents_per_net_hectare,
          units_per_gross_hectare, n_blocks, mean_storey,
          oldest_block_year, newest_block_year
@@ -47,8 +47,8 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_hdb_density.py \\
-      --estates data/estates.csv \\
-      --out data/hdb_density.csv
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/hdb_density.csv
 """
 import argparse
 import csv

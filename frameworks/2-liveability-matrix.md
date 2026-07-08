@@ -24,7 +24,7 @@ against each other. They serve different people, or the same person at different
 ## 1. The matrix: 4 personas × 2 horizons (T0 / T5)
 
 > The model now emits a **third horizon T15** (15-year) on top of this base matrix — see
-> addendum L9.1. The committed `data/liveability_matrix.csv` carries all three (T0/T5/T15).
+> addendum L9.1. The committed `data/outputs/liveability_matrix.csv` carries all three (T0/T5/T15).
 
 For each estate, up to 8 cells. **Reported as BANDS + life-path arrows, not a decimal grid**
 (option 3 — full coverage without false precision; a decimal 8-grid would put ~6 of 8 cells

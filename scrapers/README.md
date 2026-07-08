@@ -26,20 +26,20 @@ playwright install chromium
 python scrapers/ura_pmi_playwright.py \
     --districts 15 16 \
     --year_from 2021 --year_to 2026 \
-    --out_dir data/ura_raw/
+    --out_dir data/raw/ura/
 
 # Ingest into ura_private.csv
 python scrapers/ingest_ura_raw.py \
-    --raw_dir data/ura_raw/ \
-    --out data/ura_private.csv \
+    --raw_dir data/raw/ura/ \
+    --out data/inputs/ura_private.csv \
     --merge
 
 # Re-run value model
 python models/value_model.py \
-    --scores data/provision_scores.csv \
-    --hdb data/hdb_resale.csv \
-    --private data/ura_private.csv \
-    --out data/value_output_private.csv
+    --scores data/outputs/provision_scores.csv \
+    --hdb data/inputs/hdb_resale.csv \
+    --private data/inputs/ura_private.csv \
+    --out data/outputs/value_output_private.csv
 ```
 
 ## Quick start — landed private transactions
@@ -56,7 +56,7 @@ python scrapers/ura_pmi_playwright.py \
     --districts 15 16 \
     --prop_types landed strata_landed \
     --year_from 2021 --year_to 2026 \
-    --out_dir data/ura_raw/
+    --out_dir data/raw/ura/
 ```
 
 Or use the orchestrator shortcut:
@@ -66,7 +66,7 @@ python scrapers/run_download.py \
     --landed \
     --districts 15 16 \
     --year_from 2021 --year_to 2026 \
-    --out_dir data/ura_raw/
+    --out_dir data/raw/ura/
 ```
 
 New landed raw files are written with property-type slugs, for example
@@ -83,12 +83,12 @@ metadata or parses saved/copied transaction text that you are authorised to view
 ```bash
 # Discover public landed project links.
 python scrapers/edgeprop_landed.py discover \
-    --out data/edgeprop_landed_projects.csv
+    --out data/raw/edgeprop/edgeprop_landed_projects.csv
 
 # Fetch public metadata from discovered project pages.
 python scrapers/edgeprop_landed.py details \
-    --input data/edgeprop_landed_projects.csv \
-    --out data/edgeprop_landed_project_details.csv \
+    --input data/raw/edgeprop/edgeprop_landed_projects.csv \
+    --out data/raw/edgeprop/edgeprop_landed_project_details.csv \
     --limit 25
 
 # Parse copied/saved EdgeProp sales-table text into a raw CSV.
@@ -97,12 +97,12 @@ python scrapers/edgeprop_landed.py parse-transactions \
     --project-name "KEMBANGAN ESTATE" \
     --planning-area BEDOK \
     --postal-district 14 \
-    --out data/ura_raw/edgeprop_kembangan.csv
+    --out data/raw/ura/edgeprop_kembangan.csv
 
 # Merge parsed EdgeProp rows into the private transaction input.
 python scrapers/ingest_ura_raw.py \
-    --files data/ura_raw/edgeprop_kembangan.csv \
-    --out data/ura_private.csv \
+    --files data/raw/ura/edgeprop_kembangan.csv \
+    --out data/inputs/ura_private.csv \
     --merge \
     --source_quality not_clean
 ```

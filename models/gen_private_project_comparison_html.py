@@ -3,12 +3,12 @@
 Generate private_project_comparison_table.html from committed URA private data.
 
 Reads:
-  data/ura_private.csv      - URA private residential transactions
-  data/private_project_locations.csv - optional OneMap-geocoded project points
-  data/private_project_school_metrics.csv - optional project school diagnostics
-  data/mrt_layer.csv        - station coordinates, line, operational flag
-  data/estates.csv          - framework estate centroids
-  data/master_output.csv    - estate-level model context
+  data/inputs/ura_private.csv      - URA private residential transactions
+  data/outputs/private_project_locations.csv - optional OneMap-geocoded project points
+  data/outputs/private_project_school_metrics.csv - optional project school diagnostics
+  data/inputs/mrt_layer.csv        - station coordinates, line, operational flag
+  data/inputs/estates.csv          - framework estate centroids
+  data/outputs/master_output.csv    - estate-level model context
 
 Writes:
   private_project_comparison_table.html
@@ -18,7 +18,7 @@ Run:
 
 Notes:
   URA private transaction rows do not include project coordinates. When
-  data/private_project_locations.csv exists, MRT station assignment is computed
+  data/outputs/private_project_locations.csv exists, MRT station assignment is computed
   from that project lat/lon layer. Rows without project coordinates fall back
   to the framework planning-area/estate centroid and are marked as proxy rows.
 """
@@ -37,8 +37,8 @@ from typing import Any
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).parent.parent
-DEFAULT_LOCATION_PATH = ROOT / "data/private_project_locations.csv"
-DEFAULT_SCHOOL_METRICS_PATH = ROOT / "data/private_project_school_metrics.csv"
+DEFAULT_LOCATION_PATH = ROOT / "data/outputs/private_project_locations.csv"
+DEFAULT_SCHOOL_METRICS_PATH = ROOT / "data/outputs/private_project_school_metrics.csv"
 
 CONDO_TYPE_RE = re.compile(r"\b(?:apartment|condominium|executive condominium)\b", re.I)
 SALE_TYPE_LABELS = {
@@ -730,8 +730,8 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
 <div class="help-note">
   <strong>Scope:</strong>
   <span>Includes URA private Apartment, Condominium, and Executive Condominium rows where present; landed rows are excluded.</span>
-  <span>MRT station uses data/private_project_locations.csv when available; otherwise the row is marked as a centroid fallback.</span>
-  <span>School columns use data/private_project_school_metrics.csv when available; primary is checked within 1km, secondary within 2km, and JC within 5km.</span>
+  <span>MRT station uses data/outputs/private_project_locations.csv when available; otherwise the row is marked as a centroid fallback.</span>
+  <span>School columns use data/outputs/private_project_school_metrics.csv when available; primary is checked within 1km, secondary within 2km, and JC within 5km.</span>
   <span>Provision and private value bands are estate-level context, not project-level model scores.</span>
 </div>
 
@@ -1050,9 +1050,9 @@ def generate(
     private = load_private(private_path)
     project_locations = load_project_locations(location_path)
     school_metrics = load_school_metrics(school_metrics_path)
-    estates = pd.read_csv(ROOT / "data/estates.csv")
-    mrt = pd.read_csv(ROOT / "data/mrt_layer.csv")
-    master = pd.read_csv(ROOT / "data/master_output.csv").set_index("estate")
+    estates = pd.read_csv(ROOT / "data/inputs/estates.csv")
+    mrt = pd.read_csv(ROOT / "data/inputs/mrt_layer.csv")
+    master = pd.read_csv(ROOT / "data/outputs/master_output.csv").set_index("estate")
 
     rows = aggregate_projects(private, estates, mrt, master, project_locations, school_metrics)
     latest_month = month_text(private["sale_month_dt"].max())
@@ -1063,7 +1063,7 @@ def generate(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate private condo project comparison HTML")
-    parser.add_argument("--private", default=str(ROOT / "data/ura_private.csv"), help="URA private transaction CSV")
+    parser.add_argument("--private", default=str(ROOT / "data/inputs/ura_private.csv"), help="URA private transaction CSV")
     parser.add_argument(
         "--locations",
         default=str(DEFAULT_LOCATION_PATH),

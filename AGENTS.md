@@ -32,19 +32,19 @@ Framework document status:
 Core model code lives in `models/`, including `provision_model.py`, `liveability_model.py`,
 `value_model.py`, `lease_risk_model.py`, `employment_model.py`, and `build_master.py`.
 Tests live in `tests/`; fixtures and before/after snapshots are under `tests/snapshots/`.
-Inputs and generated outputs are in `data/`, with `data/master_output.csv` as the headline output.
+Inputs and generated outputs are in `data/`, with `data/outputs/master_output.csv` as the headline output.
 URA/private transaction tooling is isolated in `scrapers/`.
 
 The model pipeline is directed and run order matters:
 
 ```text
-momentum_model.py      -> data/pipeline_data.json -> data/judged_inputs_updated.csv
-provision_model.py     -> geospatial layers + judged inputs -> data/provision_scores.csv
-liveability_model.py   -> provision_scores + pipeline_data -> data/liveability_matrix.csv
-value_model.py         -> provision_scores + hdb_resale -> data/value_output.csv
-lease_risk_model.py    -> hdb_resale -> data/lease_risk.csv
-employment_model.py    -> embedded station data -> data/employment_scores_{T0,T5,T15}.csv
-build_master.py        -> all model outputs -> data/master_output.csv
+momentum_model.py      -> data/inputs/pipeline_data.json -> data/outputs/judged_inputs_updated.csv
+provision_model.py     -> geospatial layers + judged inputs -> data/outputs/provision_scores.csv
+liveability_model.py   -> provision_scores + pipeline_data -> data/outputs/liveability_matrix.csv
+value_model.py         -> provision_scores + hdb_resale -> data/outputs/value_output.csv
+lease_risk_model.py    -> hdb_resale -> data/outputs/lease_risk.csv
+employment_model.py    -> embedded station data -> data/outputs/employment_scores_{T0,T5,T15}.csv
+build_master.py        -> all model outputs -> data/outputs/master_output.csv
 ```
 
 Each model file ends with an `INPUT CONTRACT` block in its docstring. Treat that block as the
@@ -71,7 +71,7 @@ These rules are enforced by code and tests:
   in D.
 - Tengah has no HDB resale value. Canberra HDB is folded into Sembawang. Do not add synthetic HDB
   rows for these; aliases and manual overrides handle them.
-- `data/pipeline_data.json` NRP/LUP attribution has been refreshed with the shared aliases.
+- `data/inputs/pipeline_data.json` NRP/LUP attribution has been refreshed with the shared aliases.
   Jurong West and Kallang attribution is no longer folded into Jurong East / Boon Keng. Future
   regeneration still requires networked ingesters and a reviewed downstream cascade.
 
@@ -80,7 +80,7 @@ These rules are enforced by code and tests:
 - `python3 -m pip install -r requirements-dev.txt` installs local development dependencies.
 - `make smoke` runs the default pytest gate with snapshot tests excluded.
 - `python3 -m pytest -q` is equivalent to the smoke test and useful for direct pytest flags.
-- `make master` rebuilds only `data/master_output.csv` from current intermediate outputs.
+- `make master` rebuilds only `data/outputs/master_output.csv` from current intermediate outputs.
 - `make pipeline` regenerates provision, liveability, value, and master CSV outputs from committed data.
 
 Targeted tests:
@@ -120,11 +120,13 @@ versions.
 
 ## Data Conventions
 
-- `data/` holds canonical real-data inputs and outputs from the most recent committed run.
+- `data/` is split four ways: `inputs/` (curated + ingester-refreshed layers), `outputs/` (model
+  results from the most recent committed run), `raw/` (scraper artifacts: `raw/ura/`, `raw/edgeprop/`),
+  and `_archive/` (superseded one-off outputs; nothing reads them).
 - `_demo-files/` is synthetic data used only to smoke-test scripts; do not treat it as truthful.
-- `data/pipeline_data.json` is the source of truth for announced infrastructure additions used by
+- `data/inputs/pipeline_data.json` is the source of truth for announced infrastructure additions used by
   S7 momentum and Liveability T5/T15 horizons.
-- CSV outputs use uppercase estate names matching `data/estates.csv`; joins assume that casing.
+- CSV outputs use uppercase estate names matching `data/inputs/estates.csv`; joins assume that casing.
 
 ## Framework Change Rules
 

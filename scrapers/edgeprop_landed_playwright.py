@@ -255,12 +255,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--input",
-        default="data/edgeprop_playwright_probe/edgeprop_landed_projects_playwright.csv",
+        default="data/raw/edgeprop/edgeprop_landed_projects_playwright.csv",
         help="CSV with name,url,slug columns",
     )
     parser.add_argument(
         "--out",
-        default="data/edgeprop_landed_transactions_playwright_not_clean.csv",
+        default="data/raw/edgeprop/edgeprop_landed_transactions_playwright_not_clean.csv",
         help="Output CSV",
     )
     parser.add_argument("--limit", type=int, help="Maximum project pages to scrape")

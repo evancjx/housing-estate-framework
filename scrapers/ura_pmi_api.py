@@ -24,10 +24,10 @@ IMPORTANT — L7 WAF:
 
 USAGE:
     export URA_ACCESS_KEY="your-access-key-here"
-    python scrapers/ura_pmi_api.py --out_dir data/ura_raw/
+    python scrapers/ura_pmi_api.py --out_dir data/raw/ura/
 
     # Keep only landed transaction groups if the API path is usable.
-    python scrapers/ura_pmi_api.py --prop_types landed strata_landed --out_dir data/ura_raw/
+    python scrapers/ura_pmi_api.py --prop_types landed strata_landed --out_dir data/raw/ura/
 
 INSTALL:
     pip install requests --break-system-packages
@@ -337,7 +337,7 @@ def main():
     ap = argparse.ArgumentParser(
         description="URA Data Service API client for private residential transactions"
     )
-    ap.add_argument("--out_dir", default="data/ura_raw", help="Output directory (default: data/ura_raw)")
+    ap.add_argument("--out_dir", default="data/raw/ura", help="Output directory (default: data/raw/ura)")
     ap.add_argument(
         "--prop_types", nargs="+",
         help=(

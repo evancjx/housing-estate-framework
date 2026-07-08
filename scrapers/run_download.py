@@ -6,24 +6,24 @@ Tries Playwright scraper first; falls back to the API client if it fails.
 
 TYPICAL USAGE:
     # Download missing districts for the estate framework (15, 16 = Marine Parade/Bedok private)
-    python scrapers/run_download.py --districts 15 16 --out_dir data/ura_raw/
+    python scrapers/run_download.py --districts 15 16 --out_dir data/raw/ura/
 
     # Download landed transactions (Landed Properties (Non-Strata) + Strata Landed)
-    python scrapers/run_download.py --landed --districts 15 16 --out_dir data/ura_raw/
+    python scrapers/run_download.py --landed --districts 15 16 --out_dir data/raw/ura/
 
     # Download all non-central districts (Apts & Condos only, all years)
-    python scrapers/run_download.py --mode all --out_dir data/ura_raw/
+    python scrapers/run_download.py --mode all --out_dir data/raw/ura/
 
     # API mode only (faster but requires token + WAF clearance)
-    python scrapers/run_download.py --mode api --out_dir data/ura_raw/
+    python scrapers/run_download.py --mode api --out_dir data/raw/ura/
 
 After download, ingest the raw CSVs into the pipeline:
-    python scrapers/ingest_ura_raw.py --raw_dir data/ura_raw/ --out data/ura_private.csv
+    python scrapers/ingest_ura_raw.py --raw_dir data/raw/ura/ --out data/inputs/ura_private.csv
 
 Then re-run the value model:
-    python models/value_model.py --scores data/provision_scores.csv \\
-        --hdb data/hdb_resale.csv --private data/ura_private.csv \\
-        --out data/value_output.csv
+    python models/value_model.py --scores data/outputs/provision_scores.csv \\
+        --hdb data/inputs/hdb_resale.csv --private data/inputs/ura_private.csv \\
+        --out data/outputs/value_output.csv
 """
 
 import argparse
@@ -143,7 +143,7 @@ def main():
     )
     ap.add_argument("--year_from", default="2021", help="Start year (default: 2021)")
     ap.add_argument("--year_to", default="2026", help="End year (default: 2026)")
-    ap.add_argument("--out_dir", default="data/ura_raw", help="Output directory")
+    ap.add_argument("--out_dir", default="data/raw/ura", help="Output directory")
     ap.add_argument(
         "--prop_types", nargs="+", default=["3"],
         help=(
@@ -157,7 +157,7 @@ def main():
     )
     ap.add_argument(
         "--include_existing", action="store_true",
-        help="Re-download districts already in data/ura_private.csv",
+        help="Re-download districts already in data/inputs/ura_private.csv",
     )
     args = ap.parse_args()
     try:

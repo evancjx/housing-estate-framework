@@ -29,8 +29,8 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_ev_chargers.py \\
-      --estates data/estates.csv \\
-      --out data/ev_chargers.csv
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/ev_chargers.csv
 """
 import argparse
 import os

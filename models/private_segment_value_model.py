@@ -14,9 +14,9 @@ this file only creates segment-specific Value evidence.
 
 RUN:
     python3 models/private_segment_value_model.py \
-        --scores data/provision_scores.csv \
-        --private data/ura_private.csv \
-        --out data/private_segment_value.csv
+        --scores data/outputs/provision_scores.csv \
+        --private data/inputs/ura_private.csv \
+        --out data/outputs/private_segment_value.csv
 
 INPUT CONTRACT:
   --scores: provision_scores.csv with estate,score,score_private
@@ -25,7 +25,7 @@ INPUT CONTRACT:
       project_age_years, sale_month, type_of_area
 
 OUTPUT:
-  data/private_segment_value.csv with estate,property_segment,n,value_score,
+  data/outputs/private_segment_value.csv with estate,property_segment,n,value_score,
   value_band,value_basis,trust,reported,mult.
 """
 
@@ -110,9 +110,9 @@ def build(scores: pd.DataFrame, private_df: pd.DataFrame) -> pd.DataFrame:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build condo/landed private Value outputs")
-    parser.add_argument("--scores", default=os.path.join(ROOT, "data/provision_scores.csv"))
-    parser.add_argument("--private", default=os.path.join(ROOT, "data/ura_private.csv"))
-    parser.add_argument("--out", default=os.path.join(ROOT, "data/private_segment_value.csv"))
+    parser.add_argument("--scores", default=os.path.join(ROOT, "data/outputs/provision_scores.csv"))
+    parser.add_argument("--private", default=os.path.join(ROOT, "data/inputs/ura_private.csv"))
+    parser.add_argument("--out", default=os.path.join(ROOT, "data/outputs/private_segment_value.csv"))
     args = parser.parse_args()
 
     if not os.path.exists(args.scores):

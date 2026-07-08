@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate buyer_profile_table.html from data/buyer_profile_output.csv.
+Generate buyer_profile_table.html from data/outputs/buyer_profile_output.csv.
 
 Reads:
-  data/buyer_profile_output.csv
+  data/outputs/buyer_profile_output.csv
 
 Writes:
   buyer_profile_table.html
@@ -25,7 +25,7 @@ import pandas as pd
 
 
 ROOT = pathlib.Path(__file__).parent.parent
-DEFAULT_INPUT = ROOT / "data/buyer_profile_output.csv"
+DEFAULT_INPUT = ROOT / "data/outputs/buyer_profile_output.csv"
 DEFAULT_OUT = ROOT / "buyer_profile_table.html"
 
 REQUIRED_COLUMNS = {
@@ -322,7 +322,7 @@ def render_html(rows: list[dict[str, Any]], generated_on: str) -> str:
 <body>
   <header>
     <h1>Buyer Profile Evaluation</h1>
-    <div class="meta">Generated {html.escape(generated_on)} from data/buyer_profile_output.csv</div>
+    <div class="meta">Generated {html.escape(generated_on)} from data/outputs/buyer_profile_output.csv</div>
   </header>
   <main>
     <section class="summary" id="summary"></section>

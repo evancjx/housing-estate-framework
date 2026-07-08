@@ -29,20 +29,20 @@ SEVERITY FORMULA (audit §B3):
   )
   where remaining_months = max(0, (expected_year - this_year) × 12).
 
-OUTPUT (data/bca_permits.csv):
+OUTPUT (data/inputs/bca_permits.csv):
   estate, n_active_permits_500m, total_gfa_active, max_remaining_months,
          severity_score
 
 INPUT CONTRACT:
-  --pipeline  data/pipeline_data.json
-  --estates   data/estates.csv
+  --pipeline  data/inputs/pipeline_data.json
+  --estates   data/inputs/estates.csv
   --out       output CSV path
 
 RUN:
   python3 models/ingest_bca_permits.py \\
-      --pipeline data/pipeline_data.json \\
-      --estates data/estates.csv \\
-      --out data/bca_permits.csv
+      --pipeline data/inputs/pipeline_data.json \\
+      --estates data/inputs/estates.csv \\
+      --out data/inputs/bca_permits.csv
 """
 import argparse
 import json
@@ -101,7 +101,7 @@ def derive_severity(pipeline_items, this_year):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--pipeline", required=True)
-    ap.add_argument("--estates", default="data/estates.csv")
+    ap.add_argument("--estates", default="data/inputs/estates.csv")
     ap.add_argument("--out", required=True)
     ap.add_argument("--year", type=int, default=2026,
                     help="scoring year for the [now, now+3] window. Default 2026 matches "

@@ -5,11 +5,11 @@ Pedestrian + cycling path ingester  (Provision v2.0 §1.6)
 ==========================================================
 Two CSVs feeding the conn sub-metric refinement (Task 2.9):
 
-  data/walking_routes.csv:
+  data/inputs/walking_routes.csv:
     estate, pct_sheltered_to_mrt, n_covered_linkway_segments_800m,
            provenance_note
 
-  data/cycling_paths.csv:
+  data/inputs/cycling_paths.csv:
     estate, dedicated_path_m_within_800m, pcn_continuous_m,
            bike_parks_at_mrt, provenance_note
 
@@ -36,9 +36,9 @@ INPUT CONTRACT:
 
 RUN:
   python3 models/ingest_pedestrian_paths.py \\
-      --estates data/estates.csv \\
-      --out-walking data/walking_routes.csv \\
-      --out-cycling data/cycling_paths.csv
+      --estates data/inputs/estates.csv \\
+      --out-walking data/inputs/walking_routes.csv \\
+      --out-cycling data/inputs/cycling_paths.csv
 """
 import argparse
 import os

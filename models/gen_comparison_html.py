@@ -2,8 +2,8 @@
 Generate comparison_table.html from committed model outputs.
 
 Reads:
-  data/master_output.csv          — provision, liveability, value, employment, lease, archetypes
-  data/provision_scores.csv       — per-component scores (noise column)
+  data/outputs/master_output.csv          — provision, liveability, value, employment, lease, archetypes
+  data/outputs/provision_scores.csv       — per-component scores (noise column)
   data/employment_scores_T{0,5,15}.csv  — employment band per horizon
 
 Writes:
@@ -24,13 +24,13 @@ ROOT = pathlib.Path(__file__).parent.parent
 
 # ── load inputs ────────────────────────────────────────────────────────────────
 
-master = pd.read_csv(ROOT / "data/master_output.csv")
-prov_s = pd.read_csv(ROOT / "data/provision_scores.csv")[["estate", "noise"]].set_index("estate")
-emp0   = pd.read_csv(ROOT / "data/employment_scores_T0.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e0"}).set_index("estate")
-emp5   = pd.read_csv(ROOT / "data/employment_scores_T5.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e5"}).set_index("estate")
-emp15  = pd.read_csv(ROOT / "data/employment_scores_T15.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e15"}).set_index("estate")
+master = pd.read_csv(ROOT / "data/outputs/master_output.csv")
+prov_s = pd.read_csv(ROOT / "data/outputs/provision_scores.csv")[["estate", "noise"]].set_index("estate")
+emp0   = pd.read_csv(ROOT / "data/outputs/employment_scores_T0.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e0"}).set_index("estate")
+emp5   = pd.read_csv(ROOT / "data/outputs/employment_scores_T5.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e5"}).set_index("estate")
+emp15  = pd.read_csv(ROOT / "data/outputs/employment_scores_T15.csv")[["estate", "emp_band"]].rename(columns={"emp_band": "e15"}).set_index("estate")
 
-_lp = pd.read_csv(ROOT / "data/life_paths.csv")
+_lp = pd.read_csv(ROOT / "data/outputs/life_paths.csv")
 life_best  = _lp.loc[_lp.groupby("estate")["delta"].idxmax()].set_index("estate")["path"]
 life_worst = _lp.loc[_lp.groupby("estate")["delta"].idxmin()].set_index("estate")["path"]
 

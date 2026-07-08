@@ -2,9 +2,9 @@
 Generate mrt_comparison_table.html from committed MRT and estate outputs.
 
 Reads:
-  data/mrt_layer.csv        - station coordinates, line, operational flag
-  data/estates.csv          - framework estate centroids
-  data/master_output.csv    - estate-level model context
+  data/inputs/mrt_layer.csv        - station coordinates, line, operational flag
+  data/inputs/estates.csv          - framework estate centroids
+  data/outputs/master_output.csv    - estate-level model context
 
 Writes:
   mrt_comparison_table.html
@@ -67,9 +67,9 @@ def short_line(line: str) -> str:
     return code or "MRT"
 
 
-mrt = pd.read_csv(ROOT / "data/mrt_layer.csv")
-estates = pd.read_csv(ROOT / "data/estates.csv")
-master = pd.read_csv(ROOT / "data/master_output.csv").set_index("estate")
+mrt = pd.read_csv(ROOT / "data/inputs/mrt_layer.csv")
+estates = pd.read_csv(ROOT / "data/inputs/estates.csv")
+master = pd.read_csv(ROOT / "data/outputs/master_output.csv").set_index("estate")
 
 rows = []
 for _, station in mrt.iterrows():

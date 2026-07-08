@@ -33,13 +33,13 @@ SIGNIFICANCE SCALING (count of precincts/blocks per estate, per certainty):
 
 RUN:
   python3 models/ingest_hdb_upgrading.py \\
-      --estates data/estates.csv \\
-      --pipeline data/pipeline_data.json \\
-      --out data/pipeline_data.json
+      --estates data/inputs/estates.csv \\
+      --pipeline data/inputs/pipeline_data.json \\
+      --out data/inputs/pipeline_data.json
   python3 models/momentum_model.py \\
-      --pipeline data/pipeline_data.json \\
-      --judged data/judged_inputs.csv \\
-      --out data/judged_inputs.csv
+      --pipeline data/inputs/pipeline_data.json \\
+      --judged data/inputs/judged_inputs.csv \\
+      --out data/inputs/judged_inputs.csv
 """
 import argparse
 import json

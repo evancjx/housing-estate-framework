@@ -18,12 +18,12 @@ separate paths:
 Examples:
     # Build a landed-project index from the public directory.
     python scrapers/edgeprop_landed.py discover \\
-        --out data/edgeprop_landed_projects.csv
+        --out data/raw/edgeprop/edgeprop_landed_projects.csv
 
     # Fetch public detail metadata for projects in the discovered index.
     python scrapers/edgeprop_landed.py details \\
-        --input data/edgeprop_landed_projects.csv \\
-        --out data/edgeprop_landed_project_details.csv \\
+        --input data/raw/edgeprop/edgeprop_landed_projects.csv \\
+        --out data/raw/edgeprop/edgeprop_landed_project_details.csv \\
         --limit 25
 
     # Parse transaction rows from copied/saved EdgeProp text.
@@ -32,7 +32,7 @@ Examples:
         --project-name "KEMBANGAN ESTATE" \\
         --planning-area BEDOK \\
         --postal-district 14 \\
-        --out data/ura_raw/edgeprop_kembangan.csv
+        --out data/raw/ura/edgeprop_kembangan.csv
 """
 
 from __future__ import annotations
@@ -513,7 +513,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     discover = sub.add_parser("discover", help="Discover project links from /landed-house/all")
     discover.add_argument("--index-url", default=DEFAULT_INDEX_URL)
-    discover.add_argument("--out", default="data/edgeprop_landed_projects.csv")
+    discover.add_argument("--out", default="data/raw/edgeprop/edgeprop_landed_projects.csv")
     discover.add_argument("--match", help="Filter discovered links by name/slug substring")
     discover.add_argument("--timeout", type=int, default=30)
     discover.set_defaults(func=cmd_discover)
@@ -521,7 +521,7 @@ def build_parser() -> argparse.ArgumentParser:
     details = sub.add_parser("details", help="Fetch public detail metadata for project URLs")
     details.add_argument("--input", help="CSV with a url column, usually discover output")
     details.add_argument("--urls", nargs="*", help="Specific project detail URLs")
-    details.add_argument("--out", default="data/edgeprop_landed_project_details.csv")
+    details.add_argument("--out", default="data/raw/edgeprop/edgeprop_landed_project_details.csv")
     details.add_argument("--limit", type=int, help="Maximum number of URLs to fetch")
     details.add_argument("--delay", type=float, default=1.0, help="Delay between detail requests")
     details.add_argument("--timeout", type=int, default=30)
@@ -529,7 +529,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     scrape = sub.add_parser("scrape", help="Run discover and details together")
     scrape.add_argument("--index-url", default=DEFAULT_INDEX_URL)
-    scrape.add_argument("--out-dir", default="data/edgeprop_landed")
+    scrape.add_argument("--out-dir", default="data/raw/edgeprop/edgeprop_landed")
     scrape.add_argument("--match", help="Filter discovered links by name/slug substring")
     scrape.add_argument("--limit", type=int, help="Maximum detail pages to fetch")
     scrape.add_argument("--delay", type=float, default=1.0)

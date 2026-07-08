@@ -9,7 +9,7 @@ Portal: https://eservice.ura.gov.sg/property-market-information/pmiResidentialTr
 
 USAGE:
     # Download Apartments & Condominiums for districts 03, 04, 05
-    python scrapers/ura_pmi_playwright.py --districts 03 04 05 --out_dir data/ura_raw/
+    python scrapers/ura_pmi_playwright.py --districts 03 04 05 --out_dir data/raw/ura/
 
     # Download landed transactions: Landed Properties (Non-Strata) + Strata Landed
     python scrapers/ura_pmi_playwright.py --districts 15 16 --prop_types landed strata_landed
@@ -18,7 +18,7 @@ USAGE:
     python scrapers/ura_pmi_playwright.py --districts 15 16 --year_from 2021 --sale_type 3
 
     # All districts with private transactions (non-central)
-    python scrapers/ura_pmi_playwright.py --districts 03 04 05 07 08 10 14 15 16 18 19 20 21 22 23 24 25 26 27 --out_dir data/ura_raw/
+    python scrapers/ura_pmi_playwright.py --districts 03 04 05 07 08 10 14 15 16 18 19 20 21 22 23 24 25 26 27 --out_dir data/raw/ura/
 
 DISTRICT → ESTATE mapping (estates.csv names):
     03 → QUEENSTOWN / DOVER / HOLLAND VILLAGE proxy
@@ -424,7 +424,7 @@ def main():
         choices=["1", "2", "3"],
         help="Sale type(s): 1=New Sale, 2=Sub Sale, 3=Resale. Default: all.",
     )
-    ap.add_argument("--out_dir", default="data/ura_raw", help="Output directory (default: data/ura_raw)")
+    ap.add_argument("--out_dir", default="data/raw/ura", help="Output directory (default: data/raw/ura)")
     ap.add_argument("--headed", action="store_true", help="Run in headed mode (shows browser window)")
     ap.add_argument("--timeout", type=int, default=60, help="Results load timeout in seconds (default: 60)")
     args = ap.parse_args()

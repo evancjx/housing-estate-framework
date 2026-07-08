@@ -7,7 +7,7 @@ Enforces the X-archetype N/R gate, emits explicit coverage flags instead of
 blank cells, and fails loudly if a required input is missing. Private Value is
 structurally supported but flagged 'not_covered' until Phase 3 ingests it.
 
-Also generates data/life_paths.csv from the liveability matrix persona scores.
+Also generates data/outputs/life_paths.csv from the liveability matrix persona scores.
 
 RUN:
   python3 models/build_master.py            # uses data/ defaults
@@ -40,7 +40,7 @@ _LIFE_PATH_MAP = {
 
 
 def build_life_paths(live: pd.DataFrame, out_path: str) -> pd.DataFrame:
-    """Generate data/life_paths.csv from liveability_matrix persona scores.
+    """Generate data/outputs/life_paths.csv from liveability_matrix persona scores.
 
     Each estate × 5 life paths. Archetype X estates are excluded.
     Scores are the T0/T5 liveability values for the mapped start/end persona.
@@ -166,16 +166,17 @@ def build(args):
 def main():
     # __file__-relative so it works from any cwd (matches lease_risk_model.py)
     D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+    IN, OUT = f"{D}/inputs", f"{D}/outputs"
     ap = argparse.ArgumentParser(description="Join model outputs into master_output.csv")
-    ap.add_argument("--liveability", default=f"{D}/liveability_matrix.csv")
-    ap.add_argument("--provision", default=f"{D}/provision_scores.csv")
-    ap.add_argument("--value_hdb", default=f"{D}/value_output.csv")
-    ap.add_argument("--employment", default=f"{D}/employment_scores_T0.csv")
-    ap.add_argument("--lease", default=f"{D}/lease_risk.csv")
-    ap.add_argument("--archetypes", default=f"{D}/archetype_assignments.csv")
-    ap.add_argument("--value_private", default=f"{D}/value_output_private.csv")
-    ap.add_argument("--life_paths", default=f"{D}/life_paths.csv")
-    ap.add_argument("--out", default=f"{D}/master_output.csv")
+    ap.add_argument("--liveability", default=f"{OUT}/liveability_matrix.csv")
+    ap.add_argument("--provision", default=f"{OUT}/provision_scores.csv")
+    ap.add_argument("--value_hdb", default=f"{OUT}/value_output.csv")
+    ap.add_argument("--employment", default=f"{OUT}/employment_scores_T0.csv")
+    ap.add_argument("--lease", default=f"{OUT}/lease_risk.csv")
+    ap.add_argument("--archetypes", default=f"{IN}/archetype_assignments.csv")
+    ap.add_argument("--value_private", default=f"{OUT}/value_output_private.csv")
+    ap.add_argument("--life_paths", default=f"{OUT}/life_paths.csv")
+    ap.add_argument("--out", default=f"{OUT}/master_output.csv")
     build(ap.parse_args())
 
 

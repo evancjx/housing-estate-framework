@@ -3,7 +3,7 @@
 NEA Hawker Centre v2 ingester  (Provision v2.0 §1.3)
 =====================================================
 Enriches the existing NEA hawker centre point dataset (already ingested
-to data/markets.csv as a Provision §2 input) with per-estate aggregates
+to data/inputs/markets.csv as a Provision §2 input) with per-estate aggregates
 needed by score_hawker: count + nearest + stall-total + redundancy.
 
 The richer NEA Hawker Centre v2 schema (NO_OF_STALLS, completion year)
@@ -17,20 +17,20 @@ PROVENANCE: PARTLY_MEASURED.
   total_stalls_800m is APPROXIMATED: known overrides + default 40/centre.
   oldest_completion_y is omitted (NEA does not publish a clean dataset).
 
-OUTPUT (data/hawker_v2.csv):
+OUTPUT (data/inputs/hawker_v2.csv):
   estate, n_hawker_centres_800m, total_stalls_800m, nearest_hawker_m,
          has_redundancy_dayoff
 
 INPUT CONTRACT:
   --estates    CSV with estate, lat, lon (UPPERCASE)
-  --markets    data/markets.csv (existing NEA hawker centre points)
+  --markets    data/inputs/markets.csv (existing NEA hawker centre points)
   --out        output CSV path
 
 RUN:
   python3 models/ingest_hawker_v2.py \\
-      --estates data/estates.csv \\
-      --markets data/markets.csv \\
-      --out data/hawker_v2.csv
+      --estates data/inputs/estates.csv \\
+      --markets data/inputs/markets.csv \\
+      --out data/inputs/hawker_v2.csv
 """
 import argparse
 import math

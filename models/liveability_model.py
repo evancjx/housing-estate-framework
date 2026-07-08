@@ -105,8 +105,8 @@ Pipeline type → component boosts:
 
 === CLI ===
 python liveability_model.py \\
-    --scores  SG-Estate-Framework/data/provision_scores.csv \\
-    --pipeline SG-Estate-Framework/data/pipeline_data.json \\
+    --scores  SG-Estate-Framework/data/outputs/provision_scores.csv \\
+    --pipeline SG-Estate-Framework/data/inputs/pipeline_data.json \\
     --out     liveability_matrix.csv
 """
 
@@ -792,12 +792,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--scores",
-        default="SG-Estate-Framework/data/provision_scores.csv",
+        default="SG-Estate-Framework/data/outputs/provision_scores.csv",
         help="Path to provision_scores.csv (output of provision_model.py)",
     )
     parser.add_argument(
         "--pipeline",
-        default="SG-Estate-Framework/data/pipeline_data.json",
+        default="SG-Estate-Framework/data/inputs/pipeline_data.json",
         help="Path to pipeline_data.json",
     )
     parser.add_argument(
@@ -818,7 +818,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--archetypes",
-        default="SG-Estate-Framework/data/archetype_assignments.csv",
+        default="SG-Estate-Framework/data/inputs/archetype_assignments.csv",
         help="archetype_assignments.csv (X = non-residential N/R gate)",
     )
     parser.add_argument(
@@ -861,13 +861,13 @@ if __name__ == "__main__":
 #   pip install pandas numpy --break-system-packages
 #
 #   python SG-Estate-Framework/models/liveability_model.py \
-#       --scores   SG-Estate-Framework/data/provision_scores.csv \
-#       --pipeline SG-Estate-Framework/data/pipeline_data.json \
+#       --scores   SG-Estate-Framework/data/outputs/provision_scores.csv \
+#       --pipeline SG-Estate-Framework/data/inputs/pipeline_data.json \
 #       --out      liveability_matrix.csv
 #
 #   # To inspect computed persona weights:
 #   python SG-Estate-Framework/models/liveability_model.py \
-#       --scores   SG-Estate-Framework/data/provision_scores.csv \
-#       --pipeline SG-Estate-Framework/data/pipeline_data.json \
+#       --scores   SG-Estate-Framework/data/outputs/provision_scores.csv \
+#       --pipeline SG-Estate-Framework/data/inputs/pipeline_data.json \
 #       --out      liveability_matrix.csv \
 #       --debug

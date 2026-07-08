@@ -13,10 +13,10 @@ Soft weights represent trade-offs once a choice is still feasible.
 
 RUN:
     python3 models/buyer_profile_model.py \
-        --profile data/buyer_profiles.example.json \
-        --master data/master_output.csv \
-        --life-paths data/life_paths.csv \
-        --out data/buyer_profile_output.csv
+        --profile data/inputs/buyer_profiles.example.json \
+        --master data/outputs/master_output.csv \
+        --life-paths data/outputs/life_paths.csv \
+        --out data/outputs/buyer_profile_output.csv
 
 INPUT CONTRACT
 ==============
@@ -31,10 +31,10 @@ INPUT CONTRACT
     tenure: "hdb" | "private" | "condo" | "landed" | "any"
     tenures: list of tenure/property segments (overrides tenure). `private`
       uses the legacy combined private bucket; `condo` and `landed` use
-      data/private_segment_value.csv when available.
+      data/outputs/private_segment_value.csv when available.
     persona: yf|youngfam|young_family|sp|singlepro|ret|retiree|ls|lifestyle
     horizon: T0|T5|T15
-    life_path: one of data/life_paths.csv path values
+    life_path: one of data/outputs/life_paths.csv path values
     hard_filters:
       exclude_archetypes: list[str]
       allowed_archetypes: list[str]
@@ -53,16 +53,16 @@ INPUT CONTRACT
       liveability, value, employment, lease, provision, life_path: numbers
 
 --master CSV:
-  data/master_output.csv from build_master.py. Required columns include estate,
+  data/outputs/master_output.csv from build_master.py. Required columns include estate,
   archetype, persona/horizon scores, Value columns, Employment, Lease, and
   Provision fields.
 
 --life-paths CSV:
-  data/life_paths.csv from build_master.py. Required only when profile.life_path
+  data/outputs/life_paths.csv from build_master.py. Required only when profile.life_path
   is provided. Columns: estate,path,start_score,end_score,delta.
 
 --private-values CSV:
-  data/private_segment_value.csv from private_segment_value_model.py. Required
+  data/outputs/private_segment_value.csv from private_segment_value_model.py. Required
   only for segment-specific condo/landed Value. Missing rows stay no_data rather
   than borrowing from the combined private bucket.
 
@@ -602,12 +602,14 @@ def run_many(
 
 def main() -> None:
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+    inputs_dir = os.path.join(data_dir, "inputs")
+    outputs_dir = os.path.join(data_dir, "outputs")
     parser = argparse.ArgumentParser(description="Apply a buyer profile to estate outputs")
-    parser.add_argument("--profile", default=os.path.join(data_dir, "buyer_profiles.example.json"))
-    parser.add_argument("--master", default=os.path.join(data_dir, "master_output.csv"))
-    parser.add_argument("--life-paths", default=os.path.join(data_dir, "life_paths.csv"))
-    parser.add_argument("--private-values", default=os.path.join(data_dir, "private_segment_value.csv"))
-    parser.add_argument("--out", default=os.path.join(data_dir, "buyer_profile_output.csv"))
+    parser.add_argument("--profile", default=os.path.join(inputs_dir, "buyer_profiles.example.json"))
+    parser.add_argument("--master", default=os.path.join(outputs_dir, "master_output.csv"))
+    parser.add_argument("--life-paths", default=os.path.join(outputs_dir, "life_paths.csv"))
+    parser.add_argument("--private-values", default=os.path.join(outputs_dir, "private_segment_value.csv"))
+    parser.add_argument("--out", default=os.path.join(outputs_dir, "buyer_profile_output.csv"))
     args = parser.parse_args()
 
     try:

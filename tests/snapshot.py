@@ -6,7 +6,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SNAP = os.path.join(HERE, "snapshots")
-DATA = os.path.join(os.path.dirname(HERE), "data")
+DATA = os.path.join(os.path.dirname(HERE), "data", "outputs")
 
 
 def capture(tag):
