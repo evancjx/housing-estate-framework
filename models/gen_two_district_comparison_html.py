@@ -8,10 +8,13 @@ rows whose property_type contains "House" are dropped by the shared loaders).
 
 Three comparison axes, presented as aggregated side-by-side tables (District A | District B):
   1. Size        - median PSF / median price / n per floor-area band (sqm).
-  2. Bedrooms    - median PSF / median price / n per bedroom count. Bedroom counts
-                   come ONLY from the EdgeProp "not_clean" feed and are used as
-                   per-(project, size-band) LABELS (never merged into prices), exactly
-                   as gen_district_private_comparison_html.load_edgeprop_bedroom_counts does.
+  2. Bedrooms    - median PSF / median price / n per bedroom count. URA has no bedroom
+                   field; bedroom counts come ONLY from the EdgeProp "not_clean" feed. Since
+                   that feed carries the same exact unit size, each URA transaction is labelled
+                   by matching on (project + exact area_sqm), falling back to a per-(project,
+                   size-band) modal label (gen_district_private_comparison_html.load_edgeprop_bedroom_counts).
+                   Labels only - prices are never merged. Reported coverage % shows how many
+                   transactions received a bedroom label.
   3. MRT distance- distribution of each project's straight-line distance to its nearest
                    MRT station. Reported twice: nearest OPERATIONAL station, and nearest
                    INCLUDING future/under-construction stations (mrt_layer operational=0),
@@ -109,6 +112,39 @@ def load_unified(private_path: pathlib.Path, edgeprop_path: pathlib.Path, distri
     return df
 
 
+def load_edgeprop_bedroom_by_size(path: pathlib.Path, district: str,
+                                  min_n: int = 2, min_share: float = 0.6) -> dict:
+    """(PROJECT_UPPER, round(area_sqm)) -> modal bedroom count.
+
+    Bedrooms live only in the EdgeProp feed, but that feed carries the SAME exact
+    floor area as the URA rows, so a bedroom count can be transferred onto a URA
+    transaction by matching on (project, exact unit size) instead of a coarse size
+    band. Same conservative guard as the band labeller (>=min_n units, >=min_share
+    modal agreement); prices are never merged, only the bedroom label.
+    """
+    if not path.exists():
+        return {}
+    df = pd.read_csv(path, dtype={"Postal District": str, "Bedrooms": str})
+    df = df[df["Postal District"].map(normalise_district) == district].copy()
+    df["bedrooms"] = pd.to_numeric(df["Bedrooms"], errors="coerce")
+    df["area_sqm"] = pd.to_numeric(df["Area (sqm)"], errors="coerce")
+    df = df.dropna(subset=["bedrooms", "area_sqm"])
+    df = df[(df["bedrooms"] > 0) & (df["area_sqm"] > 0)]
+    if df.empty:
+        return {}
+    df["bedrooms"] = df["bedrooms"].astype(int)
+    df["project_u"] = df["Project"].astype(str).str.strip().str.upper()
+    df["area_r"] = df["area_sqm"].round(0).astype(int)
+    labels = {}
+    for (proj, area_r), grp in df.groupby(["project_u", "area_r"]):
+        if len(grp) < min_n:
+            continue
+        counts = grp["bedrooms"].value_counts()
+        if counts.iloc[0] / len(grp) >= min_share:
+            labels[(proj, int(area_r))] = int(counts.index[0])
+    return labels
+
+
 def load_project_coords(path: pathlib.Path, district: str) -> dict[str, dict]:
     """{PROJECT_NAME_UPPER: {lat, lon, match_status}} for one district.
 
@@ -165,15 +201,24 @@ def size_breakdown(df: pd.DataFrame) -> dict:
     return out
 
 
-def bedroom_breakdown(df: pd.DataFrame, bedroom_labels: dict) -> dict:
-    """bedroom_class -> stats. Bedrooms are per-(project, band) EdgeProp labels."""
+def resolve_bedroom(project: str, area_sqm: float, size_labels: dict, band_labels: dict):
+    """Bedroom count for a URA transaction: exact-size EdgeProp label first, band fallback."""
+    exact = size_labels.get((project, int(round(area_sqm))))
+    if exact is not None:
+        return exact
+    return band_labels.get((project, band_of(area_sqm)))
+
+
+def bedroom_breakdown(df: pd.DataFrame, size_labels: dict, band_labels: dict) -> dict:
+    """bedroom_class -> stats. Bedrooms come from EdgeProp, matched to each URA txn by
+    exact unit size (project + rounded area_sqm), falling back to the per-(project, band)
+    modal label when the exact size has no confident label."""
     df = df.copy()
-    bands = df["area_sqm"].map(band_of)
     # Compute the bedroom class directly so pandas never coerces missing labels to NaN
     # (bedroom_class expects None, not float NaN, for the Unknown bucket).
     df["bedroom_class"] = [
-        bedroom_class(bedroom_labels.get((proj, band)))
-        for proj, band in zip(df["project"], bands)
+        bedroom_class(resolve_bedroom(proj, area, size_labels, band_labels))
+        for proj, area in zip(df["project"], df["area_sqm"])
     ]
     out = {}
     for key in BEDROOM_ORDER:
@@ -243,8 +288,11 @@ def mrt_breakdown(df: pd.DataFrame, coords: dict, all_stations: list, op_station
 def build_district(private_path, edgeprop_path, locations_path, all_stations, op_stations,
                    district) -> dict:
     df = load_unified(private_path, edgeprop_path, district)
-    bedroom_labels = load_edgeprop_bedroom_counts(edgeprop_path, district)
+    size_labels = load_edgeprop_bedroom_by_size(edgeprop_path, district)
+    band_labels = load_edgeprop_bedroom_counts(edgeprop_path, district)
     coords = load_project_coords(locations_path, district)
+    bedrooms = bedroom_breakdown(df, size_labels, band_labels)
+    n_known = int(len(df)) - bedrooms["brunknown"]["n"]
     return {
         "district": district,
         "name": DISTRICT_NAMES.get(district, ""),
@@ -252,7 +300,8 @@ def build_district(private_path, edgeprop_path, locations_path, all_stations, op
         "n_projects": int(df["project"].nunique()),
         "headline": _stats(df),
         "size": size_breakdown(df),
-        "bedrooms": bedroom_breakdown(df, bedroom_labels),
+        "bedrooms": bedrooms,
+        "bedroom_coverage_pct": round(100.0 * n_known / len(df), 1) if len(df) else 0.0,
         "mrt": mrt_breakdown(df, coords, all_stations, op_stations),
     }
 
@@ -415,9 +464,11 @@ def render_html(a: dict, b: dict) -> str:
     caveats = (
         "<div class='caveats'><b>Scope & caveats.</b> Condominium / apartment / EC only; "
         "landed excluded. Prices from URA (2021+) plus EdgeProp 2019–2020 backfill. "
-        "<b>Bedroom counts</b> come only from the EdgeProp <code>not_clean</code> feed and are "
-        "applied as per-(project, size-band) labels (never merged into prices); coverage is "
-        "partial, so many transactions fall under <em>Unknown</em>. <b>MRT distance</b> uses "
+        "<b>Bedroom counts</b> come only from the EdgeProp <code>not_clean</code> feed (URA has no "
+        "bedroom field). Because that feed carries the same exact unit size, each URA transaction "
+        "is labelled by matching on (project + exact area), falling back to a per-(project, size-band) "
+        "modal label; prices are never merged. Remaining <em>Unknown</em> rows are projects EdgeProp "
+        "has not scraped bedrooms for (typically the newest launches). <b>MRT distance</b> uses "
         "committed OneMap project geocodes; ungeocoded projects are excluded from distance stats.</div>"
     )
     return (
@@ -430,8 +481,11 @@ def render_html(a: dict, b: dict) -> str:
         f"{caveats}"
         "<h2>Headline</h2>" + _headline_row(a, b)
         + _paired_table("Size (floor-area bands)", BAND_ORDER, BAND_LABELS, a["size"], b["size"], a, b)
-        + _paired_table("Bedrooms (EdgeProp labels)", BEDROOM_ORDER, BEDROOM_LABELS,
-                        a["bedrooms"], b["bedrooms"], a, b)
+        + _paired_table(
+            f"Bedrooms (EdgeProp, matched by unit size) — coverage "
+            f"D{a['district']} {a['bedroom_coverage_pct']:.0f}% · "
+            f"D{b['district']} {b['bedroom_coverage_pct']:.0f}%",
+            BEDROOM_ORDER, BEDROOM_LABELS, a["bedrooms"], b["bedrooms"], a, b)
         + _mrt_section(a, b)
         + "</body></html>"
     )

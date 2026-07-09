@@ -120,14 +120,29 @@ def test_size_breakdown_bands(tmp_path):
 def test_bedroom_breakdown_uses_edgeprop_labels(tmp_path):
     ura = _write_ura(tmp_path)
     edge = _write_edgeprop(tmp_path)
-    labels = gen.load_edgeprop_bedroom_counts(edge, "18")
-    assert labels[("COCO PALMS", "50to70")] == 2
+    band_labels = gen.load_edgeprop_bedroom_counts(edge, "18")
+    assert band_labels[("COCO PALMS", "50to70")] == 2
+    size_labels = gen.load_edgeprop_bedroom_by_size(edge, "18")
+    # exact-size label keyed by (project, rounded sqm) — 3x 60 sqm 2BR rows
+    assert size_labels[("COCO PALMS", 60)] == 2
     df = gen.load_unified(ura, edge, "18")
-    br = gen.bedroom_breakdown(df, labels)
+    br = gen.bedroom_breakdown(df, size_labels, band_labels)
     # the 60 sqm COCO PALMS units get the 2BR label; others fall to Unknown
     assert br["br2"]["n"] >= 1
     total = sum(br[k]["n"] for k in gen.BEDROOM_ORDER)
     assert total == len(df)
+
+
+def test_exact_size_match_beats_band_when_bands_are_mixed(tmp_path):
+    """Exact-size label resolves a unit even when its band holds mixed bedroom counts."""
+    ura = _write_ura(tmp_path)
+    edge = _write_edgeprop(tmp_path)
+    df = gen.load_unified(ura, edge, "18")
+    size_labels = gen.load_edgeprop_bedroom_by_size(edge, "18")
+    band_labels = gen.load_edgeprop_bedroom_counts(edge, "18")
+    # COCO PALMS 60 sqm URA row must resolve to 2BR via the exact-size map
+    got = gen.resolve_bedroom("COCO PALMS", 60.0, size_labels, band_labels)
+    assert got == 2
 
 
 def test_mrt_breakdown_operational_vs_future(tmp_path):
@@ -159,7 +174,7 @@ def test_generate_writes_html(tmp_path):
     assert out.exists()
     text = out.read_text()
     assert "Size (floor-area bands)" in text
-    assert "Bedrooms (EdgeProp labels)" in text
+    assert "Bedrooms (EdgeProp, matched by unit size)" in text
     assert "MRT distance" in text
     assert a["district"] == "18" and b["district"] == "26"
 
