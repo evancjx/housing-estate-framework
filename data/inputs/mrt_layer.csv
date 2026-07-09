@@ -116,7 +116,7 @@ lat,lon,name,stn_code,line,operational
 1.33474211664091,103.91797832995,Bedok North,DT29,Downtown Line,1
 1.33660782955099,103.932234623286,Bedok Reservoir,DT30,Downtown Line,1
 1.34551530560119,103.938436971222,Tampines West,DT31,Downtown Line,1
-1.35520,103.96108,Tampines East,DT33,Downtown Line,1
+1.3552,103.96108,Tampines East,DT33,Downtown Line,1
 1.34173977444995,103.961472788634,Upper Changi,DT34,Downtown Line,1
 1.38029828742399,103.745291799824,South View,BP2,Bukit Panjang LRT,1
 1.3786032506373,103.749055668925,Keat Hong,BP3,Bukit Panjang LRT,1
@@ -158,8 +158,27 @@ lat,lon,name,stn_code,line,operational
 1.40532331860455,103.897290522033,Soo Teck,PW7,Punggol LRT,1
 1.44967,103.82988,Canberra,NS12,North South Line,1
 1.30223,103.90737,Marine Parade,TE26,Thomson-East Coast Line,1
-1.37480,103.74100,Tengah (JRL planned),JR1,Jurong Region Line,0
+1.3748,103.741,Tengah (JRL planned),JR1,Jurong Region Line,0
 1.38597,103.83682,Lentor,TE5,Thomson-East Coast Line,1
-1.31600,103.93900,Bedok South,TE30,Thomson-East Coast Line,0
-1.32050,103.94200,Sungei Bedok,TE31,Thomson-East Coast Line,0
-1.30200,103.86200,Founders' Memorial,TE22A,Thomson-East Coast Line,0
+1.316,103.939,Bedok South,TE30,Thomson-East Coast Line,0
+1.3205,103.942,Sungei Bedok,TE31,Thomson-East Coast Line,0
+1.302,103.862,Founders' Memorial,TE22A,Thomson-East Coast Line,0
+1.4482924,103.785692,Woodlands North,TE1,Thomson-East Coast Line,1
+1.427396,103.793264,Woodlands South,TE3,Thomson-East Coast Line,1
+1.397581,103.817856,Springleaf,TE4,Thomson-East Coast Line,1
+1.3714631,103.836567,Mayflower,TE6,Thomson-East Coast Line,1
+1.3632831,103.832893,Bright Hill,TE7,Thomson-East Coast Line,1
+1.3544164,103.832898,Upper Thomson,TE8,Thomson-East Coast Line,1
+1.3067822,103.818956,Napier,TE12,Thomson-East Coast Line,1
+1.3024222,103.823868,Orchard Boulevard,TE13,Thomson-East Coast Line,1
+1.2939481,103.83372,Great World,TE15,Thomson-East Coast Line,1
+1.2885052,103.833585,Havelock,TE16,Thomson-East Coast Line,1
+1.2805332,103.843883,Maxwell,TE18,Thomson-East Coast Line,1
+1.2777168,103.850367,Shenton Way,TE19,Thomson-East Coast Line,1
+1.2784872,103.867454,Gardens by the Bay,TE22,Thomson-East Coast Line,1
+1.29726507940646,103.873453254621,Tanjong Rhu,TE23,Thomson-East Coast Line,1
+1.29783147778951,103.886178949925,Katong Park,TE24,Thomson-East Coast Line,1
+1.29931925769899,103.897368742078,Tanjong Katong,TE25,Thomson-East Coast Line,1
+1.30666510344814,103.9151067005,Marine Terrace,TE27,Thomson-East Coast Line,1
+1.31000869432289,103.930025826708,Siglap,TE28,Thomson-East Coast Line,1
+1.31312248291264,103.942309776767,Bayshore,TE29,Thomson-East Coast Line,1
