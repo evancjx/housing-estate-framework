@@ -66,6 +66,10 @@ value_model.py               → data/outputs/provision_scores.csv + data/inputs
 lease_risk_model.py          → data/inputs/hdb_resale.csv → data/outputs/lease_risk.csv           (standalone, joined later)
 employment_model.py          → (embedded station data) → data/outputs/employment_scores_{T0,T5,T15}.csv
 build_master.py              → all above → data/outputs/master_output.csv                  (headline deliverable)
+
+# --- SIDE PIPELINE (private transactions, not estate scores; run via `make private-bedrooms`) ---
+build_private_bedrooms.py    → data/inputs/ura_private.csv + edgeprop scrape [+ data/inputs/project_unit_mix.csv]
+                               → data/outputs/private_transactions_bedrooms.csv  (per-txn bedrooms + bedroom_source provenance)
 ```
 
 Each model file ends with an **INPUT CONTRACT** block in its docstring — the authoritative spec for
@@ -87,6 +91,8 @@ These are not stylistic preferences — they are framework rules the code active
   JUDGED. Provenance split: 14 MEASURED + 6 PARTLY_MEASURED (dens, env, mom, air_quality, stewardship, hawker) + 0 JUDGED.
   If a PARTLY_MEASURED input is missing, the model renormalises over present
   components and sets `measured_only=True` — it does NOT impute. Preserve this behaviour.
+  Same culture in `build_private_bedrooms.py`: every bedrooms value carries a `bedroom_source`
+  (edgeprop_exact / edgeprop_band_label / research_unit_mix / unknown); ambiguity → unknown, never a guess.
 - **HDB and private are separate universes.** `value_model.py` keeps them as distinct SEGMENTS with
   different control variables; never blend or rank across them.
 - **Bands, not decimals, below thresholds.** `value_model.py:CFG["trust_decimal_n"] = 100` — under that

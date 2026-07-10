@@ -37,6 +37,21 @@ ESTATE_TOWN_ALIAS = {
 # Private-dominant estates: must NOT borrow an HDB-resale residual (value_model).
 PRIVATE_DOMINANT_PROXIES = {"HOLLAND VILLAGE", "LENTOR"}
 
+# URA project name -> EdgeProp project name, both in build_private_bedrooms
+# normalise_project_name form, keyed with the zero-padded postal district.
+# ONLY for cases irreducible by normalisation (combined pages, renames).
+# Used by build_private_bedrooms.py.
+URA_EDGEPROP_PROJECT_ALIAS = {
+    # ("<URA name_norm>", "<district>"): "<EdgeProp name_norm>",
+    # URA annotates the en-bloc'd development; EdgeProp calls the same page "(OLD)".
+    ("CHUAN PARK DEMOLISHED", "19"): "CHUAN PARK OLD",
+    # SAINT vs ST — a token rule would wrongly merge EdgeProp's separate
+    # ST THOMAS COURT and SAINT THOMAS COURT projects, so alias just this one.
+    ("SKYLINE 360 AT SAINT THOMAS WALK", "09"): "SKYLINE 360 AT ST THOMAS WALK",
+    # Spacing variant: URA MERAWOODS = EdgeProp "MERA WOODS" (Hillview Ave, D23).
+    ("MERAWOODS", "23"): "MERA WOODS",
+}
+
 
 def canonicalise_pipeline_name(name):
     """Pipeline/research estate name -> canonical estate."""

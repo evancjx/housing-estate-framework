@@ -144,3 +144,37 @@ browser and bypasses this. The API client (`ura_pmi_api.py`) is included as a
 template; it may work if you have a pre-generated token or the WAF rules change.
 
 Access key must be set as `URA_ACCESS_KEY` environment variable — **never hardcode it**.
+
+## EdgeProp condo/apartment zero-row re-scrape runbook
+
+Projects scraped before the lazy-load scroll fix (commit 69b7775) bailed with
+0 rows. To find and re-scrape them:
+
+```bash
+# 1. Derive the zero-row list (projects CSV minus slugs present in the transactions CSV)
+python3 scrapers/derive_zero_row_projects.py
+
+# 2. Scrape in resumable batches (NOTE: --start/--limit slice BEFORE the resume
+#    filter, so always run batches against the dedicated zero-row input file)
+python3 scrapers/edgeprop_condo_apartment_playwright.py scrape \
+  --input data/raw/edgeprop/edgeprop_zero_row_projects.csv \
+  --out   data/raw/edgeprop/edgeprop_zero_row_rescrape_transactions.csv \
+  --log   data/raw/edgeprop/edgeprop_zero_row_rescrape_attempts.csv \
+  --resume --resume-attempts --delay 0.5 --from-year 2019 \
+  --start 0 --limit 300          # repeat with --start 300/600/900/1200/1500
+
+# 3. Retry error rows: rename the attempts log first (--resume-attempts skips
+#    everything ATTEMPTED, not just succeeded), then re-run without --start/--limit.
+
+# 4. Diagnose stubborn zero-row slugs (writes stage snapshots to data/raw/edgeprop/probe/)
+python3 scrapers/probe_zero_row.py <slug>
+
+# 5. Merge into the canonical CSV (dedup on Project/Date/Price/Area/Address; refuses no-op)
+python3 scrapers/merge_edgeprop_rescrape.py --new data/raw/edgeprop/edgeprop_zero_row_rescrape_transactions.csv
+
+# 6. Rebuild the bedroom attribution dataset + gap report
+make private-bedrooms
+```
+
+Zero-row slugs that never appear in `ura_private.csv` are acceptable: they are
+pre-2019-sales or rental-only projects with no transactions to recover.

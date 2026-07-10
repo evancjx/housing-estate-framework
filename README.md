@@ -50,6 +50,7 @@ Canonical outputs from the most recent committed pipeline run (reproducible via 
 - **[master_output.csv](data/outputs/master_output.csv)** — headline deliverable; estates × Provision/Liveability/Value/Employment/Risk/Life-Path joined across all models.
 - **provision_scores.csv**, **liveability_matrix.csv**, **value_output.csv** — intermediate model outputs.
 - **lease_risk.csv**, **employment_scores_{T0,T5,T15}.csv** — supporting model outputs.
+- **private_transactions_bedrooms.csv** — per-transaction bedroom attribution for the private condo/apartment sector (URA txns + EdgeProp 2019–20 backfill) with a `bedroom_source` provenance column; rebuilt via `make private-bedrooms`. `data/inputs/project_unit_mix.csv` is its curated research input (per-project bedroom↔sqft ranges with source URLs).
 
 Superseded one-off experiment outputs live in `data/_archive/`.
 

@@ -34,6 +34,16 @@ def test_estate_town_unchanged_entries():
     assert aliases.ESTATE_TOWN_ALIAS["LENTOR"] == "ANG MO KIO"
 
 
+def test_ura_edgeprop_project_alias_single_source():
+    import build_private_bedrooms as bpb
+    assert bpb.URA_EDGEPROP_PROJECT_ALIAS is aliases.URA_EDGEPROP_PROJECT_ALIAS
+    # keys are ((normalised URA name, zero-padded district)) -> normalised EP name
+    for (name, district), target in aliases.URA_EDGEPROP_PROJECT_ALIAS.items():
+        assert bpb.normalise_project_name(name) == name
+        assert bpb.normalise_project_name(target) == target
+        assert len(district) == 2 and district.isdigit()
+
+
 def test_ingest_hdb_upgrading_uses_shared_alias():
     import ingest_hdb_upgrading as ih
     assert ih.ALIAS_MAP is aliases.PIPELINE_NAME_ALIAS

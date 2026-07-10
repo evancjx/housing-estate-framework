@@ -1,4 +1,4 @@
-.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table pipeline
+.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table private-bedrooms pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -21,6 +21,12 @@ private-project-school-metrics:
 # Generate the private project comparison table from committed transactions and optional geocodes.
 private-project-table:
 	python3 models/gen_private_project_comparison_html.py
+
+# Per-transaction bedroom attribution (URA txns + EdgeProp 2019-20 backfill).
+# NOT part of `pipeline` — different data family (private transactions, not estate scores);
+# refresh after an EdgeProp re-scrape or a project_unit_mix.csv research batch.
+private-bedrooms:
+	python3 models/build_private_bedrooms.py --report
 
 # Regenerate the whole pipeline from real data, then the master.
 # Includes derived provision layers and BCA disruption severity; see CLAUDE.md.
