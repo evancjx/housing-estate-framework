@@ -29,6 +29,7 @@ PROBE_DIR = Path("data/raw/edgeprop/probe")
 
 
 async def probe(slug: str) -> None:
+    PROBE_DIR.mkdir(parents=True, exist_ok=True)
     url = f"{BASE_URL}/condo-apartment/{slug}"
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
