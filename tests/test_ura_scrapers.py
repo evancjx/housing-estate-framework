@@ -95,6 +95,47 @@ def test_ingest_edgeprop_style_file_converts_sqft_and_preserves_context(tmp_path
     assert row["sale_month"] == "2020-10"
 
 
+def test_ingest_edgeprop_unit_schema_preserves_exact_unit_provenance(tmp_path):
+    raw = tmp_path / "edgeprop_condo_units.csv"
+    pd.DataFrame(
+        {
+            "Project": ["TEST RESIDENCES"],
+            "planning_area": ["NOVENA"],
+            "Postal District": ["11"],
+            "Date of Sale": ["22 Jun 2026"],
+            "Address": ["10 TEST ROAD #06-15"],
+            "Street": ["10 TEST ROAD"],
+            "unit_number": ["#06-15"],
+            "unit_floor": ["06"],
+            "unit_stack": ["15"],
+            "unit_number_status": ["exact"],
+            "unit_number_source": ["edgeprop_address"],
+            "Unit Price ($psf)": ["1,830"],
+            "Price ($)": ["1,536,500"],
+            "Type": ["Condominium"],
+            "Tenure": ["Freehold"],
+            "Sale Type": ["Resale"],
+            "Area (sqft)": ["840"],
+            "Type of Area": ["Strata"],
+            "Purchaser Address": ["Private"],
+            "Source": ["URA"],
+            "source_quality": ["not_clean"],
+        }
+    ).to_csv(raw, index=False)
+
+    out = ingest_ura_raw.ingest_file(raw)
+
+    assert len(out) == 1
+    row = out.iloc[0]
+    assert row["address"] == "10 TEST ROAD #06-15"
+    assert row["street_name"] == "10 TEST ROAD"
+    assert row["unit_number"] == "#06-15"
+    assert str(row["unit_floor"]).zfill(2) == "06"
+    assert str(row["unit_stack"]).zfill(2) == "15"
+    assert row["unit_number_status"] == "exact"
+    assert row["unit_number_source"] == "edgeprop_address"
+
+
 def test_api_project_records_flatten_to_ingestor_schema():
     rows = flatten_project_transactions([
         {
@@ -166,6 +207,29 @@ def test_dedupe_transactions_runs_without_merge_mode():
 
     assert len(deduped) == 1
     assert dropped == 1
+
+
+def test_dedupe_keeps_distinct_exact_condo_units_apart():
+    common = {
+        "planning_area": "NOVENA",
+        "transacted_price": 1536500,
+        "area_sqm": 78.039,
+        "sale_month": "2026-06",
+        "property_type": "Condominium",
+        "project_name": "TEST RESIDENCES",
+        "street_name": "10 TEST ROAD",
+    }
+    df = pd.DataFrame(
+        [
+            {**common, "address": "10 TEST ROAD #06-15", "unit_number": "#06-15"},
+            {**common, "address": "10 TEST ROAD #07-15", "unit_number": "#07-15"},
+        ]
+    )
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert len(deduped) == 2
+    assert dropped == 0
 
 
 def test_dedupe_keeps_land_and_strata_landed_apart():

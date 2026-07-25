@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "reports": [
+    {
+      "id": "estate-comparison",
+      "path": "comparison_table.html",
+      "title": "Estate comparison table",
+      "category": "estate-framework",
+      "kind": "comparison",
+      "summary": "Compare Provision, persona-relative Liveability, tenure-segmented Value, employment and risk across Singapore estates.",
+      "tags": ["estate", "provision", "liveability", "value"]
+    },
+    {
+      "id": "buyer-profiles",
+      "path": "buyer_profile_table.html",
+      "title": "Buyer profile evaluation",
+      "category": "estate-framework",
+      "kind": "explorer",
+      "summary": "Explore which estate characteristics fit different household profiles and time horizons.",
+      "tags": ["persona", "household", "liveability"]
+    },
+    {
+      "id": "mrt-comparison",
+      "path": "mrt_comparison_table.html",
+      "title": "MRT station comparison",
+      "category": "estate-framework",
+      "kind": "comparison",
+      "summary": "Research MRT and LRT stations alongside nearby estate framework evidence.",
+      "tags": ["mrt", "lrt", "transport", "estate"]
+    },
+    {
+      "id": "framework-diagram",
+      "path": "framework_diagram.html",
+      "title": "Framework architecture",
+      "category": "estate-framework",
+      "kind": "method",
+      "summary": "Understand how source layers flow into the separate Provision, Liveability and Value views.",
+      "tags": ["method", "architecture", "provenance"]
+    },
+    {
+      "id": "private-projects",
+      "path": "private_project_comparison_table.html",
+      "title": "Private condominium project comparison",
+      "category": "private-property",
+      "kind": "explorer",
+      "summary": "Filter private projects by district, station, sale mix and school context using project-level transaction evidence.",
+      "tags": ["condominium", "project", "transaction", "district"],
+      "featured": true
+    },
+    {
+      "id": "poiz-east-comparison",
+      "path": "poiz_east_resale_comparison.html",
+      "title": "Poiz versus East-side resale condominiums",
+      "category": "private-property",
+      "kind": "research",
+      "summary": "Compare achieved resale prices, bedroom mix, liquidity, access, buyer fit and planning context across nine projects.",
+      "tags": ["poiz", "resale", "condominium", "east"],
+      "featured": true
+    },
+    {
+      "id": "poiz-east-transactions",
+      "path": "poiz_east_unit_growth_transactions.html",
+      "title": "Poiz and East unit growth and transactions",
+      "category": "private-property",
+      "kind": "transaction-ledger",
+      "summary": "Inspect unit-type growth, annual PSF history and the underlying resale transaction ledger.",
+      "tags": ["poiz", "unit", "transaction", "growth"]
+    },
+    {
+      "id": "district-17",
+      "path": "private_project_comparison_D17.html",
+      "title": "District 17 private project comparison",
+      "category": "district",
+      "kind": "comparison",
+      "summary": "Review private residential transaction evidence for Changi, Loyang and Pasir Ris.",
+      "tags": ["district 17", "changi", "loyang", "pasir ris"]
+    },
+    {
+      "id": "district-18",
+      "path": "private_project_comparison_D18.html",
+      "title": "District 18 private project comparison",
+      "category": "district",
+      "kind": "comparison",
+      "summary": "Review private residential transaction evidence for Tampines and Pasir Ris.",
+      "tags": ["district 18", "tampines", "pasir ris"]
+    },
+    {
+      "id": "district-27",
+      "path": "private_project_comparison_D27.html",
+      "title": "District 27 private project comparison",
+      "category": "district",
+      "kind": "comparison",
+      "summary": "Review private residential transaction evidence for Yishun and Sembawang.",
+      "tags": ["district 27", "yishun", "sembawang", "canberra"]
+    },
+    {
+      "id": "district-18-26",
+      "path": "district_pair_comparison_D18_D26.html",
+      "title": "District 18 versus District 26",
+      "category": "district",
+      "kind": "comparison",
+      "summary": "Compare private residential transaction evidence across Districts 18 and 26.",
+      "tags": ["district 18", "district 26", "comparison"]
+    },
+    {
+      "id": "landed-growth",
+      "path": "landed_growth_dashboard.html",
+      "title": "Landed property growth dashboard",
+      "category": "private-property",
+      "kind": "dashboard",
+      "summary": "Explore landed transaction and PSF growth diagnostics by project and district.",
+      "tags": ["landed", "growth", "psf", "transaction"]
+    },
+    {
+      "id": "canberra-d27",
+      "path": "canberra_crescent_d27_deep_analysis.html",
+      "title": "Canberra Crescent District 27 deep analysis",
+      "category": "canberra",
+      "kind": "research",
+      "summary": "Audit launch evidence, bedroom-matched peers and District 27 condominium transactions.",
+      "tags": ["canberra", "district 27", "launch", "transaction"],
+      "featured": true
+    },
+    {
+      "id": "canberra-micro-location",
+      "path": "canberra_strategy_1_micro_location.html",
+      "title": "Canberra strategy 1: micro-location",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Compare Canberra Crescent with nearby peers to minimise location drift.",
+      "tags": ["canberra", "micro-location", "peer"]
+    },
+    {
+      "id": "canberra-newness",
+      "path": "canberra_strategy_2_newness.html",
+      "title": "Canberra strategy 2: newness",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Separate lease vintage, project age and launch-state effects from observed price differences.",
+      "tags": ["canberra", "lease", "newness", "launch"]
+    },
+    {
+      "id": "canberra-integration",
+      "path": "canberra_strategy_3_integration.html",
+      "title": "Canberra strategy 3: integration",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Test rail, retail and town-centre convenience as distinct evidence layers.",
+      "tags": ["canberra", "integration", "rail", "retail"]
+    },
+    {
+      "id": "canberra-unit-matching",
+      "path": "canberra_strategy_4_unit_matching.html",
+      "title": "Canberra strategy 4: unit matching",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Match bedroom, size and floor cohorts before comparing total quantum and PSF.",
+      "tags": ["canberra", "bedroom", "size", "floor"]
+    },
+    {
+      "id": "canberra-sale-state",
+      "path": "canberra_strategy_5_sale_state.html",
+      "title": "Canberra strategy 5: sale state",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Keep new sale, sub-sale and resale evidence separate when studying price and liquidity.",
+      "tags": ["canberra", "new sale", "sub-sale", "resale"]
+    },
+    {
+      "id": "canberra-planning-context",
+      "path": "canberra_strategy_6_planning_context.html",
+      "title": "Canberra strategy 6: planning context",
+      "category": "canberra",
+      "kind": "workbook",
+      "summary": "Classify delivered, committed and conceptual infrastructure without treating plans as booked returns.",
+      "tags": ["canberra", "planning", "infrastructure", "risk"]
+    }
+  ]
+}

@@ -3,189 +3,551 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Singapore Estate Framework · Research Reports</title>
+<meta name="description" content="Research Singapore condominiums and estates with transaction, access, liveability and value evidence.">
+<title>Singapore Estate Research Hub</title>
+<link rel="stylesheet" href="assets/research-shell.css">
 <style>
   :root {
-    --ink:#17212b; --muted:#617080; --line:#d9e1e8; --paper:#f4f7f8;
-    --card:#fff; --accent:#0f766e; --accent-soft:#dff4f0;
+    --ink:#14221e; --muted:#60706a; --line:#d8e3de; --paper:#f2f6f3;
+    --card:#fff; --accent:#08786d; --accent-strong:#075b54; --accent-soft:#def2ed;
+    --warm:#e9a23b; --warm-soft:#fff1d9; --navy:#17324d; --shadow:0 18px 55px rgba(23,50,40,.09);
   }
   * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
   body { margin:0; background:var(--paper); color:var(--ink);
     font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-  main { max-width:1180px; margin:0 auto; padding:52px 28px 76px; }
-  .eyebrow { color:var(--accent); font-size:11px; font-weight:850;
-    letter-spacing:.14em; text-transform:uppercase; }
-  h1 { max-width:850px; margin:9px 0 12px; font-size:clamp(34px,5vw,58px);
-    line-height:1.01; letter-spacing:-.045em; }
-  .lede { max-width:790px; margin:0; color:var(--muted); font-size:16px; line-height:1.6; }
-  h2 { margin:42px 0 14px; font-size:20px; letter-spacing:-.02em; }
-  .featured,.grid { display:grid; gap:14px; }
-  .featured { grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:30px; }
-  .grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-  .card { display:flex; min-height:176px; flex-direction:column; padding:20px;
-    border:1px solid var(--line); border-radius:15px; background:var(--card);
-    color:inherit; text-decoration:none; box-shadow:0 8px 22px rgba(23,33,43,.04);
-    transition:transform .16s ease,border-color .16s ease; }
-  .card:hover { transform:translateY(-2px); border-color:#83bdb6; }
-  .featured .card { min-height:215px; background:var(--ink); color:white; border-color:var(--ink); }
-  .tag { align-self:flex-start; border-radius:99px; padding:5px 8px;
-    background:var(--accent-soft); color:var(--accent); font-size:9px;
-    font-weight:850; text-transform:uppercase; letter-spacing:.06em; }
-  .featured .tag { background:#244039; color:#8ce0d3; }
-  .card h3 { margin:19px 0 7px; font-size:18px; letter-spacing:-.02em; }
-  .featured .card h3 { font-size:25px; }
-  .card p { margin:0; color:var(--muted); font-size:11px; line-height:1.55; }
-  .featured .card p { color:#cbd5df; font-size:12px; }
-  .open { margin-top:auto; padding-top:17px; color:var(--accent); font-size:11px; font-weight:850; }
-  .featured .open { color:#8ce0d3; }
-  footer { margin-top:44px; padding-top:17px; border-top:1px solid var(--line);
-    color:var(--muted); font-size:10px; line-height:1.6; }
+  button,input,select { font:inherit; }
+  a { color:inherit; }
+  .site-header { border-bottom:1px solid rgba(216,227,222,.9); background:rgba(242,246,243,.92);
+    backdrop-filter:blur(14px); position:sticky; top:0; z-index:100; }
+  .site-nav { max-width:1180px; min-height:64px; margin:auto; padding:0 28px; display:flex;
+    align-items:center; justify-content:space-between; gap:20px; }
+  .brand { display:flex; gap:10px; align-items:center; text-decoration:none; font-size:13px; font-weight:850; }
+  .brand-mark { display:grid; width:30px; height:30px; place-items:center; border-radius:9px;
+    background:var(--accent); color:white; font-size:11px; }
+  .nav-links { display:flex; gap:6px; }
+  .nav-links a { padding:9px 11px; border-radius:8px; color:var(--muted); text-decoration:none;
+    font-size:12px; font-weight:700; }
+  .nav-links a:hover { background:white; color:var(--accent); }
+  main { max-width:1180px; margin:0 auto; padding:56px 28px 82px; }
+  .hero { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr); gap:48px;
+    align-items:start; padding:22px 0 40px; }
+  .eyebrow { color:var(--accent); font-size:11px; font-weight:900; letter-spacing:.15em;
+    text-transform:uppercase; }
+  h1 { max-width:690px; margin:11px 0 17px; font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(43px,6vw,72px); font-weight:500; line-height:.98; letter-spacing:-.045em; }
+  .lede { max-width:660px; margin:0; color:var(--muted); font-size:17px; line-height:1.65; }
+  .proof { display:flex; flex-wrap:wrap; gap:9px 22px; margin-top:28px; color:var(--muted);
+    font-size:11px; font-weight:700; }
+  .proof span::before { content:""; display:inline-block; width:6px; height:6px; margin:0 8px 1px 0;
+    border-radius:50%; background:var(--accent); }
+  .finder { padding:8px; border:1px solid var(--line); border-radius:20px; background:rgba(255,255,255,.72);
+    box-shadow:var(--shadow); }
+  .finder-inner { padding:22px; border-radius:14px; background:white; }
+  .finder h2 { margin:0; font-size:20px; letter-spacing:-.025em; }
+  .finder-intro { margin:6px 0 18px; color:var(--muted); font-size:12px; line-height:1.5; }
+  .research-tabs { display:grid; grid-template-columns:1fr 1fr; padding:3px; margin-bottom:17px;
+    border-radius:10px; background:#edf2ef; }
+  .tab { min-height:38px; padding:8px 10px; border:0; border-radius:8px; background:transparent;
+    color:var(--muted); font-size:11px; font-weight:850; cursor:pointer; }
+  .tab[aria-selected="true"] { background:white; color:var(--ink); box-shadow:0 2px 9px rgba(20,34,30,.1); }
+  .research-panel[hidden] { display:none; }
+  label { display:block; margin:0 0 7px; font-size:10px; font-weight:900; letter-spacing:.06em;
+    text-transform:uppercase; }
+  .input-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; position:relative; }
+  input,select { width:100%; min-height:47px; padding:10px 12px; border:1px solid #bccdc5;
+    border-radius:9px; background:#fff; color:var(--ink); font-size:13px; outline:none; }
+  input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.13); }
+  .primary-btn { min-height:47px; padding:10px 15px; border:0; border-radius:9px; background:var(--accent);
+    color:white; font-size:11px; font-weight:900; cursor:pointer; }
+  .primary-btn:hover { background:var(--accent-strong); }
+  .suggestions { position:absolute; top:51px; left:0; right:92px; z-index:30; max-height:245px;
+    overflow:auto; margin:0; padding:5px; border:1px solid var(--line); border-radius:10px;
+    background:white; box-shadow:0 15px 35px rgba(20,34,30,.16); list-style:none; }
+  .suggestions:empty,.suggestions[hidden] { display:none; }
+  .suggestions button { width:100%; padding:9px 10px; border:0; border-radius:7px; background:transparent;
+    color:var(--ink); text-align:left; font-size:12px; cursor:pointer; }
+  .suggestions button:hover,.suggestions button[aria-selected="true"] { background:var(--accent-soft); }
+  .suggestions small { display:block; margin-top:2px; color:var(--muted); font-size:9px; }
+  .route-note { min-height:34px; margin:10px 0 0; color:var(--muted); font-size:10px; line-height:1.5; }
+  .route-note a { color:var(--accent); font-weight:800; }
+  .popular { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .popular button { padding:6px 8px; border:1px solid var(--line); border-radius:99px; background:white;
+    color:var(--muted); font-size:9px; font-weight:750; cursor:pointer; }
+  .popular button:hover { border-color:#8fbfb6; color:var(--accent); }
+  .workflow { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin:10px 0 54px;
+    border:1px solid var(--line); border-radius:15px; overflow:hidden; background:var(--line); }
+  .step { padding:21px; background:white; }
+  .step b { display:block; margin-bottom:6px; font-size:12px; }
+  .step p { margin:0; color:var(--muted); font-size:10px; line-height:1.55; }
+  .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin:44px 0 16px; }
+  .section-head h2 { margin:0; font-size:24px; letter-spacing:-.035em; }
+  .section-head p { max-width:570px; margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
+  .collection-controls { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:15px; }
+  .filter-chip { min-height:34px; padding:7px 11px; border:1px solid var(--line); border-radius:99px;
+    background:white; color:var(--muted); font-size:10px; font-weight:800; cursor:pointer; }
+  .filter-chip.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+  .report-search { width:min(290px,100%); min-height:34px; margin-left:auto; padding:7px 10px; font-size:11px; }
+  .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; }
+  .card { display:flex; min-height:194px; flex-direction:column; padding:20px; border:1px solid var(--line);
+    border-radius:14px; background:var(--card); color:inherit; text-decoration:none;
+    box-shadow:0 8px 24px rgba(20,34,30,.035); transition:transform .16s,border-color .16s,box-shadow .16s; }
+  .card:hover { transform:translateY(-2px); border-color:#83b9ae; box-shadow:0 14px 32px rgba(20,34,30,.08); }
+  .card[hidden] { display:none; }
+  .tag { align-self:flex-start; padding:5px 8px; border-radius:99px; background:var(--accent-soft);
+    color:var(--accent); font-size:8px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+  .card h3 { margin:18px 0 7px; font-size:17px; letter-spacing:-.025em; }
+  .card p { margin:0; color:var(--muted); font-size:10px; line-height:1.6; }
+  .open { margin-top:auto; padding-top:18px; color:var(--accent); font-size:10px; font-weight:900; }
+  .featured { min-height:244px; background:var(--navy); color:white; border-color:var(--navy); }
+  .featured .tag { background:#274963; color:#a9e5d9; }
+  .featured p { color:#bdcbd6; }
+  .featured .open { color:#8cddd0; }
+  .method { display:grid; grid-template-columns:1fr 1fr 1fr; gap:13px; margin-top:16px; }
+  .method article { padding:18px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.58); }
+  .method b { font-size:11px; }
+  .method p { margin:6px 0 0; color:var(--muted); font-size:10px; line-height:1.55; }
+  .data-note { margin-top:13px; padding:13px 15px; border-left:3px solid var(--warm);
+    background:var(--warm-soft); color:#72501f; font-size:10px; line-height:1.55; }
+  .empty { display:none; padding:25px; border:1px dashed #aec1b8; border-radius:12px;
+    color:var(--muted); text-align:center; font-size:11px; }
+  footer { display:flex; justify-content:space-between; gap:30px; margin-top:54px; padding-top:18px;
+    border-top:1px solid var(--line); color:var(--muted); font-size:9px; line-height:1.65; }
   footer a { color:inherit; }
-  @media(max-width:850px) { .grid { grid-template-columns:repeat(2,1fr); } }
-  @media(max-width:620px) {
-    main { padding:35px 15px 55px; }
-    .featured,.grid { grid-template-columns:1fr; }
+  :focus-visible { outline:3px solid #f2a900; outline-offset:2px; }
+  @media(max-width:900px) {
+    .hero { grid-template-columns:1fr; gap:32px; }
+    .finder { max-width:680px; }
+    .grid { grid-template-columns:repeat(2,1fr); }
+  }
+  @media(max-width:650px) {
+    .site-nav { padding:0 15px; }
+    .nav-links a:not(:first-child) { display:none; }
+    main { padding:35px 15px 58px; }
+    h1 { font-size:45px; }
+    .finder-inner { padding:17px; }
+    .workflow,.grid,.method { grid-template-columns:1fr; }
+    .section-head,footer { align-items:start; flex-direction:column; }
+    .report-search { width:100%; margin-left:0; }
   }
 </style>
 </head>
-<body><main>
-<div class="eyebrow">Singapore Estate Liveability Framework</div>
-<h1>Research reports and interactive comparisons</h1>
-<p class="lede">Static, evidence-led explorations of Singapore estates and private residential projects. Provision, person-relative Liveability and tenure-segmented Value remain separate analytical views.</p>
+<body data-research-shell="off">
+<a class="research-shell-skip" href="#research-content">Skip to research tools</a>
+<header class="site-header">
+  <nav class="site-nav" aria-label="Primary navigation">
+    <span class="brand" aria-label="Current page"><span class="brand-mark" aria-hidden="true">SG</span>Estate research hub</span>
+    <span class="nav-links">
+      <a href="#research-content">Start research</a>
+      <a href="#reports">Reports</a>
+      <a href="#method">Method</a>
+    </span>
+  </nav>
+</header>
 
-<div class="featured">
-  <a class="card" href="poiz_east_resale_comparison.html">
-    <span class="tag">Featured comparison</span>
-    <h3>Poiz versus East-side resale condominiums</h3>
-    <p>Nine-project comparison of achieved resale prices, bedroom mix, liquidity, access, buyer fit, risks and planning context.</p>
-    <span class="open">Open comparison →</span>
-  </a>
-  <a class="card" href="poiz_east_unit_growth_transactions.html">
-    <span class="tag">Transaction explorer</span>
-    <h3>Unit-type growth and every resale transaction</h3>
-    <p>Rolling 12-month growth by bedroom type, annual PSF history and 1,757 transaction records with floor, size and provenance.</p>
-    <span class="open">Open transaction history →</span>
-  </a>
-</div>
+<main id="research-content">
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <div class="eyebrow">Singapore Estate Liveability Framework</div>
+      <h1 id="hero-title">Research a home in its real context.</h1>
+      <p class="lede">Start with a condominium or district, then examine achieved prices, unit mix, access, household fit and future context—without collapsing them into one misleading score.</p>
+      <div class="proof" aria-label="Research coverage">
+        <span>3,477 EdgeProp project names indexed</span>
+        <span>28 postal districts</span>
+        <span>Persona and horizon views</span>
+      </div>
+    </div>
 
-<h2>Estate framework</h2>
-<div class="grid">
-  <a class="card" href="comparison_table.html">
-    <span class="tag">Estate comparison</span>
-    <h3>Estate comparison table</h3>
-    <p>Framework outputs presented across the estate universe.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="buyer_profile_table.html">
-    <span class="tag">Personas</span>
-    <h3>Buyer profile table</h3>
-    <p>Liveability views for different household needs and horizons.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="mrt_comparison_table.html">
-    <span class="tag">Transport</span>
-    <h3>MRT comparison</h3>
-    <p>Estate and station-oriented transport diagnostics.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="framework_diagram.html">
-    <span class="tag">Method</span>
-    <h3>Framework diagram</h3>
-    <p>A visual guide to the framework’s analytical structure.</p>
-    <span class="open">Open diagram →</span>
-  </a>
-</div>
+    <section class="finder" aria-labelledby="finder-title">
+      <div class="finder-inner">
+        <h2 id="finder-title">What are you researching?</h2>
+        <p class="finder-intro">Choose a starting point. You can narrow the evidence after opening the explorer.</p>
+        <div class="research-tabs" role="tablist" aria-label="Research type">
+          <button class="tab" id="condo-tab" role="tab" aria-selected="true" aria-controls="condo-panel">Condominium</button>
+          <button class="tab" id="district-tab" role="tab" aria-selected="false" aria-controls="district-panel">District or estate</button>
+        </div>
 
-<h2>Private project and district research</h2>
-<div class="grid">
-  <a class="card" href="canberra_crescent_d27_deep_analysis.html">
-    <span class="tag">Canberra · District 27</span>
-    <h3>Canberra Crescent deep analysis</h3>
-    <p>Launch audit, bedroom-matched peers and diagnostics for every official District 27 condominium transaction.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="private_project_comparison_table.html">
-    <span class="tag">All projects</span>
-    <h3>Private project comparison</h3>
-    <p>Large project-level transaction comparison with mix-aware recent evidence.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="private_project_comparison_D17.html">
-    <span class="tag">District 17</span>
-    <h3>D17 project comparison</h3>
-    <p>Private residential transaction evidence for District 17.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="private_project_comparison_D18.html">
-    <span class="tag">District 18</span>
-    <h3>D18 project comparison</h3>
-    <p>Private residential transaction evidence for District 18.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="private_project_comparison_D27.html">
-    <span class="tag">District 27</span>
-    <h3>D27 project comparison</h3>
-    <p>Private residential transaction evidence for District 27.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="district_pair_comparison_D18_D26.html">
-    <span class="tag">District pair</span>
-    <h3>D18 versus D26</h3>
-    <p>A focused transaction comparison across two private residential districts.</p>
-    <span class="open">Open report →</span>
-  </a>
-  <a class="card" href="landed_growth_dashboard.html">
-    <span class="tag">Landed</span>
-    <h3>Landed growth dashboard</h3>
-    <p>Interactive landed transaction and growth diagnostics.</p>
-    <span class="open">Open dashboard →</span>
-  </a>
-</div>
+        <div class="research-panel" id="condo-panel" role="tabpanel" aria-labelledby="condo-tab">
+          <form id="condo-form">
+            <label for="condo-search">Project name</label>
+            <div class="input-row">
+              <input id="condo-search" name="q" type="search" autocomplete="off"
+                placeholder="e.g. Treasure at Tampines" role="combobox" aria-autocomplete="list"
+                aria-expanded="false" aria-controls="condo-suggestions">
+              <button class="primary-btn" type="submit">Research</button>
+              <ul class="suggestions" id="condo-suggestions" role="listbox" hidden></ul>
+            </div>
+            <p class="route-note" id="condo-route" aria-live="polite">Searches open the all-project explorer. A dedicated project or district report is offered when one exists.</p>
+            <div class="popular" aria-label="Example condominium searches">
+              <button type="button" data-project="TREASURE AT TAMPINES">Treasure at Tampines</button>
+              <button type="button" data-project="THE POIZ RESIDENCES">The Poiz Residences</button>
+              <button type="button" data-project="CANBERRA CRESCENT RESIDENCES">Canberra Crescent</button>
+            </div>
+          </form>
+        </div>
 
-<h2>Canberra comparison strategy workbooks</h2>
-<div class="grid">
-  <a class="card" href="canberra_strategy_1_micro_location.html">
-    <span class="tag">Strategy 01</span>
-    <h3>Micro-location first</h3>
-    <p>Subject-active comparison with The Watergardens and The Commodore to minimise location drift.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-  <a class="card" href="canberra_strategy_2_newness.html">
-    <span class="tag">Strategy 02</span>
-    <h3>Control for newness</h3>
-    <p>Lease-vintage, project-age and period controls anchored by older Canberra Residences.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-  <a class="card" href="canberra_strategy_3_integration.html">
-    <span class="tag">Strategy 03</span>
-    <h3>Price integration separately</h3>
-    <p>Rail, retail and town-centre convenience tested as distinct layers rather than one premium.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-  <a class="card" href="canberra_strategy_4_unit_matching.html">
-    <span class="tag">Strategy 04</span>
-    <h3>Match bedroom, size and floor</h3>
-    <p>Strict cohort comparisons with total quantum beside PSF and thin cells withheld.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-  <a class="card" href="canberra_strategy_5_sale_state.html">
-    <span class="tag">Strategy 05</span>
-    <h3>Keep sale states apart</h3>
-    <p>New Sale, Sub Sale and Resale liquidity separated by the process that formed each price.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-  <a class="card" href="canberra_strategy_6_planning_context.html">
-    <span class="tag">Strategy 06</span>
-    <h3>Treat plans as context</h3>
-    <p>Delivered, committed and conceptual infrastructure classified without booking future returns.</p>
-    <span class="open">Open workbook →</span>
-  </a>
-</div>
+        <div class="research-panel" id="district-panel" role="tabpanel" aria-labelledby="district-tab" hidden>
+          <form id="district-form">
+            <label for="district-select">Postal district</label>
+            <div class="input-row">
+              <select id="district-select" name="district">
+                <option value="">Choose D01–D28</option>
+              </select>
+              <button class="primary-btn" type="submit">Research</button>
+            </div>
+            <p class="route-note" id="district-route" aria-live="polite">Select a district to see whether a dedicated report is available.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </section>
 
-<footer>
-  Static research artifacts from
-  <a href="https://github.com/evancjx/housing-estate-framework">evancjx/housing-estate-framework</a>.
-  Transaction evidence is descriptive and does not constitute financial advice.
-</footer>
-</main></body>
+  <section class="workflow" aria-label="Suggested research workflow">
+    <article class="step"><b>1 · Find the subject</b><p>Open the target project or district before choosing comparables.</p></article>
+    <article class="step"><b>2 · Match like with like</b><p>Compare bedroom, size, floor and sale state—not headline medians alone.</p></article>
+    <article class="step"><b>3 · Add household context</b><p>Read Provision, Liveability and tenure-specific Value as separate views.</p></article>
+  </section>
+
+  <section id="reports" aria-labelledby="reports-title">
+    <div class="section-head">
+      <div><div class="eyebrow">Research library</div><h2 id="reports-title">Choose the evidence you need</h2></div>
+      <p>Start broad, then move into a district, project or transaction view. Dates and source limitations remain visible inside each report.</p>
+    </div>
+    <div class="collection-controls" aria-label="Filter reports">
+      <button class="filter-chip active" data-filter="all">All reports</button>
+      <button class="filter-chip" data-filter="project">Projects</button>
+      <button class="filter-chip" data-filter="district">Districts</button>
+      <button class="filter-chip" data-filter="estate">Estates & households</button>
+      <button class="filter-chip" data-filter="method">Method</button>
+      <input class="report-search" id="report-search" type="search" placeholder="Filter this report library…" aria-label="Filter report library">
+    </div>
+
+    <div class="grid" id="report-grid">
+      <a class="card featured" data-kind="project" data-search="all private condominium project comparison mrt schools price transactions" href="private_project_comparison_table.html">
+        <span class="tag">Start here · All projects</span><h3>Private condominium explorer</h3>
+        <p>Search projects across 28 districts, then filter transaction evidence, MRT access, schools and estate context.</p>
+        <span class="open">Open project explorer →</span>
+      </a>
+      <a class="card featured" data-kind="estate" data-search="estate comparison provision liveability personas value" href="comparison_table.html">
+        <span class="tag">Start here · Estate context</span><h3>Estate and household explorer</h3>
+        <p>Compare objective Provision, person-relative Liveability and tenure-segmented Value without blending the views.</p>
+        <span class="open">Open estate explorer →</span>
+      </a>
+      <a class="card" data-kind="project" data-search="poiz east resale condominium comparison" href="poiz_east_resale_comparison.html">
+        <span class="tag">Project comparison</span><h3>Poiz versus East-side resale</h3>
+        <p>Nine-project comparison of achieved prices, liquidity, access, buyer fit and planning context.</p>
+        <span class="open">Open comparison →</span>
+      </a>
+      <a class="card" data-kind="project" data-search="poiz unit type growth every resale transaction history floor size" href="poiz_east_unit_growth_transactions.html">
+        <span class="tag">Transaction explorer</span><h3>Unit-type growth and transactions</h3>
+        <p>Rolling growth by bedroom type, annual PSF history and transaction records with floor, size and provenance.</p>
+        <span class="open">Open transaction history →</span>
+      </a>
+      <a class="card" data-kind="district project" data-search="canberra crescent d27 deep analysis launch bedroom peers" href="canberra_crescent_d27_deep_analysis.html">
+        <span class="tag">Canberra · D27</span><h3>Canberra Crescent deep analysis</h3>
+        <p>Launch audit, bedroom-matched peers and District 27 private transaction diagnostics.</p>
+        <span class="open">Open deep analysis →</span>
+      </a>
+      <a class="card" data-kind="district" data-search="district 17 d17 private project comparison" href="private_project_comparison_D17.html">
+        <span class="tag">District 17</span><h3>D17 project comparison</h3>
+        <p>Private residential transaction evidence for Changi, Loyang and Pasir Ris.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card" data-kind="district" data-search="district 18 d18 private project comparison pasir ris tampines" href="private_project_comparison_D18.html">
+        <span class="tag">District 18</span><h3>D18 project comparison</h3>
+        <p>Private residential transaction evidence for Pasir Ris and Tampines.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card" data-kind="district" data-search="district 27 d27 private project comparison yishun sembawang" href="private_project_comparison_D27.html">
+        <span class="tag">District 27</span><h3>D27 project comparison</h3>
+        <p>Private residential transaction evidence for Yishun and Sembawang.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card" data-kind="district" data-search="district pair d18 d26 tampines lentor upper thomson" href="district_pair_comparison_D18_D26.html">
+        <span class="tag">District pair</span><h3>D18 versus D26</h3>
+        <p>A focused bedroom, size and MRT-distance comparison across two private districts.</p><span class="open">Open comparison →</span>
+      </a>
+      <a class="card" data-kind="project" data-search="landed growth dashboard transactions" href="landed_growth_dashboard.html">
+        <span class="tag">Landed</span><h3>Landed growth dashboard</h3>
+        <p>Interactive landed transaction and growth diagnostics, kept outside the condominium universe.</p><span class="open">Open dashboard →</span>
+      </a>
+      <a class="card" data-kind="estate" data-search="buyer household personas liveability profile young family professional retiree lifestyle" href="buyer_profile_table.html">
+        <span class="tag">Household fit</span><h3>Buyer profile table</h3>
+        <p>Person-relative Liveability views for different household needs and time horizons.</p><span class="open">Open personas →</span>
+      </a>
+      <a class="card" data-kind="estate" data-search="mrt transport station comparison" href="mrt_comparison_table.html">
+        <span class="tag">Transport</span><h3>MRT comparison</h3>
+        <p>Estate and station-oriented transport diagnostics across current and future horizons.</p><span class="open">Open transport view →</span>
+      </a>
+      <a class="card" data-kind="method" data-search="framework diagram method provision liveability value" href="framework_diagram.html">
+        <span class="tag">Method</span><h3>How the framework works</h3>
+        <p>A visual guide to the analytical structure, including the intentional split between views.</p><span class="open">Open method →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy micro location watergardens commodore" href="canberra_strategy_1_micro_location.html">
+        <span class="tag">Comparison practice · 01</span><h3>Start with micro-location</h3>
+        <p>Keep the subject active while choosing nearby peers, so location drift remains visible.</p><span class="open">Open workbook →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy newness lease vintage age period" href="canberra_strategy_2_newness.html">
+        <span class="tag">Comparison practice · 02</span><h3>Control for newness</h3>
+        <p>Separate lease vintage, project age and transaction period before reading a premium.</p><span class="open">Open workbook →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy integration mrt rail retail town centre" href="canberra_strategy_3_integration.html">
+        <span class="tag">Comparison practice · 03</span><h3>Price integration separately</h3>
+        <p>Test rail, retail and town-centre convenience as distinct layers rather than one premium.</p><span class="open">Open workbook →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy workbooks unit matching sale state planning newness micro location integration" href="canberra_strategy_4_unit_matching.html">
+        <span class="tag">Comparison practice · 04</span><h3>Match bedroom, size and floor</h3>
+        <p>A Canberra workbook demonstrating strict cohorts, total quantum, PSF and thin-cell withholding.</p><span class="open">Open workbook →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy sale state new sale sub sale resale liquidity" href="canberra_strategy_5_sale_state.html">
+        <span class="tag">Comparison practice · 05</span><h3>Keep sale states apart</h3>
+        <p>Separate new sale, sub sale and resale evidence by the process that formed each price.</p><span class="open">Open workbook →</span>
+      </a>
+      <a class="card" data-kind="method project" data-search="canberra comparison strategy planning delivered committed conceptual" href="canberra_strategy_6_planning_context.html">
+        <span class="tag">Comparison practice · 06</span><h3>Treat plans as context</h3>
+        <p>Classify delivered, committed and conceptual infrastructure without booking future returns.</p><span class="open">Open workbook →</span>
+      </a>
+    </div>
+    <div class="empty" id="report-empty">No report title matches that filter. Try a project or district in the research finder above.</div>
+  </section>
+
+  <section id="method" aria-labelledby="method-title">
+    <div class="section-head">
+      <div><div class="eyebrow">Read the framework correctly</div><h2 id="method-title">Three views, three questions</h2></div>
+    </div>
+    <div class="method">
+      <article><b>Provision · What is here?</b><p>Objective, supply-side and comparable across estates. It produces one estate score and an archetype.</p></article>
+      <article><b>Liveability · Does it fit me?</b><p>Person-relative and horizon-specific. It is a 4-persona × 3-horizon matrix, not a universal ranking.</p></article>
+      <article><b>Value · Is the cost justified for me?</b><p>Lives inside Liveability and remains segmented by tenure. HDB and private are never blended.</p></article>
+    </div>
+    <div class="data-note"><strong>About exact units:</strong> Public EdgeProp transaction rows commonly mask unit numbers as <code>#XX-XX</code> or preserve only a floor band. Masked values are not exact unit identifiers; exact-unit claims require an authenticated, verifiable source.</div>
+  </section>
+
+  <footer>
+    <span>Descriptive research artifacts—not financial advice. Check source date, sample count and cohort fit before drawing a conclusion.</span>
+    <span><a href="https://github.com/evancjx/housing-estate-framework">Source repository</a></span>
+  </footer>
+</main>
+
+<script src="assets/research-shell.js"></script>
+<script>
+(() => {
+  const PROJECT_REPORTS = {
+    "THE POIZ RESIDENCES": "poiz_east_resale_comparison.html",
+    "CANBERRA CRESCENT RESIDENCES": "canberra_crescent_d27_deep_analysis.html"
+  };
+  const DISTRICT_REPORTS = {
+    "17": "private_project_comparison_D17.html",
+    "18": "private_project_comparison_D18.html",
+    "27": "private_project_comparison_D27.html"
+  };
+  const DISTRICT_NAMES = {
+    "01":"Boat Quay · Raffles Place · Marina","02":"Chinatown · Tanjong Pagar","03":"Alexandra · Queenstown",
+    "04":"HarbourFront · Telok Blangah","05":"Buona Vista · West Coast","06":"City Hall · Clarke Quay",
+    "07":"Beach Road · Bugis","08":"Farrer Park · Serangoon Road","09":"Orchard · River Valley",
+    "10":"Tanglin · Holland","11":"Newton · Novena","12":"Balestier · Toa Payoh","13":"Macpherson · Potong Pasir",
+    "14":"Eunos · Geylang · Paya Lebar","15":"East Coast · Marine Parade","16":"Bedok · Upper East Coast",
+    "17":"Changi · Loyang · Pasir Ris","18":"Pasir Ris · Tampines","19":"Hougang · Punggol · Sengkang",
+    "20":"Ang Mo Kio · Bishan","21":"Clementi · Upper Bukit Timah","22":"Boon Lay · Jurong · Tuas",
+    "23":"Bukit Batok · Choa Chu Kang","24":"Lim Chu Kang · Tengah","25":"Admiralty · Woodlands",
+    "26":"Lentor · Upper Thomson","27":"Sembawang · Yishun","28":"Seletar · Yio Chu Kang"
+  };
+  const fallbackProjects = [
+    {name:"TREASURE AT TAMPINES",slug:"treasure-at-tampines",district:"18"},
+    {name:"THE POIZ RESIDENCES",slug:"the-poiz-residences",district:"13"},
+    {name:"CANBERRA CRESCENT RESIDENCES",slug:"canberra-crescent-residences",district:"27"}
+  ];
+  let projects = fallbackProjects;
+  let activeSuggestion = -1;
+
+  const condoInput = document.getElementById("condo-search");
+  const suggestions = document.getElementById("condo-suggestions");
+  const condoRoute = document.getElementById("condo-route");
+  const districtSelect = document.getElementById("district-select");
+  const districtRoute = document.getElementById("district-route");
+
+  Object.entries(DISTRICT_NAMES).forEach(([district, name]) => {
+    const option = document.createElement("option");
+    option.value = district;
+    option.textContent = `D${district} · ${name}`;
+    districtSelect.append(option);
+  });
+
+  fetch("projects.json")
+    .then(response => {
+      if (!response.ok) throw new Error("project index unavailable");
+      return response.json();
+    })
+    .then(payload => {
+      if (Array.isArray(payload.projects) && payload.projects.length) projects = payload.projects;
+    })
+    .catch(() => {});
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(button => button.setAttribute("aria-selected", String(button === tab)));
+      document.getElementById("condo-panel").hidden = tab.id !== "condo-tab";
+      document.getElementById("district-panel").hidden = tab.id !== "district-tab";
+      document.getElementById(tab.id === "condo-tab" ? "condo-search" : "district-select").focus();
+    });
+  });
+
+  function normalize(value) {
+    return value.trim().replace(/\s+/g, " ").toUpperCase();
+  }
+
+  function escapeMarkup(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[character]);
+  }
+
+  function exactProject() {
+    const value = normalize(condoInput.value);
+    return projects.find(project => normalize(project.name) === value);
+  }
+
+  function updateCondoRoute(project = exactProject()) {
+    if (!condoInput.value.trim()) {
+      condoRoute.textContent = "Searches open the all-project explorer. A dedicated project or district report is offered when one exists.";
+      return;
+    }
+    if (!project) {
+      condoRoute.textContent = "No exact catalog match yet. You can still search this name in the all-project explorer.";
+      return;
+    }
+    const report = PROJECT_REPORTS[normalize(project.name)];
+    const district = String(project.district || "").padStart(2, "0");
+    if (report) {
+      condoRoute.innerHTML = `Dedicated project research is available. <a href="${report}">Open that report</a>, or use the broader explorer.`;
+    } else if (DISTRICT_REPORTS[district]) {
+      condoRoute.innerHTML = `No dedicated project report yet. The project explorer is the best route; <a href="${DISTRICT_REPORTS[district]}">D${district} research</a> is also available.`;
+    } else {
+      condoRoute.textContent = "No dedicated project report yet. The all-project explorer will open with this project name applied.";
+    }
+  }
+
+  function renderSuggestions() {
+    const query = normalize(condoInput.value);
+    activeSuggestion = -1;
+    if (query.length < 2) {
+      suggestions.hidden = true;
+      condoInput.setAttribute("aria-expanded", "false");
+      updateCondoRoute();
+      return;
+    }
+    const matches = projects
+      .filter(project => normalize(project.name).includes(query))
+      .sort((a, b) => {
+        const aStarts = normalize(a.name).startsWith(query) ? 0 : 1;
+        const bStarts = normalize(b.name).startsWith(query) ? 0 : 1;
+        return aStarts - bStarts || a.name.localeCompare(b.name);
+      })
+      .slice(0, 8);
+    suggestions.innerHTML = matches.map((project, index) =>
+      `<li role="option"><button type="button" data-index="${index}" data-name="${escapeMarkup(project.name)}">${escapeMarkup(project.name)}<small>${project.district ? `District ${String(project.district).padStart(2, "0")}` : "Project explorer"}</small></button></li>`
+    ).join("");
+    suggestions.hidden = matches.length === 0;
+    condoInput.setAttribute("aria-expanded", String(matches.length > 0));
+    suggestions.querySelectorAll("button").forEach((button, index) => {
+      button.addEventListener("click", () => chooseSuggestion(matches[index]));
+    });
+    updateCondoRoute(matches.length === 1 ? matches[0] : undefined);
+  }
+
+  function chooseSuggestion(project) {
+    condoInput.value = project.name;
+    suggestions.hidden = true;
+    condoInput.setAttribute("aria-expanded", "false");
+    updateCondoRoute(project);
+    condoInput.focus();
+  }
+
+  condoInput.addEventListener("input", renderSuggestions);
+  condoInput.addEventListener("keydown", event => {
+    const buttons = Array.from(suggestions.querySelectorAll("button"));
+    if (!buttons.length || suggestions.hidden) return;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      activeSuggestion = event.key === "ArrowDown"
+        ? (activeSuggestion + 1) % buttons.length
+        : (activeSuggestion - 1 + buttons.length) % buttons.length;
+      buttons.forEach((button, index) => button.setAttribute("aria-selected", String(index === activeSuggestion)));
+      buttons[activeSuggestion].scrollIntoView({block:"nearest"});
+    } else if (event.key === "Enter" && activeSuggestion >= 0) {
+      event.preventDefault();
+      condoInput.value = buttons[activeSuggestion].dataset.name;
+      suggestions.hidden = true;
+      updateCondoRoute();
+    } else if (event.key === "Escape") {
+      suggestions.hidden = true;
+      condoInput.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.getElementById("condo-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const query = condoInput.value.trim();
+    if (!query) {
+      condoInput.focus();
+      condoRoute.textContent = "Enter a condominium project name to continue.";
+      return;
+    }
+    const project = exactProject();
+    window.location.href = project && PROJECT_REPORTS[normalize(project.name)]
+      ? PROJECT_REPORTS[normalize(project.name)]
+      : `private_project_comparison_table.html?q=${encodeURIComponent(query)}`;
+  });
+
+  document.querySelectorAll("[data-project]").forEach(button => {
+    button.addEventListener("click", () => {
+      condoInput.value = button.dataset.project;
+      updateCondoRoute();
+      condoInput.focus();
+    });
+  });
+
+  function updateDistrictRoute() {
+    const district = districtSelect.value;
+    if (!district) {
+      districtRoute.textContent = "Select a district to see whether a dedicated report is available.";
+    } else if (DISTRICT_REPORTS[district]) {
+      districtRoute.innerHTML = `A dedicated D${district} report is available and will open first. <a href="private_project_comparison_table.html?district=${district}">Use the all-project explorer instead</a>.`;
+    } else {
+      districtRoute.textContent = `No dedicated D${district} report yet. The all-project explorer will open with District ${district} applied.`;
+    }
+  }
+  districtSelect.addEventListener("change", updateDistrictRoute);
+  document.getElementById("district-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const district = districtSelect.value;
+    if (!district) {
+      districtSelect.focus();
+      districtRoute.textContent = "Choose a postal district to continue.";
+      return;
+    }
+    window.location.href = DISTRICT_REPORTS[district] || `private_project_comparison_table.html?district=${district}`;
+  });
+
+  let activeFilter = "all";
+  const reportSearch = document.getElementById("report-search");
+  function filterReports() {
+    const query = normalize(reportSearch.value);
+    let shown = 0;
+    document.querySelectorAll("#report-grid .card").forEach(card => {
+      const filterOk = activeFilter === "all" || card.dataset.kind.split(" ").includes(activeFilter);
+      const searchOk = !query || normalize(card.dataset.search + " " + card.textContent).includes(query);
+      card.hidden = !(filterOk && searchOk);
+      if (!card.hidden) shown += 1;
+    });
+    document.getElementById("report-empty").style.display = shown ? "none" : "block";
+  }
+  document.querySelectorAll(".filter-chip").forEach(button => {
+    button.addEventListener("click", () => {
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll(".filter-chip").forEach(chip => chip.classList.toggle("active", chip === button));
+      filterReports();
+    });
+  });
+  reportSearch.addEventListener("input", filterReports);
+})();
+</script>
+</body>
 </html>

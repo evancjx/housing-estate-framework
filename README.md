@@ -64,6 +64,25 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 - **`data/inputs/school_selectivity.csv` + `make private-project-school-metrics`** — seed school-demand/selectivity proxies and build private-project diagnostics such as primary schools within 1km and best-ranked school within level-specific radii. These are private-buyer diagnostics, not official MOE rankings.
 - **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → Models → `data/outputs/master_output.csv`). Same caveat.
 
+### Static research site
+
+Root HTML files remain the generated report artifacts. [`site/reports.json`](site/reports.json) is
+the machine-readable catalog used for report discovery; every non-index root report must have one
+entry. Shared browser assets belong in `site/assets/` and are referenced from reports as
+`assets/<name>`.
+
+The build also derives a compact `projects.json` lookup from the committed EdgeProp project list
+and transaction district field. It contains only project names, slugs, and known districts; raw
+transactions and exact-unit records are not published in the lookup.
+
+```bash
+make pages-check  # validate catalog coverage and report paths
+make pages-build  # assemble the GitHub Pages artifact in _site/
+```
+
+The Pages workflow uses the same builder and rejects broken local HTML, stylesheet, script, and
+image references before deployment.
+
 ## 🔧 Other files & directories
 - **[Makefile](Makefile)** — `make smoke` (test gate), `make pipeline` (full regeneration), `make master` (rebuild master only). See [CLAUDE.md](CLAUDE.md) for details.
 - **[scrapers/](scrapers/)** ([README](scrapers/README.md)) — URA private-transaction scrapers. Downloads apartment/condo, landed, and strata-landed PMI data by postal district for `value_model.py --private`.

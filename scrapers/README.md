@@ -110,6 +110,42 @@ python scrapers/ingest_ura_raw.py \
 The parser writes `Area (sqm)` from EdgeProp's sqft value, and the ingestor keeps `type_of_area`,
 `unit_price_psf`, `purchaser_address`, `source`, and `source_quality` when present.
 
+## Exact EdgeProp condo/apartment unit numbers
+
+Public EdgeProp pages publish masked addresses such as `#06-XX`. Exact unit numbers are a
+login/Pro feature. The scraper does not bypass that access control and never fills masked digits.
+Its dedicated unit schema records:
+
+- `unit_number`, `unit_floor`, `unit_stack`: populated only from one published, unmasked
+  `#floor-stack` token (including legitimate values such as `#PH-01` or `#B1-01`);
+- `unit_number_status`: `exact`, `masked`, `not_present`, or `unparseable`;
+- `unit_number_source`: `edgeprop_address` when an address unit fragment was present.
+
+Parse a copied or saved table you are authorised to view:
+
+```bash
+python3 scrapers/edgeprop_condo_apartment_playwright.py parse-transactions \
+  --html-file /path/to/saved-project.html \
+  --project-name "PROJECT NAME" --planning-area NOVENA --postal-district 11 \
+  --source-url https://www.edgeprop.sg/condo-apartment/project-slug \
+  --out data/raw/edgeprop/project_unit_transactions.csv
+```
+
+Alternatively, use a Playwright storage-state file for your own authorised session. Keep the state
+file outside the repository because it contains login credentials:
+
+```bash
+python3 scrapers/edgeprop_condo_apartment_playwright.py scrape \
+  --storage-state /secure/path/edgeprop-storage-state.json \
+  --unit-out data/raw/edgeprop/edgeprop_condo_unit_transactions.csv \
+  --resume
+```
+
+`--out` retains the legacy transaction schema; `--unit-out` writes the dedicated unit schema and
+prints exact/masked coverage. The unit output is a history of published transactions, not a complete
+inventory of every physical unit. Missing and never-transacted units cannot be recovered from the
+sales table. Review access and redistribution terms before committing paid-source extracts.
+
 ## District → Estate mapping
 
 | District | Label | Estate(s) in framework |

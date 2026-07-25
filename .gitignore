@@ -25,5 +25,15 @@ data/inputs/bus_stops_raw.json
 data/raw/edgeprop/probe/
 data/**/*probe*/
 
+# Browser authentication state contains reusable session credentials
+*storage-state*.json
+*storage_state*.json
+playwright/.auth/
+
 # Snapshot scratch (after_* are ephemeral; before/ is committed baseline)
 tests/snapshots/after_*/
+
+# Local GitHub Pages build artifact
+_site/
+_site-test/
+_site-unowned-test/

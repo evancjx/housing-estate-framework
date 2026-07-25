@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
-Playwright scraper for public EdgeProp condo/apartment transaction tables.
+EdgeProp condo/apartment transaction scraper and saved-table parser.
 
-This only reads rows visible in an unauthenticated browser session. EdgeProp
-masks unit numbers and gates full unit-number search behind login/Pro access.
-Rows are therefore marked source_quality=not_clean.
+By default, Playwright only reads rows visible in an unauthenticated browser
+session. EdgeProp masks unit numbers there and gates full unit-number access
+behind login/Pro access. An authorised Playwright storage state may be supplied
+with --storage-state, or a table the user is authorised to view may be parsed
+from saved HTML/text with parse-transactions.
+
+Unit numbers are never inferred. The unit_number field is populated only when
+the rendered/saved address contains one unmasked #floor-stack token.
+Masked, absent, and unparseable values remain blank and are distinguished by
+unit_number_status.
 
 Commands:
     python3 scrapers/edgeprop_condo_apartment_playwright.py discover
@@ -31,12 +38,13 @@ try:
     from playwright.async_api import TimeoutError as PlaywrightTimeoutError
     from playwright.async_api import async_playwright
 except ImportError:
-    sys.exit("pip install playwright --break-system-packages")
+    PlaywrightTimeoutError = TimeoutError
+    async_playwright = None
 
 try:
-    from scrapers.edgeprop_landed import DEFAULT_USER_AGENT, SQFT_TO_SQM
+    from scrapers.edgeprop_landed import DEFAULT_USER_AGENT, SQFT_TO_SQM, text_from_html
 except ModuleNotFoundError:
-    from edgeprop_landed import DEFAULT_USER_AGENT, SQFT_TO_SQM
+    from edgeprop_landed import DEFAULT_USER_AGENT, SQFT_TO_SQM, text_from_html
 
 
 BASE_URL = "https://www.edgeprop.sg"
@@ -47,7 +55,10 @@ DEFAULT_OUTPUT = "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwr
 DATE_RE = re.compile(r"^\d{1,2}\s+[A-Z]{3}\s+\d{4}$", re.I)
 MONEY_RE = re.compile(r"^-?\d[\d,]*(?:\.\d+)?$")
 DETAIL_PATH_RE = re.compile(r"^/condo-apartment/[^/?#]+$")
-UNIT_SUFFIX_RE = re.compile(r"\s+#\d{2}-XX$", re.I)
+UNIT_TOKEN_RE = re.compile(
+    r"(?<![A-Z0-9])#(?P<floor>[A-Z0-9X*?]{1,4})-(?P<stack>[A-Z0-9X*?]{1,6})(?![A-Z0-9])",
+    re.I,
+)
 SALES_COUNT_RE = re.compile(r"ALL SALES TRANSACTIONS?\s*\((\d+)\)", re.I)
 
 FIELDS = [
@@ -56,6 +67,15 @@ FIELDS = [
     "Area (sqft)", "Area (sqm)", "Type of Area", "Purchaser Address", "Source",
     "source_quality", "source_url", "source_slug",
 ]
+
+UNIT_PROVENANCE_FIELDS = [
+    "unit_number", "unit_floor", "unit_stack", "unit_number_status",
+    "unit_number_source",
+]
+
+# Dedicated unit-level output schema. Keep the provenance fields next to the
+# published address while retaining all transaction columns used downstream.
+UNIT_FIELDS = FIELDS[:6] + UNIT_PROVENANCE_FIELDS + FIELDS[6:]
 
 ATTEMPT_FIELDS = [
     "source_url", "source_slug", "name", "row_count", "pages_scraped",
@@ -108,6 +128,56 @@ class LinkTextParser(HTMLParser):
 def clean_line(line: str) -> str:
     line = html.unescape(line).replace("\xa0", " ")
     return " ".join(line.split()).strip()
+
+
+def extract_unit_number(address: str) -> dict[str, str]:
+    """
+    Extract an exact EdgeProp unit token without guessing masked values.
+
+    Status values are stable and intentionally small:
+      exact        one unmasked #floor-stack token was published
+      masked       the published token contains X, * or ?
+      not_present  the address has no # unit fragment
+      unparseable  a # fragment exists but is ambiguous/malformed
+    """
+    published = clean_line(address)
+    matches = list(UNIT_TOKEN_RE.finditer(published))
+    source = "edgeprop_address" if "#" in published else ""
+    empty = {
+        "unit_number": "",
+        "unit_floor": "",
+        "unit_stack": "",
+        "unit_number_source": source,
+    }
+    if not matches:
+        return {
+            **empty,
+            "unit_number_status": "unparseable" if "#" in published else "not_present",
+        }
+    if len(matches) != 1:
+        return {**empty, "unit_number_status": "unparseable"}
+
+    match = matches[0]
+    floor = match.group("floor")
+    stack = match.group("stack")
+    if any(marker in floor.upper() + stack.upper() for marker in ("X", "*", "?")):
+        return {**empty, "unit_number_status": "masked"}
+    return {
+        "unit_number": match.group(0),
+        "unit_floor": floor,
+        "unit_stack": stack,
+        "unit_number_status": "exact",
+        "unit_number_source": "edgeprop_address",
+    }
+
+
+def street_without_unit(address: str) -> str:
+    """Remove one recognised trailing unit token while preserving source text."""
+    published = clean_line(address)
+    match = UNIT_TOKEN_RE.search(published)
+    if match and match.end() == len(published) and len(list(UNIT_TOKEN_RE.finditer(published))) == 1:
+        return published[:match.start()].strip()
+    return published
 
 
 def parse_number(value: str) -> float | None:
@@ -248,13 +318,15 @@ def parse_transaction_text(
             i += 1
             continue
 
+        unit = extract_unit_number(address)
         rows.append({
             "Project": project_name,
             "planning_area": planning_area.upper().strip(),
             "Postal District": str(postal_district).zfill(2) if postal_district else "",
             "Date of Sale": title_date(sale_date),
             "Address": address,
-            "Street": UNIT_SUFFIX_RE.sub("", address).strip(),
+            "Street": street_without_unit(address),
+            **unit,
             "Bedrooms": bedrooms,
             "Unit Price ($psf)": int(unit_price_psf) if unit_price_psf.is_integer() else unit_price_psf,
             "Price ($)": int(price) if price.is_integer() else price,
@@ -300,6 +372,44 @@ def append_rows(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in FIELDS})
+
+
+def write_unit_rows(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write the complete unit-level schema, including unavailable-unit rows."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=UNIT_FIELDS)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in UNIT_FIELDS})
+
+
+def append_unit_rows(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Append unit rows, refusing to mix this schema with a legacy CSV."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    write_header = not path.exists()
+    if not write_header:
+        with path.open(newline="", encoding="utf-8") as handle:
+            existing_fields = next(csv.reader(handle), [])
+        if existing_fields != UNIT_FIELDS:
+            raise SystemExit(
+                f"ERROR: {path} does not use the EdgeProp unit schema; "
+                "choose a new --unit-out path"
+            )
+    with path.open("a", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=UNIT_FIELDS)
+        if write_header:
+            writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in UNIT_FIELDS})
+
+
+def unit_status_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    counts = {status: 0 for status in ("exact", "masked", "not_present", "unparseable")}
+    for row in rows:
+        status = str(row.get("unit_number_status", "unparseable"))
+        counts[status] = counts.get(status, 0) + 1
+    return counts
 
 
 def append_attempt(
@@ -502,6 +612,8 @@ async def scrape_project(
 
 
 async def scrape(args: argparse.Namespace) -> None:
+    if async_playwright is None:
+        raise SystemExit("pip install playwright --break-system-packages")
     projects = read_project_links(Path(args.input))
     if args.match:
         needle = args.match.lower()
@@ -515,6 +627,7 @@ async def scrape(args: argparse.Namespace) -> None:
         projects = projects[: args.limit]
 
     out = Path(args.out)
+    unit_out = Path(args.unit_out) if args.unit_out else None
     log_path = Path(args.log) if args.log else out.with_name(f"{out.stem}_attempts.csv")
     completed = read_completed_urls(out) if args.resume else set()
     completed |= read_completed_urls(log_path) if args.resume_attempts else set()
@@ -525,12 +638,21 @@ async def scrape(args: argparse.Namespace) -> None:
         print("Nothing to scrape.")
         return
 
+    storage_state = None
+    if args.storage_state:
+        storage_path = Path(args.storage_state)
+        if not storage_path.is_file():
+            raise SystemExit(f"ERROR: --storage-state does not exist: {storage_path}")
+        storage_state = str(storage_path)
+
     total_rows = 0
+    all_status_counts = unit_status_counts([])
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=not args.headed)
         context = await browser.new_context(
             viewport={"width": 1440, "height": 1600},
             user_agent=DEFAULT_USER_AGENT,
+            storage_state=storage_state,
         )
         page = await context.new_page()
         for idx, project in enumerate(projects, 1):
@@ -552,7 +674,12 @@ async def scrape(args: argparse.Namespace) -> None:
                 print(f"[{idx}/{len(projects)}] ERROR {project['url']}: {exc}", file=sys.stderr, flush=True)
             if result.rows:
                 append_rows(out, result.rows)
+                if unit_out:
+                    append_unit_rows(unit_out, result.rows)
                 total_rows += len(result.rows)
+                project_counts = unit_status_counts(result.rows)
+                for status, count in project_counts.items():
+                    all_status_counts[status] += count
             append_attempt(log_path, project, result, status, error)
             print(
                 f"[{idx}/{len(projects)}] {project.get('name', '')}: "
@@ -564,6 +691,9 @@ async def scrape(args: argparse.Namespace) -> None:
         await browser.close()
 
     print(f"Wrote {total_rows} transaction rows to {out}", flush=True)
+    if unit_out:
+        summary = ", ".join(f"{status}={count}" for status, count in all_status_counts.items())
+        print(f"Wrote unit provenance rows to {unit_out} ({summary})", flush=True)
 
 
 def write_project_csv(path: Path, projects: list[ProjectLink]) -> None:
@@ -588,9 +718,51 @@ def discover(args: argparse.Namespace) -> None:
     print(f"Wrote {len(projects)} condo/apartment project links to {args.out}")
 
 
+def parse_saved_transactions(args: argparse.Namespace) -> None:
+    """Parse saved/copied EdgeProp tables without requiring a live browser."""
+    sources: list[str] = []
+    for path_text in args.html_file or []:
+        path = Path(path_text)
+        sources.append(text_from_html(path.read_text(encoding="utf-8", errors="replace")))
+    for path_text in args.text_file or []:
+        path = Path(path_text)
+        sources.append(path.read_text(encoding="utf-8", errors="replace"))
+    if not sources:
+        raise SystemExit("ERROR: provide --html-file or --text-file")
+
+    rows: list[dict[str, Any]] = []
+    for text in sources:
+        context = project_context(text, args.project_name)
+        project_name = context[0] or args.project_name
+        planning_area = context[1] or args.planning_area
+        district = context[2] or args.postal_district
+        property_type = detail_value(text, "Property Type") or args.property_type
+        tenure = context[4] or args.tenure
+        parsed = parse_transaction_text(
+            text,
+            project_name=project_name,
+            planning_area=planning_area,
+            postal_district=district,
+            property_type=property_type,
+            tenure=tenure,
+        )
+        for row in parsed:
+            row["source_quality"] = "not_clean"
+            row["source_url"] = args.source_url
+            row["source_slug"] = args.source_slug
+            # Local paths are deliberately not written into the output. They
+            # may reveal workstation details and are not source provenance.
+        rows.extend(parsed)
+
+    write_unit_rows(Path(args.out), rows)
+    counts = unit_status_counts(rows)
+    summary = ", ".join(f"{status}={count}" for status, count in counts.items())
+    print(f"Wrote {len(rows)} unit provenance rows to {args.out} ({summary})")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Scrape public EdgeProp condo/apartment transaction rows with Playwright",
+        description="Extract EdgeProp condo/apartment transactions with source-safe unit provenance",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -604,6 +776,20 @@ def build_parser() -> argparse.ArgumentParser:
     scrape_parser = sub.add_parser("scrape", help="Scrape discovered project transaction rows")
     scrape_parser.add_argument("--input", default=DEFAULT_PROJECTS, help="CSV with name,url,slug columns")
     scrape_parser.add_argument("--out", default=DEFAULT_OUTPUT, help="Output CSV")
+    scrape_parser.add_argument(
+        "--unit-out",
+        help=(
+            "Optional dedicated unit-level CSV. Exact unit_number values are "
+            "written only when published; all rows retain unit_number_status."
+        ),
+    )
+    scrape_parser.add_argument(
+        "--storage-state",
+        help=(
+            "Playwright storage-state JSON for an EdgeProp session you are "
+            "authorised to use; keep credentials outside the repository"
+        ),
+    )
     scrape_parser.add_argument("--from-year", type=int, default=2019, help="Keep transactions from this year onward")
     scrape_parser.add_argument("--limit", type=int, help="Maximum project pages to scrape")
     scrape_parser.add_argument("--start", type=int, default=0, help="Zero-based project offset")
@@ -621,6 +807,22 @@ def build_parser() -> argparse.ArgumentParser:
     scrape_parser.add_argument("--delay", type=float, default=0.10, help="Delay between projects in seconds")
     scrape_parser.add_argument("--headed", action="store_true")
     scrape_parser.set_defaults(func=lambda args: asyncio.run(scrape(args)))
+
+    parse_parser = sub.add_parser(
+        "parse-transactions",
+        help="Parse authorised saved HTML/copied transaction tables with unit provenance",
+    )
+    parse_parser.add_argument("--html-file", nargs="*", help="Saved EdgeProp project HTML page(s)")
+    parse_parser.add_argument("--text-file", nargs="*", help="Copied EdgeProp sales-table text file(s)")
+    parse_parser.add_argument("--project-name", default="")
+    parse_parser.add_argument("--planning-area", default="")
+    parse_parser.add_argument("--postal-district", default="")
+    parse_parser.add_argument("--property-type", default="Condominium/Apartment")
+    parse_parser.add_argument("--tenure", default="")
+    parse_parser.add_argument("--source-url", default="")
+    parse_parser.add_argument("--source-slug", default="")
+    parse_parser.add_argument("--out", required=True, help="Unit-level CSV output")
+    parse_parser.set_defaults(func=parse_saved_transactions)
     return parser
 
 

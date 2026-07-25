@@ -538,6 +538,11 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
     margin-bottom: 16px;
     align-items: start;
   }
+  .control-field { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+  .control-label {
+    color: #64748b; font-size: 9px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
   .search, select {
     padding: 6px 10px; border-radius: 5px; border: 1px solid #1e293b;
     background: #111827; color: #e2e8f0; font-size: 11px; outline: none;
@@ -552,7 +557,19 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
   }
   .search::placeholder { color: #475569; }
   .search:focus, select:focus { border-color: #38bdf8; }
-  .count { color: #64748b; font-size: 11px; text-align: right; }
+  .count { padding-top: 20px; color: #64748b; font-size: 11px; text-align: right; }
+  .active-query {
+    display: flex; margin: -4px 0 16px; padding: 8px 10px; align-items: center;
+    justify-content: space-between; gap: 12px; border: 1px solid #164e63;
+    border-radius: 6px; background: #082f49; color: #bae6fd; font-size: 11px;
+  }
+  .active-query[hidden] { display: none; }
+  .clear-filters {
+    flex: 0 0 auto; padding: 5px 8px; border: 1px solid #0e7490;
+    border-radius: 5px; background: transparent; color: #e0f2fe;
+    font: inherit; cursor: pointer;
+  }
+  .clear-filters:hover { background: #164e63; }
   .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #1e293b; }
   table { border-collapse: collapse; width: 100%; white-space: nowrap; }
   thead tr.group th {
@@ -743,33 +760,57 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
 </div>
 
 <div class="controls">
-  <input class="search" id="search" placeholder="Search project, street, district, station..." oninput="applyFilters()">
-  <select id="districtFilter" multiple size="5" onchange="applyFilters()" aria-label="District filter">
-    <option value="all" selected>All districts</option>
+  <label class="control-field">
+    <span class="control-label">Project or place</span>
+    <input class="search" id="search" type="search"
+      placeholder="Project, street, district or MRT"
+      aria-label="Search private projects" oninput="applyFilters()">
+  </label>
+  <label class="control-field">
+    <span class="control-label">District</span>
+    <select id="districtFilter" multiple size="5" onchange="applyFilters()" aria-label="District filter">
+      <option value="all" selected>All districts</option>
 {{DISTRICT_OPTIONS}}
-  </select>
-  <select id="stationFilter" multiple size="5" onchange="applyFilters()" aria-label="MRT station filter">
-    <option value="all" selected>All MRT stations</option>
+    </select>
+  </label>
+  <label class="control-field">
+    <span class="control-label">Nearest MRT</span>
+    <select id="stationFilter" multiple size="5" onchange="applyFilters()" aria-label="MRT station filter">
+      <option value="all" selected>All MRT stations</option>
 {{STATION_OPTIONS}}
-  </select>
-  <select id="saleFilter" multiple size="5" onchange="applyFilters()" aria-label="Sale mix filter">
-    <option value="all" selected>All sale mixes</option>
-    <option value="New Sale">Has new sales</option>
-    <option value="Resale">Has resale</option>
-    <option value="Sub Sale">Has sub sales</option>
-  </select>
-  <select id="sourceFilter" multiple size="4" onchange="applyFilters()" aria-label="Location source filter">
-    <option value="all" selected>All locations</option>
-    <option value="project_geocode">Project geocode</option>
-    <option value="centroid_proxy">Centroid fallback</option>
-  </select>
-  <select id="primaryFilter" multiple size="4" onchange="applyFilters()" aria-label="Primary access filter">
-    <option value="all" selected>All primary access</option>
-    <option value="has_primary_1km">Has primary <=1km</option>
-    <option value="has_ranked_primary_1km">Has ranked primary <=1km</option>
-    <option value="no_primary_1km">No primary <=1km</option>
-  </select>
+    </select>
+  </label>
+  <label class="control-field">
+    <span class="control-label">Sale evidence</span>
+    <select id="saleFilter" multiple size="5" onchange="applyFilters()" aria-label="Sale mix filter">
+      <option value="all" selected>All sale mixes</option>
+      <option value="New Sale">Has new sales</option>
+      <option value="Resale">Has resale</option>
+      <option value="Sub Sale">Has sub sales</option>
+    </select>
+  </label>
+  <label class="control-field">
+    <span class="control-label">Location quality</span>
+    <select id="sourceFilter" multiple size="4" onchange="applyFilters()" aria-label="Location source filter">
+      <option value="all" selected>All locations</option>
+      <option value="project_geocode">Project geocode</option>
+      <option value="centroid_proxy">Centroid fallback</option>
+    </select>
+  </label>
+  <label class="control-field">
+    <span class="control-label">Primary school access</span>
+    <select id="primaryFilter" multiple size="4" onchange="applyFilters()" aria-label="Primary access filter">
+      <option value="all" selected>All primary access</option>
+      <option value="has_primary_1km">Has primary &lt;=1km</option>
+      <option value="has_ranked_primary_1km">Has ranked primary &lt;=1km</option>
+      <option value="no_primary_1km">No primary &lt;=1km</option>
+    </select>
+  </label>
   <div class="count"><span id="visibleCount">{{PROJECT_COUNT}}</span> visible</div>
+</div>
+<div class="active-query" id="activeQuery" hidden>
+  <span id="activeQueryText"></span>
+  <button class="clear-filters" id="clearFilters" type="button">Clear filters</button>
 </div>
 
 <div class="tbl-wrap">
@@ -1025,6 +1066,38 @@ function sortTable(field, th) {
   th.classList.add("sorted", sortAsc ? "sorted-asc" : "sorted-desc");
   applyFilters();
 }
+function initialiseFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const query = (params.get("q") || "").trim();
+  const district = (params.get("district") || "").trim().replace(/^D/i, "").padStart(2, "0");
+  if (query) document.getElementById("search").value = query;
+  if (district) {
+    const option = Array.from(document.getElementById("districtFilter").options)
+      .find(item => item.value === district);
+    if (option) {
+      Array.from(option.parentElement.options).forEach(item => { item.selected = false; });
+      option.selected = true;
+    }
+  }
+  if (query || district) {
+    document.getElementById("activeQuery").hidden = false;
+    document.getElementById("activeQueryText").textContent = query
+      ? `Showing matches for “${query}”.`
+      : `Showing projects in District ${district}.`;
+  }
+}
+initialiseFromURL();
+document.getElementById("clearFilters").addEventListener("click", () => {
+  document.getElementById("search").value = "";
+  ["districtFilter", "stationFilter", "saleFilter", "sourceFilter", "primaryFilter"]
+    .forEach(id => {
+      const select = document.getElementById(id);
+      Array.from(select.options).forEach((option, index) => { option.selected = index === 0; });
+    });
+  document.getElementById("activeQuery").hidden = true;
+  window.history.replaceState({}, "", window.location.pathname);
+  applyFilters();
+});
 applyFilters();
 </script>
 </body>
