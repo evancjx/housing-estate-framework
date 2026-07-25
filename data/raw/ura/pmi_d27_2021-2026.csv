@@ -1,27 +1,62 @@
 Project Name,Transacted Price ($),Area (SQFT),Unit Price ($ PSF),Sale Date,Street Name,Type of Sale,Type of Area,Area (SQM),Unit Price ($ PSM),Nett Price($),Property Type,Number of Units,Tenure,Postal District,Market Segment,Floor Level
+ORCHID PARK CONDOMINIUM,"1,350,000","1,248.62","1,081",Jul-26,YISHUN STREET 81,Resale,Strata,116,"11,638",-,Condominium,1,99 yrs lease commencing from 1991,27,Outside Central Region,06 to 10
+THE NAUTICAL,"1,520,000","1,259.39","1,207",Jul-26,JALAN SENDUDOK,Resale,Strata,117,"12,991",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
+CANBERRA CRESCENT RESIDENCES,"2,468,642","1,216.33","2,030",Jul-26,CANBERRA CRESCENT,New Sale,Strata,113,"21,846",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,01 to 05
+THE COMMODORE,"2,020,000","1,184.04","1,706",Jul-26,CANBERRA DRIVE,Resale,Strata,110,"18,364",-,Condominium,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+THE WATERGARDENS AT CANBERRA,"1,270,000",753.48,"1,686",Jul-26,CANBERRA DRIVE,Sub Sale,Strata,70,"18,143",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+YISHUN SAPPHIRE,"1,250,000","1,162.51","1,075",Jul-26,CANBERRA DRIVE,Resale,Strata,108,"11,574",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,11 to 15
+SYMPHONY SUITES,"970,000",688.9,"1,408",Jul-26,YISHUN CLOSE,Resale,Strata,64,"15,156",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,01 to 05
+SKIES MILTONIA,"1,318,500","1,033.34","1,276",Jul-26,MILTONIA CLOSE,Resale,Strata,96,"13,734",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
+THE NAUTICAL,"1,480,000","1,119.46","1,322",Jul-26,JALAN SENDUDOK,Resale,Strata,104,"14,231",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
+NINE RESIDENCES,"1,420,000","1,001.05","1,419",Jul-26,YISHUN AVENUE 9,Resale,Strata,93,"15,269",-,Apartment,1,99 yrs lease commencing from 2013,27,Outside Central Region,11 to 15
+SYMPHONY SUITES,"1,080,000",796.54,"1,356",Jul-26,YISHUN CLOSE,Resale,Strata,74,"14,595",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,01 to 05
+THE COMMODORE,"1,110,000",624.31,"1,778",Jul-26,CANBERRA DRIVE,Resale,Strata,58,"19,138",-,Condominium,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+SELETARIS,"2,300,000","1,851.41","1,242",Jul-26,SEMBAWANG ROAD,Resale,Strata,172,"13,372",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
+THE NAUTICAL,"1,500,000","1,119.46","1,340",Jul-26,JALAN SENDUDOK,Resale,Strata,104,"14,423",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
+THE WATERGARDENS AT CANBERRA,"1,300,000",721.19,"1,803",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,67,"19,403",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+THE MILTONIA RESIDENCES,"1,390,000","1,140.98","1,218",Jun-26,MILTONIA CLOSE,Resale,Strata,106,"13,113",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+THE SENSORIA,"1,650,000","1,270.15","1,299",Jun-26,JALAN ULU SEMBAWANG,Resale,Strata,118,"13,983",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
+SELETARIS,"1,610,000","1,237.86","1,301",Jun-26,SEMBAWANG ROAD,Resale,Strata,115,"14,000",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
+SELETARIS,"2,160,000","1,636.13","1,320",Jun-26,SEMBAWANG ROAD,Resale,Strata,152,"14,211",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
+SKIES MILTONIA,"1,288,888","1,076.4","1,197",Jun-26,MILTONIA CLOSE,Resale,Strata,100,"12,889",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
+THE MILTONIA RESIDENCES,"1,180,000",936.47,"1,260",Jun-26,MILTONIA CLOSE,Resale,Strata,87,"13,563",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+THE COMMODORE,"1,920,000","1,184.04","1,622",Jun-26,CANBERRA DRIVE,Resale,Strata,110,"17,455",-,Condominium,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+THE WATERGARDENS AT CANBERRA,"1,160,000",678.13,"1,711",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,63,"18,413",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+THE WATERGARDENS AT CANBERRA,"1,220,000",753.48,"1,619",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,70,"17,429",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
 EIGHT COURTYARDS,"1,460,000","1,087.16","1,343",Jun-26,CANBERRA DRIVE,Resale,Strata,101,"14,455",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+THE WISTERIA,"1,328,000",968.76,"1,371",Jun-26,YISHUN RING ROAD,Resale,Strata,90,"14,756",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,06 to 10
 EIGHT COURTYARDS,"1,050,000",753.48,"1,394",Jun-26,CANBERRA DRIVE,Resale,Strata,70,"15,000",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 THE WATERGARDENS AT CANBERRA,"2,295,000","1,302.44","1,762",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,121,"18,967",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
 THE WATERGARDENS AT CANBERRA,"1,648,000",958,"1,720",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,89,"18,517",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
 CANBERRA CRESCENT RESIDENCES,"1,995,861",990.29,"2,015",Jun-26,CANBERRA CRESCENT,New Sale,Strata,92,"21,694",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,01 to 05
 EIGHT COURTYARDS,"1,278,000",958,"1,334",Jun-26,CANBERRA DRIVE,Resale,Strata,89,"14,360",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 THE MILTONIA RESIDENCES,"1,060,688",861.12,"1,232",Jun-26,MILTONIA CLOSE,Resale,Strata,80,"13,259",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+ORCHID PARK CONDOMINIUM,"1,830,000","1,733","1,056",Jun-26,YISHUN STREET 81,Resale,Strata,161,"11,366",-,Condominium,1,99 yrs lease commencing from 1991,27,Outside Central Region,11 to 15
+NORTH PARK RESIDENCES,"1,100,000",656.6,"1,675",Jun-26,YISHUN CENTRAL 1,Resale,Strata,61,"18,033",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,01 to 05
 SKIES MILTONIA,"1,260,000",968.76,"1,301",Jun-26,MILTONIA CLOSE,Resale,Strata,90,"14,000",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,06 to 10
 SYMPHONY SUITES,"1,420,000","1,022.58","1,389",Jun-26,YISHUN CLOSE,Resale,Strata,95,"14,947",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,06 to 10
 SUN PLAZA,"1,050,000","1,065.64",985,Jun-26,SEMBAWANG DRIVE,Resale,Strata,99,"10,606",-,Apartment,1,99 yrs lease commencing from 1996,27,Outside Central Region,06 to 10
 SYMPHONY SUITES,"1,230,000",914.94,"1,344",Jun-26,YISHUN CLOSE,Resale,Strata,85,"14,471",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,11 to 15
 THE COMMODORE,"1,618,000",968.76,"1,670",Jun-26,CANBERRA DRIVE,Resale,Strata,90,"17,978",-,Condominium,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+YISHUN EMERALD,"1,590,000","1,356.26","1,172",Jun-26,CANBERRA DRIVE,Resale,Strata,126,"12,619",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,11 to 15
 EIGHT COURTYARDS,"1,540,000","1,140.98","1,350",Jun-26,CANBERRA DRIVE,Resale,Strata,106,"14,528",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 THE MILTONIA RESIDENCES,"1,086,888","1,001.05","1,086",Jun-26,MILTONIA CLOSE,Resale,Strata,93,"11,687",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+THE WATERGARDENS AT CANBERRA,"1,750,000","1,162.51","1,505",Jun-26,CANBERRA DRIVE,Sub Sale,Strata,108,"16,204",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
+YISHUN EMERALD,"1,650,000","1,399.32","1,179",May-26,CANBERRA DRIVE,Resale,Strata,130,"12,692",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,06 to 10
 CANBERRA RESIDENCES,"1,197,000","1,076.4","1,112",May-26,CANBERRA DRIVE,Resale,Strata,100,"11,970",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+THE MILTONIA RESIDENCES,"1,058,000",861.12,"1,229",May-26,MILTONIA CLOSE,Resale,Strata,80,"13,225",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+SKIES MILTONIA,"960,000",710.42,"1,351",May-26,MILTONIA CLOSE,Resale,Strata,66,"14,545",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,11 to 15
 CANBERRA CRESCENT RESIDENCES,"1,990,912",990.29,"2,010",May-26,CANBERRA CRESCENT,New Sale,Strata,92,"21,640",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,01 to 05
 CANBERRA CRESCENT RESIDENCES,"2,372,894","1,216.33","1,951",May-26,CANBERRA CRESCENT,New Sale,Strata,113,"20,999",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,01 to 05
 EIGHT COURTYARDS,"1,980,000","1,377.79","1,437",May-26,CANBERRA DRIVE,Resale,Strata,128,"15,469",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 CANBERRA RESIDENCES,"1,140,000",936.47,"1,217",May-26,CANBERRA DRIVE,Resale,Strata,87,"13,103",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 CANBERRA RESIDENCES,"1,398,888","1,140.98","1,226",May-26,CANBERRA DRIVE,Resale,Strata,106,"13,197",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
+NORTH PARK RESIDENCES,"1,612,000",828.83,"1,945",May-26,YISHUN CENTRAL 1,Resale,Strata,77,"20,935",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,11 to 15
 CANBERRA CRESCENT RESIDENCES,"2,045,800",990.29,"2,066",May-26,CANBERRA CRESCENT,New Sale,Strata,92,"22,237",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,06 to 10
+THE ESTUARY,"1,500,000","1,302.44","1,152",May-26,YISHUN AVENUE 1,Resale,Strata,121,"12,397",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,01 to 05
 SYMPHONY SUITES,"1,200,000",914.94,"1,312",May-26,YISHUN CLOSE,Resale,Strata,85,"14,118",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,01 to 05
 ORCHID PARK CONDOMINIUM,"950,000",979.52,970,May-26,YISHUN STREET 81,Resale,Strata,91,"10,440",-,Condominium,1,99 yrs lease commencing from 1991,27,Outside Central Region,06 to 10
+KANDIS RESIDENCE,"978,000",796.54,"1,228",May-26,KANDIS LINK,Resale,Strata,74,"13,216",-,Condominium,1,99 yrs lease commencing from 2016,27,Outside Central Region,01 to 05
 CANBERRA CRESCENT RESIDENCES,"2,005,900",990.29,"2,026",May-26,CANBERRA CRESCENT,New Sale,Strata,92,"21,803",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,06 to 10
 CANBERRA CRESCENT RESIDENCES,"2,040,700",990.29,"2,061",May-26,CANBERRA CRESCENT,New Sale,Strata,92,"22,182",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,06 to 10
 EUPHONY GARDENS,"1,155,000","1,194.8",967,May-26,JALAN MATA AYER,Resale,Strata,111,"10,405",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
@@ -35,6 +70,7 @@ SYMPHONY SUITES,"1,230,000",893.41,"1,377",May-26,YISHUN CLOSE,Resale,Strata,83,
 SYMPHONY SUITES,"1,180,000",914.94,"1,290",May-26,YISHUN CLOSE,Resale,Strata,85,"13,882",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,01 to 05
 THE WATERGARDENS AT CANBERRA,"1,300,000",753.48,"1,725",May-26,CANBERRA DRIVE,Sub Sale,Strata,70,"18,571",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
 YISHUN SAPPHIRE,"1,368,000","1,216.33","1,125",May-26,CANBERRA DRIVE,Resale,Strata,113,"12,106",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
+EUPHONY GARDENS,"1,000,888","1,076.4",930,May-26,JALAN MATA AYER,Resale,Strata,100,"10,009",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
 SYMPHONY SUITES,"955,000",688.9,"1,386",May-26,YISHUN CLOSE,Resale,Strata,64,"14,922",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,06 to 10
 THE MILTONIA RESIDENCES,"1,030,000",861.12,"1,196",May-26,MILTONIA CLOSE,Resale,Strata,80,"12,875",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 THE WATERGARDENS AT CANBERRA,"1,693,888","1,162.51","1,457",May-26,CANBERRA DRIVE,Sub Sale,Strata,108,"15,684",-,Apartment,1,99 yrs lease commencing from 2020,27,Outside Central Region,01 to 05
@@ -129,6 +165,7 @@ EUPHONY GARDENS,"1,050,000","1,076.4",975,Feb-26,JALAN MATA AYER,Resale,Strata,1
 NINE RESIDENCES,"1,250,000",904.18,"1,382",Feb-26,YISHUN AVENUE 9,Resale,Strata,84,"14,881",-,Apartment,1,99 yrs lease commencing from 2013,27,Outside Central Region,06 to 10
 THE MILTONIA RESIDENCES,"1,030,000",839.59,"1,227",Feb-26,MILTONIA CLOSE,Resale,Strata,78,"13,205",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 SKIES MILTONIA,"668,000",484.38,"1,379",Feb-26,MILTONIA CLOSE,Resale,Strata,45,"14,844",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
+THE ESTUARY,"1,260,000",925.7,"1,361",Feb-26,YISHUN AVENUE 1,Resale,Strata,86,"14,651",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,06 to 10
 SYMPHONY SUITES,"1,420,000","1,022.58","1,389",Feb-26,YISHUN CLOSE,Resale,Strata,95,"14,947",-,Condominium,1,99 yrs lease commencing from 2014,27,Outside Central Region,01 to 05
 CANBERRA CRESCENT RESIDENCES,"2,011,000",990.29,"2,031",Feb-26,CANBERRA CRESCENT,New Sale,Strata,92,"21,859",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,11 to 15
 CANBERRA CRESCENT RESIDENCES,"2,257,200","1,162.51","1,942",Feb-26,CANBERRA CRESCENT,New Sale,Strata,108,"20,900",-,Apartment,1,99 yrs lease commencing from 2024,27,Outside Central Region,01 to 05
@@ -1438,7 +1475,7 @@ SKIES MILTONIA,"1,513,999","1,485.43","1,019",Jun-23,MILTONIA CLOSE,Resale,Strat
 SKIES MILTONIA,"640,000",484.38,"1,321",Jun-23,MILTONIA CLOSE,Resale,Strata,45,"14,222",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
 SKIES MILTONIA,"1,180,000","1,097.93","1,075",Jun-23,MILTONIA CLOSE,Resale,Strata,102,"11,569",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
 THE WISTERIA,"1,250,000",968.76,"1,290",Jun-23,YISHUN RING ROAD,Resale,Strata,90,"13,889",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,06 to 10
-SKIES MILTONIA,"1,268,888","1,076.4","1,179",Jun-23,MILTONIA CLOSE,Resale,Strata,100,"12,689",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
+SKIES MILTONIA,"1,268,888","1,033.34","1,228",Jun-23,MILTONIA CLOSE,Resale,Strata,96,"13,218",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
 NORTH PARK RESIDENCES,"1,128,000",624.31,"1,807",May-23,YISHUN CENTRAL 1,Resale,Strata,58,"19,448",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,06 to 10
 YISHUN EMERALD,"1,380,000","1,399.32",986,May-23,CANBERRA DRIVE,Resale,Strata,130,"10,615",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
 CANBERRA RESIDENCES,"1,038,000",936.47,"1,108",May-23,CANBERRA DRIVE,Resale,Strata,87,"11,931",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
@@ -2846,32 +2883,3 @@ THE ESTUARY,"980,000","1,119.46",875,Jul-21,YISHUN AVENUE 1,Resale,Strata,104,"9
 CANBERRA RESIDENCES,"845,000",990.29,853,Jul-21,CANBERRA DRIVE,Resale,Strata,92,"9,185",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
 ORCHID PARK CONDOMINIUM,"1,300,000","1,571.54",827,Jul-21,YISHUN STREET 81,Resale,Strata,146,"8,904",-,Condominium,1,99 yrs lease commencing from 1991,27,Outside Central Region,11 to 15
 EIGHT COURTYARDS,"1,126,000","1,087.16","1,036",Jul-21,CANBERRA DRIVE,Resale,Strata,101,"11,149",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,11 to 15
-THE MILTONIA RESIDENCES,"805,000",839.59,959,Jul-21,MILTONIA CLOSE,Resale,Strata,78,"10,321",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
-SKIES MILTONIA,"1,030,000","1,076.4",957,Jul-21,MILTONIA CLOSE,Resale,Strata,100,"10,300",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,01 to 05
-THE ESTUARY,"1,330,000","1,302.44","1,021",Jul-21,YISHUN AVENUE 1,Resale,Strata,121,"10,992",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,01 to 05
-EUPHONY GARDENS,"720,000","1,076.4",669,Jul-21,JALAN MATA AYER,Resale,Strata,100,"7,200",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
-NORTH PARK RESIDENCES,"1,800,000","1,248.62","1,442",Jul-21,YISHUN CENTRAL 1,Sub Sale,Strata,116,"15,517",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,01 to 05
-EIGHT COURTYARDS,"950,000",947.23,"1,003",Jul-21,CANBERRA DRIVE,Resale,Strata,88,"10,795",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
-YISHUN SAPPHIRE,"960,000","1,194.8",803,Jul-21,CANBERRA DRIVE,Resale,Strata,111,"8,649",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,11 to 15
-THE ESTUARY,"1,600,000","1,528.49","1,047",Jul-21,YISHUN AVENUE 1,Resale,Strata,142,"11,268",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,11 to 15
-CANBERRA RESIDENCES,"1,350,000","1,528.49",883,Jul-21,CANBERRA DRIVE,Resale,Strata,142,"9,507",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
-THE NAUTICAL,"1,090,000","1,119.46",974,Jul-21,JALAN SENDUDOK,Resale,Strata,104,"10,481",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
-SELETARIS,"1,730,000","1,959.05",883,Jul-21,SEMBAWANG ROAD,Resale,Strata,182,"9,505",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
-NORTHWOOD,"1,313,000","1,313.21","1,000",Jul-21,JALAN MATA AYER,Resale,Strata,122,"10,762",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
-THE NAUTICAL,"640,000",570.49,"1,122",Jul-21,JALAN SENDUDOK,Resale,Strata,53,"12,075",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
-THE SENSORIA,"1,150,000","1,151.75",998,Jul-21,JALAN ULU SEMBAWANG,Resale,Strata,107,"10,748",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
-YISHUN EMERALD,"1,050,000","1,173.28",895,Jul-21,CANBERRA DRIVE,Resale,Strata,109,"9,633",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,11 to 15
-THE WISTERIA,"790,000",710.42,"1,112",Jul-21,YISHUN RING ROAD,Resale,Strata,66,"11,970",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,01 to 05
-CANBERRA RESIDENCES,"840,000",904.18,929,Jul-21,CANBERRA DRIVE,Resale,Strata,84,"10,000",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05
-NORTHWOOD,"1,320,000","1,334.74",989,Jul-21,JALAN MATA AYER,Resale,Strata,124,"10,645",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
-SKIES MILTONIA,"785,000",710.42,"1,105",Jul-21,MILTONIA CLOSE,Resale,Strata,66,"11,894",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,11 to 15
-THE SENSORIA,"943,000","1,076.4",876,Jul-21,JALAN ULU SEMBAWANG,Resale,Strata,100,"9,430",-,Condominium,1,Freehold,27,Outside Central Region,01 to 05
-THE ESTUARY,"1,520,000","1,528.49",994,Jul-21,YISHUN AVENUE 1,Resale,Strata,142,"10,704",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,01 to 05
-THE WISTERIA,"1,148,000",968.76,"1,185",Jul-21,YISHUN RING ROAD,Resale,Strata,90,"12,756",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,11 to 15
-NORTH PARK RESIDENCES,"1,200,000",871.88,"1,376",Jul-21,YISHUN CENTRAL 1,Sub Sale,Strata,81,"14,815",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,11 to 15
-THE ESTUARY,"1,500,000","1,453.14","1,032",Jun-21,YISHUN AVENUE 1,Resale,Strata,135,"11,111",-,Condominium,1,99 yrs lease commencing from 2008,27,Outside Central Region,11 to 15
-THE WISTERIA,"782,000",635.08,"1,231",Jun-21,YISHUN RING ROAD,Resale,Strata,59,"13,254",-,Apartment,1,99 yrs lease commencing from 2015,27,Outside Central Region,01 to 05
-THE NAUTICAL,"820,000",764.24,"1,073",Jun-21,JALAN SENDUDOK,Resale,Strata,71,"11,549",-,Condominium,1,99 yrs lease commencing from 2011,27,Outside Central Region,01 to 05
-SKIES MILTONIA,"900,000",742.72,"1,212",Jun-21,MILTONIA CLOSE,Resale,Strata,69,"13,043",-,Condominium,1,99 yrs lease commencing from 2012,27,Outside Central Region,11 to 15
-YISHUN SAPPHIRE,"930,000","1,216.33",765,Jun-21,CANBERRA DRIVE,Resale,Strata,113,"8,230",-,Condominium,1,99 yrs lease commencing from 1998,27,Outside Central Region,01 to 05
-THE MILTONIA RESIDENCES,"880,000",861.12,"1,022",Jun-21,MILTONIA CLOSE,Resale,Strata,80,"11,000",-,Condominium,1,99 yrs lease commencing from 2010,27,Outside Central Region,01 to 05

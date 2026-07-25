@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A precinct-first comparison of Canberra Crescent Residences against Watergardens, The Commodore and Canberra Residences.">
+<title>Compare Canberra with Canberra</title>
+<style>
+:root {
+  --ink:#17201f; --muted:#66706d; --paper:#f5f3ec; --card:#fffefa;
+  --line:#d9d7cc; --accent:#b7482a; --wash:color-mix(in srgb, var(--accent) 9%, white);
+  --serif:Georgia, "Times New Roman", serif; --sans:Inter, ui-sans-serif, system-ui, sans-serif;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; color:var(--ink); background:var(--paper); font:15px/1.6 var(--sans); }
+a { color:inherit; }
+.shell { width:min(1220px, calc(100% - 32px)); margin:auto; }
+.report-nav { display:flex; gap:8px; flex-wrap:wrap; padding:18px 0; }
+.report-nav a { text-decoration:none; border:1px solid var(--line); background:#fff9;
+  border-radius:99px; padding:7px 12px; font-size:12px; }
+.hero { border-top:1px solid var(--line); padding:72px 0 54px; display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(250px,.6fr); gap:54px; align-items:end; }
+.eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.16em;
+  font-weight:800; font-size:11px; }
+h1,h2,h3 { font-family:var(--serif); line-height:1.08; margin:0; }
+h1 { font-size:clamp(44px,7vw,88px); max-width:950px; letter-spacing:-.045em; }
+.dek { font-size:clamp(17px,2vw,22px); max-width:760px; color:#46504d; margin:24px 0 0; }
+.stamp { border-left:3px solid var(--accent); padding:8px 0 8px 18px; }
+.stamp b,.stamp span { display:block; }
+.stamp b { font-size:18px; } .stamp span { color:var(--muted); font-size:12px; }
+section { padding:54px 0; border-top:1px solid var(--line); }
+.section-head { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:28px; }
+h2 { font-size:clamp(30px,4vw,48px); letter-spacing:-.025em; }
+.section-head p { margin:0; color:var(--muted); max-width:650px; }
+.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.card { background:var(--card); border:1px solid var(--line); padding:24px; min-height:180px; }
+.card .kicker { display:block; color:var(--accent); font-weight:800; font-size:11px;
+  text-transform:uppercase; letter-spacing:.11em; margin-bottom:12px; }
+.card h3 { font-size:24px; } .card p { color:var(--muted); margin:12px 0 0; }
+.tabs { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 15px; }
+.tab { cursor:pointer; border:1px solid var(--line); color:var(--ink); background:#fff9;
+  border-radius:99px; padding:9px 14px; font:700 12px var(--sans); }
+.tab.active { background:var(--accent); color:white; border-color:var(--accent); }
+.tab-panel { display:none; } .tab-panel.active { display:block; }
+.table-wrap { overflow:auto; border:1px solid var(--line); background:var(--card); }
+table { width:100%; border-collapse:collapse; min-width:850px; }
+th,td { padding:15px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+th { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em;
+  background:var(--wash); position:sticky; top:0; }
+td b,td small { display:block; } td small { color:var(--muted); font-size:11px; margin-top:3px; }
+td.num,th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.matrix { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.matrix article { background:var(--card); border:1px solid var(--line); padding:22px; }
+.matrix strong { color:var(--accent); display:block; font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; margin-bottom:7px; }
+.matrix h3 { font-size:23px; } .matrix p { color:var(--muted); margin:9px 0 0; }
+.callout { background:var(--accent); color:white; padding:30px; display:grid;
+  grid-template-columns:.5fr 1.5fr; gap:24px; align-items:start; }
+.callout h3 { font-size:30px; } .callout p { margin:0; opacity:.88; }
+.source-list { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.source-list li { padding:17px; border:1px solid var(--line); background:var(--card); }
+.source-list a { font-weight:800; text-decoration-thickness:1px; }
+.source-list span { color:var(--muted); display:block; font-size:12px; margin-top:5px; }
+footer { padding:32px 0 48px; color:var(--muted); font-size:12px; }
+@media (max-width:800px) {
+  .hero,.section-head,.callout { grid-template-columns:1fr; }
+  .hero { padding-top:44px; gap:28px; } .cards { grid-template-columns:1fr; }
+  .matrix,.source-list { grid-template-columns:1fr; } h1 { font-size:48px; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+<nav class='report-nav' aria-label='Canberra strategy reports'><a href='canberra_crescent_d27_deep_analysis.html'>Deep transaction ledger</a><a href='canberra_strategy_1_micro_location.html'>01 Micro-location</a><a href='canberra_strategy_2_newness.html'>02 Newness controls</a><a href='canberra_strategy_3_integration.html'>03 Integration</a><a href='canberra_strategy_4_unit_matching.html'>04 Unit matching</a><a href='canberra_strategy_5_sale_state.html'>05 Sale states</a><a href='canberra_strategy_6_planning_context.html'>06 Planning context</a><a href='index.html'>All reports</a></nav>
+<header class="hero">
+  <div><span class="eyebrow">Strategy 01 · Micro-location</span><h1>Compare Canberra with Canberra</h1>
+  <p class="dek">A precinct-first comparison of Canberra Crescent Residences against Watergardens, The Commodore and Canberra Residences.</p></div>
+  <aside class="stamp"><span>Evidence cut</span><b>2025-08 → 2026-06</b>
+  <span>As at 2026-07-25</span><span>2026-07 is partial and excluded.</span></aside>
+</header>
+
+<section>
+  <div class="section-head"><h2>What micro-location can isolate</h2><p>
+  The comparison holds the Canberra precinct relatively tight, then exposes the
+  remaining differences: sale state, lease vintage, layout size and floor mix.</p></div>
+  <div class="cards"><article class='card'><span class='kicker'>Closest recent control</span><h3>Watergardens</h3><p>51 period-matched observations; median PSF is -13.3% versus the subject. Its Sub Sale state is not a developer launch state.</p></article><article class='card'><span class='kicker'>Exit-state control</span><h3>The Commodore</h3><p>25 observations spanning Sub Sale 15 · Resale 10; median PSF is -13.3% versus the subject.</p></article><article class='card'><span class='kicker'>Age/layout control</span><h3>Canberra Residences</h3><p>9 Resale observations; median PSF is -39.0%. Read its quantum with median size and 2010 lease start.</p></article></div>
+</section>
+<section>
+  <div class="section-head"><h2>Bedroom-matched evidence</h2><p>
+  Every row uses the same 2025-08–2026-06
+  complete-month window. P10–P90 ranges reveal mix dispersion; a median is not a valuation.</p></div>
+  <div class="tabs"><button class='tab active' data-switch='all'>All unit types</button><button class='tab' data-switch='1'>1 bedroom</button><button class='tab' data-switch='2'>2 bedrooms</button><button class='tab' data-switch='3'>3 bedrooms</button><button class='tab' data-switch='4'>4 bedrooms</button></div>
+  <div class='tab-panel active' data-tab='all'><div class='table-wrap'><table><thead><tr><th>Project / diagnostic role</th><th>Transactions / states</th><th>Median quantum</th><th>Median PSF</th><th>Median size</th></tr></thead><tbody><tr><td><b>Canberra Crescent</b><small>Subject · developer New Sale</small></td><td class='num'><b>339</b><small>New Sale 339</small></td><td class='num'><b>S$1.62m</b><small>S$1.33m–S$2.31m P10–P90</small></td><td class='num'><b>S$1,996</b><small>S$1,927–S$2,047 P10–P90</small></td><td class='num'><b>797 sqft</b></td></tr><tr><td><b>Watergardens</b><small>Recent same-precinct control</small></td><td class='num'><b>51</b><small>Sub Sale 51</small></td><td class='num'><b>S$1.64m</b><small>S$1.25m–S$2.29m P10–P90</small></td><td class='num'><b>S$1,731</b><small>S$1,609–S$1,818 P10–P90</small></td><td class='num'><b>958 sqft</b></td></tr><tr><td><b>The Commodore</b><small>Recent same-precinct exit control</small></td><td class='num'><b>25</b><small>Sub Sale 15 · Resale 10</small></td><td class='num'><b>S$1.32m</b><small>S$943k–S$1.93m P10–P90</small></td><td class='num'><b>S$1,730</b><small>S$1,658–S$1,801 P10–P90</small></td><td class='num'><b>786 sqft</b></td></tr><tr><td><b>Canberra Residences</b><small>Older same-precinct resale control</small></td><td class='num'><b>9</b><small>Resale 9</small></td><td class='num'><b>S$1.14m</b><small>S$797k–S$1.47m P10–P90</small></td><td class='num'><b>S$1,217</b><small>S$1,091–S$1,267 P10–P90</small></td><td class='num'><b>936 sqft</b></td></tr></tbody></table></div></div><div class='tab-panel' data-tab='1'><div class='table-wrap'><table><thead><tr><th>Project / diagnostic role</th><th>Transactions / states</th><th>Median quantum</th><th>Median PSF</th><th>Median size</th></tr></thead><tbody><tr><td><b>Canberra Crescent</b><small>Subject · developer New Sale</small></td><td class='num'><b>3</b><small>New Sale 3</small></td><td class='num'><b>S$880k</b><small>S$880k–S$880k P10–P90</small></td><td class='num'><b>S$2,151</b><small>S$2,151–S$2,151 P10–P90</small></td><td class='num'><b>409 sqft</b></td></tr><tr><td><b>Watergardens</b><small>Recent same-precinct control</small></td><td class='num'><b>0</b><small>No observations</small></td><td class='num'><b>—</b><small>— P10–P90</small></td><td class='num'><b>—</b><small>— P10–P90</small></td><td class='num'><b>—</b></td></tr><tr><td><b>The Commodore</b><small>Recent same-precinct exit control</small></td><td class='num'><b>3</b><small>Resale 2 · Sub Sale 1</small></td><td class='num'><b>S$866k</b><small>S$836k–S$871k P10–P90</small></td><td class='num'><b>S$1,871</b><small>S$1,805–S$1,881 P10–P90</small></td><td class='num'><b>463 sqft</b></td></tr><tr><td><b>Canberra Residences</b><small>Older same-precinct resale control</small></td><td class='num'><b>3</b><small>Resale 3</small></td><td class='num'><b>S$800k</b><small>S$788k–S$1.12m P10–P90</small></td><td class='num'><b>S$1,122</b><small>S$1,114–S$1,268 P10–P90</small></td><td class='num'><b>700 sqft</b></td></tr></tbody></table></div></div><div class='tab-panel' data-tab='2'><div class='table-wrap'><table><thead><tr><th>Project / diagnostic role</th><th>Transactions / states</th><th>Median quantum</th><th>Median PSF</th><th>Median size</th></tr></thead><tbody><tr><td><b>Canberra Crescent</b><small>Subject · developer New Sale</small></td><td class='num'><b>91</b><small>New Sale 91</small></td><td class='num'><b>S$1.34m</b><small>S$1.1m–S$1.38m P10–P90</small></td><td class='num'><b>S$2,003</b><small>S$1,933–S$2,062 P10–P90</small></td><td class='num'><b>667 sqft</b></td></tr><tr><td><b>Watergardens</b><small>Recent same-precinct control</small></td><td class='num'><b>20</b><small>Sub Sale 20</small></td><td class='num'><b>S$1.28m</b><small>S$1.15m–S$1.42m P10–P90</small></td><td class='num'><b>S$1,725</b><small>S$1,682–S$1,819 P10–P90</small></td><td class='num'><b>753 sqft</b></td></tr><tr><td><b>The Commodore</b><small>Recent same-precinct exit control</small></td><td class='num'><b>12</b><small>Sub Sale 8 · Resale 4</small></td><td class='num'><b>S$1.3m</b><small>S$1.08m–S$1.34m P10–P90</small></td><td class='num'><b>S$1,745</b><small>S$1,678–S$1,794 P10–P90</small></td><td class='num'><b>743 sqft</b></td></tr><tr><td><b>Canberra Residences</b><small>Older same-precinct resale control</small></td><td class='num'><b>4</b><small>Resale 4</small></td><td class='num'><b>S$1.14m</b><small>S$1.08m–S$1.15m P10–P90</small></td><td class='num'><b>S$1,226</b><small>S$1,069–S$1,251 P10–P90</small></td><td class='num'><b>920 sqft</b></td></tr></tbody></table></div></div><div class='tab-panel' data-tab='3'><div class='table-wrap'><table><thead><tr><th>Project / diagnostic role</th><th>Transactions / states</th><th>Median quantum</th><th>Median PSF</th><th>Median size</th></tr></thead><tbody><tr><td><b>Canberra Crescent</b><small>Subject · developer New Sale</small></td><td class='num'><b>183</b><small>New Sale 183</small></td><td class='num'><b>S$1.7m</b><small>S$1.55m–S$2.01m P10–P90</small></td><td class='num'><b>S$2,005</b><small>S$1,934–S$2,041 P10–P90</small></td><td class='num'><b>872 sqft</b></td></tr><tr><td><b>Watergardens</b><small>Recent same-precinct control</small></td><td class='num'><b>24</b><small>Sub Sale 24</small></td><td class='num'><b>S$1.67m</b><small>S$1.61m–S$1.94m P10–P90</small></td><td class='num'><b>S$1,725</b><small>S$1,536–S$1,750 P10–P90</small></td><td class='num'><b>958 sqft</b></td></tr><tr><td><b>The Commodore</b><small>Recent same-precinct exit control</small></td><td class='num'><b>7</b><small>Sub Sale 4 · Resale 3</small></td><td class='num'><b>S$1.74m</b><small>S$1.61m–S$1.87m P10–P90</small></td><td class='num'><b>S$1,711</b><small>S$1,646–S$1,786 P10–P90</small></td><td class='num'><b>969 sqft</b></td></tr><tr><td><b>Canberra Residences</b><small>Older same-precinct resale control</small></td><td class='num'><b>1</b><small>Resale 1</small></td><td class='num'><b>S$1.4m</b><small>S$1.4m–S$1.4m P10–P90</small></td><td class='num'><b>S$1,226</b><small>S$1,226–S$1,226 P10–P90</small></td><td class='num'><b>1,141 sqft</b></td></tr></tbody></table></div></div><div class='tab-panel' data-tab='4'><div class='table-wrap'><table><thead><tr><th>Project / diagnostic role</th><th>Transactions / states</th><th>Median quantum</th><th>Median PSF</th><th>Median size</th></tr></thead><tbody><tr><td><b>Canberra Crescent</b><small>Subject · developer New Sale</small></td><td class='num'><b>62</b><small>New Sale 62</small></td><td class='num'><b>S$2.33m</b><small>S$2.18m–S$2.48m P10–P90</small></td><td class='num'><b>S$1,951</b><small>S$1,879–S$1,999 P10–P90</small></td><td class='num'><b>1,173 sqft</b></td></tr><tr><td><b>Watergardens</b><small>Recent same-precinct control</small></td><td class='num'><b>7</b><small>Sub Sale 7</small></td><td class='num'><b>S$2.4m</b><small>S$2.29m–S$2.46m P10–P90</small></td><td class='num'><b>S$1,762</b><small>S$1,584–S$1,886 P10–P90</small></td><td class='num'><b>1,302 sqft</b></td></tr><tr><td><b>The Commodore</b><small>Recent same-precinct exit control</small></td><td class='num'><b>2</b><small>Resale 1 · Sub Sale 1</small></td><td class='num'><b>S$2.2m</b><small>S$1.98m–S$2.42m P10–P90</small></td><td class='num'><b>S$1,658</b><small>S$1,629–S$1,687 P10–P90</small></td><td class='num'><b>1,324 sqft</b></td></tr><tr><td><b>Canberra Residences</b><small>Older same-precinct resale control</small></td><td class='num'><b>1</b><small>Resale 1</small></td><td class='num'><b>S$1.73m</b><small>S$1.73m–S$1.73m P10–P90</small></td><td class='num'><b>S$1,208</b><small>S$1,208–S$1,208 P10–P90</small></td><td class='num'><b>1,432 sqft</b></td></tr></tbody></table></div></div>
+</section>
+<section>
+  <div class="section-head"><h2>Decision protocol</h2><p>
+  Use controls sequentially. The objective is to understand what a premium buys,
+  not to produce a single winner.</p></div>
+  <div class="matrix">
+    <article><strong>Step 01</strong><h3>Match bedroom and area</h3><p>
+    Compare quantum, PSF and median square feet together. Compact launch layouts can
+    carry a higher PSF while preserving a lower entry quantum.</p></article>
+    <article><strong>Step 02</strong><h3>Match transaction state</h3><p>
+    Canberra Crescent is New Sale evidence. Watergardens Sub Sales and Commodore
+    Resales embed seller, completion, condition and financing effects.</p></article>
+    <article><strong>Step 03</strong><h3>Interrogate the range</h3><p>
+    A wide P10–P90 band flags floor, view and layout heterogeneity. Inspect the deep
+    transaction ledger before treating the median as a benchmark.</p></article>
+    <article><strong>Step 04</strong><h3>Stress-test exit comparables</h3><p>
+    The recent controls are the better future exit-state candidates; the older
+    control is useful for lease/layout tradeoffs, not a direct launch valuation.</p></article>
+  </div>
+</section>
+<section><div class="callout"><h3>Boundary</h3><p>
+Changes between projects are cross-sectional transaction-mix differences. They do
+not measure apartment-level growth, and exact unit numbers are unavailable in URA PMI.</p></div></section>
+<section>
+  <div class="section-head"><h2>Sources and caveats</h2><p>
+  Bedroom labels are secondary-source attributions applied conservatively by the
+  shared loader; official URA rows remain the transaction source.</p></div>
+  <ul class="source-list"><li><a href='https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch' target='_blank' rel='noopener'>URA Property Market Information</a><span>Official transaction price, month, area, floor band, tenure and sale state. URA notes that resale/subsale rows are caveats and caveat lodgement is not mandatory.</span></li><li><a href='https://eservice.ura.gov.sg/maps/api/' target='_blank' rel='noopener'>URA transaction API reference</a><span>Official field definitions and five-year API coverage.</span></li><li><a href='https://www.onemap.gov.sg/home/index.html' target='_blank' rel='noopener'>OneMap</a><span>Authoritative national geospatial reference used by the project location pipeline.</span></li><li><a href='https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html' target='_blank' rel='noopener'>LTA rail network</a><span>Operational rail context. Distances on these pages are computed straight-line, not routes.</span></li></ul>
+</section>
+<footer>Private-project diagnostic only · Provision and Liveability remain separate ·
+No unified condominium ranking · Generated deterministically from the repository data.</footer>
+</main>
+<script>
+document.querySelectorAll("[data-switch]").forEach(button => {
+  button.addEventListener("click", () => {
+    const key = button.dataset.switch;
+    document.querySelectorAll("[data-switch]").forEach(el => el.classList.toggle("active", el.dataset.switch === key));
+    document.querySelectorAll("[data-tab]").forEach(el => el.classList.toggle("active", el.dataset.tab === key));
+  });
+});
+</script>
+</body></html>

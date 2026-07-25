@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG MRT Station Comparison</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -116,11 +117,16 @@
     .summary { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
     .search { width: 100%; }
   }
+  @media (max-width: 480px) {
+    body { padding: 18px 14px 28px; }
+    .summary { grid-template-columns: 1fr; }
+    .filter-btn { min-height: 36px; }
+  }
 </style>
 </head>
 <body>
 <h1>SG MRT Station Comparison</h1>
-<p class="meta">183 station records | 179 open | 4 future | nearest-estate context from framework outputs | 2026-07-10</p>
+<p class="meta">183 station records | 179 open | 4 future | nearest-estate context from framework outputs | 2026-07-25</p>
 
 <div class="summary">
   <div class="metric"><b>183</b><span>station records</span></div>
@@ -210,7 +216,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },
@@ -2036,7 +2042,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },
@@ -2344,7 +2350,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },
@@ -4060,7 +4066,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },
@@ -4082,7 +4088,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },
@@ -4104,7 +4110,7 @@ const DATA = [
     "provision_score": 3.29,
     "ls_traj": "F -> C -> C",
     "hdb_value_band": "B",
-    "private_value_band": "B",
+    "private_value_band": "B+",
     "employment_band": "F",
     "lease_band": "B+"
   },

@@ -340,6 +340,8 @@ def _render_project_table(band_key: str, rows: list[dict], bedroom_counts: dict)
             "</tr>"
         )
     return (
+        "<div class=\"table-scroll\" role=\"region\" tabindex=\"0\" "
+        "aria-label=\"Scrollable project comparison table\">"
         "<table class=\"ptable\">"
         "<thead><tr>"
         "<th class=\"sortable\">Project</th><th class=\"sortable\">Type</th>"
@@ -350,7 +352,7 @@ def _render_project_table(band_key: str, rows: list[dict], bedroom_counts: dict)
         "<th class=\"num sortable\">Latest median PSF</th>"
         "<th class=\"num sortable\">Latest median price</th>"
         "</tr></thead>"
-        f"<tbody>{''.join(body_rows)}</tbody></table>"
+        f"<tbody>{''.join(body_rows)}</tbody></table></div>"
     )
 
 
@@ -420,6 +422,7 @@ def render_html(district: str, per_band: dict, bedroom_counts: dict) -> str:
   .summary .card {{ border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; font-size: 13px; }}
   .summary h3 {{ margin: 0 0 6px; font-size: 13px; }}
   .summary ul {{ margin: 0; padding-left: 18px; }}
+  .table-scroll {{ max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }}
   table {{ border-collapse: collapse; font-size: 13px; }}
   th, td {{ padding: 5px 9px; border-bottom: 1px solid #e4e4ee; text-align: left; white-space: nowrap; }}
   th {{ background: #f4f4fa; position: sticky; top: 0; cursor: pointer; user-select: none; }}
@@ -429,6 +432,13 @@ def render_html(district: str, per_band: dict, bedroom_counts: dict) -> str:
   .neg {{ color: #b02a2a; }}
   .badge {{ background: #fdecc8; color: #8a6100; border-radius: 4px; padding: 1px 5px; font-size: 11px; }}
   .n {{ font-size: 10px; color: #9a9ab0; }}
+  @media (max-width: 620px) {{
+    body {{ margin: 18px 14px 28px; }}
+    h1 {{ font-size: 20px; line-height: 1.25; }}
+    .tab {{ min-height: 38px; padding: 7px 11px; }}
+    .summary {{ gap: 10px; }}
+    .summary .card {{ width: 100%; max-width: 100%; overflow-x: auto; }}
+  }}
 </style>
 </head>
 <body>
