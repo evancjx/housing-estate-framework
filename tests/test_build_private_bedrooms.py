@@ -185,6 +185,20 @@ def test_dash_bedrooms_never_matches(tmp_path):
     assert out[out["data_source"] == "ura_private"].iloc[0]["bedroom_source"] == "unknown"
 
 
+def test_repeated_edgeprop_header_row_is_excluded(tmp_path):
+    shifted_header = _ep_row(
+        project="Tenure",
+        district="",
+        date="17 Jun 2020",
+        ptype="Bedrooms",
+        address="Resale",
+    )
+    shifted_header["Tenure"] = "Type of Sale"
+    out = _build(tmp_path, [_ura_row()], [shifted_header])
+    assert "TENURE" not in set(out["project_name"])
+    assert (out["data_source"] == "edgeprop_backfill").sum() == 0
+
+
 def test_no_bedrooms_without_source_and_vice_versa(tmp_path):
     out = _build(tmp_path,
                  [_ura_row(), _ura_row(project="NOMATCH TOWERS", price=42)],

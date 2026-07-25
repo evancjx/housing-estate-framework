@@ -732,6 +732,7 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
   <span>Includes URA private Apartment, Condominium, and Executive Condominium rows where present; landed rows are excluded.</span>
   <span>MRT station uses data/outputs/private_project_locations.csv when available; otherwise the row is marked as a centroid fallback.</span>
   <span>School columns use data/outputs/private_project_school_metrics.csv when available; primary is checked within 1km, secondary within 2km, and JC within 5km.</span>
+  <span><strong>Recent vs all</strong> compares the recent-window project median with its full-window median; it is mix-sensitive and is not an appreciation rate.</span>
   <span>Provision and private value bands are estate-level context, not project-level model scores.</span>
 </div>
 
@@ -800,7 +801,7 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
     <th data-sort="median_psm" onclick="sortTable('median_psm', this)"><span class="tip" data-tip="Median transacted price per square metre across project transactions.">Median $psm</span></th>
     <th data-sort="recent_median_psm" onclick="sortTable('recent_median_psm', this)"><span class="tip" data-tip="Recent-window median transacted price per square metre for this project.">Recent $psm</span></th>
     <th data-sort="district_delta_pct" onclick="sortTable('district_delta_pct', this)"><span class="tip" data-tip="Project median price per square metre versus its postal-district median.">vs district</span></th>
-    <th data-sort="recent_delta_pct" onclick="sortTable('recent_delta_pct', this)"><span class="tip" data-tip="Recent median price per square metre versus the full project median.">Recent move</span></th>
+    <th data-sort="recent_delta_pct" onclick="sortTable('recent_delta_pct', this)"><span class="tip" data-tip="Recent median price per square metre versus the full project median; mix-sensitive and not an appreciation rate.">Recent vs all</span></th>
     <th data-sort="median_price_mil" onclick="sortTable('median_price_mil', this)"><span class="tip" data-tip="Median transacted price in Singapore dollars, shown in millions.">Median price</span></th>
     <th data-sort="median_area_sqm" onclick="sortTable('median_area_sqm', this)"><span class="tip" data-tip="Median transacted unit area in square metres.">Median sqm</span></th>
     <th data-sort="first_sale" onclick="sortTable('first_sale', this)"><span class="tip" data-tip="Earliest transaction month observed for this project group.">First sale</span></th>

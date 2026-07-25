@@ -125,6 +125,8 @@ def test_render_html_adds_header_tooltips():
     assert 'data-tip="Project identity from URA private transaction records."' in html
     assert 'data-tip="Number of MOE primary schools within 1km of the matched project coordinate."' in html
     assert 'data-tip="Estate-level private value band from the framework, kept separate from HDB value."' in html
+    assert "Recent vs all" in html
+    assert "mix-sensitive and not an appreciation rate" in html
 
 
 def test_render_html_uses_multi_select_filters():

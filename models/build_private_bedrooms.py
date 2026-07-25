@@ -116,6 +116,15 @@ def load_edgeprop(path: pathlib.Path) -> pd.DataFrame:
     df = pd.read_csv(path, dtype={"Postal District": str, "Bedrooms": str}, low_memory=False)
     df = df[~df["Type"].astype(str).str.contains("Executive Condominium", case=False, na=False)]
     df = df[~df["Type"].astype(str).str.contains("House", case=False, na=False)].copy()
+    # Some rendered EdgeProp tables repeat their column headings inside the
+    # transaction body. When parsed, those shifted rows look like a project
+    # named "TENURE" with no postal district and can otherwise leak into the
+    # 2019-2020 backfill as fabricated transactions.
+    df["district"] = df["Postal District"].map(normalise_district)
+    df = df[
+        df["district"].ne("")
+        & ~df["Project"].astype(str).str.strip().str.upper().eq("TENURE")
+    ].copy()
     df["sale_dt"] = pd.to_datetime(df["Date of Sale"], format="%d %b %Y", errors="coerce")
     df["price_int"] = pd.to_numeric(df["Price ($)"], errors="coerce").round().astype("Int64")
     df["ep_sqm"] = pd.to_numeric(df["Area (sqm)"], errors="coerce")
@@ -127,7 +136,6 @@ def load_edgeprop(path: pathlib.Path) -> pd.DataFrame:
     df["sale_month"] = df["sale_dt"].dt.strftime("%Y-%m")
     df["sale_year"] = df["sale_dt"].dt.year
     df["project_upper"] = df["Project"].astype(str).str.strip().str.upper()
-    df["district"] = df["Postal District"].map(normalise_district)
     df["name_norm"] = df["project_upper"].map(normalise_project_name)
     return df.reset_index(drop=True)
 

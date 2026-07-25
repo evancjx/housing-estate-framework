@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Singapore Estate Framework · Research Reports</title>
+<style>
+  :root {
+    --ink:#17212b; --muted:#617080; --line:#d9e1e8; --paper:#f4f7f8;
+    --card:#fff; --accent:#0f766e; --accent-soft:#dff4f0;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:52px 28px 76px; }
+  .eyebrow { color:var(--accent); font-size:11px; font-weight:850;
+    letter-spacing:.14em; text-transform:uppercase; }
+  h1 { max-width:850px; margin:9px 0 12px; font-size:clamp(34px,5vw,58px);
+    line-height:1.01; letter-spacing:-.045em; }
+  .lede { max-width:790px; margin:0; color:var(--muted); font-size:16px; line-height:1.6; }
+  h2 { margin:42px 0 14px; font-size:20px; letter-spacing:-.02em; }
+  .featured,.grid { display:grid; gap:14px; }
+  .featured { grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:30px; }
+  .grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .card { display:flex; min-height:176px; flex-direction:column; padding:20px;
+    border:1px solid var(--line); border-radius:15px; background:var(--card);
+    color:inherit; text-decoration:none; box-shadow:0 8px 22px rgba(23,33,43,.04);
+    transition:transform .16s ease,border-color .16s ease; }
+  .card:hover { transform:translateY(-2px); border-color:#83bdb6; }
+  .featured .card { min-height:215px; background:var(--ink); color:white; border-color:var(--ink); }
+  .tag { align-self:flex-start; border-radius:99px; padding:5px 8px;
+    background:var(--accent-soft); color:var(--accent); font-size:9px;
+    font-weight:850; text-transform:uppercase; letter-spacing:.06em; }
+  .featured .tag { background:#244039; color:#8ce0d3; }
+  .card h3 { margin:19px 0 7px; font-size:18px; letter-spacing:-.02em; }
+  .featured .card h3 { font-size:25px; }
+  .card p { margin:0; color:var(--muted); font-size:11px; line-height:1.55; }
+  .featured .card p { color:#cbd5df; font-size:12px; }
+  .open { margin-top:auto; padding-top:17px; color:var(--accent); font-size:11px; font-weight:850; }
+  .featured .open { color:#8ce0d3; }
+  footer { margin-top:44px; padding-top:17px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:10px; line-height:1.6; }
+  footer a { color:inherit; }
+  @media(max-width:850px) { .grid { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:620px) {
+    main { padding:35px 15px 55px; }
+    .featured,.grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body><main>
+<div class="eyebrow">Singapore Estate Liveability Framework</div>
+<h1>Research reports and interactive comparisons</h1>
+<p class="lede">Static, evidence-led explorations of Singapore estates and private residential projects. Provision, person-relative Liveability and tenure-segmented Value remain separate analytical views.</p>
+
+<div class="featured">
+  <a class="card" href="poiz_east_resale_comparison.html">
+    <span class="tag">Featured comparison</span>
+    <h3>Poiz versus East-side resale condominiums</h3>
+    <p>Nine-project comparison of achieved resale prices, bedroom mix, liquidity, access, buyer fit, risks and planning context.</p>
+    <span class="open">Open comparison →</span>
+  </a>
+  <a class="card" href="poiz_east_unit_growth_transactions.html">
+    <span class="tag">Transaction explorer</span>
+    <h3>Unit-type growth and every resale transaction</h3>
+    <p>Rolling 12-month growth by bedroom type, annual PSF history and 1,757 transaction records with floor, size and provenance.</p>
+    <span class="open">Open transaction history →</span>
+  </a>
+</div>
+
+<h2>Estate framework</h2>
+<div class="grid">
+  <a class="card" href="comparison_table.html">
+    <span class="tag">Estate comparison</span>
+    <h3>Estate comparison table</h3>
+    <p>Framework outputs presented across the estate universe.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="buyer_profile_table.html">
+    <span class="tag">Personas</span>
+    <h3>Buyer profile table</h3>
+    <p>Liveability views for different household needs and horizons.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="mrt_comparison_table.html">
+    <span class="tag">Transport</span>
+    <h3>MRT comparison</h3>
+    <p>Estate and station-oriented transport diagnostics.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="framework_diagram.html">
+    <span class="tag">Method</span>
+    <h3>Framework diagram</h3>
+    <p>A visual guide to the framework’s analytical structure.</p>
+    <span class="open">Open diagram →</span>
+  </a>
+</div>
+
+<h2>Private project and district research</h2>
+<div class="grid">
+  <a class="card" href="private_project_comparison_table.html">
+    <span class="tag">All projects</span>
+    <h3>Private project comparison</h3>
+    <p>Large project-level transaction comparison with mix-aware recent evidence.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="private_project_comparison_D17.html">
+    <span class="tag">District 17</span>
+    <h3>D17 project comparison</h3>
+    <p>Private residential transaction evidence for District 17.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="private_project_comparison_D18.html">
+    <span class="tag">District 18</span>
+    <h3>D18 project comparison</h3>
+    <p>Private residential transaction evidence for District 18.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="private_project_comparison_D27.html">
+    <span class="tag">District 27</span>
+    <h3>D27 project comparison</h3>
+    <p>Private residential transaction evidence for District 27.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="district_pair_comparison_D18_D26.html">
+    <span class="tag">District pair</span>
+    <h3>D18 versus D26</h3>
+    <p>A focused transaction comparison across two private residential districts.</p>
+    <span class="open">Open report →</span>
+  </a>
+  <a class="card" href="landed_growth_dashboard.html">
+    <span class="tag">Landed</span>
+    <h3>Landed growth dashboard</h3>
+    <p>Interactive landed transaction and growth diagnostics.</p>
+    <span class="open">Open dashboard →</span>
+  </a>
+</div>
+
+<footer>
+  Static research artifacts from
+  <a href="https://github.com/evancjx/housing-estate-framework">evancjx/housing-estate-framework</a>.
+  Transaction evidence is descriptive and does not constitute financial advice.
+</footer>
+</main></body>
+</html>

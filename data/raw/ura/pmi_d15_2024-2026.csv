@@ -1,30 +1,129 @@
 Project Name,Transacted Price ($),Area (SQFT),Unit Price ($ PSF),Sale Date,Street Name,Type of Sale,Type of Area,Area (SQM),Unit Price ($ PSM),Nett Price($),Property Type,Number of Units,Tenure,Postal District,Market Segment,Floor Level
+THE CONTINUUM,"5,351,000","1,905.23","2,809",Jul-26,THIAM SIEW AVENUE,New Sale,Strata,177,"30,232",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+AMBER HOUSE,"3,074,310",979.52,"3,139",Jul-26,AMBER GARDENS,New Sale,Strata,91,"33,784",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+TEMBUSU GRAND,"2,730,000",990.29,"2,757",Jul-26,JALAN TEMBUSU,Resale,Strata,92,"29,674",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,06 to 10
+ASPEN LOFT,"2,300,000","1,313.21","1,751",Jul-26,JOO CHIAT TERRACE,Resale,Strata,122,"18,852",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+SUNNYVALE RESIDENCES,"2,088,000","1,216.33","1,717",Jul-26,LORONG K TELOK KURAU,Resale,Strata,113,"18,478",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+IMPERIAL HEIGHTS,"950,000",592.02,"1,605",Jul-26,IPOH LANE,Resale,Strata,55,"17,273",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+CRESCENDO PARK,"2,525,000","1,474.67","1,712",Jul-26,JALAN TUA KONG,Resale,Strata,137,"18,431",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
+GRAND DUNMAN,"4,360,000","1,926.76","2,263",Jul-26,DUNMAN ROAD,New Sale,Strata,179,"24,358",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
+SEASIDE RESIDENCES,"1,950,000",785.77,"2,482",Jul-26,SIGLAP LINK,Resale,Strata,73,"26,712",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,06 to 10
+THE CONTINUUM,"2,925,000","1,076.4","2,717",Jul-26,THIAM SIEW AVENUE,New Sale,Strata,100,"29,250",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+THE SHORE RESIDENCES,"2,000,000",914.94,"2,186",Jul-26,AMBER ROAD,Resale,Strata,85,"23,529",-,Condominium,1,103 yrs lease commencing from 2009,15,Rest of Central Region,06 to 10
+GRAND DUNMAN,"4,354,000","1,926.76","2,260",Jul-26,DUNMAN ROAD,New Sale,Strata,179,"24,324",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
+AMBER HOUSE,"3,228,840",979.52,"3,296",Jul-26,AMBER GARDENS,New Sale,Strata,91,"35,482",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+SILVERSEA,"3,260,000","1,496.2","2,179",Jul-26,MARINE PARADE ROAD,Resale,Strata,139,"23,453",-,Condominium,1,99 yrs lease commencing from 2007,15,Rest of Central Region,06 to 10
+AMBER SKYE,"2,800,000","1,280.92","2,186",Jul-26,AMBER ROAD,Resale,Strata,119,"23,529",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+COTE D'AZUR,"2,200,000","1,420.85","1,548",Jul-26,MARINE PARADE ROAD,Resale,Strata,132,"16,667",-,Condominium,1,99 yrs lease commencing from 2001,15,Rest of Central Region,01 to 05
+AMBER HOUSE,"3,907,530","1,216.33","3,213",Jul-26,AMBER GARDENS,New Sale,Strata,113,"34,580",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+GRAND DUNMAN,"7,150,000","3,067.74","2,331",Jul-26,DUNMAN ROAD,New Sale,Strata,285,"25,088",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,16 to 20
+CASTLE LOFT,"923,000",656.6,"1,406",Jul-26,LORONG K TELOK KURAU,Resale,Strata,61,"15,131",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+THE CAPE,"2,750,000","1,184.04","2,323",Jul-26,AMBER ROAD,Resale,Strata,110,"25,000",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+PARC BLEU,"1,540,000","1,119.46","1,376",Jul-26,JOO CHIAT PLACE,Resale,Strata,104,"14,808",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+THE ESTA,"3,220,000","1,313.21","2,452",Jul-26,AMBER GARDENS,Resale,Strata,122,"26,393",-,Condominium,1,Freehold,15,Rest of Central Region,01 to 05
+ARINA EAST RESIDENCES,"3,220,000","1,087.16","2,962",Jul-26,TANJONG RHU ROAD,New Sale,Strata,101,"31,881",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+EVERITT EDGE,"1,180,000",796.54,"1,481",Jul-26,JOO CHIAT PLACE,Resale,Strata,74,"15,946",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+NEPTUNE COURT,"1,355,000","1,270.15","1,067",Jul-26,MARINE VISTA,Resale,Strata,118,"11,483",-,Apartment,1,99 yrs lease commencing from 1976,15,Outside Central Region,11 to 15
+LAGOON VIEW,"2,088,000","1,646.89","1,268",Jul-26,MARINE PARADE ROAD,Resale,Strata,153,"13,647",-,Apartment,1,99 yrs lease commencing from 1977,15,Outside Central Region,21 to 25
+ARINA EAST RESIDENCES,"3,850,000","1,388.56","2,773",Jul-26,TANJONG RHU ROAD,New Sale,Strata,129,"29,845",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+MEYER BLUE,"5,752,000","1,733","3,319",Jul-26,MEYER ROAD,New Sale,Strata,161,"35,727",-,Apartment,1,Freehold,15,Rest of Central Region,21 to 25
+EAST GROVE,"1,430,000",882.65,"1,620",Jul-26,EAST COAST ROAD,Resale,Strata,82,"17,439",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+THE VIEW @ MEYER,"3,980,000","1,689.95","2,355",Jul-26,MEYER ROAD,Resale,Strata,157,"25,350",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+POSHGROVE EAST,"2,182,000","1,733","1,259",Jul-26,EAST COAST ROAD,Resale,Strata,161,"13,553",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
+HAIG COURT,"3,150,000","1,453.14","2,168",Jul-26,HAIG ROAD,Resale,Strata,135,"23,333",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
+CORALIS,"2,000,000",861.12,"2,323",Jul-26,JOO CHIAT ROAD,Resale,Strata,80,"25,000",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
+ARINA EAST RESIDENCES,"3,850,000","1,388.56","2,773",Jul-26,TANJONG RHU ROAD,New Sale,Strata,129,"29,845",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+PEBBLE BAY,"2,438,000","1,302.44","1,872",Jul-26,TANJONG RHU ROAD,Resale,Strata,121,"20,149",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,01 to 05
+COASTLINE RESIDENCES,"1,950,000",710.42,"2,745",Jul-26,AMBER ROAD,Resale,Strata,66,"29,545",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+D-MANSIONS,"1,800,000","1,044.11","1,724",Jul-26,DUNMAN LANE,Resale,Strata,97,"18,557",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+TIVOLI GRANDE,"1,550,000","1,140.98","1,358",Jul-26,KOON SENG ROAD,Resale,Strata,106,"14,623",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+GRAND DUNMAN,"1,421,000",548.96,"2,589",Jul-26,DUNMAN ROAD,New Sale,Strata,51,"27,863",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,11 to 15
+COTE D'AZUR,"2,750,000","1,862.17","1,477",Jul-26,MARINE PARADE ROAD,Resale,Strata,173,"15,896",-,Condominium,1,99 yrs lease commencing from 2001,15,Rest of Central Region,01 to 05
+ARINA EAST RESIDENCES,"2,287,320",861.12,"2,656",Jul-26,TANJONG RHU ROAD,New Sale,Strata,80,"28,592",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+SEASIDE RESIDENCES,"3,150,000","1,259.39","2,501",Jul-26,SIGLAP LINK,Resale,Strata,117,"26,923",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,06 to 10
+THE CONTINUUM,"4,459,000","1,689.95","2,639",Jul-26,THIAM SIEW AVENUE,New Sale,Strata,157,"28,401",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+THE CONTINUUM,"5,215,000","1,905.23","2,737",Jul-26,THIAM SIEW AVENUE,New Sale,Strata,177,"29,463",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+SHIRO,"1,560,000",904.18,"1,725",Jul-26,LORONG H TELOK KURAU,Resale,Strata,84,"18,571",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+FORTUNE JADE,"2,330,000","1,140.98","2,042",Jul-26,DUNMAN ROAD,Resale,Strata,106,"21,981",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+PEBBLE BAY,"4,450,000","2,787.88","1,596",Jul-26,TANJONG RHU ROAD,Resale,Strata,259,"17,181",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,01 to 05
+PEBBLE BAY,"2,158,888","1,302.44","1,658",Jul-26,TANJONG RHU ROAD,Resale,Strata,121,"17,842",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,01 to 05
+TEMBUSU GRAND,"2,673,000",990.29,"2,699",Jul-26,JALAN TEMBUSU,Resale,Strata,92,"29,054",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,06 to 10
+ARINA EAST RESIDENCES,"2,300,000",796.54,"2,888",Jul-26,TANJONG RHU ROAD,New Sale,Strata,74,"31,081",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+VIBES @ EAST COAST,"710,000",398.27,"1,783",Jul-26,TELOK KURAU ROAD,Resale,Strata,37,"19,189",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+FULCRUM,"1,588,888",678.13,"2,343",Jul-26,FORT ROAD,Resale,Strata,63,"25,220",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
+AXIS @ SIGLAP,"2,300,000","1,819.12","1,264",Jul-26,EAST COAST TERRACE,Resale,Strata,169,"13,609",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+ARINA EAST RESIDENCES,"1,318,000",495.14,"2,662",Jul-26,TANJONG RHU ROAD,New Sale,Strata,46,"28,652",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+CRYSTAL RHU,"2,808,888","1,270.15","2,211",Jul-26,TANJONG RHU ROAD,Resale,Strata,118,"23,804",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+PARK EAST,"2,900,000","1,657.66","1,749",Jul-26,JALAN TUA KONG,Resale,Strata,154,"18,831",-,Condominium,1,Freehold,15,Outside Central Region,06 to 10
+LIV @ MB,"4,200,000","1,528.49","2,748",Jul-26,ARTHUR ROAD,Sub Sale,Strata,142,"29,577",-,Condominium,1,99 yrs lease commencing from 2021,15,Rest of Central Region,16 to 20
+ST PATRICK'S RESIDENCES,"4,100,000","2,561.83","1,600",Jul-26,ST. PATRICK'S ROAD,Resale,Strata,238,"17,227",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+MANDARIN GARDENS,"2,750,000","2,034.4","1,352",Jul-26,SIGLAP ROAD,Resale,Strata,189,"14,550",-,Condominium,1,99 yrs lease commencing from 1982,15,Outside Central Region,16 to 20
+VERSILIA ON HAIG,"2,450,000","1,130.22","2,168",Jul-26,IPOH LANE,Resale,Strata,105,"23,333",-,Condominium,1,Freehold,15,Rest of Central Region,11 to 15
+WORTHINGTON,"2,900,000","2,109.74","1,375",Jul-26,BUTTERWORTH LANE,Resale,Strata,196,"14,796",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
+SILVERSEA,"3,300,000","1,496.2","2,206",Jul-26,MARINE PARADE ROAD,Resale,Strata,139,"23,741",-,Condominium,1,99 yrs lease commencing from 2007,15,Rest of Central Region,06 to 10
+THE SHORE RESIDENCES,"1,918,000",871.88,"2,200",Jul-26,AMBER ROAD,Resale,Strata,81,"23,679",-,Condominium,1,103 yrs lease commencing from 2009,15,Rest of Central Region,11 to 15
+THE SHORE RESIDENCES,"2,000,000",914.94,"2,186",Jul-26,AMBER ROAD,Resale,Strata,85,"23,529",-,Condominium,1,103 yrs lease commencing from 2009,15,Rest of Central Region,16 to 20
+NEPTUNE COURT,"1,830,000","1,636.13","1,118",Jun-26,MARINE VISTA,Resale,Strata,152,"12,039",-,Apartment,1,99 yrs lease commencing from 1975,15,Outside Central Region,16 to 20
+PEBBLE BAY,"2,800,000","1,367.03","2,048",Jun-26,TANJONG RHU ROAD,Resale,Strata,127,"22,047",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,01 to 05
+AMBER PARK,"1,378,000",462.85,"2,977",Jun-26,AMBER GARDENS,Resale,Strata,43,"32,047",-,Condominium,1,Freehold,15,Rest of Central Region,16 to 20
+NYON,"2,188,000",914.94,"2,391",Jun-26,AMBER ROAD,Resale,Strata,85,"25,741",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+ARDOR RESIDENCE,"2,169,000",861.12,"2,519",Jun-26,HAIG ROAD,New Sale,Strata,80,"27,113",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+PEACH GARDEN,"5,025,000","2,766.35","1,816",Jun-26,PEACH GARDEN,Resale,Strata,257,"19,553",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+THE SERENNO,"1,330,000",775.01,"1,716",Jun-26,HAIG ROAD,Resale,Strata,72,"18,472",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+KING'S MANSION,"3,815,000","1,808.35","2,110",Jun-26,AMBER GARDENS,Resale,Strata,168,"22,708",-,Condominium,1,Freehold,15,Rest of Central Region,16 to 20
+ST PATRICK'S RESIDENCES,"2,710,000","1,205.57","2,248",Jun-26,ST. PATRICK'S ROAD,Resale,Strata,112,"24,196",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+SANCTUARY GREEN,"2,200,000","1,399.32","1,572",Jun-26,TANJONG RHU ROAD,Resale,Strata,130,"16,923",-,Condominium,1,99 yrs lease commencing from 1997,15,Rest of Central Region,01 to 05
+THE CONTINUUM,"3,770,000","1,248.62","3,019",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,116,"32,500",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+COSTA RHU,"1,700,000","1,442.38","1,179",Jun-26,RHU CROSS,Resale,Strata,134,"12,687",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,01 to 05
+ESPIRA SPRING,"1,930,000","1,862.17","1,036",Jun-26,LORONG G TELOK KURAU,Resale,Strata,173,"11,156",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+THE HACIENDA,"5,250,000","3,078.5","1,705",Jun-26,HACIENDA GROVE,Resale,Strata,286,"18,357",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
+THE CONTINUUM,"3,950,000","1,496.2","2,640",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,139,"28,417",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
+THE WATERSIDE,"6,280,000","2,400.37","2,616",Jun-26,TANJONG RHU ROAD,Resale,Strata,223,"28,161",-,Condominium,1,Freehold,15,Rest of Central Region,21 to 25
+PARK COURT,"1,180,000",947.23,"1,246",Jun-26,LORONG 101 CHANGI,Resale,Strata,88,"13,409",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+FLAMINGO VALLEY,"1,560,000",861.12,"1,812",Jun-26,SIGLAP ROAD,Resale,Strata,80,"19,500",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
+EASTBAY,"1,150,000",688.9,"1,669",Jun-26,TAY LIAN TECK ROAD,Resale,Strata,64,"17,969",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+SANDALWOOD,"1,545,300",850.36,"1,817",Jun-26,TEMBELING ROAD,Resale,Strata,79,"19,561",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+SEA AVENUE MANSIONS,"1,650,000",936.47,"1,762",Jun-26,SEA AVENUE,Resale,Strata,87,"18,966",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+THE CONTINUUM,"4,753,000","1,689.95","2,813",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,157,"30,274",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
+CASUARINA COVE,"2,710,000","1,625.36","1,667",Jun-26,TANJONG RHU ROAD,Resale,Strata,151,"17,947",-,Condominium,1,99 yrs lease commencing from 1993,15,Rest of Central Region,01 to 05
+COASTARINA,"1,320,000",678.13,"1,947",Jun-26,EAST COAST ROAD,Resale,Strata,63,"20,952",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+LAGUNA PARK,"2,180,000","1,614.6","1,350",Jun-26,MARINE PARADE ROAD,Resale,Strata,150,"14,533",-,Apartment,1,99 yrs lease commencing from 1977,15,Outside Central Region,16 to 20
+SEASIDE RESIDENCES,"2,470,000","1,022.58","2,415",Jun-26,SIGLAP LINK,Resale,Strata,95,"26,000",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,16 to 20
+PARC SEABREEZE,"3,300,000","1,291.68","2,555",Jun-26,JOO CHIAT ROAD,Resale,Strata,120,"27,500",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 THE ESTA,"3,388,888","1,345.5","2,519",Jun-26,AMBER GARDENS,Resale,Strata,125,"27,111",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 COSTA RHU,"3,275,000","1,776.06","1,844",Jun-26,RHU CROSS,Resale,Strata,165,"19,848",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,11 to 15
+SANCTUARY GREEN,"1,420,000",775.01,"1,832",Jun-26,TANJONG RHU ROAD,Resale,Strata,72,"19,722",-,Condominium,1,99 yrs lease commencing from 1997,15,Rest of Central Region,01 to 05
 THE CONTINUUM,"3,551,000","1,237.86","2,869",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,115,"30,878",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 THE MEYER PLACE,"3,100,000","1,453.14","2,133",Jun-26,MEYER PLACE,Resale,Strata,135,"22,963",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 NEPTUNE COURT,"1,828,888","1,636.13","1,118",Jun-26,MARINE VISTA,Resale,Strata,152,"12,032",-,Apartment,1,99 yrs lease commencing from 1975,15,Outside Central Region,06 to 10
+DUNMAN VIEW,"1,950,000","1,194.8","1,632",Jun-26,HAIG ROAD,Resale,Strata,111,"17,568",-,Condominium,1,99 yrs lease commencing from 1997,15,Rest of Central Region,11 to 15
+SEASIDE RESIDENCES,"1,060,000",505.91,"2,095",Jun-26,SIGLAP LINK,Resale,Strata,47,"22,553",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,06 to 10
 TREESCAPE,"793,000",430.56,"1,842",Jun-26,LORONG N TELOK KURAU,Resale,Strata,40,"19,825",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 JUPITER 18,"1,100,000",850.36,"1,294",Jun-26,LORONG 102 CHANGI,Resale,Strata,79,"13,924",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 THE CONTINUUM,"5,330,000","1,905.23","2,798",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,177,"30,113",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
 SANTA FE MANSIONS,"1,825,000","1,076.4","1,695",Jun-26,MARGATE ROAD,Resale,Strata,100,"18,250",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+THE SHORE RESIDENCES,"1,858,000",871.88,"2,131",Jun-26,AMBER ROAD,Resale,Strata,81,"22,938",-,Condominium,1,103 yrs lease commencing from 2009,15,Rest of Central Region,11 to 15
 AMBER SKYE,"3,480,000","1,334.74","2,607",Jun-26,AMBER ROAD,Resale,Strata,124,"28,065",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 MANDARIN GARDENS,"1,955,500","1,528.49","1,279",Jun-26,SIGLAP ROAD,Resale,Strata,142,"13,771",-,Condominium,1,99 yrs lease commencing from 1982,15,Outside Central Region,06 to 10
 VILLA MARINA,"2,140,000","1,646.89","1,299",Jun-26,JALAN SEMPADAN,Resale,Strata,153,"13,987",-,Condominium,1,99 yrs lease commencing from 1995,15,Outside Central Region,01 to 05
+THE ESTA,"2,780,000","1,130.22","2,460",Jun-26,AMBER GARDENS,Resale,Strata,105,"26,476",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 THE CONTINUUM,"4,130,000","1,453.14","2,842",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,135,"30,593",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 ROXY SQUARE,"1,800,000","1,259.39","1,429",Jun-26,EAST COAST ROAD,Resale,Strata,117,"15,385",-,Apartment,1,9999 yrs lease commencing from 1995,15,Rest of Central Region,06 to 10
 LIV @ MB,"2,250,000",871.88,"2,581",Jun-26,ARTHUR ROAD,Sub Sale,Strata,81,"27,778",-,Condominium,1,99 yrs lease commencing from 2021,15,Rest of Central Region,01 to 05
 RIVEREDGE,"2,575,000","1,517.72","1,697",Jun-26,SAMPAN PLACE,Resale,Strata,141,"18,262",-,Condominium,1,99 yrs lease commencing from 2004,15,Rest of Central Region,06 to 10
 PARK COURT,"1,308,000",925.7,"1,413",Jun-26,LORONG 101 CHANGI,Resale,Strata,86,"15,209",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+FIVENINE,"2,050,000","1,054.87","1,943",Jun-26,LORONG K TELOK KURAU,Resale,Strata,98,"20,918",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 BUTTERWORTH 8,"2,100,000","1,022.58","2,054",Jun-26,BUTTERWORTH LANE,Resale,Strata,95,"22,105",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 FLAMINGO VALLEY,"980,000",581.26,"1,686",Jun-26,SIGLAP ROAD,Resale,Strata,54,"18,148",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
 MEYER BLUE,"5,209,000","1,517.72","3,432",Jun-26,MEYER ROAD,New Sale,Strata,141,"36,943",-,Apartment,1,Freehold,15,Rest of Central Region,21 to 25
 AXIS @ SIGLAP,"1,700,000","1,001.05","1,698",Jun-26,EAST COAST TERRACE,Resale,Strata,93,"18,280",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+SEASIDE RESIDENCES,"1,100,000",592.02,"1,858",Jun-26,SIGLAP LINK,Resale,Strata,55,"20,000",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,01 to 05
 WATER PLACE,"2,380,000","1,216.33","1,957",Jun-26,TANJONG RHU ROAD,Resale,Strata,113,"21,062",-,Condominium,1,99 yrs lease commencing from 1998,15,Rest of Central Region,11 to 15
 TEMBUSU GRAND,"1,908,000",742.72,"2,569",Jun-26,JALAN TEMBUSU,Sub Sale,Strata,69,"27,652",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
 AMBER 45,"2,980,000","1,130.22","2,637",Jun-26,AMBER ROAD,Resale,Strata,105,"28,381",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 EVERITT EDGE,"730,000",430.56,"1,695",Jun-26,JOO CHIAT PLACE,Resale,Strata,40,"18,250",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 MARSHALL LODGE,"2,680,000","1,776.06","1,509",Jun-26,MARSHALL ROAD,Resale,Strata,165,"16,242",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+ATLASSIA,"2,680,000","1,140.98","2,349",Jun-26,JOO CHIAT PLACE,Resale,Strata,106,"25,283",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 THE CONTINUUM,"1,480,000",559.73,"2,644",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,52,"28,462",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 SEASIDE RESIDENCES,"1,600,000",678.13,"2,359",Jun-26,SIGLAP LINK,Resale,Strata,63,"25,397",-,Apartment,1,99 yrs lease commencing from 2016,15,Outside Central Region,11 to 15
 THE CONTINUUM,"5,187,000","1,905.23","2,723",Jun-26,THIAM SIEW AVENUE,New Sale,Strata,177,"29,305",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
@@ -44,6 +143,8 @@ D' FRESCO,"1,368,000",796.54,"1,717",Jun-26,JOO CHIAT LANE,Resale,Strata,74,"18,
 THE WATERSIDE,"5,600,000","2,400.37","2,333",Jun-26,TANJONG RHU ROAD,Resale,Strata,223,"25,112",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 NATURE MANSIONS,"2,000,000","1,216.33","1,644",Jun-26,LORONG K TELOK KURAU,Resale,Strata,113,"17,699",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 TEMBUSU GRAND,"1,900,000",667.37,"2,847",Jun-26,JALAN TEMBUSU,Sub Sale,Strata,62,"30,645",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,11 to 15
+ONE AMBER,"3,500,000","1,453.14","2,409",Jun-26,AMBER GARDENS,Resale,Strata,135,"25,926",-,Condominium,1,Freehold,15,Rest of Central Region,21 to 25
+COASTLINE RESIDENCES,"2,255,000",721.19,"3,127",Jun-26,AMBER ROAD,Resale,Strata,67,"33,657",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 GRAND DUNMAN,"2,046,000",893.41,"2,290",Jun-26,DUNMAN ROAD,New Sale,Strata,83,"24,651",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,16 to 20
 SANCTUARY GREEN,"3,900,000","2,723.29","1,432",Jun-26,TANJONG RHU ROAD,Resale,Strata,253,"15,415",-,Condominium,1,99 yrs lease commencing from 1997,15,Rest of Central Region,06 to 10
 VILLA MARINA,"1,800,000","1,151.75","1,563",Jun-26,JALAN SEMPADAN,Resale,Strata,107,"16,822",-,Condominium,1,99 yrs lease commencing from 1995,15,Outside Central Region,01 to 05
@@ -60,6 +161,8 @@ COTE D'AZUR,"3,575,000","1,679.18","2,129",Jun-26,MARINE PARADE ROAD,Resale,Stra
 SERAYA 9,"1,035,000",559.73,"1,849",Jun-26,SERAYA LANE,Resale,Strata,52,"19,904",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 NEPTUNE COURT,"1,250,000","1,270.15",984,Jun-26,MARINE VISTA,Resale,Strata,118,"10,593",-,Apartment,1,99 yrs lease commencing from 1976,15,Outside Central Region,11 to 15
 AURA 83,"2,350,000","1,593.07","1,475",Jun-26,DUKU ROAD,Resale,Strata,148,"15,878",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+TROPICS @ HAIGSVILLE,"1,426,888",839.59,"1,700",Jun-26,HAIGSVILLE DRIVE,Resale,Strata,78,"18,293",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+SANTA FE MANSIONS,"1,950,000","1,076.4","1,812",Jun-26,MARGATE ROAD,Resale,Strata,100,"19,500",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 AMBER HOUSE,"3,747,438","1,216.33","3,081",Jun-26,AMBER GARDENS,New Sale,Strata,113,"33,163",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
 THE CONTINUUM,"5,473,000","2,034.4","2,690",May-26,THIAM SIEW AVENUE,New Sale,Strata,189,"28,958",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 PINEHURST CONDOMINIUM,"2,450,000","1,528.49","1,603",May-26,LORONG L TELOK KURAU,Resale,Strata,142,"17,254",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
@@ -71,6 +174,7 @@ BUTTERWORTH 8,"3,600,000","1,776.06","2,027",May-26,BUTTERWORTH LANE,Resale,Stra
 ONE AMBER,"2,430,000",958,"2,537",May-26,AMBER GARDENS,Resale,Strata,89,"27,303",-,Condominium,1,Freehold,15,Rest of Central Region,21 to 25
 THE SEAFRONT ON MEYER,"2,728,000","1,065.64","2,560",May-26,MEYER ROAD,Resale,Strata,99,"27,556",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 SERAYA 9,"1,550,000",796.54,"1,946",May-26,SERAYA LANE,Resale,Strata,74,"20,946",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+COTE D'AZUR,"3,200,000","2,045.16","1,565",May-26,MARINE PARADE ROAD,Resale,Strata,190,"16,842",-,Condominium,1,99 yrs lease commencing from 2001,15,Rest of Central Region,01 to 05
 EASTWIND MANSIONS,"2,000,000","1,345.5","1,486",May-26,JOO CHIAT TERRACE,Resale,Strata,125,"16,000",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 AMBER PARK,"3,800,000","1,302.44","2,918",May-26,AMBER GARDENS,Resale,Strata,121,"31,405",-,Condominium,1,Freehold,15,Rest of Central Region,11 to 15
 THE CONTINUUM,"3,555,000","1,237.86","2,872",May-26,THIAM SIEW AVENUE,New Sale,Strata,115,"30,913",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
@@ -78,11 +182,14 @@ THE MEYERISE,"3,580,000","1,280.92","2,795",May-26,MEYER ROAD,Resale,Strata,119,
 CHELSEA LODGE,"1,560,000",958,"1,628",May-26,TANJONG KATONG ROAD,Resale,Strata,89,"17,528",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 AMBER 45,"1,860,000",699.66,"2,658",May-26,AMBER ROAD,Resale,Strata,65,"28,615",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 THE GRANDIFLORA,"2,100,000","1,614.6","1,301",May-26,LORONG L TELOK KURAU,Resale,Strata,150,"14,000",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+STUDIOS@TEMBELING,"1,425,000",785.77,"1,814",May-26,TEMBELING ROAD,Resale,Strata,73,"19,521",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 11 AMBER ROAD,"3,510,000","1,506.96","2,329",May-26,AMBER ROAD,Resale,Strata,140,"25,071",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 AMBER 45,"3,118,000","1,130.22","2,759",May-26,AMBER ROAD,Resale,Strata,105,"29,695",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 POSHGROVE EAST,"2,680,000","1,431.61","1,872",May-26,EAST COAST ROAD,Resale,Strata,133,"20,150",-,Condominium,1,Freehold,15,Outside Central Region,01 to 05
 THE NCLAVE,"1,250,000",731.95,"1,708",May-26,LORONG N TELOK KURAU,Resale,Strata,68,"18,382",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 CADENCE LIGHT,"1,450,000",850.36,"1,705",May-26,TELOK KURAU ROAD,Resale,Strata,79,"18,354",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+MANDARIN GARDENS,"960,000",731.95,"1,312",May-26,SIGLAP ROAD,Resale,Strata,68,"14,118",-,Condominium,1,99 yrs lease commencing from 1982,15,Outside Central Region,11 to 15
+ST PATRICK'S RESIDENCES,"2,580,000","1,205.57","2,140",May-26,ST. PATRICK'S ROAD,Resale,Strata,112,"23,036",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 BUTTERWORTH 8,"2,580,000","1,313.21","1,965",May-26,BUTTERWORTH LANE,Resale,Strata,122,"21,148",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 EAST PALM,"2,100,000","1,162.51","1,806",May-26,PALM ROAD,Resale,Strata,108,"19,444",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 ASPEN LOFT,"1,620,000","1,011.82","1,601",May-26,JOO CHIAT TERRACE,Resale,Strata,94,"17,234",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
@@ -98,6 +205,7 @@ HAIG COURT,"2,168,000","1,076.4","2,014",May-26,HAIG ROAD,Resale,Strata,100,"21,
 PARADISE PALMS,"2,538,000","1,184.04","2,144",May-26,DUNMAN ROAD,Resale,Strata,110,"23,073",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 AALTO,"3,980,000","1,442.38","2,759",May-26,MEYER ROAD,Resale,Strata,134,"29,701",-,Condominium,1,Freehold,15,Rest of Central Region,06 to 10
 MEYER MANSION,"4,350,000","1,722.24","2,526",May-26,MEYER ROAD,Resale,Strata,160,"27,188",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
+SUNSHINE GRANDEUR,"1,650,000","1,054.87","1,564",May-26,LORONG K TELOK KURAU,Resale,Strata,98,"16,837",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 SANCTUARY GREEN,"2,300,000","1,356.26","1,696",May-26,TANJONG RHU ROAD,Resale,Strata,126,"18,254",-,Condominium,1,99 yrs lease commencing from 1997,15,Rest of Central Region,11 to 15
 MERIDIAN 38,"1,828,000","1,151.75","1,587",May-26,LORONG M TELOK KURAU,Resale,Strata,107,"17,084",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 HAIG COURT,"3,090,000","1,453.14","2,126",May-26,HAIG ROAD,Resale,Strata,135,"22,889",-,Condominium,1,Freehold,15,Rest of Central Region,01 to 05
@@ -145,6 +253,7 @@ THE CONTINUUM,"4,668,000","1,689.95","2,762",May-26,THIAM SIEW AVENUE,New Sale,S
 TEMBUSU GRAND,"1,810,000",667.37,"2,712",May-26,JALAN TEMBUSU,Sub Sale,Strata,62,"29,194",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
 TEMBUSU GRAND,"4,080,000","1,431.61","2,850",May-26,JALAN TEMBUSU,Sub Sale,Strata,133,"30,677",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,16 to 20
 LIV @ MB,"3,420,000","1,280.92","2,670",May-26,ARTHUR ROAD,Sub Sale,Strata,119,"28,739",-,Condominium,1,99 yrs lease commencing from 2021,15,Rest of Central Region,11 to 15
+HAIG COURT,"2,280,000","1,076.4","2,118",May-26,HAIG ROAD,Resale,Strata,100,"22,800",-,Condominium,1,Freehold,15,Rest of Central Region,01 to 05
 CENTRINA,"1,125,000",775.01,"1,452",May-26,EVERITT ROAD NORTH,Resale,Strata,72,"15,625",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
 THE MAKENA,"3,848,000","1,636.13","2,352",May-26,MEYER ROAD,Resale,Strata,152,"25,316",-,Condominium,1,Freehold,15,Rest of Central Region,21 to 25
 AMBER 45,"3,200,000","1,130.22","2,831",May-26,AMBER ROAD,Resale,Strata,105,"30,476",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
@@ -215,6 +324,7 @@ MEYER BLUE,"5,528,000","1,733","3,190",Apr-26,MEYER ROAD,New Sale,Strata,161,"34
 MANDARIN GARDENS,"2,212,000","1,571.54","1,408",Apr-26,SIGLAP ROAD,Resale,Strata,146,"15,151",-,Condominium,1,99 yrs lease commencing from 1982,15,Outside Central Region,16 to 20
 NEPTUNE COURT,"1,320,000","1,270.15","1,039",Apr-26,MARINE VISTA,Resale,Strata,118,"11,186",-,Apartment,1,99 yrs lease commencing from 1976,15,Outside Central Region,16 to 20
 ESPIRA SUITES,"832,800",495.14,"1,682",Apr-26,LORONG H TELOK KURAU,Resale,Strata,46,"18,104",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
+448@EAST COAST,"775,000",462.85,"1,674",Apr-26,EAST COAST ROAD,Resale,Strata,43,"18,023",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 THE CONTINUUM,"5,333,000","1,905.23","2,799",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,177,"30,130",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 THE CONTINUUM,"3,584,000","1,302.44","2,752",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,121,"29,620",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
 THE CONTINUUM,"1,480,000",559.73,"2,644",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,52,"28,462",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
@@ -310,7 +420,7 @@ PROSPERO VILLE,"2,100,000","2,077.45","1,011",Apr-26,LORONG K TELOK KURAU,Resale
 8M RESIDENCES,"1,200,000",516.67,"2,323",Apr-26,MARGATE ROAD,Resale,Strata,48,"25,000",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
 THE SHORE RESIDENCES,"1,820,000",893.41,"2,037",Apr-26,AMBER ROAD,Resale,Strata,83,"21,928",-,Condominium,1,103 yrs lease commencing from 2009,15,Rest of Central Region,16 to 20
 THE CONTINUUM,"3,020,000","1,140.98","2,647",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,106,"28,491",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
-GRAND DUNMAN,"4,477,000","1,926.76","2,324",Apr-26,DUNMAN ROAD,New Sale,Strata,179,"25,011",-,Apartment,1,99 years leasehold,15,Rest of Central Region,11 to 15
+GRAND DUNMAN,"4,477,000","1,926.76","2,324",Apr-26,DUNMAN ROAD,New Sale,Strata,179,"25,011",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,11 to 15
 THE CONTINUUM,"3,768,000","1,248.62","3,018",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,116,"32,483",-,Apartment,1,Freehold,15,Rest of Central Region,11 to 15
 TEMBUSU GRAND,"1,530,000",645.84,"2,369",Apr-26,JALAN TEMBUSU,New Sale,Strata,60,"25,500",-,Condominium,1,99 yrs lease commencing from 2022,15,Rest of Central Region,16 to 20
 THE CONTINUUM,"5,482,000","1,905.23","2,877",Apr-26,THIAM SIEW AVENUE,New Sale,Strata,177,"30,972",-,Apartment,1,Freehold,15,Rest of Central Region,16 to 20
@@ -707,9 +817,6 @@ AMBER HOUSE,"3,109,206",979.52,"3,174",Jan-26,AMBER GARDENS,New Sale,Strata,91,"
 MERIDIAN 38,"1,850,000","1,151.75","1,606",Jan-26,LORONG M TELOK KURAU,Resale,Strata,107,"17,290",-,Apartment,1,Freehold,15,Outside Central Region,01 to 05
 MEYER MANSION,"3,300,000","1,108.69","2,976",Jan-26,MEYER ROAD,Resale,Strata,103,"32,039",-,Apartment,1,Freehold,15,Rest of Central Region,06 to 10
 ARDOR RESIDENCE,"2,485,000",979.52,"2,537",Jan-26,HAIG ROAD,New Sale,Strata,91,"27,308",-,Apartment,1,Freehold,15,Rest of Central Region,01 to 05
-GRAND DUNMAN,"4,354,000","1,926.76","2,260",Jan-26,DUNMAN ROAD,New Sale,Strata,179,"24,324",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
-GRAND DUNMAN,"4,360,000","1,926.76","2,263",Jan-26,DUNMAN ROAD,New Sale,Strata,179,"24,358",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
-GRAND DUNMAN,"4,503,000","1,786.82","2,520",Jan-26,DUNMAN ROAD,New Sale,Strata,166,"27,127",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,01 to 05
 GRAND DUNMAN,"5,262,000","2,131.27","2,469",Jan-26,DUNMAN ROAD,New Sale,Strata,198,"26,576",-,Apartment,1,99 yrs lease commencing from 2022,15,Rest of Central Region,11 to 15
 COSTA RHU,"2,260,000","1,399.32","1,615",Jan-26,RHU CROSS,Resale,Strata,130,"17,385",-,Condominium,1,99 yrs lease commencing from 1994,15,Rest of Central Region,11 to 15
 THE RED HOUSE,"1,410,000",958,"1,472",Jan-26,EAST COAST ROAD,Resale,Strata,89,"15,843",-,Apartment,1,99 yrs lease commencing from 2012,15,Rest of Central Region,01 to 05
