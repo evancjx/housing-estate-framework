@@ -48,6 +48,16 @@
       "featured": true
     },
     {
+      "id": "katong-comparison",
+      "path": "katong_condo_comparison.html",
+      "title": "Katong condominium comparison",
+      "category": "private-property",
+      "kind": "research",
+      "summary": "Compare eight reviewed Katong projects by sale state, bedroom, floor, size, growth, liquidity and exact-unit evidence coverage.",
+      "tags": ["katong", "condominium", "transaction", "unit", "sale state"],
+      "featured": true
+    },
+    {
       "id": "poiz-east-comparison",
       "path": "poiz_east_resale_comparison.html",
       "title": "Poiz versus East-side resale condominiums",
