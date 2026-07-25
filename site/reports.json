@@ -48,6 +48,26 @@
       "featured": true
     },
     {
+      "id": "condo-framework-comparison",
+      "path": "condo_framework_comparison.html",
+      "title": "Two-condominium framework comparison",
+      "category": "private-property",
+      "kind": "comparison",
+      "summary": "Select two condominium projects and compare achieved project evidence alongside the estate Provision, Liveability, private Value, employment, risk and life-path framework.",
+      "tags": ["condominium", "comparison", "provision", "liveability", "value"],
+      "featured": true
+    },
+    {
+      "id": "multi-condo-framework-comparison",
+      "path": "multi_condo_framework_comparison.html",
+      "title": "Multi-condominium framework comparison",
+      "category": "private-property",
+      "kind": "comparison",
+      "summary": "Build an ordered set of two to five condominium projects and compare achieved project evidence alongside the separate estate framework views.",
+      "tags": ["condominium", "comparison", "matrix", "provision", "liveability", "value"],
+      "featured": true
+    },
+    {
       "id": "katong-comparison",
       "path": "katong_condo_comparison.html",
       "title": "Katong condominium comparison",
