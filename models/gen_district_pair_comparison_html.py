@@ -229,19 +229,22 @@ def build_page(da: str, db: str, label_a: str, label_b: str,
                     f"{project_mrt_table(tb, mrt_b, f'{label_b} (D{db})')}</section>")
 
     style = """
+    *{box-sizing:border-box}
     body{font-family:-apple-system,Segoe UI,sans-serif;margin:24px;color:#1a1a1a;max-width:1100px}
     h1{font-size:22px} h2{font-size:17px;margin-top:28px} h3{font-size:14px}
-    table{border-collapse:collapse;width:100%;margin:8px 0 20px;font-size:13px}
+    table{border-collapse:collapse;width:100%;margin:8px 0 20px;font-size:13px;display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
     th,td{border:1px solid #d5d5d5;padding:5px 8px;text-align:left}
     th{background:#f2f2f2} td.num{text-align:right;font-variant-numeric:tabular-nums}
-    .cards{display:flex;gap:16px;flex-wrap:wrap} .card{border:1px solid #d5d5d5;border-radius:8px;padding:4px 16px;flex:1;min-width:320px}
+    .cards{display:flex;gap:16px;flex-wrap:wrap} .card{border:1px solid #d5d5d5;border-radius:8px;padding:4px 16px;flex:1;min-width:min(320px,100%)}
     .note{color:#666;font-size:12px}
+    @media (max-width:620px){body{margin:18px 14px 28px}h1{font-size:20px;line-height:1.25}th,td{white-space:nowrap}}
     @media (prefers-color-scheme: dark){body{background:#111;color:#eee}th{background:#222}th,td,.card{border-color:#444}.note{color:#aaa}}
     """
     caveat = ("Source: EdgeProp public transaction tables (labelled URA), source_quality=not_clean; "
               "condo/apartment/EC only, landed excluded. Medians only — no mix adjustment; "
               "compare like-for-like rows (same bedroom count or size band), not headline medians.")
     return (f"<!DOCTYPE html><html><head><meta charset='utf-8'>"
+            f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
             f"<title>D{da} vs D{db} private comparison</title><style>{style}</style></head><body>"
             f"<h1>{_esc(label_a)} (D{da}) vs {_esc(label_b)} (D{db}) — condo/apartment transactions</h1>"
             f"<p class='note'>{caveat}</p>" + "".join(sections) + "</body></html>")

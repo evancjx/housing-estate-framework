@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG Estate Framework — Architecture</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -273,6 +274,21 @@
     justify-content: center;
     height: 100%;
     min-height: 40px;
+  }
+  @media (max-width: 900px) {
+    body { padding: 28px 20px 44px; }
+    .diagram { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .col-inputs, .col-models, .col-output { grid-column: 1; min-width: 0; }
+    .col-arr1, .col-arr2 { display: none; }
+    .output-card { position: static; }
+    .notes-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    body { padding: 24px 14px 36px; }
+    .subtitle { margin-bottom: 28px; }
+    .models-grid, .notes-strip { grid-template-columns: minmax(0, 1fr); }
+    .model-card, .output-card { min-width: 0; }
+    .col-entry { flex-wrap: wrap; }
   }
 </style>
 </head>

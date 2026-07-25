@@ -497,6 +497,7 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG Private Condo Project Comparison</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -713,6 +714,11 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
     .summary { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
     .controls { grid-template-columns: 1fr; }
     .count { text-align: left; }
+  }
+  @media (max-width: 480px) {
+    body { padding: 18px 14px 28px; }
+    .summary { grid-template-columns: 1fr; }
+    .search, select { width: 100%; min-height: 38px; }
   }
 </style>
 </head>

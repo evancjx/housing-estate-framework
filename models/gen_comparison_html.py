@@ -164,6 +164,7 @@ HTML = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG Estate Comparison — All Districts</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -342,6 +343,13 @@ HTML = f"""<!DOCTYPE html>
   th[colspan] {{ border-right: 1px solid #1e3a5f; }}
   td:last-child {{ border-right: none; }}
   .col-sep {{ border-left: 1px solid #1e293b; }}
+  @media (max-width: 620px) {{
+    body {{ padding: 18px 14px 28px; }}
+    .controls {{ gap: 8px; }}
+    .search {{ width: 100%; min-height: 36px; }}
+    .filter-btn {{ min-height: 36px; }}
+    .tip::after {{ max-width: min(240px, calc(100vw - 32px)); }}
+  }}
 </style>
 </head>
 <body>

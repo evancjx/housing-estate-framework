@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG Estate Comparison — All Districts</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -180,11 +181,18 @@
   th[colspan] { border-right: 1px solid #1e3a5f; }
   td:last-child { border-right: none; }
   .col-sep { border-left: 1px solid #1e293b; }
+  @media (max-width: 620px) {
+    body { padding: 18px 14px 28px; }
+    .controls { gap: 8px; }
+    .search { width: 100%; min-height: 36px; }
+    .filter-btn { min-height: 36px; }
+    .tip::after { max-width: min(240px, calc(100vw - 32px)); }
+  }
 </style>
 </head>
 <body>
 <h1>SG Estate Comparison</h1>
-<p class="meta">35 estates · 20-component provision · 4 personas × 3 horizons · HDB + private value · 2026-07-10</p>
+<p class="meta">35 estates · 20-component provision · 4 personas × 3 horizons · HDB + private value · 2026-07-25</p>
 
 <div class="help-note">
   <strong>Liveability note:</strong>
@@ -297,8 +305,8 @@ const DATA = [
     "gap_ls": -1.17,
     "hdb_b": "B",
     "hdb_m": 1.1574,
-    "pvt_b": "B",
-    "pvt_m": 1.2127,
+    "pvt_b": "B+",
+    "pvt_m": 1.2178,
     "pvt_n": 960,
     "emp0": "F",
     "emp5": "F",
@@ -358,7 +366,7 @@ const DATA = [
     "hdb_b": "B",
     "hdb_m": 1.0682,
     "pvt_b": "B",
-    "pvt_m": 1.046,
+    "pvt_m": 1.0505,
     "pvt_n": 2473,
     "emp0": "B",
     "emp5": "B",
@@ -388,7 +396,7 @@ const DATA = [
     "hdb_b": "D",
     "hdb_m": 0.7681,
     "pvt_b": "B",
-    "pvt_m": 0.9715,
+    "pvt_m": 0.9755,
     "pvt_n": 3358,
     "emp0": "B",
     "emp5": "B",
@@ -418,8 +426,8 @@ const DATA = [
     "hdb_b": "B+",
     "hdb_m": 0.9738,
     "pvt_b": "B+",
-    "pvt_m": 1.0336,
-    "pvt_n": 5460,
+    "pvt_m": 1.038,
+    "pvt_n": 5510,
     "emp0": "B",
     "emp5": "B",
     "emp15": "B",
@@ -448,8 +456,8 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.9617,
     "pvt_b": "B+",
-    "pvt_m": 1.1769,
-    "pvt_n": 5966,
+    "pvt_m": 1.1814,
+    "pvt_n": 6040,
     "emp0": "C",
     "emp5": "C",
     "emp15": "C",
@@ -478,7 +486,7 @@ const DATA = [
     "hdb_b": "B",
     "hdb_m": 0.9114,
     "pvt_b": "B+",
-    "pvt_m": 1.0071,
+    "pvt_m": 1.0112,
     "pvt_n": 3010,
     "emp0": "B",
     "emp5": "B",
@@ -508,7 +516,7 @@ const DATA = [
     "hdb_b": "D",
     "hdb_m": 0.8154,
     "pvt_b": "C",
-    "pvt_m": 0.854,
+    "pvt_m": 0.8572,
     "pvt_n": 5448,
     "emp0": "B+",
     "emp5": "B+",
@@ -538,7 +546,7 @@ const DATA = [
     "hdb_b": "D",
     "hdb_m": 0.9018,
     "pvt_b": "B",
-    "pvt_m": 1.1279,
+    "pvt_m": 1.1324,
     "pvt_n": 11843,
     "emp0": "B",
     "emp5": "B",
@@ -598,8 +606,8 @@ const DATA = [
     "hdb_b": "F",
     "hdb_m": 0.7754,
     "pvt_b": "D",
-    "pvt_m": 0.9498,
-    "pvt_n": 10630,
+    "pvt_m": 0.9535,
+    "pvt_n": 10739,
     "emp0": "B",
     "emp5": "B",
     "emp15": "B",
@@ -658,7 +666,7 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.855,
     "pvt_b": "B+",
-    "pvt_m": 1.0522,
+    "pvt_m": 1.0564,
     "pvt_n": 1457,
     "emp0": "B",
     "emp5": "B",
@@ -688,7 +696,7 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.9114,
     "pvt_b": "B",
-    "pvt_m": 1.0272,
+    "pvt_m": 1.0314,
     "pvt_n": 3010,
     "emp0": "B",
     "emp5": "C",
@@ -718,7 +726,7 @@ const DATA = [
     "hdb_b": "D",
     "hdb_m": 0.8154,
     "pvt_b": "D",
-    "pvt_m": 0.842,
+    "pvt_m": 0.8453,
     "pvt_n": 5448,
     "emp0": "B+",
     "emp5": "B+",
@@ -748,7 +756,7 @@ const DATA = [
     "hdb_b": null,
     "hdb_m": null,
     "pvt_b": "D",
-    "pvt_m": 1.1613,
+    "pvt_m": 1.1668,
     "pvt_n": 675,
     "emp0": "F",
     "emp5": "C",
@@ -778,8 +786,8 @@ const DATA = [
     "hdb_b": "B",
     "hdb_m": 0.9617,
     "pvt_b": "B+",
-    "pvt_m": 1.173,
-    "pvt_n": 5966,
+    "pvt_m": 1.1774,
+    "pvt_n": 6040,
     "emp0": "C",
     "emp5": "C",
     "emp15": "C",
@@ -808,8 +816,8 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.9617,
     "pvt_b": "B+",
-    "pvt_m": 1.1671,
-    "pvt_n": 5966,
+    "pvt_m": 1.1715,
+    "pvt_n": 6040,
     "emp0": "C",
     "emp5": "C",
     "emp15": "C",
@@ -838,7 +846,7 @@ const DATA = [
     "hdb_b": "B",
     "hdb_m": 0.9776,
     "pvt_b": "B+",
-    "pvt_m": 1.1063,
+    "pvt_m": 1.1109,
     "pvt_n": 4310,
     "emp0": "C",
     "emp5": "C",
@@ -1018,7 +1026,7 @@ const DATA = [
     "hdb_b": "B+",
     "hdb_m": 1.1777,
     "pvt_b": "B+",
-    "pvt_m": 1.1245,
+    "pvt_m": 1.1292,
     "pvt_n": 5945,
     "emp0": "C",
     "emp5": "C",
@@ -1078,7 +1086,7 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.8118,
     "pvt_b": "B",
-    "pvt_m": 0.9439,
+    "pvt_m": 0.9476,
     "pvt_n": 1739,
     "emp0": "B+",
     "emp5": "B+",
@@ -1138,8 +1146,8 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.9023,
     "pvt_b": "B+",
-    "pvt_m": 1.0722,
-    "pvt_n": 4845,
+    "pvt_m": 1.076,
+    "pvt_n": 4897,
     "emp0": "B+",
     "emp5": "B+",
     "emp15": "B",
@@ -1168,7 +1176,7 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.9058,
     "pvt_b": "B",
-    "pvt_m": 1.0702,
+    "pvt_m": 1.0746,
     "pvt_n": 7635,
     "emp0": "B+",
     "emp5": "B+",
@@ -1228,7 +1236,7 @@ const DATA = [
     "hdb_b": "D",
     "hdb_m": 0.75,
     "pvt_b": "C",
-    "pvt_m": 0.8879,
+    "pvt_m": 0.8913,
     "pvt_n": 13508,
     "emp0": "B",
     "emp5": "B",
@@ -1288,7 +1296,7 @@ const DATA = [
     "hdb_b": "C",
     "hdb_m": 0.855,
     "pvt_b": "D",
-    "pvt_m": 0.7591,
+    "pvt_m": 0.7623,
     "pvt_n": 959,
     "emp0": "B",
     "emp5": "B",

@@ -1,4 +1,4 @@
-.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth private-bedrooms pipeline
+.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -29,6 +29,18 @@ poiz-east-comparison:
 # Generate unit-type growth and full resale ledgers for the curated Poiz/East projects.
 poiz-east-unit-growth:
 	python3 models/gen_poiz_east_unit_growth_html.py
+
+# Generate Canberra Crescent Residences versus District 27 deep analysis.
+canberra-d27-analysis:
+	python3 models/gen_canberra_crescent_d27_html.py
+
+# Generate the six Canberra comparison-strategy workbooks.
+canberra-d27-strategies:
+	python3 models/gen_canberra_d27_peer_strategy_html.py
+	python3 models/gen_canberra_d27_control_strategy_html.py
+
+# Rebuild the Canberra district analysis and every linked strategy workbook.
+canberra-d27-reports: canberra-d27-analysis canberra-d27-strategies
 
 # Per-transaction bedroom attribution (URA txns + EdgeProp 2019-20 backfill).
 # NOT part of `pipeline` — different data family (private transactions, not estate scores);

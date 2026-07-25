@@ -137,6 +137,7 @@ HTML = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SG MRT Station Comparison</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -250,6 +251,11 @@ HTML = f"""<!DOCTYPE html>
     body {{ padding: 18px; }}
     .summary {{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }}
     .search {{ width: 100%; }}
+  }}
+  @media (max-width: 480px) {{
+    body {{ padding: 18px 14px 28px; }}
+    .summary {{ grid-template-columns: 1fr; }}
+    .filter-btn {{ min-height: 36px; }}
   }}
 </style>
 </head>
