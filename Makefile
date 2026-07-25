@@ -1,4 +1,4 @@
-.PHONY: smoke pages-check pages-build master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline
+.PHONY: smoke pages-check pages-build master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth katong-comparison canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -37,6 +37,11 @@ poiz-east-comparison:
 # Generate unit-type growth and full resale ledgers for the curated Poiz/East projects.
 poiz-east-unit-growth:
 	python3 models/gen_poiz_east_unit_growth_html.py
+
+# Generate the reviewed Katong project, sale-state and transaction comparison.
+# Exact-unit analysis activates only when an authorised EdgeProp unit CSV exists.
+katong-comparison:
+	python3 models/gen_katong_comparison_html.py
 
 # Generate Canberra Crescent Residences versus District 27 deep analysis.
 canberra-d27-analysis:
