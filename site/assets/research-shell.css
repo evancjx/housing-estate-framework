@@ -1,0 +1,133 @@
+:root {
+  --shell-ink: #16231f;
+  --shell-muted: #65736d;
+  --shell-line: #dbe3df;
+  --shell-surface: #ffffff;
+  --shell-accent: #08786d;
+  --shell-accent-soft: #e3f4f0;
+  --shell-focus: #f2a900;
+}
+
+.research-shell-skip {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10000;
+  padding: 9px 12px;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #073f3a;
+  font: 700 13px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+  transform: translateY(-180%);
+}
+
+.research-shell-skip:focus {
+  transform: translateY(0);
+}
+
+.research-shell-nav {
+  display: flex;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 20px;
+  padding: 10px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--shell-line);
+  border-radius: 10px;
+  background: var(--shell-surface);
+  color: var(--shell-ink);
+  font: 600 12px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 28px rgba(18, 40, 34, .08);
+}
+
+.research-shell-brand,
+.research-shell-links,
+.research-shell-copy {
+  display: inline-flex;
+  align-items: center;
+}
+
+.research-shell-brand {
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.research-shell-brand-mark {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--shell-accent);
+  color: #fff;
+  font-size: 11px;
+}
+
+.research-shell-links {
+  gap: 5px;
+}
+
+.research-shell-links a,
+.research-shell-copy {
+  min-height: 32px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--shell-muted);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.research-shell-links a:hover,
+.research-shell-copy:hover {
+  background: var(--shell-accent-soft);
+  color: var(--shell-accent);
+}
+
+.research-shell-nav a:focus-visible,
+.research-shell-nav button:focus-visible,
+.research-shell-skip:focus-visible {
+  outline: 3px solid var(--shell-focus);
+  outline-offset: 2px;
+}
+
+.research-shell-status {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  max-width: min(340px, calc(100vw - 36px));
+  padding: 10px 13px;
+  border-radius: 8px;
+  background: #073f3a;
+  color: #ffffff;
+  font: 650 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .22);
+}
+
+.tbl-wrap:focus-visible,
+[role="region"]:focus-visible {
+  outline: 3px solid var(--shell-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 680px) {
+  .research-shell-nav {
+    margin-bottom: 15px;
+  }
+
+  .research-shell-links a:not(.research-shell-primary) {
+    display: none;
+  }
+
+  .research-shell-copy {
+    display: none;
+  }
+}

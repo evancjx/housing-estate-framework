@@ -12,8 +12,8 @@ INPUT:  Raw CSVs from the URA PMI portal or REALIS caveats.
 OUTPUT: data/inputs/ura_private.csv with columns:
     planning_area, transacted_price, area_sqm, property_type,
     tenure, project_age_years, sale_month, plus optional raw context
-    columns such as type_of_area, market_segment, source, and source_quality
-    when present
+    columns such as type_of_area, market_segment, source, source_quality,
+    and exact EdgeProp unit provenance when present
 
 DISTRICT → PLANNING AREA mapping is used when the raw file doesn't have
 a planning_area column (portal downloads only have Postal District).
@@ -124,7 +124,7 @@ PORTAL_COLS = {
 EDGEPROP_COLS = {
     "date":                   "sale_date",
     "date of sale":           "sale_date",
-    "address":                "street_name",
+    "address":                "address",
     "street":                 "street_name",
     "price (s$ psf)":         "unit_price_psf",
     "unit price ($psf)":      "unit_price_psf",
@@ -143,6 +143,11 @@ EDGEPROP_COLS = {
     "postal district":        "postal_district",
     "project":                "project_name",
     "project name":           "project_name",
+    "unit number":            "unit_number",
+    "unit floor":             "unit_floor",
+    "unit stack":             "unit_stack",
+    "unit number status":     "unit_number_status",
+    "unit number source":     "unit_number_source",
 }
 
 
@@ -301,7 +306,9 @@ def ingest_file(
     ]
     optional = ["project_name", "street_name", "postal_district", "market_segment",
                 "floor_level", "type_of_sale", "type_of_area", "unit_price_psf",
-                "unit_price_psm", "purchaser_address", "source", "source_quality"]
+                "unit_price_psm", "purchaser_address", "source", "source_quality",
+                "address", "unit_number", "unit_floor", "unit_stack",
+                "unit_number_status", "unit_number_source"]
     for c in optional:
         if c in df.columns:
             out_cols.append(c)
@@ -314,7 +321,9 @@ def ingest_file(
 def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     """Drop duplicate raw transactions using the broadest stable key available."""
     dedup_cols = ["planning_area", "transacted_price", "area_sqm", "sale_month", "property_type"]
-    for extra in ["project_name", "street_name", "floor_level"]:
+    # Exact units that happen to share month/price/area are distinct
+    # transactions. Include published address/unit context when available.
+    for extra in ["project_name", "street_name", "address", "unit_number", "floor_level"]:
         if extra in df.columns:
             dedup_cols.append(extra)
     before = len(df)

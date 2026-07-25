@@ -179,6 +179,25 @@ def test_render_html_uses_multi_select_filters():
     assert 'id="saleFilter" multiple' in html
     assert 'id="sourceFilter" multiple' in html
     assert 'id="primaryFilter" multiple' in html
+    assert '<span class="control-label">District</span>' in html
+    assert '<span class="control-label">Nearest MRT</span>' in html
+    assert '<span class="control-label">Sale evidence</span>' in html
     assert 'function selectedValues(id)' in html
     assert 'values.some(value => String(saleMix ?? "").includes(value))' in html
     assert 'const primaryValues = selectedValues("primaryFilter");' in html
+
+
+def test_render_html_prefills_project_search_from_query_parameter():
+    html = table.render_html([], "")
+
+    assert 'id="search" type="search"' in html
+    assert 'aria-label="Search private projects"' in html
+    assert 'const params = new URLSearchParams(window.location.search);' in html
+    assert 'const query = (params.get("q") || "").trim();' in html
+    assert 'const district = (params.get("district") || "")' in html
+    assert "option.selected = true;" in html
+    assert 'id="activeQuery" hidden' in html
+    assert 'id="clearFilters"' in html
+    assert 'Showing matches for “${query}”.' in html
+    assert 'window.history.replaceState({}, "", window.location.pathname);' in html
+    assert "initialiseFromURL();" in html

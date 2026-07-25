@@ -1,0 +1,58 @@
+Project Name
+TEST RESIDENCES
+Property Type
+Condominium
+Tenure
+Freehold
+District/Planning Area
+D11 / NOVENA
+Date
+Area (sqft)
+Bedrooms
+Price (S$ psf)
+Price (S$)
+Type of Sale
+Address
+Type of Area
+Purchaser Address
+Source
+22 JUN 2026
+840
+3
+1,830
+1,536,500
+Resale
+10 TEST ROAD #06-15
+Strata
+Private
+URA
+21 JUN 2026
+840
+3
+1,800
+1,512,000
+Resale
+10 TEST ROAD #06-XX
+Strata
+Private
+URA
+20 JUN 2026
+592
+2
+1,740
+1,030,000
+Resale
+10 TEST ROAD
+Strata
+HDB
+URA
+19 JUN 2026
+592
+2
+1,700
+1,006,400
+Resale
+10 TEST ROAD #LEVEL
+Strata
+HDB
+URA

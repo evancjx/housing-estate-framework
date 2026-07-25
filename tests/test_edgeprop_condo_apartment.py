@@ -1,4 +1,11 @@
+import argparse
+import csv
+from pathlib import Path
+
 from scrapers import edgeprop_condo_apartment_playwright as condo
+
+
+FIXTURE = Path(__file__).parent / "fixtures/edgeprop/condo_unit_transactions.txt"
 
 
 def test_discover_project_links_keeps_condo_apartment_detail_pages_only():
@@ -58,6 +65,9 @@ def test_parse_condo_rendered_transaction_text():
     assert row["Date of Sale"] == "22 Jun 2026"
     assert row["Address"] == "55 TAMPINES LANE #06-XX"
     assert row["Street"] == "55 TAMPINES LANE"
+    assert row["unit_number"] == ""
+    assert row["unit_number_status"] == "masked"
+    assert row["unit_number_source"] == "edgeprop_address"
     assert row["Bedrooms"] == "3"
     assert row["Unit Price ($psf)"] == 1830
     assert row["Price ($)"] == 1536500
@@ -97,3 +107,87 @@ def test_advertised_sales_count_accepts_singular_and_plural_labels():
     assert condo.advertised_sales_count("ALL SALES TRANSACTIONS (935)") == 935
     assert condo.advertised_sales_count("ALL SALES TRANSACTION (0)") == 0
     assert condo.advertised_sales_count("No transaction table") is None
+
+
+def test_unit_fixture_preserves_exact_values_and_marks_unavailable_units():
+    text = FIXTURE.read_text(encoding="utf-8")
+
+    rows = condo.parse_transaction_text(
+        text,
+        project_name="TEST RESIDENCES",
+        planning_area="NOVENA",
+        postal_district="11",
+        property_type="Condominium",
+        tenure="Freehold",
+    )
+
+    assert len(rows) == 4
+    exact, masked, absent, unparseable = rows
+    assert exact["unit_number"] == "#06-15"
+    assert exact["unit_floor"] == "06"
+    assert exact["unit_stack"] == "15"
+    assert exact["unit_number_status"] == "exact"
+    assert exact["unit_number_source"] == "edgeprop_address"
+    assert exact["Street"] == "10 TEST ROAD"
+
+    assert masked["unit_number"] == ""
+    assert masked["unit_floor"] == ""
+    assert masked["unit_stack"] == ""
+    assert masked["unit_number_status"] == "masked"
+    assert masked["unit_number_source"] == "edgeprop_address"
+    assert masked["Address"].endswith("#06-XX")
+
+    assert absent["unit_number"] == ""
+    assert absent["unit_number_status"] == "not_present"
+    assert absent["unit_number_source"] == ""
+
+    assert unparseable["unit_number"] == ""
+    assert unparseable["unit_number_status"] == "unparseable"
+    assert unparseable["unit_number_source"] == "edgeprop_address"
+    assert unparseable["Address"].endswith("#LEVEL")
+
+
+def test_parse_saved_transactions_writes_stable_unit_schema(tmp_path):
+    out = tmp_path / "units.csv"
+    args = argparse.Namespace(
+        html_file=[],
+        text_file=[str(FIXTURE)],
+        project_name="",
+        planning_area="",
+        postal_district="",
+        property_type="Condominium/Apartment",
+        tenure="",
+        source_url="https://www.edgeprop.sg/condo-apartment/test-residences",
+        source_slug="test-residences",
+        out=str(out),
+    )
+
+    condo.parse_saved_transactions(args)
+
+    with out.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+    assert reader.fieldnames == condo.UNIT_FIELDS
+    assert len(rows) == 4
+    assert rows[0]["Project"] == "TEST RESIDENCES"
+    assert rows[0]["planning_area"] == "NOVENA"
+    assert rows[0]["Postal District"] == "11"
+    assert rows[0]["unit_number"] == "#06-15"
+    assert rows[1]["unit_number_status"] == "masked"
+    assert all(row["source_quality"] == "not_clean" for row in rows)
+    assert all(row["source_slug"] == "test-residences" for row in rows)
+
+
+def test_extract_unit_number_rejects_ambiguity_and_preserves_alphanumeric_tokens():
+    ambiguous = condo.extract_unit_number("10 TEST ROAD #01-01 / #02-02")
+    penthouse = condo.extract_unit_number("10 TEST ROAD #PH-01")
+    basement = condo.extract_unit_number("10 TEST ROAD #B1-01")
+
+    assert ambiguous["unit_number"] == ""
+    assert ambiguous["unit_number_status"] == "unparseable"
+    assert penthouse["unit_number"] == "#PH-01"
+    assert penthouse["unit_floor"] == "PH"
+    assert penthouse["unit_number_status"] == "exact"
+    assert basement["unit_number"] == "#B1-01"
+    assert basement["unit_floor"] == "B1"
+    assert basement["unit_number_status"] == "exact"

@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - "*.html"
+      - "site/**"
+      - "scripts/build_pages_site.py"
+      - "data/raw/edgeprop/edgeprop_condo_apartment_projects.csv"
+      - "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -32,13 +36,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Prepare static report bundle
-        run: |
-          mkdir _site
-          find . -maxdepth 1 -type f -name '*.html' -exec cp '{}' _site/ \;
-          touch _site/.nojekyll
-          test -f _site/index.html
-          test -f _site/poiz_east_resale_comparison.html
-          test -f _site/poiz_east_unit_growth_transactions.html
+        run: python3 scripts/build_pages_site.py --out _site
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

@@ -1,8 +1,16 @@
-.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline
+.PHONY: smoke pages-check pages-build master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
 	python3 -m pytest -q
+
+# Validate the static research catalog without writing a Pages artifact.
+pages-check:
+	python3 scripts/build_pages_site.py
+
+# Assemble the same static artifact deployed by the GitHub Pages workflow.
+pages-build:
+	python3 scripts/build_pages_site.py --out _site
 
 # Rebuild the joined master_output.csv from the current model outputs.
 master:
