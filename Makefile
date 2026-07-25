@@ -1,4 +1,4 @@
-.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table private-bedrooms pipeline
+.PHONY: smoke master private-project-locations private-project-school-metrics private-project-table poiz-east-comparison poiz-east-unit-growth private-bedrooms pipeline
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -21,6 +21,14 @@ private-project-school-metrics:
 # Generate the private project comparison table from committed transactions and optional geocodes.
 private-project-table:
 	python3 models/gen_private_project_comparison_html.py
+
+# Generate the curated, resale-only Poiz-versus-East project diagnostic.
+poiz-east-comparison:
+	python3 models/gen_poiz_east_resale_comparison_html.py
+
+# Generate unit-type growth and full resale ledgers for the curated Poiz/East projects.
+poiz-east-unit-growth:
+	python3 models/gen_poiz_east_unit_growth_html.py
 
 # Per-transaction bedroom attribution (URA txns + EdgeProp 2019-20 backfill).
 # NOT part of `pipeline` — different data family (private transactions, not estate scores);
