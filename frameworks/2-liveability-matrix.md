@@ -21,7 +21,7 @@ against each other. They serve different people, or the same person at different
 
 ---
 
-## 1. The matrix: 4 personas × 2 horizons (T0 / T5)
+## 1. The matrix: 4 personas × 3 horizons (T0 / T5 / T15)
 
 > The model now emits a **third horizon T15** (15-year) on top of this base matrix — see
 > addendum L9.1. The committed `data/outputs/liveability_matrix.csv` carries all three (T0/T5/T15).
@@ -43,7 +43,10 @@ Cell(estate, persona, horizon) =
     Σ [ w_persona(i) × S_i(horizon) ]  ×  D(estate)  ×  C_persona(estate)
     then expressed as a BAND, and adjusted by Value (§3) when a Value read is requested.
 ```
-- `w_persona` = Document-1 weights + persona Δ (below), renormalised. Non-comparable across personas by design.
+- `w_persona` = Document-1 weights + persona Δ (below). If a signed delta would make an
+  S-group negative, that group is floored at zero; the full vector is then renormalised.
+  This prevents positive provision from receiving a negative persona weight.
+  Non-comparable across personas by design.
 - `S_i(horizon)`: T0 uses present-state; T5 folds in confirmed additions, each discounted by
   Certainty × Time × SlipPremium (rail 0.85). Promises are NOT counted at face value.
 - `C_persona`: persona-specific vetoes (e.g. Schools=1 caps young-family at C; Healthcare=1 caps retiree at C).

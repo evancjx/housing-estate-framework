@@ -44,7 +44,7 @@ Output range 1.0–5.0, reported as a BAND (A/B+/B/C/D/F), not a bare decimal (s
 
 ### 1.1 Components and weights — `W` (20 components, sum = 1.000)
 
-Sourced verbatim from `models/framework_config.py:PROVISION_WEIGHTS`. Do not edit here without updating that file.
+Sourced verbatim from `sg_estate/domain/framework.py:PROVISION_WEIGHTS`. Do not edit here without updating that file.
 
 | # | Key | Weight | Provenance | Notes |
 |---|-----|------:|:----------:|-------|
@@ -99,7 +99,7 @@ allocated; it does not appear in PROVISION_WEIGHTS. Do not include it in scoring
 Applied by `value_model.py` when scoring private transactions. Rationale: private buyers have
 higher car ownership (conn ↓), use in-development amenities (green ↓, sport ↓), prioritise
 school postal codes as a direct pricing driver (sch ↑), and skew younger/wealthier (eldercare ↓).
-Sourced verbatim from `models/framework_config.py:PROVISION_WEIGHTS_PRIVATE`.
+Sourced verbatim from `sg_estate/domain/framework.py:PROVISION_WEIGHTS_PRIVATE`.
 
 | Key | W (HDB) | W_PRIVATE | Delta | Rationale |
 |-----|--------:|----------:|------:|-----------|

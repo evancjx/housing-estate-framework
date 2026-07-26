@@ -1,5 +1,7 @@
-pytest>=8.0
-pandas
-numpy
-statsmodels
-shapely
+# Reproducible development/test environment. Keep aligned with pyproject.toml.
+pytest==9.0.3
+pandas==2.3.2
+numpy==2.3.3
+statsmodels==0.14.6
+shapely==2.1.2
+requests==2.34.2

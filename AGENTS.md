@@ -1,7 +1,8 @@
 # Repository Guidelines
 
-This file gives Codex and other coding agents the working rules for this repository. It is based on
-`CLAUDE.md`; keep the two files aligned when repository conventions change.
+This is the authoritative working guide for coding agents. `CLAUDE.md`
+delegates here so repository conventions have one owner. See
+`docs/ARCHITECTURE.md` for package and execution boundaries.
 
 ## What This Repo Is
 
@@ -29,8 +30,9 @@ Framework document status:
 
 ## Project Structure & Module Organization
 
-Core model code lives in `models/`, including `provision_model.py`, `liveability_model.py`,
-`value_model.py`, `lease_risk_model.py`, `employment_model.py`, and `build_master.py`.
+Canonical core model code lives in `sg_estate/domain/`; orchestration and master
+publication live in `sg_estate/application/`. Historical paths in `models/`
+remain compatibility CLIs alongside ingesters and reports not yet migrated.
 Tests live in `tests/`; fixtures and before/after snapshots are under `tests/snapshots/`.
 Inputs and generated outputs are in `data/`, with `data/outputs/master_output.csv` as the headline output.
 URA/private transaction tooling is isolated in `scrapers/`.
@@ -39,33 +41,33 @@ The model pipeline is directed and run order matters:
 
 ```text
 momentum_model.py      -> data/inputs/pipeline_data.json -> data/outputs/judged_inputs_updated.csv
-provision_model.py     -> geospatial layers + judged inputs -> data/outputs/provision_scores.csv
-liveability_model.py   -> provision_scores + pipeline_data -> data/outputs/liveability_matrix.csv
-value_model.py         -> provision_scores + hdb_resale -> data/outputs/value_output.csv
-lease_risk_model.py    -> hdb_resale -> data/outputs/lease_risk.csv
-employment_model.py    -> embedded station data -> data/outputs/employment_scores_{T0,T5,T15}.csv
-build_master.py        -> all model outputs -> data/outputs/master_output.csv
+sg_estate.domain.provision     -> geospatial layers + judged inputs -> data/outputs/provision_scores.csv
+sg_estate.domain.liveability   -> provision_scores + pipeline_data -> data/outputs/liveability_matrix.csv
+sg_estate.domain.value         -> provision_scores + transactions -> segmented value outputs
+sg_estate.domain.lease_risk    -> hdb_resale -> data/outputs/lease_risk.csv
+sg_estate.domain.employment    -> embedded station data -> data/outputs/employment_scores_{T0,T5,T15}.csv
+sg_estate.application.master   -> all model outputs -> data/outputs/master_output.csv
 ```
 
-Each model file ends with an `INPUT CONTRACT` block in its docstring. Treat that block as the
-authoritative schema for each input CSV. Update both the contract and loader when changing schemas.
+Executable schemas in `sg_estate/contracts.py` are authoritative. Keep the
+human-readable `INPUT CONTRACT` blocks aligned with those schemas.
 
 ## Cross-Cutting Invariants
 
 These rules are enforced by code and tests:
 
-- Constants are single-sourced in `models/framework_config.py`: `PROVISION_WEIGHTS`,
+- Constants are single-sourced in `sg_estate/domain/framework.py`: `PROVISION_WEIGHTS`,
   `PROVISION_WEIGHTS_PRIVATE`, `PROVENANCE`, `S_GROUPS`, `PERSONA_DELTAS`, `BAND_EDGES`,
   `BAND_NUMERIC`, `band_label`, `build_persona_weights`, and `validate_framework_config`.
-- Alias maps are single-sourced in `models/aliases.py`, not `framework_config.py`.
+- Alias maps are single-sourced in `sg_estate/domain/aliases.py`, not the compatibility wrappers.
   `PIPELINE_NAME_ALIAS`, `ESTATE_TOWN_ALIAS`, and `PRIVATE_DOMINANT_PROXIES` are guarded by
   `tests/test_aliases.py`; do not reintroduce local copies.
-- Provenance is never faked. `provision_model.py` tags components as `MEASURED`,
+- Provenance is never faked. `sg_estate.domain.provision` tags components as `MEASURED`,
   `PARTLY_MEASURED`, or `JUDGED`. If a `PARTLY_MEASURED` input is missing, the model renormalizes
   over present components and sets `measured_only=True`; it does not impute.
 - HDB and private are separate universes. Keep value segments distinct and do not blend or rank
   across tenure segments.
-- Value reporting uses bands below the trust threshold. `value_model.py:CFG["trust_decimal_n"] = 100`;
+- Value reporting uses bands below the trust threshold. `sg_estate.domain.value:CFG["trust_decimal_n"] = 100`;
   below that sample count, report bands rather than implying decimal precision.
 - The D multiplier holds losses only. Positive additions go in S7 momentum or Liveability T5, never
   in D.
@@ -81,7 +83,8 @@ These rules are enforced by code and tests:
 - `make smoke` runs the default pytest gate with snapshot tests excluded.
 - `python3 -m pytest -q` is equivalent to the smoke test and useful for direct pytest flags.
 - `make master` rebuilds only `data/outputs/master_output.csv` from current intermediate outputs.
-- `make pipeline` regenerates provision, liveability, value, and master CSV outputs from committed data.
+- `make pipeline` refreshes derived layers, validates an isolated run, and atomically promotes it.
+- `make pipeline-reuse` performs an offline rebuild from committed derived layers.
 
 Targeted tests:
 
@@ -93,7 +96,7 @@ python3 -m pytest -m integration
 python3 -m pytest -m snapshot
 ```
 
-`pytest.ini` deselects `snapshot` by default via `addopts = -m "not snapshot"`.
+`pyproject.toml` deselects `snapshot` by default via `addopts = -m "not snapshot"`.
 
 For scraper setup, see `scrapers/README.md`; Playwright and external credentials are outside the
 default test path.
@@ -103,9 +106,10 @@ default test path.
 Use Python 3 with 4-space indentation. Follow the existing procedural module style: helper
 functions, `argparse` CLIs, pandas DataFrames for joins, and clear failure messages when inputs are
 missing. Keep CSV column names stable and lowercase unless the schema requires otherwise.
-Normalize estate keys with stripped uppercase names, matching `build_master.py`.
+Normalize estate keys with stripped uppercase names, matching
+`sg_estate.application.master`.
 
-No formatter or linter config is checked in, so keep edits consistent with nearby code.
+No formatter or linter gate is currently enforced, so keep edits consistent with nearby code.
 
 ## Testing Guidelines
 

@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sg-estate-framework"
+version = "2.1.0"
+description = "Singapore Estate Provision, Liveability, and tenure-segmented Value models"
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "numpy>=2.0,<3",
+    "pandas>=2.2,<3",
+    "shapely>=2.0,<3",
+    "statsmodels>=0.14,<0.15",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+]
+scrapers = [
+    "playwright>=1.45,<2",
+    "requests>=2.34,<3",
+]
+
+[project.scripts]
+sg-estate-pipeline = "sg_estate.application.pipeline:main"
+sg-estate-master = "sg_estate.application.master:main"
+sg-estate-framework-diagram = "sg_estate.reporting.builders.framework_diagram:main"
+
+[tool.setuptools.packages.find]
+include = ["sg_estate*"]
+
+[tool.setuptools.package-data]
+"sg_estate.reporting.templates" = ["*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = '-m "not snapshot"'
+markers = [
+    "integration: runs the real pipeline on committed data (slow)",
+    "snapshot: before/after characterization (run manually)",
+]

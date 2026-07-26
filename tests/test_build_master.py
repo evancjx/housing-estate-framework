@@ -20,6 +20,9 @@ def inputs(tmp_path):
         "archetype": ["B", "X", "D"],
         "provision_band": ["B", "N/R", "B+"],
         "provision_score": [3.63, 4.36, 4.01],
+        "D_T0": [1.0, 1.0, 1.0],
+        "D_T5": [1.0, 1.0, 1.0],
+        "D_T15": [1.0, 1.0, 1.0],
         "yf_T0_band": ["B", "N/R", "B+"],
         "gap_yf_T0": [0.0, None, 0.0],
         "gap_yf_T0_label": ["matched", "N/R", "matched"],
@@ -27,6 +30,7 @@ def inputs(tmp_path):
     prov = pd.DataFrame({"estate": ["BISHAN", "CENTRAL AREA", "HOLLAND VILLAGE"],
                          "score_private": [3.7, 4.4, 4.1], "measured_only": [False, False, False]})
     vhdb = pd.DataFrame({"estate": ["BISHAN", "CENTRAL AREA", "HOLLAND VILLAGE"],
+                         "segment": ["hdb_resale", "hdb_resale", "hdb_resale"],
                          "value_score": [2.73, 3.55, ""], "value_band": ["D", "B", "N/A"],
                          "value_basis": ["direct", "direct", "no_hdb_segment"], "n": [4063, 1815, 0]})
     emp = pd.DataFrame({"estate": ["BISHAN", "HOLLAND VILLAGE"], "emp_score": [3.5, 3.8],
@@ -54,6 +58,9 @@ def test_joins_all_models(inputs):
     assert row["lease_band"] == "B+"       # lease wired in
     assert row["value_hdb_band"] == "D"    # HDB value wired in
     assert row["archetype"] == "B"
+    assert row["value_hdb_status"] == "available"
+    assert row["employment_status"] == "available"
+    assert pd.api.types.is_float_dtype(m["value_hdb_score"].dtype)
 
 
 def test_x_archetype_is_nr(inputs):
@@ -62,6 +69,8 @@ def test_x_archetype_is_nr(inputs):
     assert ca["value_hdb_band"] == "N/R"
     assert ca["emp_band"] == "N/R"
     assert ca["lease_band"] == "N/R"
+    assert ca["value_hdb_status"] == "not_applicable"
+    assert pd.isna(ca["value_hdb_score"])
 
 
 def test_missing_employment_row_flagged_not_blank(inputs):
@@ -140,3 +149,14 @@ def test_private_value_prefers_private_segment_over_hdb(inputs, tmp_path):
     bishan = m[m["estate"] == "BISHAN"].iloc[0]
     assert bishan["value_private_band"] == "C"          # private segment, not HDB "D"
     assert bishan["value_private_basis"] == "direct"
+    assert bishan["value_private_status"] == "available"
+    assert bishan["value_private_score"] == pytest.approx(3.30)
+
+
+def test_duplicate_join_key_fails_contract(inputs, tmp_path):
+    duplicate = pd.read_csv(inputs["provision"])
+    duplicate = pd.concat([duplicate, duplicate.iloc[[0]]], ignore_index=True)
+    changed = dict(inputs)
+    changed["provision"] = _write(str(tmp_path), "duplicate-provision.csv", duplicate)
+    with pytest.raises(SystemExit, match="duplicate key"):
+        build_master.build(_ns(changed))
