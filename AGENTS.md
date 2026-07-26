@@ -34,6 +34,8 @@ Core model code lives in `models/`, including `provision_model.py`, `liveability
 Tests live in `tests/`; fixtures and before/after snapshots are under `tests/snapshots/`.
 Inputs and generated outputs are in `data/`, with `data/outputs/master_output.csv` as the headline output.
 URA/private transaction tooling is isolated in `scrapers/`.
+Each catalogued root HTML report has a matching guide in `docs/html-pages/`; update the guide when
+the page, generator, data scope, comparison framework, or interpretation limits change.
 
 The model pipeline is directed and run order matters:
 
