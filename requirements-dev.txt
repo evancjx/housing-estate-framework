@@ -4,3 +4,4 @@ pandas==2.3.2
 numpy==2.3.3
 statsmodels==0.14.6
 shapely==2.1.2
+requests==2.34.2

@@ -21,6 +21,7 @@ dev = [
 ]
 scrapers = [
     "playwright>=1.45,<2",
+    "requests>=2.34,<3",
 ]
 
 [project.scripts]
