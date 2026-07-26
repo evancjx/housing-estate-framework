@@ -103,6 +103,8 @@
   .featured .tag { background:#274963; color:#a9e5d9; }
   .featured p { color:#bdcbd6; }
   .featured .open { color:#8cddd0; }
+  .property-analysis-card { border-top:3px solid var(--warm); }
+  .property-analysis-card .tag { background:var(--warm-soft); color:#76511f; }
   .method { display:grid; grid-template-columns:1fr 1fr 1fr; gap:13px; margin-top:16px; }
   .method article { padding:18px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.58); }
   .method b { font-size:11px; }
@@ -214,15 +216,17 @@
       <p>Start broad, then move into a district, project or transaction view. Dates and source limitations remain visible inside each report.</p>
     </div>
     <div class="collection-controls" aria-label="Filter reports">
-      <button class="filter-chip active" data-filter="all">All reports</button>
-      <button class="filter-chip" data-filter="project">Projects</button>
-      <button class="filter-chip" data-filter="district">Districts</button>
-      <button class="filter-chip" data-filter="estate">Estates & households</button>
-      <button class="filter-chip" data-filter="method">Method</button>
+      <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true">All reports</button>
+      <button class="filter-chip" type="button" data-filter="project" aria-pressed="false">Projects</button>
+      <button class="filter-chip" type="button" data-filter="district" aria-pressed="false">Districts</button>
+      <button class="filter-chip" type="button" data-filter="estate" aria-pressed="false">Estates & households</button>
+      <button class="filter-chip" type="button" data-filter="method" aria-pressed="false">Method</button>
+      <button class="filter-chip" type="button" data-filter="analysis" aria-pressed="false">Property analyses</button>
       <input class="report-search" id="report-search" type="search" placeholder="Filter this report library…" aria-label="Filter report library">
     </div>
 
     <div class="grid" id="report-grid">
+      <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->
       <a class="card featured" data-kind="project" data-search="compare multiple up to five condo condominium framework provision liveability value employment risk matrix" href="multi_condo_framework_comparison.html">
         <span class="tag">Interactive · Up to five</span><h3>Compare multiple condominiums</h3>
         <p>Compare five complete years of transactions, annual medians, detailed analysis and full ledgers for two to five projects, with A as reference.</p>
@@ -354,7 +358,8 @@
     "KATONG REGENCY": "katong_condo_comparison.html?projects=katong-regency",
     "HAIG COURT": "katong_condo_comparison.html?projects=haig-court",
     "THE SHORE RESIDENCES": "katong_condo_comparison.html?projects=the-shore-residences",
-    "ONE AMBER": "katong_condo_comparison.html?projects=one-amber"
+    "ONE AMBER": "katong_condo_comparison.html?projects=one-amber",
+    /* GENERATED_PROPERTY_ANALYSIS_PROJECT_ROUTES */
   };
   const DISTRICT_REPORTS = {
     "17": "private_project_comparison_D17.html",
@@ -430,6 +435,11 @@
   function updateCondoRoute(project = exactProject()) {
     if (!condoInput.value.trim()) {
       condoRoute.textContent = "Searches open the all-project explorer. A dedicated project or district report is offered when one exists.";
+      return;
+    }
+    const directReport = PROJECT_REPORTS[normalize(condoInput.value)];
+    if (directReport) {
+      condoRoute.innerHTML = `Dedicated project research is available. <a href="${directReport}">Open that report</a>, or use the broader explorer.`;
       return;
     }
     if (!project) {
@@ -513,9 +523,9 @@
       condoRoute.textContent = "Enter a condominium project name to continue.";
       return;
     }
-    const project = exactProject();
-    window.location.href = project && PROJECT_REPORTS[normalize(project.name)]
-      ? PROJECT_REPORTS[normalize(project.name)]
+    const directReport = PROJECT_REPORTS[normalize(query)];
+    window.location.href = directReport
+      ? directReport
       : `private_project_comparison_table.html?q=${encodeURIComponent(query)}`;
   });
 
@@ -565,7 +575,11 @@
   document.querySelectorAll(".filter-chip").forEach(button => {
     button.addEventListener("click", () => {
       activeFilter = button.dataset.filter;
-      document.querySelectorAll(".filter-chip").forEach(chip => chip.classList.toggle("active", chip === button));
+      document.querySelectorAll(".filter-chip").forEach(chip => {
+        const selected = chip === button;
+        chip.classList.toggle("active", selected);
+        chip.setAttribute("aria-pressed", String(selected));
+      });
       filterReports();
     });
   });

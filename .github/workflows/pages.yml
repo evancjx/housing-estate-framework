@@ -6,8 +6,12 @@ on:
       - main
     paths:
       - "*.html"
+      - "property_analysis/**"
       - "site/**"
       - "scripts/build_pages_site.py"
+      - "sg_estate/reporting/**"
+      - "pyproject.toml"
+      - "requirements-dev.txt"
       - "data/raw/edgeprop/edgeprop_condo_apartment_projects.csv"
       - "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
       - ".github/workflows/pages.yml"
@@ -44,7 +48,15 @@ jobs:
       - name: Run required checks
         run: |
           python -m pytest -q
-          python scripts/build_pages_site.py
+          python scripts/build_pages_site.py --out _site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload validated Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
 
   deploy:
     needs: validate
@@ -53,20 +65,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Prepare static report bundle
-        run: python3 scripts/build_pages_site.py --out _site
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: _site
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

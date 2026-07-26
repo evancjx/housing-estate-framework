@@ -2,6 +2,7 @@
 
 from html.parser import HTMLParser
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -68,6 +69,7 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     assets.mkdir()
     (assets / "research-shell.css").write_text("body {}", encoding="utf-8")
     (assets / "research-shell.js").write_text("void 0;", encoding="utf-8")
+    (assets / "property-analysis.css").write_text("body {}", encoding="utf-8")
     transaction_assets = assets / "condo-transactions"
     transaction_assets.mkdir()
     (transaction_assets / "manifest.json").write_text(
@@ -76,11 +78,13 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     (transaction_assets / "shard-00.json").write_text(
         '{"projects":{}}', encoding="utf-8"
     )
-    output = ROOT / "_site-test"
+    output = ROOT / f"_site-test-{tmp_path.name}-{os.getpid()}"
     try:
         count = build_pages_site.build_site(output, assets_dir=assets)
 
-        assert count == len(build_pages_site.load_catalog()["reports"])
+        source_count = len(build_pages_site.load_catalog()["reports"])
+        analyses = build_pages_site.discover_property_analyses()
+        assert count == source_count + len(analyses)
         assert (output / "index.html").is_file()
         assert (output / "reports.json").is_file()
         assert (output / "projects.json").is_file()
@@ -92,6 +96,36 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
             output / "assets" / "condo-transactions" / "shard-00.json"
         ).is_file()
         assert (output / ".nojekyll").is_file()
+        for analysis in analyses:
+            assert (output / analysis.output_path).is_file()
+        merged_catalog = json.loads(
+            (output / "reports.json").read_text(encoding="utf-8")
+        )
+        assert len(merged_catalog["reports"]) == count
+        property_entries = [
+            report
+            for report in merged_catalog["reports"]
+            if report["kind"] == "property-analysis"
+        ]
+        assert {"Arc at Tampines", "Park Place Residences at PLQ"} <= {
+            report["project_name"]
+            for report in property_entries
+        }
+        assert {report["id"] for report in property_entries} == {
+            analysis.report_id for analysis in analyses
+        }
+        assert {report["path"] for report in property_entries} == {
+            analysis.output_path for analysis in analyses
+        }
+        landing = (output / "index.html").read_text(encoding="utf-8")
+        assert build_pages_site.PROPERTY_CARDS_MARKER not in landing
+        assert build_pages_site.PROPERTY_ROUTES_MARKER not in landing
+        assert (
+            '"ARC AT TAMPINES": '
+            '"property-analysis-2026-07-26-arc-at-tampines.html"'
+        ) in landing
+        assert landing.index('"ONE AMBER"') < landing.index('"ARC AT TAMPINES"')
+        assert "data-kind=\"analysis project\"" in landing
         report = (output / "comparison_table.html").read_text(encoding="utf-8")
         assert report.count("assets/research-shell.css") == 1
         assert report.count("assets/research-shell.js") == 1
@@ -127,8 +161,8 @@ def test_pages_builder_rejects_output_outside_repository(tmp_path):
         build_pages_site.build_site(tmp_path / "site")
 
 
-def test_pages_builder_does_not_replace_unowned_directory():
-    output = ROOT / "_site-unowned-test"
+def test_pages_builder_does_not_replace_unowned_directory(tmp_path):
+    output = ROOT / f"_site-unowned-test-{tmp_path.name}-{os.getpid()}"
     output.mkdir()
     (output / "user-file.txt").write_text("keep", encoding="utf-8")
     try:
@@ -153,7 +187,10 @@ def test_pages_link_validator_rejects_missing_local_asset(tmp_path):
 def test_pages_workflow_uses_validated_site_builder():
     workflow = (ROOT / ".github/workflows/pages.yml").read_text(encoding="utf-8")
 
-    assert "python3 scripts/build_pages_site.py --out _site" in workflow
+    assert "python scripts/build_pages_site.py --out _site" in workflow
+    assert workflow.count("scripts/build_pages_site.py --out _site") == 1
+    assert '- "property_analysis/**"' in workflow
+    assert '- "sg_estate/reporting/**"' in workflow
     assert '- "site/**"' in workflow
     assert "edgeprop_condo_apartment_projects.csv" in workflow
     assert "actions/configure-pages@v5" in workflow

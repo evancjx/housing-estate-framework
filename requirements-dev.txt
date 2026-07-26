@@ -1,4 +1,5 @@
 # Reproducible development/test environment. Keep aligned with pyproject.toml.
+Markdown==3.10.2
 pytest==9.0.3
 pandas==2.3.2
 numpy==2.3.3
