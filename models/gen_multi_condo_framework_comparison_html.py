@@ -27,12 +27,366 @@ from datetime import date
 from typing import Any
 
 import gen_condo_framework_comparison_html as two_project
+import multi_condo_transactions as transaction_data
+import pandas as pd
 
 
 ROOT = pathlib.Path(__file__).parent.parent
 DEFAULT_OUT = ROOT / "multi_condo_framework_comparison.html"
+DEFAULT_BEDROOM_TRANSACTIONS = (
+    ROOT / "data/outputs/private_transactions_bedrooms.csv"
+)
+DEFAULT_TRANSACTION_ASSETS = ROOT / "site/assets/condo-transactions"
 MIN_PROJECTS = 2
 MAX_PROJECTS = 5
+
+
+TRANSACTION_RESEARCH_CSS = """
+.transaction-research{margin-top:58px;padding-top:3px;border-top:1px solid var(--line)}.transaction-head{display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap}.transaction-head h2{margin-bottom:0}.transaction-head p{color:var(--muted)}.tx-controls{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:10px;margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:15px;background:#fff}.tx-control label{display:block;margin-bottom:5px;font-size:.65rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}.tx-control select{width:100%;min-height:43px;padding:8px 10px;border:1px solid #b9c9c1;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:.76rem}.tx-status{min-height:23px;color:var(--muted);font-size:.75rem}.tx-block{margin-top:24px}.tx-block-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}.tx-block h3{margin:0;font-size:1.08rem}.tx-block-head p{margin:2px 0 0;color:var(--muted);font-size:.7rem}.tx-scroll{max-width:100%;margin-top:9px;overflow:auto;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-scroll table{min-width:760px}.tx-scroll th[scope=row]{min-width:180px}.tx-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:11px}.tx-analysis-card{padding:17px;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-analysis-card h4{margin:10px 0 7px;font-size:.94rem}.tx-analysis-card p,.tx-analysis-card li{font-size:.72rem}.tx-analysis-card ul{margin:8px 0 0;padding-left:18px}.depth-low{color:#9a3d33;font-weight:850}.depth-medium{color:#8a5a19;font-weight:850}.depth-strong{color:#187157;font-weight:850}.tx-ledgers{display:grid;gap:11px;margin-top:11px}.tx-ledger{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}.tx-ledger summary{padding:14px 16px;background:#eef2ee;cursor:pointer;font-size:.8rem;font-weight:900}.tx-ledger-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:.68rem}.tx-ledger .tx-scroll{margin:0;border:0;border-radius:0}.tx-ledger table{min-width:920px}.tx-ledger th,.tx-ledger td{font-size:.69rem}.tx-partial{display:inline-block;margin-left:4px;padding:1px 5px;border-radius:4px;background:var(--warm-soft);color:#8c462e;font-size:.56rem;font-weight:900}.tx-source{font-weight:800}.tx-caveat{margin-top:20px;padding:15px 17px;border-left:4px solid var(--warm);border-radius:11px;background:var(--warm-soft);font-size:.76rem}
+@media(max-width:760px){.tx-controls{grid-template-columns:1fr 1fr}.transaction-head{display:block}}
+@media(max-width:520px){.tx-controls{grid-template-columns:1fr}.tx-analysis-grid{grid-template-columns:1fr}}
+@media print{.tx-controls,.tx-ledger-actions{display:none!important}.tx-ledger{break-inside:avoid}.tx-ledger>summary{list-style:none}.tx-ledger[open] .tx-scroll{overflow:visible}}
+"""
+
+
+TRANSACTION_RESEARCH_HTML = """
+<section class="transaction-research" id="transaction-research" aria-labelledby="transaction-title">
+  <div class="transaction-head"><div><div class="eyebrow">Full achieved-sales evidence</div><h2 id="transaction-title" tabindex="-1">Transaction comparison and detailed analysis</h2>
+    <p>Compare every selected project over one common period, then inspect every available source row in its ledger.</p></div>
+    <button id="download-transactions" type="button">Download filtered CSV</button>
+  </div>
+  <div class="tx-controls" aria-label="Transaction comparison filters">
+    <div class="tx-control"><label for="tx-window">Analysis period</label><select class="tx-filter" id="tx-window">
+      <option value="60">Latest 60 complete months</option><option value="all">All available history</option><option value="36">Latest 36 complete months</option><option value="12">Latest 12 complete months</option>
+    </select></div>
+    <div class="tx-control"><label for="tx-sale">Sale state</label><select class="tx-filter" id="tx-sale">
+      <option value="all">All sale states</option><option value="New Sale">New Sale</option><option value="Resale">Resale</option><option value="Sub Sale">Sub Sale</option>
+    </select></div>
+    <div class="tx-control"><label for="tx-bedroom">Bedroom evidence</label><select class="tx-filter" id="tx-bedroom">
+      <option value="all">All bedroom labels</option><option value="1">1 bedroom</option><option value="2">2 bedrooms</option><option value="3">3 bedrooms</option><option value="4">4 bedrooms</option><option value="5+">5+ bedrooms</option><option value="unknown">Unknown bedroom</option>
+    </select></div>
+    <div class="tx-control"><label for="tx-size">Recorded size</label><select class="tx-filter" id="tx-size">
+      <option value="all">All sizes</option><option value="under500">Under 500 sqft</option><option value="500to749">500–749 sqft</option><option value="750to999">750–999 sqft</option><option value="1000to1499">1,000–1,499 sqft</option><option value="1500plus">1,500+ sqft</option>
+    </select></div>
+    <div class="tx-control"><label for="tx-floor">Floor band</label><select class="tx-filter" id="tx-floor">
+      <option value="all">All recorded floors</option><option value="1to10">Levels 1–10</option><option value="11to20">Levels 11–20</option><option value="21plus">Levels 21+</option><option value="unknown">Unknown floor</option>
+    </select></div>
+    <div class="tx-control"><label for="tx-source">Source layer</label><select class="tx-filter" id="tx-source">
+      <option value="all">URA + older backfill</option><option value="ura_private">Canonical URA only</option><option value="edgeprop_backfill">Incomplete 2019–20 backfill</option>
+    </select></div>
+  </div>
+  <p class="tx-status" id="tx-status" role="status" aria-live="polite"></p>
+  <div class="tx-block"><div class="tx-block-head"><div><h3>Selected-period snapshot</h3><p>All columns use the same active filters. Differences versus A are descriptive only.</p></div></div><div id="tx-snapshot"></div></div>
+  <div class="tx-block"><div class="tx-block-head"><div><h3>Annual median achieved PSF</h3><p>Each value discloses its sample count; the current partial month is excluded.</p></div></div><div id="tx-trend"></div></div>
+  <div class="tx-block"><div class="tx-block-head"><div><h3>Detailed analysis</h3><p>Evidence strength, observed market level, median movement, mix effects and comparability cautions.</p></div></div><div class="tx-analysis-grid" id="tx-analysis"></div></div>
+  <div class="tx-block"><div class="tx-block-head"><div><h3>Full transaction ledgers</h3><p>Newest first. Show-more controls retain every matching row without overloading the page.</p></div></div><div class="tx-ledgers" id="tx-ledgers"></div></div>
+  <div class="tx-caveat"><b>Transaction limits.</b> The canonical URA layer starts in June 2021. A separately tagged, incomplete EdgeProp backfill extends some projects through 2019–20; January–May 2021 is not backfilled. The latest source month may be partial. Bedroom provenance describes a transaction-row match or size-band inference—not an exact apartment number. These are achieved-sale medians, not repeat-unit appreciation, returns, forecasts, rankings or liquidity rates.</div>
+</section>
+"""
+
+
+TRANSACTION_RESEARCH_JS = r"""
+  const TX_FILTERS = [
+    ["tx-window","window","60"],["tx-sale","sale","all"],
+    ["tx-bedroom","bed","all"],["tx-size","size","all"],
+    ["tx-floor","floor","all"],["tx-source","source","all"]
+  ];
+  const shardCache = new Map(), transactionRows = new Map(), ledgerLimits = new Map();
+  let activeTxProjects = [], transactionLoadToken = 0;
+
+  const txMoney = value => available(value) ? new Intl.NumberFormat("en-SG",{style:"currency",currency:"SGD",maximumFractionDigits:0}).format(value) : "—";
+  const txInteger = value => available(value) ? new Intl.NumberFormat("en-SG",{maximumFractionDigits:0}).format(value) : "—";
+  const txPercent = value => available(value) ? `${value > 0 ? "+" : ""}${Number(value).toFixed(1)}%` : "—";
+  const monthLabel = value => {
+    if (!value) return "—";
+    const [year,month] = value.split("-").map(Number);
+    return new Intl.DateTimeFormat("en-SG",{month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(Date.UTC(year,month-1,1)));
+  };
+  const monthShift = (value, offset) => {
+    if (!value) return null;
+    const [year,month] = value.split("-").map(Number);
+    const shifted = new Date(Date.UTC(year,month-1+offset,1));
+    return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth()+1).padStart(2,"0")}`;
+  };
+  const canonicalMeta = TX_META.canonical || {};
+  const COMPLETE_END = canonicalMeta.complete_end || canonicalMeta.complete_through || canonicalMeta.latest_complete_month || monthShift(canonicalMeta.latest_month, -1);
+  const PARTIAL_MONTH = canonicalMeta.partial_month || canonicalMeta.latest_month || null;
+  const ANALYSIS_60_START = canonicalMeta.analysis_60_start || monthShift(COMPLETE_END,-59);
+
+  function appendTransactionFilters(params) {
+    TX_FILTERS.forEach(([id,key,defaultValue]) => {
+      const value=document.getElementById(id).value;
+      if (value !== defaultValue) params.append(key,value);
+    });
+  }
+
+  function restoreTransactionFilters() {
+    const params=new URLSearchParams(location.search);
+    TX_FILTERS.forEach(([id,key,defaultValue]) => {
+      const select=document.getElementById(id), requested=params.get(key);
+      select.value=[...select.options].some(option=>option.value===requested) ? requested : defaultValue;
+    });
+  }
+
+  function transactionKey(row) {
+    return [row.month,row.price,row.area_sqm,row.floor || "",row.sale || ""].join("|");
+  }
+
+  async function fetchTransactionShard(path) {
+    if (!path) throw new Error("Transaction path unavailable");
+    if (!shardCache.has(path)) {
+      shardCache.set(path, fetch(path).then(response => {
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        return response.json();
+      }).catch(error => { shardCache.delete(path); throw error; }));
+    }
+    return shardCache.get(path);
+  }
+
+  function decodeProjectTransactions(project,payload) {
+    const values=payload.projects?.[project.id] || [], enums=payload.enumerations || {};
+    return values.map(row => ({
+      month:row[0], price:row[1], area_sqm:row[2], sqft:row[3], psf:row[4],
+      sale:enums.sale_types?.[row[5]] || "Unknown",
+      floor:row[6] === null || row[6] === undefined ? null : enums.floor_levels?.[row[6]] || null,
+      bedrooms:row[7] === null || row[7] === undefined ? null : Number(row[7]),
+      bedroom_source:row[8] === null || row[8] === undefined ? "unknown" : enums.bedroom_sources?.[row[8]] || "unknown",
+      source:row[9] === null || row[9] === undefined ? "unknown" : enums.data_sources?.[row[9]] || "unknown"
+    })).sort((a,b) => b.month.localeCompare(a.month) || b.price-a.price || transactionKey(a).localeCompare(transactionKey(b)));
+  }
+
+  function periodBounds() {
+    const value=document.getElementById("tx-window").value;
+    if (value === "all") return {start:null,end:COMPLETE_END};
+    const months=Number(value);
+    return {start:monthShift(COMPLETE_END,-(months-1)),end:COMPLETE_END};
+  }
+
+  function floorMidpoint(value) {
+    if (!value) return null;
+    const numbers=String(value).match(/\d+/g)?.map(Number) || [];
+    if (!numbers.length) return null;
+    return numbers.length > 1 ? (numbers[0]+numbers[1])/2 : numbers[0];
+  }
+
+  function matchesTransaction(row,{ledger=false,ignoreWindow=false}={}) {
+    const source=document.getElementById("tx-source").value;
+    if (source !== "all" && row.source !== source) return false;
+    const sale=document.getElementById("tx-sale").value;
+    if (sale !== "all" && row.sale !== sale) return false;
+    const bedroom=document.getElementById("tx-bedroom").value;
+    if (bedroom === "unknown" && row.bedrooms !== null) return false;
+    if (/^\d$/.test(bedroom) && row.bedrooms !== Number(bedroom)) return false;
+    if (bedroom === "5+" && !(row.bedrooms >= 5)) return false;
+    const size=document.getElementById("tx-size").value, sqft=row.sqft;
+    if (size === "under500" && !(sqft < 500)) return false;
+    if (size === "500to749" && !(sqft >= 500 && sqft < 750)) return false;
+    if (size === "750to999" && !(sqft >= 750 && sqft < 1000)) return false;
+    if (size === "1000to1499" && !(sqft >= 1000 && sqft < 1500)) return false;
+    if (size === "1500plus" && !(sqft >= 1500)) return false;
+    const floor=document.getElementById("tx-floor").value, midpoint=floorMidpoint(row.floor);
+    if (floor === "unknown" && midpoint !== null) return false;
+    if (floor === "1to10" && !(midpoint !== null && midpoint <= 10)) return false;
+    if (floor === "11to20" && !(midpoint >= 11 && midpoint <= 20)) return false;
+    if (floor === "21plus" && !(midpoint >= 21)) return false;
+    if (!ignoreWindow) {
+      const bounds=periodBounds();
+      if (bounds.start && row.month < bounds.start) return false;
+      if (bounds.end && row.month > bounds.end && !(ledger && document.getElementById("tx-window").value === "all")) return false;
+    }
+    if (!ledger && PARTIAL_MONTH && row.month === PARTIAL_MONTH) return false;
+    return true;
+  }
+
+  function quantile(values,point) {
+    if (!values.length) return null;
+    const sorted=[...values].sort((a,b)=>a-b), position=(sorted.length-1)*point;
+    const lower=Math.floor(position), upper=Math.ceil(position);
+    return lower === upper ? sorted[lower] : sorted[lower]+(sorted[upper]-sorted[lower])*(position-lower);
+  }
+
+  function mixSummary(rows,field) {
+    if (!rows.length) return "—";
+    const counts=new Map();
+    rows.forEach(row => {const value=row[field] || "Unknown";counts.set(value,(counts.get(value)||0)+1);});
+    return [...counts.entries()].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])).map(([value,count])=>`${value}:${count}`).join(" / ");
+  }
+
+  function transactionStats(rows) {
+    if (!rows.length) return {n:0,first:null,last:null,medianPrice:null,medianPsf:null,medianSqft:null,p10Price:null,p90Price:null,p10Psf:null,p90Psf:null,saleMix:"—",bedroomCoverage:0,floorCoverage:0};
+    const prices=rows.map(row=>row.price), psf=rows.map(row=>row.psf), sizes=rows.map(row=>row.sqft);
+    return {
+      n:rows.length,first:rows.reduce((value,row)=>!value || row.month<value ? row.month : value,null),
+      last:rows.reduce((value,row)=>!value || row.month>value ? row.month : value,null),
+      medianPrice:quantile(prices,.5),medianPsf:quantile(psf,.5),medianSqft:quantile(sizes,.5),
+      p10Price:quantile(prices,.1),p90Price:quantile(prices,.9),p10Psf:quantile(psf,.1),p90Psf:quantile(psf,.9),
+      saleMix:mixSummary(rows,"sale"),bedroomCoverage:rows.filter(row=>row.bedrooms!==null).length/rows.length*100,
+      floorCoverage:rows.filter(row=>row.floor).length/rows.length*100
+    };
+  }
+
+  function movementStats(allRows) {
+    const cohort=allRows.filter(row=>matchesTransaction(row,{ignoreWindow:true}));
+    const recentStart=monthShift(COMPLETE_END,-11), priorStart=monthShift(COMPLETE_END,-23), priorEnd=monthShift(COMPLETE_END,-12);
+    const recent=cohort.filter(row=>row.month>=recentStart && row.month<=COMPLETE_END);
+    const prior=cohort.filter(row=>row.month>=priorStart && row.month<=priorEnd);
+    const recentPsf=transactionStats(recent).medianPsf, priorPsf=transactionStats(prior).medianPsf;
+    return {recentN:recent.length,priorN:prior.length,recentPsf,priorPsf,change:recent.length>=3 && prior.length>=3 && priorPsf ? (recentPsf/priorPsf-1)*100 : null,recentStart,priorStart,priorEnd};
+  }
+
+  function vsReference(value,reference,formatter,percentDifference=false) {
+    if (!available(value) || !available(reference)) return "";
+    const difference=percentDifference && reference ? (value/reference-1)*100 : value-reference;
+    return `<small>vs A: ${esc(formatter(difference))}</small>`;
+  }
+
+  function renderTransactionSnapshot(projects,viewModels) {
+    const reference=viewModels[0].stats;
+    const rows=[
+      ["Filtered coverage",(model)=>`${monthLabel(model.stats.first)}–${monthLabel(model.stats.last)}`,(model)=>`${txInteger(model.stats.n)} records`],
+      ["Transactions",(model)=>txInteger(model.stats.n),(model,index)=>index ? `vs A: ${signed(model.stats.n-reference.n,0)} records` : "Reference"],
+      ["Median achieved price",(model)=>txMoney(model.stats.medianPrice),(model,index)=>index ? `vs A: ${txPercent(available(model.stats.medianPrice) && reference.medianPrice ? (model.stats.medianPrice/reference.medianPrice-1)*100 : null)}` : "Reference"],
+      ["P10–P90 achieved price",(model)=>`${txMoney(model.stats.p10Price)}–${txMoney(model.stats.p90Price)}`,()=>""],
+      ["Median achieved PSF",(model)=>number(model.stats.medianPsf," psf"),(model,index)=>index ? `vs A: ${available(model.stats.medianPsf) && available(reference.medianPsf) ? signed(model.stats.medianPsf-reference.medianPsf,0) : "—"} psf` : "Reference"],
+      ["P10–P90 achieved PSF",(model)=>`${number(model.stats.p10Psf," psf")}–${number(model.stats.p90Psf," psf")}`,()=>""],
+      ["Median recorded size",(model)=>number(model.stats.medianSqft," sqft"),(model,index)=>index ? `vs A: ${available(model.stats.medianSqft) && available(reference.medianSqft) ? signed(model.stats.medianSqft-reference.medianSqft,0) : "—"} sqft` : "Reference"],
+      ["Sale-state mix",(model)=>model.stats.saleMix,()=>""],
+      ["Bedroom-label coverage",(model)=>`${number(model.stats.bedroomCoverage)}%`,()=>""],
+      ["Change in median achieved PSF",(model)=>txPercent(model.movement.change),(model)=>`prior n=${model.movement.priorN} → recent n=${model.movement.recentN}`]
+    ];
+    document.getElementById("tx-snapshot").innerHTML=`<div class="tx-scroll" role="region" tabindex="0" aria-label="Selected-period transaction snapshot">
+      <table style="min-width:${170+projects.length*190}px"><thead><tr><th scope="col">Transaction factor</th>${projects.map((project,index)=>`<th scope="col">${LETTERS[index]} · ${esc(title(project.project))}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(([label,main,sub])=>`<tr><th scope="row">${esc(label)}</th>${viewModels.map((model,index)=>`<td>${esc(main(model,index))}<small>${esc(sub(model,index))}</small></td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  function renderTransactionTrend(projects,viewModels) {
+    const years=[...new Set(viewModels.flatMap(model=>model.analysisRows.map(row=>row.month.slice(0,4))))].sort();
+    if (!years.length) {
+      document.getElementById("tx-trend").innerHTML='<div class="empty">No annual trend remains under these filters.</div>';
+      return;
+    }
+    document.getElementById("tx-trend").innerHTML=`<div class="tx-scroll" role="region" tabindex="0" aria-label="Annual median achieved PSF comparison">
+      <table style="min-width:${170+projects.length*190}px"><thead><tr><th scope="col">Year</th>${projects.map((project,index)=>`<th scope="col">${LETTERS[index]} · ${esc(title(project.project))}</th>`).join("")}</tr></thead>
+      <tbody>${years.map(year=>`<tr><th scope="row">${year}</th>${viewModels.map(model=>{const rows=model.analysisRows.filter(row=>row.month.startsWith(year)),value=transactionStats(rows).medianPsf;return `<td>${number(value," psf")}<small>n=${rows.length}</small></td>`;}).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  function depthLabel(n) {
+    return n >= 100 ? ["Higher-depth","depth-strong"] : n >= 30 ? ["Moderate-depth","depth-medium"] : ["Low-depth","depth-low"];
+  }
+
+  function renderDetailedTransactionAnalysis(projects,viewModels) {
+    const reference=viewModels[0].stats;
+    document.getElementById("tx-analysis").innerHTML=viewModels.map((model,index)=>{
+      const {stats,movement,allRows,analysisRows}=model, [depth,depthClass]=depthLabel(stats.n);
+      const canonicalN=allRows.filter(row=>row.source==="ura_private").length, backfillN=allRows.filter(row=>row.source==="edgeprop_backfill").length;
+      const psfVs=index && available(stats.medianPsf) && reference.medianPsf ? (stats.medianPsf/reference.medianPsf-1)*100 : null;
+      const sizeVs=index && available(stats.medianSqft) && available(reference.medianSqft) ? stats.medianSqft-reference.medianSqft : null;
+      const cautions=[];
+      if (stats.n<30) cautions.push("Selected cohort has fewer than 30 rows; medians are mix-sensitive.");
+      if (stats.bedroomCoverage<80) cautions.push("Bedroom labels cover less than 80% of the filtered rows.");
+      if (stats.floorCoverage<80) cautions.push("Recorded floor bands are incomplete.");
+      if (backfillN && document.getElementById("tx-window").value==="all") cautions.push("Older EdgeProp rows are an incomplete 2019–20 backfill with a known 2021 gap.");
+      if (movement.change===null) cautions.push("Recent/prior movement is withheld because either 12-month window has fewer than three matched rows.");
+      if (!analysisRows.length) cautions.push("No complete-month rows remain under the active filters.");
+      return `<article class="tx-analysis-card"><span class="project-badge badge-${LETTERS[index]}">${LETTERS[index]}</span>
+        <h4>${esc(title(model.project.project))}</h4>
+        <p><b class="${depthClass}">${depth}</b> selected evidence: n=${txInteger(stats.n)} across ${monthLabel(stats.first)}–${monthLabel(stats.last)}. Loaded history contains ${txInteger(canonicalN)} URA and ${txInteger(backfillN)} older-backfill rows.</p>
+        <ul><li><b>Observed level:</b> median ${txMoney(stats.medianPrice)}, ${number(stats.medianPsf," psf")} and ${number(stats.medianSqft," sqft")}.${index ? ` PSF is ${txPercent(psfVs)} and size is ${signed(sizeVs,0)} sqft versus A.` : " Project A is the neutral reference."}</li>
+        <li><b>Median movement:</b> ${movement.change===null ? "insufficient matched sample" : `${txPercent(movement.change)} from prior to recent 12 complete months`} (n=${movement.priorN} → n=${movement.recentN}). This is change in achieved median PSF, not repeat-unit appreciation.</li>
+        <li><b>Mix:</b> ${esc(stats.saleMix)}; bedroom labels ${number(stats.bedroomCoverage)}%; floor labels ${number(stats.floorCoverage)}%.</li></ul>
+        ${cautions.length ? `<p><b>Comparability cautions:</b> ${esc(cautions.join(" "))}</p>` : '<p><b>Comparability:</b> No additional automated caution beyond the disclosed period and mix limits.</p>'}
+      </article>`;
+    }).join("");
+  }
+
+  function bedroomLabel(row) {
+    if (row.bedrooms===null) return "—";
+    const provenance=row.bedroom_source==="edgeprop_exact" ? "row-matched" : row.bedroom_source==="edgeprop_band_label" ? "size-band inferred" : row.bedroom_source.replaceAll("_"," ");
+    return `${row.bedrooms} <small>${esc(provenance)}</small>`;
+  }
+
+  function sourceLabel(value) {
+    return value==="ura_private" ? "URA private caveat" : value==="edgeprop_backfill" ? "EdgeProp incomplete backfill" : title(value.replaceAll("_"," "));
+  }
+
+  function renderTransactionLedgers(projects) {
+    document.getElementById("tx-ledgers").innerHTML=projects.map((project,index)=>{
+      const rows=(transactionRows.get(project.id)||[]).filter(row=>matchesTransaction(row,{ledger:true}));
+      const limit=ledgerLimits.get(project.id)||50, visible=rows.slice(0,limit);
+      return `<details class="tx-ledger"><summary>${LETTERS[index]} · ${esc(title(project.project))} — ${txInteger(rows.length)} matching transactions</summary>
+        <div class="tx-scroll" role="region" tabindex="0" aria-label="${esc(title(project.project))} full transaction ledger"><table><thead><tr><th scope="col">Sale month</th><th scope="col">Sale state</th><th scope="col">Bedrooms</th><th scope="col">Floor</th><th scope="col">Size</th><th scope="col">Achieved price</th><th scope="col">Achieved PSF</th><th scope="col">Source</th></tr></thead>
+        <tbody>${visible.map(row=>`<tr><td>${esc(monthLabel(row.month))}${PARTIAL_MONTH===row.month ? '<span class="tx-partial">partial</span>' : ""}</td><td>${esc(row.sale)}</td><td>${bedroomLabel(row)}</td><td>${esc(row.floor||"—")}</td><td>${number(row.sqft," sqft")}<small>${number(row.area_sqm," sqm")}</small></td><td>${txMoney(row.price)}</td><td>${number(row.psf," psf")}</td><td class="tx-source">${esc(sourceLabel(row.source))}</td></tr>`).join("") || '<tr><td colspan="8">No matching transactions.</td></tr>'}</tbody></table></div>
+        <div class="tx-ledger-actions"><span>Showing ${txInteger(Math.min(limit,rows.length))} of ${txInteger(rows.length)}</span>${limit<rows.length ? `<button class="show-more-transactions" type="button" data-project="${esc(project.id)}">Show 50 more</button>` : ""}</div></details>`;
+    }).join("");
+    document.querySelectorAll(".show-more-transactions").forEach(button=>button.addEventListener("click",()=>{
+      const id=button.dataset.project;ledgerLimits.set(id,(ledgerLimits.get(id)||50)+50);renderTransactionLedgers(projects);
+      document.querySelector(`[data-project="${CSS.escape(id)}"]`)?.focus();
+    }));
+  }
+
+  function renderTransactionResearch(projects) {
+    activeTxProjects=projects;
+    const viewModels=projects.map(project=>{
+      const allRows=transactionRows.get(project.id)||[], analysisRows=allRows.filter(row=>matchesTransaction(row));
+      return {project,allRows,analysisRows,stats:transactionStats(analysisRows),movement:movementStats(allRows)};
+    });
+    renderTransactionSnapshot(projects,viewModels);
+    renderTransactionTrend(projects,viewModels);
+    renderDetailedTransactionAnalysis(projects,viewModels);
+    renderTransactionLedgers(projects);
+    const total=viewModels.reduce((sum,model)=>sum+model.stats.n,0), bounds=periodBounds();
+    document.getElementById("tx-status").textContent=`${txInteger(total)} complete-month transactions match across ${projects.length} projects${bounds.start ? ` from ${monthLabel(bounds.start)} to ${monthLabel(bounds.end)}` : " over all available history"}.`;
+  }
+
+  async function loadTransactionResearch(projects) {
+    const token=++transactionLoadToken, txStatus=document.getElementById("tx-status");
+    activeTxProjects=[];transactionRows.clear();ledgerLimits.clear();
+    document.getElementById("tx-snapshot").innerHTML="";
+    document.getElementById("tx-trend").innerHTML="";
+    document.getElementById("tx-analysis").innerHTML="";
+    document.getElementById("tx-ledgers").innerHTML="";
+    txStatus.textContent=`Loading full transaction histories for ${projects.length} projects…`;
+    try {
+      const paths=[...new Set(projects.map(project=>project.transaction_shard).filter(Boolean))];
+      const payloads=await Promise.all(paths.map(async path=>[path,await fetchTransactionShard(path)]));
+      if (token!==transactionLoadToken) return;
+      const byPath=new Map(payloads);
+      projects.forEach(project=>transactionRows.set(project.id,decodeProjectTransactions(project,byPath.get(project.transaction_shard)||{})));
+      renderTransactionResearch(projects);
+    } catch (loadError) {
+      if (token!==transactionLoadToken) return;
+      txStatus.textContent="Transaction histories could not be loaded. The estate-framework comparison remains available.";
+      document.getElementById("tx-snapshot").innerHTML=`<div class="empty">Transaction data load failed: ${esc(loadError.message)}</div>`;
+    }
+  }
+
+  function csvCell(value) {
+    let text=String(value ?? "");
+    if (/^[=+\-@]/.test(text)) text=`'${text}`;
+    return `"${text.replaceAll('"','""')}"`;
+  }
+
+  function downloadFilteredTransactions() {
+    if (!activeTxProjects.length) return;
+    const header=["project","sale_month","sale_state","bedrooms","bedroom_provenance","floor_level","area_sqm","area_sqft","price_sgd","psf_sgd","data_source"];
+    const body=[header.map(csvCell).join(",")];
+    activeTxProjects.forEach(project=>(transactionRows.get(project.id)||[]).filter(row=>matchesTransaction(row,{ledger:true})).forEach(row=>{
+      body.push([project.project,row.month,row.sale,row.bedrooms,row.bedroom_source,row.floor,row.area_sqm,row.sqft,row.price,row.psf,row.source].map(csvCell).join(","));
+    }));
+    const blob=new Blob([body.join("\r\n")],{type:"text/csv;charset=utf-8"}), url=URL.createObjectURL(blob), link=document.createElement("a");
+    link.href=url;link.download="condominium_transaction_comparison.csv";link.click();URL.revokeObjectURL(url);
+  }
+
+  document.getElementById("download-transactions").addEventListener("click",downloadFilteredTransactions);
+  document.querySelectorAll(".tx-filter").forEach(control=>control.addEventListener("change",()=>{
+    ledgerLimits.clear();
+    if (activeTxProjects.length) renderTransactionResearch(activeTxProjects);
+    if (selected.length) history.replaceState({},"",canonicalURL(selected));
+  }));
+  if (ANALYSIS_60_START && COMPLETE_END) {
+    document.querySelector('#tx-window option[value="60"]').textContent=`Latest 60 complete months (${monthLabel(ANALYSIS_60_START)}–${monthLabel(COMPLETE_END)})`;
+  }
+"""
 
 
 def default_ids(projects: list[dict[str, Any]]) -> list[str]:
@@ -68,16 +422,23 @@ def render_html(
     projects: list[dict[str, Any]],
     latest_month: str | None,
     as_of: date,
+    transaction_metadata: dict[str, Any] | None = None,
 ) -> str:
     defaults = default_ids(projects)
+    transaction_metadata = transaction_metadata or {}
     browser_projects, browser_contexts = two_project.build_browser_payload(projects)
-    project_json = json.dumps(
-        browser_projects, ensure_ascii=False, separators=(",", ":")
+    project_json = two_project.script_safe_json(browser_projects)
+    context_json = two_project.script_safe_json(browser_contexts)
+    default_json = two_project.script_safe_json(defaults)
+    metadata_json = two_project.script_safe_json(transaction_metadata)
+    transaction_count = transaction_metadata.get("reconciliation", {}).get(
+        "project_transaction_count"
     )
-    context_json = json.dumps(
-        browser_contexts, ensure_ascii=False, separators=(",", ":")
+    transaction_proof = (
+        f"{int(transaction_count):,} mapped transaction rows"
+        if transaction_count is not None
+        else "On-demand full transaction ledgers"
     )
-    default_json = json.dumps(defaults, separators=(",", ":"))
     options = options_html(projects)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -94,15 +455,16 @@ def render_html(
 .subject-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}}.subject{{min-height:285px;padding:19px;border:1px solid var(--line);border-radius:17px;background:var(--card)}}.subject h3{{margin:17px 0 5px;font-size:1.16rem;letter-spacing:-.03em}}.subject .location{{min-height:38px;color:var(--muted);font-size:.72rem}}.subject-metrics{{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:17px 0;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}}.subject-metrics div{{padding:10px;background:#f9faf7}}.subject-metrics span{{display:block;color:var(--muted);font-size:.61rem}}.subject-metrics b{{display:block;margin-top:3px;font-size:.84rem}}.subject p{{font-size:.76rem}}.subject-links{{font-size:.69rem;font-weight:850;color:var(--accent)}}
 .factor-group{{margin-top:15px;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#fff}}.factor-group summary{{display:flex;padding:16px 18px;align-items:start;justify-content:space-between;gap:16px;background:#eef2ee;cursor:pointer;list-style-position:inside}}.factor-group summary b{{font-size:.94rem}}.factor-group summary span{{max-width:720px;color:var(--muted);font-size:.7rem;text-align:right}}.matrix-wrap{{max-width:100%;overflow:auto}}table{{width:100%;border-collapse:collapse}}th,td{{padding:12px 14px;border-top:1px solid var(--line);text-align:left;vertical-align:top;font-size:.78rem}}thead th{{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;border-top:0;font-size:.67rem;text-transform:uppercase;letter-spacing:.05em}}th[scope=row]{{position:sticky;left:0;z-index:1;width:170px;background:#f8faf7;font-weight:850}}thead th:first-child{{left:0;z-index:3}}td small{{display:block;margin-top:3px;color:var(--muted);font-size:.65rem}}.reference-note{{color:var(--accent)}}.band{{display:inline-block;padding:2px 7px;border-radius:5px;background:#e8ece9;font-weight:900}}.band-A{{background:#d9efe4;color:#176045}}.band-Bp{{background:#dceaf3;color:#235a78}}.band-C,.band-D,.band-F{{background:#f5e5df;color:#8b4834}}.gap-positive{{color:#187157;font-weight:850}}.gap-negative{{color:#a3443a;font-weight:850}}
 .legend{{display:flex;gap:9px 18px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:.68rem}}.legend b{{color:var(--ink)}}[hidden]{{display:none!important}}:focus-visible{{outline:3px solid #f2a900;outline-offset:2px}}
+{TRANSACTION_RESEARCH_CSS}
 @media(max-width:760px){{.project-row{{grid-template-columns:1fr}}.slot-label{{justify-content:space-between}}.row-actions{{justify-content:flex-start}}.factor-group summary{{display:block}}.factor-group summary span{{display:block;margin:4px 0 0;text-align:left}}.subject-grid{{grid-template-columns:1fr}}}}
 @media(max-width:540px){{body{{padding:10px}}main{{padding-top:16px}}h1{{font-size:3rem}}.set-inner{{padding:14px}}.set-head{{align-items:start;flex-direction:column}}.subject-metrics{{grid-template-columns:1fr}}.detail-actions{{width:100%}}}}
 @media print{{.research-shell-nav,.set-panel,.detail-actions,.subject-links{{display:none!important}}body{{padding:0;background:#fff}}main{{max-width:none}}details{{display:block}}details>summary{{list-style:none}}.factor-group{{break-inside:avoid}}.matrix-wrap{{overflow:visible}}table{{min-width:100%;font-size:9px}}}}
 </style></head><body>
 <main id="research-content">
-<header class="hero"><div class="eyebrow">2–5 projects · project evidence × estate framework · updated {as_of:%d %b %Y}</div>
+<header class="hero"><div class="eyebrow">2–5 projects · full transactions × estate framework · updated {as_of:%d %b %Y}</div>
 <h1>Build a condominium comparison set.</h1>
-<p class="lede">Choose two to five named private projects. Project A is the reference; every factor stays visible in its own column so trade-offs do not collapse into a misleading winner.</p>
-<div class="proof"><span>{len(projects):,} named project records</span><span>Transaction data through {html.escape(latest_month or '—')}</span><span>Ordered share links preserve the reference</span></div></header>
+<p class="lede">Choose two to five named private projects. Compare five complete years of achieved sales, inspect longer history where safely available, and keep project A as the neutral reference—without collapsing the evidence into a misleading winner.</p>
+<div class="proof"><span>{len(projects):,} named project records</span><span>{html.escape(transaction_proof)}</span><span>Transaction data through {html.escape(latest_month or '—')}</span><span>Ordered share links preserve the reference and filters</span></div></header>
 
 <section class="set-panel" aria-labelledby="set-title"><div class="set-inner">
 <div class="set-head"><div><div class="eyebrow" id="set-title">Comparison set</div><p class="set-status" id="set-status" role="status" aria-live="polite"></p></div><span class="set-count" id="set-count"></span></div>
@@ -115,6 +477,7 @@ def render_html(
 <section id="comparison-result" hidden>
 <div class="context-note" id="context-note"></div>
 <div class="subject-grid" id="subject-grid"></div>
+{TRANSACTION_RESEARCH_HTML}
 <div class="result-tools"><div><h2 id="result-heading" tabindex="-1">Factor-by-factor matrix</h2><p>Neutral “vs A” values are descriptive differences, not points in an overall score.</p></div>
 <div class="detail-actions"><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button></div></div>
 <div id="factor-groups"></div>
@@ -126,6 +489,7 @@ def render_html(
 (() => {{
   const MIN_PROJECTS = {MIN_PROJECTS}, MAX_PROJECTS = {MAX_PROJECTS};
   const LETTERS = ["A","B","C","D","E"];
+  const TX_META = {metadata_json};
   const CONTEXTS = {context_json};
   const PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
   const DEFAULTS = {default_json};
@@ -156,6 +520,8 @@ def render_html(
   const announce = message => {{status.textContent = message;}};
   const slot = project => ({{key:++slotSequence,value:project ? project.selection_label : ""}});
 
+{TRANSACTION_RESEARCH_JS}
+
   function syncSlotValues() {{
     tray.querySelectorAll("input").forEach(input => {{
       const current = slots.find(item => item.key === Number(input.dataset.key));
@@ -164,6 +530,9 @@ def render_html(
   }}
 
   function markDirty(message="Selection changed. Choose Compare projects to refresh the matrix.") {{
+    transactionLoadToken += 1;
+    activeTxProjects = [];
+    transactionRows.clear();
     selected = [];
     document.getElementById("comparison-result").hidden = true;
     announce(message);
@@ -239,6 +608,7 @@ def render_html(
   function canonicalURL(projects) {{
     const params = new URLSearchParams();
     projects.forEach(project => params.append("p",project.id));
+    appendTransactionFilters(params);
     return `${{location.origin}}${{location.pathname}}?${{params}}#comparison-result`;
   }}
 
@@ -374,11 +744,12 @@ def render_html(
     document.getElementById("subject-grid").innerHTML=projects.map(subjectCard).join("");
     renderGroups(projects);
     document.getElementById("comparison-result").hidden=false;
+    loadTransactionResearch(projects);
     announce(`${{projects.length}} projects compared. Project A is the reference.`);
     const url=canonicalURL(projects);
     if (historyMode === "push" && location.href !== url) history.pushState({{}}, "", url);
     else if (historyMode === "replace") history.replaceState({{}}, "", url);
-    if (focusResult) document.getElementById("result-heading").focus();
+    if (focusResult) document.getElementById("transaction-title").focus();
   }}
 
   function restoreFromURL(focusResult=false) {{
@@ -419,7 +790,8 @@ def render_html(
   document.getElementById("expand-all").addEventListener("click", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=true));
   document.getElementById("collapse-all").addEventListener("click", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=false));
   window.addEventListener("beforeprint", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=true));
-  window.addEventListener("popstate", () => restoreFromURL(false));
+  window.addEventListener("popstate", () => {{restoreTransactionFilters();restoreFromURL(false);}});
+  restoreTransactionFilters();
   restoreFromURL(false);
 }})();
 </script></body></html>"""
@@ -428,10 +800,29 @@ def render_html(
 def generate(
     out_path: pathlib.Path = DEFAULT_OUT,
     as_of: date | None = None,
+    private_path: pathlib.Path = two_project.DEFAULT_PRIVATE,
+    bedroom_transactions_path: pathlib.Path = DEFAULT_BEDROOM_TRANSACTIONS,
+    transaction_assets_path: pathlib.Path = DEFAULT_TRANSACTION_ASSETS,
 ) -> tuple[pathlib.Path, int]:
-    projects, latest_month = two_project.load_projects_for_comparison()
+    projects, latest_month = two_project.load_projects_for_comparison(
+        private_path=private_path
+    )
+    raw_private = two_project.private_projects.load_private(private_path)
+    bedroom_transactions = pd.read_csv(bedroom_transactions_path)
+    projects, shards, manifest = transaction_data.build_transaction_shards(
+        raw_private, bedroom_transactions, projects
+    )
+    transaction_data.write_shards(
+        transaction_assets_path, shards, manifest
+    )
     out_path.write_text(
-        render_html(projects, latest_month, as_of or date.today()), encoding="utf-8"
+        render_html(
+            projects,
+            latest_month,
+            as_of or date.today(),
+            manifest["source_metadata"],
+        ),
+        encoding="utf-8",
     )
     return out_path, len(projects)
 
@@ -440,12 +831,30 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate the two-to-five-condominium framework comparison"
     )
+    parser.add_argument("--private", default=str(two_project.DEFAULT_PRIVATE))
+    parser.add_argument(
+        "--bedroom-transactions", default=str(DEFAULT_BEDROOM_TRANSACTIONS)
+    )
+    parser.add_argument(
+        "--transaction-assets", default=str(DEFAULT_TRANSACTION_ASSETS)
+    )
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
-    out_path, count = generate(pathlib.Path(args.out))
+    out_path, count = generate(
+        out_path=pathlib.Path(args.out),
+        private_path=pathlib.Path(args.private),
+        bedroom_transactions_path=pathlib.Path(args.bedroom_transactions),
+        transaction_assets_path=pathlib.Path(args.transaction_assets),
+    )
+    manifest_path = pathlib.Path(args.transaction_assets) / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    transaction_count = manifest["source_metadata"]["reconciliation"][
+        "project_transaction_count"
+    ]
     print(
         f"Written: {out_path} ({out_path.stat().st_size // 1024:,} KB, "
-        f"{count:,} named project records, {MIN_PROJECTS}–{MAX_PROJECTS} selections)"
+        f"{count:,} named project records, {transaction_count:,} transaction rows, "
+        f"{MIN_PROJECTS}–{MAX_PROJECTS} selections)"
     )
 
 

@@ -160,3 +160,14 @@ def test_render_exposes_two_inputs_and_keeps_estate_context_disclosed():
     assert "Estate framework values describe the planning-area context" in page
     assert "without manufacturing a single winner" in page
     assert "const CONTEXTS =" in page
+
+
+def test_inline_json_cannot_terminate_the_script():
+    payload = '</script><script>alert("x")</script>\u2028\u2029'
+
+    encoded = comparison.script_safe_json({"value": payload})
+
+    assert "</script>" not in encoded
+    assert "<\\/script>" in encoded
+    assert "\\u2028" in encoded
+    assert "\\u2029" in encoded

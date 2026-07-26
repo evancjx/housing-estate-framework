@@ -88,11 +88,29 @@ def test_render_exposes_two_to_five_workflow_and_framework_boundaries():
     assert "Each project record can appear only once" in page
     assert "Project A is the reference" in page
     assert "Factor-by-factor matrix" in page
+    assert "Transaction comparison and detailed analysis" in page
+    assert 'id="tx-window"' in page
+    assert 'id="tx-sale"' in page
+    assert 'id="tx-bedroom"' in page
+    assert 'id="tx-size"' in page
+    assert 'id="tx-floor"' in page
+    assert 'id="tx-source"' in page
+    assert "Selected-period snapshot" in page
+    assert "Annual median achieved PSF" in page
+    assert "Detailed analysis" in page
+    assert "Full transaction ledgers" in page
+    assert "Download filtered CSV" in page
+    assert "change in achieved median PSF, not repeat-unit appreciation" in page
+    assert "incomplete EdgeProp backfill" in page
+    assert "Bedroom provenance describes a transaction-row match" in page
+    assert "fetchTransactionShard" in page
+    assert "transactionLoadToken" in page
+    assert "show-more-transactions" in page
     assert 'scope="row"' in page and 'scope="col"' in page
     assert 'class="matrix-wrap" role="region" tabindex="0"' in page
     assert "Identity and Provision context" in page
     assert "Liveability (T0) and lifestyle trajectory" in page
     assert "HDB Value band / multiplier" in page
     assert "Not applicable" in page
-    assert "do not collapse into a misleading winner" in page
+    assert "without collapsing the evidence into a misleading winner" in page
     assert "Estate framework values describe the planning-area context" in page
