@@ -34,7 +34,7 @@ private-project-table:
 condo-framework-comparison:
 	python3 models/gen_condo_framework_comparison_html.py
 
-# Generate the interactive two-to-five-condominium comparison matrix.
+# Generate the 2–5 project matrix plus on-demand five-year/all-history transaction shards.
 multi-condo-framework-comparison:
 	python3 models/gen_multi_condo_framework_comparison_html.py
 

@@ -68,6 +68,14 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     assets.mkdir()
     (assets / "research-shell.css").write_text("body {}", encoding="utf-8")
     (assets / "research-shell.js").write_text("void 0;", encoding="utf-8")
+    transaction_assets = assets / "condo-transactions"
+    transaction_assets.mkdir()
+    (transaction_assets / "manifest.json").write_text(
+        '{"schema":{"version":1}}', encoding="utf-8"
+    )
+    (transaction_assets / "shard-00.json").write_text(
+        '{"projects":{}}', encoding="utf-8"
+    )
     output = ROOT / "_site-test"
     try:
         count = build_pages_site.build_site(output, assets_dir=assets)
@@ -77,6 +85,12 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert (output / "reports.json").is_file()
         assert (output / "projects.json").is_file()
         assert (output / "assets" / "research-shell.css").is_file()
+        assert (
+            output / "assets" / "condo-transactions" / "manifest.json"
+        ).is_file()
+        assert (
+            output / "assets" / "condo-transactions" / "shard-00.json"
+        ).is_file()
         assert (output / ".nojekyll").is_file()
         report = (output / "comparison_table.html").read_text(encoding="utf-8")
         assert report.count("assets/research-shell.css") == 1

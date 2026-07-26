@@ -96,6 +96,16 @@ FRAMEWORK_FIELDS = {
 }
 
 
+def script_safe_json(value: Any) -> str:
+    """Serialize JSON without allowing data to terminate an inline script."""
+    return (
+        json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+        .replace("</", "<\\/")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
 def value_or_none(value: Any) -> Any:
     if value is None or pd.isna(value):
         return None
@@ -418,12 +428,9 @@ def render_html(
 ) -> str:
     first_default, second_default = _default_ids(projects)
     browser_projects, browser_contexts = build_browser_payload(projects)
-    project_json = json.dumps(
-        browser_projects, ensure_ascii=False, separators=(",", ":")
-    )
-    context_json = json.dumps(
-        browser_contexts, ensure_ascii=False, separators=(",", ":")
-    )
+    project_json = script_safe_json(browser_projects)
+    context_json = script_safe_json(browser_contexts)
+    default_json = script_safe_json((first_default, second_default))
     options = _options_html(projects)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -475,7 +482,7 @@ main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{
 (() => {{
   const CONTEXTS = {context_json};
   const PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
-  const DEFAULTS = ["{first_default}", "{second_default}"];
+  const DEFAULTS = {default_json};
   const byId = new Map(PROJECTS.map(project => [project.id, project]));
   const byLabel = new Map(PROJECTS.map(project => [project.selection_label.toUpperCase(), project]));
   const nameCounts = PROJECTS.reduce((counts, project) => counts.set(project.project.toUpperCase(), (counts.get(project.project.toUpperCase()) || 0) + 1), new Map());
