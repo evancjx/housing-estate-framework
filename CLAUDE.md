@@ -220,5 +220,5 @@ The framework documents are not stale documentation; they are the spec.
 - **[framework_diagram.html](framework_diagram.html)** — architecture diagram (Inputs → 4 Models → `data/outputs/master_output.csv`). Same regeneration caveat.
 - **[scrapers/](scrapers/README.md)** — URA private-transaction scrapers (Playwright primary, API fallback). Downloads apartment/condo, landed, and strata-landed PMI data by postal district for `value_model.py --private`.
 - **[factor_audit_reports/](factor_audit_reports/)** — output from the `factor-audit` skill; proposed new framework components with evidence citations. Not auto-applied to any model.
-- **[docs/superpowers/plans/](docs/superpowers/plans/)** — internal planning docs from development sessions. Not framework content.
+- **[docs/html-pages/](docs/html-pages/README.md)** — one guide per catalogued root HTML report, covering purpose, data scope, comparison factors, controls, interpretation limits, and rebuild commands.
 - **[tests/snapshots/before/](tests/snapshots/before/)** — committed baseline CSVs (`provision_scores`, `liveability_matrix`, `value_output`) for the snapshot characterization tests. Update manually when a pipeline change intentionally alters output.

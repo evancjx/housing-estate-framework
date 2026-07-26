@@ -73,6 +73,8 @@ Root HTML files remain the generated report artifacts. [`site/reports.json`](sit
 the machine-readable catalog used for report discovery; every non-index root report must have one
 entry. Shared browser assets belong in `site/assets/` and are referenced from reports as
 `assets/<name>`.
+Human-facing purpose, data, comparison-factor, control, caveat, and rebuild documentation for every
+catalogued report lives in [`docs/html-pages/`](docs/html-pages/README.md).
 
 The build also derives a compact `projects.json` lookup from the committed EdgeProp project list
 and transaction district field. It contains only project names, slugs, and known districts; raw
