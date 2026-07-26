@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="$meta_description">
+<meta property="og:type" content="article">
+<meta property="og:title" content="$page_title">
+<meta property="og:description" content="$meta_description">
+<meta property="og:url" content="$canonical_url">
+<link rel="canonical" href="$canonical_url">
+<title>$page_title</title>
+<link rel="stylesheet" href="assets/research-shell.css">
+<link rel="stylesheet" href="assets/property-analysis.css">
+<script type="application/ld+json">$structured_data</script>
+</head>
+<body class="property-analysis-page">
+<main id="research-content">
+  <header class="pa-hero">
+    <a class="pa-kicker" href="index.html#reports">Property analysis library</a>
+    <div class="pa-badges">
+      <span>Point-in-time research</span>
+      <span>$status</span>
+    </div>
+    <h1>$title</h1>
+    <p class="pa-property">$property_description</p>
+    <p class="pa-summary">$summary</p>
+    <dl class="pa-meta">
+      <div>
+        <dt>Research captured</dt>
+        <dd><time datetime="$captured_iso">$captured_display</time></dd>
+      </div>
+      <div>
+        <dt>Property</dt>
+        <dd>$project_name</dd>
+      </div>
+      <div>
+        <dt>Analysis type</dt>
+        <dd>$analysis_type</dd>
+      </div>
+    </dl>
+    <aside class="pa-caution" aria-label="Important notice" role="note">
+      This is a dated market snapshot, not financial advice or a valuation.
+      Verify live inventory, seller intent, caveats, financing and tax treatment
+      before acting.
+    </aside>
+  </header>
+
+  <div class="pa-layout">
+    <nav class="pa-toc" aria-label="Report contents">
+      <details open>
+        <summary>Report contents</summary>
+        $toc_html
+      </details>
+    </nav>
+    <article class="pa-article">
+      $body_html
+    </article>
+  </div>
+
+  <footer class="pa-footer">
+    <span>Evidence, assumptions and limitations remain visible in the report.</span>
+    <span><a href="$source_url">View the Markdown source on GitHub</a></span>
+  </footer>
+</main>
+<script src="assets/research-shell.js"></script>
+</body>
+</html>

@@ -6,14 +6,27 @@ from __future__ import annotations
 import argparse
 import csv
 from collections import Counter, defaultdict
+from html import escape
 from html.parser import HTMLParser
 import json
 import shutil
 from pathlib import Path, PurePosixPath
+import sys
 from urllib.parse import unquote, urlsplit
 
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.reporting.property_analysis import (
+    DEFAULT_PROPERTY_ANALYSIS_DIR,
+    PropertyAnalysis,
+    discover_property_analyses,
+    latest_property_analyses,
+    property_catalog_entries,
+    render_property_analysis_page,
+)
+
 DEFAULT_MANIFEST = ROOT / "site" / "reports.json"
 DEFAULT_ASSETS = ROOT / "site" / "assets"
 DEFAULT_PROJECT_LIST = (
@@ -30,6 +43,8 @@ REQUIRED_FIELDS = {"id", "path", "title", "category", "kind", "summary", "tags"}
 BUILD_MARKER = ".pages-build"
 SHARED_CSS = "assets/research-shell.css"
 SHARED_JS = "assets/research-shell.js"
+PROPERTY_CARDS_MARKER = "      <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->"
+PROPERTY_ROUTES_MARKER = "    /* GENERATED_PROPERTY_ANALYSIS_PROJECT_ROUTES */"
 
 
 class _ResourceParser(HTMLParser):
@@ -207,7 +222,8 @@ def inject_research_shell(site_dir: Path) -> None:
 def validate_site_links(site_dir: Path) -> None:
     """Reject broken local HTML, script, stylesheet and image references."""
     broken: list[str] = []
-    for html_path in site_dir.glob("*.html"):
+    site_root = site_dir.resolve()
+    for html_path in site_dir.rglob("*.html"):
         parser = _ResourceParser()
         parser.feed(html_path.read_text(encoding="utf-8"))
         for reference in parser.references:
@@ -227,10 +243,103 @@ def validate_site_links(site_dir: Path) -> None:
             target = html_path.parent / relative
             if target.is_dir():
                 target /= "index.html"
+            resolved_target = target.resolve()
+            if site_root != resolved_target and site_root not in resolved_target.parents:
+                broken.append(f"{html_path.name} -> {reference} (escapes the site)")
+                continue
             if not target.is_file():
                 broken.append(f"{html_path.name} -> {reference}")
     if broken:
         raise ValueError("Broken site references:\n" + "\n".join(sorted(broken)))
+
+
+def _prepare_property_publication(
+    catalog: dict,
+    *,
+    property_analysis_dir: Path,
+) -> tuple[list[PropertyAnalysis], dict[str, str], dict]:
+    """Validate, render and merge every dated property-analysis source."""
+
+    analyses = discover_property_analyses(property_analysis_dir)
+    existing_ids = {report["id"] for report in catalog["reports"]}
+    existing_paths = {report["path"] for report in catalog["reports"]}
+    rendered_pages: dict[str, str] = {}
+    for analysis in analyses:
+        if analysis.report_id in existing_ids:
+            raise ValueError(
+                f"Property analysis id collides with the report catalog: "
+                f"{analysis.report_id}"
+            )
+        if analysis.output_path in existing_paths or (ROOT / analysis.output_path).exists():
+            raise ValueError(
+                f"Property analysis output collides with an authored report: "
+                f"{analysis.output_path}"
+            )
+        rendered_pages[analysis.output_path] = render_property_analysis_page(analysis)
+
+    merged_catalog = dict(catalog)
+    merged_catalog["reports"] = [
+        *property_catalog_entries(analyses),
+        *catalog["reports"],
+    ]
+    return analyses, rendered_pages, merged_catalog
+
+
+def _property_cards(analyses: list[PropertyAnalysis]) -> str:
+    cards: list[str] = []
+    for analysis in latest_property_analyses(analyses):
+        search_text = " ".join(
+            (
+                analysis.project_name,
+                analysis.title,
+                analysis.property_description,
+                analysis.summary,
+                "condominium resale valuation quantum investment property analysis",
+            )
+        )
+        cards.append(
+            "\n".join(
+                (
+                    '      <a class="card property-analysis-card" '
+                    'data-kind="analysis project" '
+                    f'data-search="{escape(search_text, quote=True)}" '
+                    f'href="{escape(analysis.output_path, quote=True)}">',
+                    f'        <span class="tag">Property analysis · '
+                    f"{escape(analysis.date_label)}</span>"
+                    f"<h3>{escape(analysis.project_name)}</h3>",
+                    f"        <p>{escape(analysis.summary)}</p>",
+                    '        <span class="open">Read the dated analysis →</span>',
+                    "      </a>",
+                )
+            )
+        )
+    return "\n".join(cards)
+
+
+def _property_routes(analyses: list[PropertyAnalysis]) -> str:
+    routes: list[str] = []
+    for analysis in latest_property_analyses(analyses):
+        project_key = " ".join(analysis.project_name.split()).upper()
+        key_json = json.dumps(project_key, ensure_ascii=True).replace("<", "\\u003c")
+        path_json = json.dumps(
+            analysis.output_path, ensure_ascii=True
+        ).replace("<", "\\u003c")
+        routes.append(f"    {key_json}: {path_json},")
+    return "\n".join(routes)
+
+
+def inject_property_library(index_path: Path, analyses: list[PropertyAnalysis]) -> None:
+    """Inject indexable newest-report cards and exact project-finder routes."""
+
+    source = index_path.read_text(encoding="utf-8")
+    for marker in (PROPERTY_CARDS_MARKER, PROPERTY_ROUTES_MARKER):
+        if source.count(marker) != 1:
+            raise ValueError(
+                f"{index_path.name} must contain exactly one publication marker {marker}"
+            )
+    updated = source.replace(PROPERTY_CARDS_MARKER, _property_cards(analyses))
+    updated = updated.replace(PROPERTY_ROUTES_MARKER, _property_routes(analyses))
+    index_path.write_text(updated, encoding="utf-8")
 
 
 def build_site(
@@ -238,9 +347,15 @@ def build_site(
     *,
     manifest_path: Path = DEFAULT_MANIFEST,
     assets_dir: Path = DEFAULT_ASSETS,
+    property_analysis_dir: Path = DEFAULT_PROPERTY_ANALYSIS_DIR,
 ) -> int:
     """Build a self-contained Pages artifact and return its report count."""
     catalog = load_catalog(manifest_path)
+    analyses, rendered_pages, merged_catalog = _prepare_property_publication(
+        catalog,
+        property_analysis_dir=property_analysis_dir,
+    )
+    project_catalog = build_project_catalog()
     output_dir = output_dir.resolve()
     if output_dir == ROOT or ROOT not in output_dir.parents:
         raise ValueError(f"Output must be a directory inside the repository: {output_dir}")
@@ -255,8 +370,12 @@ def build_site(
     (output_dir / BUILD_MARKER).touch()
     for html_path in ROOT.glob("*.html"):
         shutil.copy2(html_path, output_dir / html_path.name)
-    shutil.copy2(manifest_path, output_dir / "reports.json")
-    project_catalog = build_project_catalog()
+    for relative_path, page in rendered_pages.items():
+        (output_dir / relative_path).write_text(page, encoding="utf-8")
+    (output_dir / "reports.json").write_text(
+        json.dumps(merged_catalog, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     (output_dir / "projects.json").write_text(
         json.dumps(project_catalog, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
@@ -268,12 +387,13 @@ def build_site(
             output_dir / "assets",
             dirs_exist_ok=True,
         )
+    inject_property_library(output_dir / "index.html", analyses)
     inject_research_shell(output_dir)
     (output_dir / ".nojekyll").touch()
     if not (output_dir / "index.html").is_file():
         raise ValueError("Built site is missing index.html")
     validate_site_links(output_dir)
-    return len(catalog["reports"])
+    return len(merged_catalog["reports"])
 
 
 def parse_args() -> argparse.Namespace:
@@ -292,9 +412,14 @@ def main() -> int:
     args = parse_args()
     if args.out is None:
         catalog = load_catalog()
+        analyses, _, merged_catalog = _prepare_property_publication(
+            catalog,
+            property_analysis_dir=DEFAULT_PROPERTY_ANALYSIS_DIR,
+        )
         project_catalog = build_project_catalog()
         print(
-            f"Validated {len(catalog['reports'])} research reports and "
+            f"Validated {len(merged_catalog['reports'])} research reports "
+            f"({len(analyses)} dated property analyses) and "
             f"{len(project_catalog['projects'])} private projects."
         )
     else:
