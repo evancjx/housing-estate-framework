@@ -19,9 +19,18 @@ def _run(args):
 
 
 def _same(regen, committed):
-    a = pd.read_csv(regen, keep_default_na=False)
-    b = pd.read_csv(committed, keep_default_na=False)
-    pd.testing.assert_frame_equal(a, b)
+    # Parse nullable numeric columns as numbers rather than object/string data.
+    # Regression residuals can vary at machine precision across BLAS platforms;
+    # schemas and text remain exact while numeric values use a tight tolerance.
+    a = pd.read_csv(regen)
+    b = pd.read_csv(committed)
+    pd.testing.assert_frame_equal(
+        a,
+        b,
+        check_exact=False,
+        rtol=1e-10,
+        atol=1e-12,
+    )
 
 
 @pytest.mark.integration
