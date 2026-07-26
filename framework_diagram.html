@@ -295,7 +295,7 @@
 <body>
 
 <h1>SG Estate Framework</h1>
-<p class="subtitle">32 estates · 4 models · 57-column deliverable</p>
+<p class="subtitle">35 estates · versioned transactional pipeline · 87-column deliverable · model v2.1.0</p>
 
 <div class="diagram">
 
@@ -305,22 +305,22 @@
 
     <div class="input-box geo">
       <div class="label">Geospatial layers</div>
-      <div class="detail">estates.csv · mrt_layer.csv · CHAS clinics · schools · parks · markets · bus stops</div>
+      <div class="detail">20 Provision components from transport · health · schools · amenities · environment · stewardship layers</div>
     </div>
 
     <div class="input-box">
-      <div class="label">Judged inputs</div>
-      <div class="detail">judged_inputs.csv<br>density · env_comfort · momentum<br><em style="color:#374151">human-scored, 1–5</em></div>
+      <div class="label">Reviewed inputs</div>
+      <div class="detail">judged_inputs.csv · pipeline_data.json<br>review-gated momentum · manual fallbacks<br><em style="color:#374151">never blindly promoted</em></div>
     </div>
 
     <div class="input-box transact">
       <div class="label">HDB resale txns</div>
-      <div class="detail">hdb_resale.csv<br>~36k rows · 2023–2026</div>
+      <div class="detail">hdb_resale.csv<br>234,068 normalized transactions</div>
     </div>
 
     <div class="input-box transact">
       <div class="label">URA private txns</div>
-      <div class="detail">D5/15/16/21/27<br>~9,200 rows · 2021–2026<br>MARINE PARADE · BEDOK · CLEMENTI · BUKIT TIMAH · DOVER · QUEENSTOWN · CANBERRA</div>
+      <div class="detail">ura_private.csv<br>113,448 normalized transactions<br>kept separate from the HDB tenure universe</div>
     </div>
   </div>
 
@@ -353,13 +353,11 @@
         <div class="model-num">Model 1</div>
         <div class="model-name">Provision</div>
         <div class="model-body">
-          13 components → weighted sum × D multiplier<br><br>
-          <b style="color:#7dd3fc">Measured (6):</b> connectivity · amenities · green · schools · healthcare · infra<br>
-          <b style="color:#7dd3fc">Partly (2):</b> density · env_comfort<br>
-          <b style="color:#7dd3fc">Judged (1):</b> momentum<br>
-          <b style="color:#7dd3fc">Added (4):</b> childcare · community · sport · flood<br><br>
-          D = disruption multiplier (floor 0.70)<br>
-          TENGAH=0.90 · QST/DOV=0.96
+          20 components → weighted sum with missing-input renormalisation<br><br>
+          <b style="color:#7dd3fc">Measured (14):</b> operational supply and proximity layers<br>
+          <b style="color:#7dd3fc">Partly measured (6):</b> density · environment · momentum · air quality · stewardship · hawker<br>
+          <b style="color:#7dd3fc">Judged (0):</b> none in a complete canonical run<br><br>
+          Public and private Provision weights remain distinct.
         </div>
         <div class="model-out">
           → <span class="tag tag-blue">provision_score</span>
@@ -379,7 +377,8 @@
           C veto rules · certainty discounts<br>
           T5: confirmed/gazetted only<br>
           T15: planned items @ 0.40×<br>
-          Gap = liveability − provision (band numeric)
+          Nonnegative persona weights · D disruption multiplier<br>
+          Gap = continuous liveability − continuous provision
         </div>
         <div class="model-out">
           → <span class="tag tag-green">24 liveability cells</span><br>
@@ -392,16 +391,16 @@
         <div class="model-num">Model 3</div>
         <div class="model-name">Value Residual</div>
         <div class="model-body">
-          Regress ln(price_psm) ~ score + controls + month<br>
+          Regress ln(price_psm) ~ within-segment controls + month<br>
           Value = base_score × exp(−residual) capped [0.75×, 1.25×]<br><br>
           <b style="color:#fde68a">HDB segment:</b> flat_type · storey · lease<br>
           <b style="color:#fde68a">Private segment:</b> property_type · tenure · age<br>
           Hierarchical shrinkage k=30<br>
           Decimals hidden when n &lt; 100<br><br>
-          5 HDB bases: provision + YF/SP/Ret/LS T0
+          HDB and private rows remain separate segments
         </div>
         <div class="model-out">
-          → <span class="tag tag-amber">HDB value × 5 bases</span><br>
+          → <span class="tag tag-amber">HDB resale Value</span><br>
           → <span class="tag tag-amber">Private value</span>
         </div>
       </div>
@@ -414,10 +413,10 @@
           5 cross-persona diagonals per estate<br><br>
           <b style="color:#e9d5ff">forming_family:</b> SP/T0 → YF/T5<br>
           <b style="color:#e9d5ff">downsizing:</b> YF/T0 → Ret/T5<br>
-          <b style="color:#e9d5ff">settling_single:</b> SP/T0 → SP/T5<br>
+          <b style="color:#e9d5ff">settling_single:</b> LS/T0 → SP/T5<br>
           <b style="color:#e9d5ff">ageing_in_place:</b> Ret/T0 → Ret/T5<br>
-          <b style="color:#e9d5ff">upgrader:</b> LS/T0 → LS/T5<br><br>
-          160 rows (32 estates × 5 paths)
+          <b style="color:#e9d5ff">upgrader:</b> SP/T0 → LS/T5<br><br>
+          170 rows (residential estates × 5 paths)
         </div>
         <div class="model-out">
           → <span class="tag tag-purple">best/worst lifepath</span><br>
@@ -431,8 +430,8 @@
     <div style="margin-top:12px; padding:10px 14px; border:1px solid #1e293b; border-radius:8px; font-size:11px; color:#475569; background:#0a0d14; display:flex; gap:24px; flex-wrap:wrap;">
       <span>Provision → <b style="color:#4ade80">Liveability</b> (base score)</span>
       <span>Provision → <b style="color:#fbbf24">Value</b> (base score, HDB)</span>
-      <span>Liveability T0 → <b style="color:#fbbf24">Value</b> (per-persona base)</span>
-      <span>Provision → <b style="color:#c084fc">Life Paths</b> (archetype tag)</span>
+      <span>Liveability → <b style="color:#c084fc">Life Paths</b> (cross-persona diagonals)</span>
+      <span>All outputs → <b style="color:#a855f7">strict master join</b> (status-aware)</span>
     </div>
   </div>
 
@@ -457,51 +456,50 @@
     <div class="section-label">Deliverable</div>
     <div class="output-card">
       <div class="out-label">master_output.csv</div>
-      <div class="out-name">32 rows · 57 cols</div>
-      <div class="out-dim">31 active estates + 1 N/R</div>
+      <div class="out-name">35 rows · 87 cols</div>
+      <div class="out-dim">34 residential estates + 1 N/R</div>
 
       <div class="col-group">
         <div class="col-group-label">Identity</div>
-        <div class="col-entry"><span class="n">2</span><span class="nm">estate, archetype</span></div>
+        <div class="col-entry"><span class="n">3</span><span class="nm">estate · archetype · model_version</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Provision</div>
-        <div class="col-entry"><span class="n">3</span><span class="nm">score · band · D_T0</span></div>
+        <div class="col-group-label">Provision and context</div>
+        <div class="col-entry"><span class="n">9</span><span class="nm">public/private score · band · D horizons · coverage</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Liveability (24)</div>
+        <div class="col-group-label">Liveability (32)</div>
         <div class="col-entry"><span class="n">8</span><span class="nm">YoungFam</span><span class="desc">T0/T5/T15 × score+band</span></div>
         <div class="col-entry"><span class="n">8</span><span class="nm">SinglePro</span><span class="desc">T0/T5/T15 × score+band</span></div>
         <div class="col-entry"><span class="n">8</span><span class="nm">Retiree + Lifestyle</span><span class="desc">same</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Gap (12)</div>
-        <div class="col-entry"><span class="n">12</span><span class="nm">gap_{persona}_{T0/T5/T15}</span></div>
+        <div class="col-group-label">Gap (24)</div>
+        <div class="col-entry"><span class="n">24</span><span class="nm">score + label × persona × horizon</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">HDB Value (7)</div>
-        <div class="col-entry"><span class="n">3</span><span class="nm">provision base</span><span class="desc">band · mult · n</span></div>
-        <div class="col-entry"><span class="n">4</span><span class="nm">persona bases</span><span class="desc">YF/SP/Ret/LS band</span></div>
+        <div class="col-group-label">HDB Value (5)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">score · band · basis · n · status</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Private Value (3)</div>
-        <div class="col-entry"><span class="n">3</span><span class="nm">band · mult · n</span></div>
+        <div class="col-group-label">Private Value (5)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">score · band · basis · n · status</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Life Paths (4)</div>
-        <div class="col-entry"><span class="n">2</span><span class="nm">best path</span><span class="desc">name + end_band</span></div>
-        <div class="col-entry"><span class="n">2</span><span class="nm">worst path</span><span class="desc">name + end_score</span></div>
+        <div class="col-group-label">Employment and lease (9)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">employment score · band · nodes · status</span></div>
+        <div class="col-entry"><span class="n">4</span><span class="nm">lease score · band · source · status</span></div>
       </div>
 
       <div class="col-group">
-        <div class="col-group-label">Flags</div>
-        <div class="col-entry"><span class="n">1</span><span class="nm">notes</span><span class="desc">disruption · over/underpriced · N/R</span></div>
+        <div class="col-group-label">Availability semantics</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">typed status columns</span><span class="desc">available · no_data · not_covered · N/R</span></div>
       </div>
 
     </div>

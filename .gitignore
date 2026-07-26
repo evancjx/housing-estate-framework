@@ -37,3 +37,8 @@ tests/snapshots/after_*/
 _site/
 _site-test/
 _site-unowned-test/
+
+# Transactional pipeline staging directories; the promoted manifest is kept in
+# data/outputs/run_manifest.json.
+data/runs/*
+!data/runs/.gitkeep

@@ -35,7 +35,7 @@ python scrapers/ingest_ura_raw.py \
     --merge
 
 # Re-run value model
-python models/value_model.py \
+python -m sg_estate.domain.value \
     --scores data/outputs/provision_scores.csv \
     --hdb data/inputs/hdb_resale.csv \
     --private data/inputs/ura_private.csv \

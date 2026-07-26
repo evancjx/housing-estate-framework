@@ -6,8 +6,8 @@ headline `data/outputs/master_output.csv`. Two load-bearing conceptual pillars �
 non-comparable by design). The split is structural: a single number cannot be both
 objectively-comparable AND person-relevant.
 
-> Authoritative numbers live in `models/framework_config.py` (weights, deltas, bands) and
-> `models/aliases.py` (alias maps). The `frameworks/*.md` documents are the **spec**, not stale
+> Authoritative numbers live in `sg_estate/domain/framework.py` (weights, deltas, bands) and
+> `sg_estate/domain/aliases.py` (alias maps). The `frameworks/*.md` documents are the **spec**, not stale
 > docs. This file is a navigational overview; on any conflict, the spec + config win.
 
 ---
@@ -23,7 +23,7 @@ flowchart TD
         E[embedded tables<br/>travel-times, TCMR KPIs]:::src
     end
 
-    subgraph ING["② Ingesters → layer CSVs (models/ingest_*, data_ingest, fetch_chas)"]
+    subgraph ING["② Adapters/ingesters → normalized and derived layer CSVs"]
         L1[mrt · bus · schools · parks · markets<br/>supermarkets · clinics · polyclinics<br/>childcare · community · sport · eldercare]:::lay
         L2[tree_canopy · hdb_density<br/>hawker_v2 · coastal]:::lay
         L3[air_quality · jtc_industrial<br/>town_council_kpi tcmr · flood · noise]:::lay
@@ -34,15 +34,15 @@ flowchart TD
 
     subgraph SCORE["③ Scoring models (run order matters)"]
         MOM[momentum_model<br/>S7 → judged_inputs_updated.csv]:::orph
-        PROV["provision_model<br/>20-component weighted Σ + renorm<br/>→ score, score_private, measured_only"]:::mod
-        LIVE["liveability_model<br/>4 personas × T0/T5/T15<br/>× D-multiplier × persona vetoes"]:::mod
-        VAL["value_model<br/>base × exp(−price_residual)<br/>HDB ∥ private SEGMENTS"]:::mod
-        EMP[employment_model<br/>T0/T5/T15 job access]:::mod
-        LEASE[lease_risk_model<br/>HDB lease-decay risk]:::mod
+        PROV["sg_estate.domain.provision<br/>20-component weighted Σ + renorm<br/>→ score, score_private, measured_only"]:::mod
+        LIVE["sg_estate.domain.liveability<br/>4 personas × T0/T5/T15<br/>× D-multiplier × persona vetoes"]:::mod
+        VAL["sg_estate.domain.value<br/>base × exp(−price_residual)<br/>HDB ∥ private SEGMENTS"]:::mod
+        EMP[sg_estate.domain.employment<br/>T0/T5/T15 job access]:::mod
+        LEASE[sg_estate.domain.lease_risk<br/>HDB lease-decay risk]:::mod
     end
 
     subgraph OUT["④ Deliverables"]
-        MASTER[(master_output.csv<br/>35 estates × 81 cols)]:::out
+        MASTER[(master_output.csv<br/>35 estates × 87 cols)]:::out
         LP[life_paths.csv<br/>5 life-paths × estate]:::out
         HTML[comparison_table.html<br/>framework_diagram.html]:::out
     end
@@ -52,11 +52,11 @@ flowchart TD
     JUD --> PROV
     L1 & L2 & L3 --> PROV
     MOM -.->|manual review gate| JUD
-    PROV --> LIVE & VAL & EMP
+    PROV --> LIVE & VAL
     L4 --> LIVE
     PROV & LIVE & VAL & EMP & LEASE --> MASTER
     LIVE --> LP
-    MASTER --> HTML
+    MASTER & PROV & EMP & LP --> HTML
 
     classDef src fill:#e8e8e8,stroke:#888;
     classDef lay fill:#dbeafe,stroke:#3b82f6;
@@ -69,8 +69,10 @@ flowchart TD
 `judged_inputs_updated.csv` for human review; values must be vetted and copied into `judged_inputs.csv`
 (which also carries manual `mom` overrides a blind copy would clobber) before re-running provision.
 
-**Run order** (`make pipeline`): ingesters → `provision_model` → `liveability_model` → `value_model`
-(×2: HDB-only, then HDB+private) → `lease_risk_model` → `employment_model` → `build_master`.
+**Run order** (`make pipeline`): ingesters → `sg_estate.domain.provision` →
+`sg_estate.domain.liveability` → `sg_estate.domain.value` (×2: HDB-only,
+then HDB+private) → `sg_estate.domain.lease_risk` →
+`sg_estate.domain.employment` → `sg_estate.application.master`.
 
 ---
 
@@ -157,17 +159,18 @@ Value(a, segment) = base(a, segment) × exp(−ValueResidual(a, segment))
 
 | Gate / rule | Where | Behaviour |
 |---|---|---|
-| **Provenance honesty** | `provision_model` | Missing PARTLY input → renormalise over present components, set `measured_only=True`. NEVER impute. |
-| **X-archetype N/R gate** | `liveability_model`, `build_master` | Non-residential strategic districts (e.g. CENTRAL AREA) → all scored cells `N/R`. |
-| **D = losses only** | `liveability_model` | Construction disruptions + BCA severity subtract from D; positive additions go to S7/T5, never D. Hard floor 0.70. |
-| **Rail slip premium** | `liveability_model` | MRT future additions × 0.85 (rail projects slip). PLANNED excluded at T5, included at 40% for T15. |
-| **Value trust floor** | `value_model` | Below `trust_decimal_n=100` transactions → report a **band only**, no decimal. Multiplier clipped to [0.75, 1.25]. |
-| **Separate universes** | `value_model` | HDB resale, private resale, private rental are distinct segments with different controls. |
-| **Single-sourcing** | `framework_config`, `aliases` | Weights/deltas/bands in `framework_config`; alias maps in `aliases`. No local copies. |
+| **Provenance honesty** | `sg_estate.domain.provision` | Missing PARTLY input → renormalise over present components, set `measured_only=True`. NEVER impute. |
+| **X-archetype N/R gate** | `sg_estate.domain.liveability`, `sg_estate.application.master` | Non-residential strategic districts (e.g. CENTRAL AREA) → all scored cells `N/R`. |
+| **D = losses only** | `sg_estate.domain.liveability` | Construction disruptions + BCA severity subtract from D; positive additions go to S7/T5, never D. Hard floor 0.70. |
+| **Rail slip premium** | `sg_estate.domain.liveability` | MRT future additions × 0.85 (rail projects slip). PLANNED excluded at T5, included at 40% for T15. |
+| **Value trust floor** | `sg_estate.domain.value` | Below `trust_decimal_n=100` transactions → report a **band only**, no decimal. Multiplier clipped to [0.75, 1.25]. |
+| **Separate universes** | `sg_estate.domain.value` | HDB resale, private resale, private rental are distinct segments with different controls. |
+| **Single-sourcing** | `sg_estate.domain.framework`, `sg_estate.domain.aliases` | Weights/deltas/bands and alias maps have one canonical owner. No local copies. |
 | **Fail loud** | all loaders | A supplied-but-missing input path exits with an error, never silently skips. |
 | **Determinism** | ingesters | `bca_permits --year 2026` (not `date.today()`); committed CSVs reproduce run-to-run (guarded by `tests/test_reproducibility.py`). |
 
 ---
 
-*Generated as part of the multi-agent + Codex review pass. Regenerate the rendered HTML deliverables
-(`comparison_table.html`) with `python3 models/gen_comparison_html.py` after a pipeline run.*
+Regenerate the rendered HTML deliverables after a pipeline run with
+`python3 -m sg_estate.reporting.builders.comparison` and
+`python3 -m sg_estate.reporting.builders.framework_diagram`.

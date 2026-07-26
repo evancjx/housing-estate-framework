@@ -42,15 +42,15 @@ scores unless there is a documented reason.
 
 | Route | Use when | Primary files |
 |---|---|---|
-| Provision component | Universal, objective, supply-side estate condition | `models/provision_model.py`, `models/framework_config.py`, `frameworks/1-provision-framework.md` |
-| Provision sub-metric | Refines an existing component without new top-level weight | `models/provision_model.py`, relevant `models/ingest_*.py`, Provision doc anchors |
-| Liveability profile | Depends on household, persona, anchor location, or tolerance | `models/liveability_model.py`, `frameworks/2-liveability-matrix.md`, `data/outputs/life_paths.csv` |
+| Provision component | Universal, objective, supply-side estate condition | `sg_estate/domain/provision.py`, `sg_estate/domain/framework.py`, `frameworks/1-provision-framework.md` |
+| Provision sub-metric | Refines an existing component without new top-level weight | `sg_estate/domain/provision.py`, relevant `models/ingest_*.py`, Provision doc anchors |
+| Liveability profile | Depends on household, persona, anchor location, or tolerance | `sg_estate/domain/liveability.py`, `frameworks/2-liveability-matrix.md`, `data/outputs/life_paths.csv` |
 | Buyer intake/filter | Hard constraints before scoring, such as affordability, layout, lease tolerance, school/in-law/care proximity | new profile module, `frameworks/2-liveability-matrix.md`, comparison UI |
-| Value segment | Price, affordability, rental fallback, exit liquidity, or tenure economics | `models/value_model.py`, transaction data, segment-specific output columns |
+| Value segment | Price, affordability, rental fallback, exit liquidity, or tenure economics | `sg_estate/domain/value.py`, transaction data, segment-specific output columns |
 | Momentum/future upside | Confirmed or planned public additions | `data/inputs/pipeline_data.json`, `models/momentum_model.py`, Liveability T5/T15 boosts |
-| Temporary disruption | Active construction or temporary inconvenience | D multiplier in `models/liveability_model.py`, `data/inputs/bca_permits.csv` |
-| Employment/access | Job-node access or commute opportunity | `models/employment_model.py` |
-| Lease risk | Remaining lease and tenure decay | `models/lease_risk_model.py` |
+| Temporary disruption | Active construction or temporary inconvenience | D multiplier in `sg_estate/domain/liveability.py`, `data/inputs/bca_permits.csv` |
+| Employment/access | Job-node access or commute opportunity | `sg_estate/domain/employment.py` |
+| Lease risk | Remaining lease and tenure decay | `sg_estate/domain/lease_risk.py` |
 | Project/unit diagnostic | Project, block, floor, facing, layout, view, sun, privacy | private-project tooling or separate diagnostics, not estate Provision |
 | Audit-only | Useful context but too narrow, noisy, or not model-ready | `factor_audit_reports/` |
 
@@ -125,7 +125,7 @@ residuals after property controls.
 
 8. Update single sources of truth.
    If weights, S-groups, persona deltas, bands, or provenance change, update
-   `models/framework_config.py` and the active framework document in the same
+   `sg_estate/domain/framework.py` and the active framework document in the same
    change.
 
 9. Add tests.

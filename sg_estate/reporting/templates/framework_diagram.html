@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SG Estate Framework — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    padding: 40px 32px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #f8fafc;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 40px;
+  }
+
+  /* ── Layout ── */
+  .diagram {
+    display: grid;
+    grid-template-columns: 180px 40px 1fr 40px 220px;
+    grid-template-rows: auto;
+    gap: 0;
+    align-items: start;
+  }
+
+  /* ── Columns ── */
+  .col-inputs   { grid-column: 1; }
+  .col-arr1     { grid-column: 2; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 20px; gap: 8px; }
+  .col-models   { grid-column: 3; }
+  .col-arr2     { grid-column: 4; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 20px; }
+  .col-output   { grid-column: 5; }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  /* ── Input boxes ── */
+  .input-box {
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #131820;
+  }
+  .input-box .label { font-weight: 600; color: #94a3b8; font-size: 11px; }
+  .input-box .detail { color: #475569; font-size: 11px; margin-top: 2px; }
+  .input-box.geo    { border-color: #1d3a52; }
+  .input-box.transact { border-color: #1d3347; }
+
+  /* ── Arrows ── */
+  .arr { color: #334155; font-size: 20px; line-height: 1; }
+  .arr-right { margin: auto 0; color: #334155; font-size: 16px; }
+
+  /* ── Model cards ── */
+  .models-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .model-card {
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .model-card .model-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .model-card .model-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .model-card .model-body {
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #94a3b8;
+  }
+  .model-card .model-out {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    margin: 2px 2px 2px 0;
+  }
+
+  /* Provision */
+  .card-provision { background: #0d1f2d; border-color: #1e4a6e; }
+  .card-provision .model-num { color: #38bdf8; }
+  .card-provision .model-name { color: #7dd3fc; }
+  .card-provision .model-out { color: #7dd3fc; }
+  .tag-blue { background: #0c2a3e; color: #38bdf8; border: 1px solid #1e4a6e; }
+
+  /* Liveability */
+  .card-liveability { background: #0d2218; border-color: #166534; }
+  .card-liveability .model-num { color: #4ade80; }
+  .card-liveability .model-name { color: #86efac; }
+  .card-liveability .model-out { color: #86efac; }
+  .tag-green { background: #0a2e18; color: #4ade80; border: 1px solid #166534; }
+
+  /* Value */
+  .card-value { background: #1e1408; border-color: #92400e; }
+  .card-value .model-num { color: #fbbf24; }
+  .card-value .model-name { color: #fde68a; }
+  .card-value .model-out { color: #fde68a; }
+  .tag-amber { background: #291a06; color: #fbbf24; border: 1px solid #92400e; }
+
+  /* Life Paths */
+  .card-lifepath { background: #1a0d28; border-color: #6b21a8; }
+  .card-lifepath .model-num { color: #c084fc; }
+  .card-lifepath .model-name { color: #e9d5ff; }
+  .card-lifepath .model-out { color: #e9d5ff; }
+  .tag-purple { background: #1e0a33; color: #c084fc; border: 1px solid #6b21a8; }
+
+  /* ── Internal arrows between models ── */
+  .internal-arrows {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    gap: 16px;
+    font-size: 11px;
+    color: #334155;
+  }
+  .int-arr-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+    font-size: 11px;
+  }
+  .int-arr-line span { color: #334155; }
+
+  /* ── Output card ── */
+  .output-card {
+    border: 1px solid #4a2463;
+    border-radius: 12px;
+    padding: 20px;
+    background: #130d1e;
+    position: sticky;
+    top: 40px;
+  }
+  .output-card .out-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #a855f7;
+    margin-bottom: 8px;
+  }
+  .output-card .out-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #e9d5ff;
+    margin-bottom: 4px;
+  }
+  .output-card .out-dim {
+    font-size: 11px;
+    color: #7c3aed;
+    margin-bottom: 16px;
+  }
+
+  .col-group {
+    margin-bottom: 14px;
+  }
+  .col-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 5px;
+  }
+  .col-entry {
+    font-size: 11px;
+    color: #9ca3af;
+    padding: 2px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .col-entry .n { color: #4b5563; font-size: 10px; min-width: 20px; text-align: right; }
+  .col-entry .nm { color: #d1d5db; }
+  .col-entry .desc { color: #6b7280; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1e293b;
+    margin: 12px 0;
+  }
+
+  /* ── Connector lines (SVG overlay approach — use flex column for simplicity) ── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  /* ── Notes strip ── */
+  .notes-strip {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .note-box {
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #0d1117;
+    font-size: 11px;
+  }
+  .note-box .note-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .note-box .note-body { color: #6b7280; line-height: 1.5; }
+  .note-box .note-body b { color: #94a3b8; }
+
+  .nb-inv  { border-color: #1e3a52; }
+  .nb-inv .note-label { color: #38bdf8; }
+  .nb-gap  { border-color: #166534; }
+  .nb-gap .note-label { color: #4ade80; }
+  .nb-val  { border-color: #92400e; }
+  .nb-val .note-label { color: #fbbf24; }
+  .nb-arch { border-color: #4c1d95; }
+  .nb-arch .note-label { color: #c084fc; }
+
+  /* big arrow SVG */
+  .big-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 40px;
+  }
+  @media (max-width: 900px) {
+    body { padding: 28px 20px 44px; }
+    .diagram { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .col-inputs, .col-models, .col-output { grid-column: 1; min-width: 0; }
+    .col-arr1, .col-arr2 { display: none; }
+    .output-card { position: static; }
+    .notes-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    body { padding: 24px 14px 36px; }
+    .subtitle { margin-bottom: 28px; }
+    .models-grid, .notes-strip { grid-template-columns: minmax(0, 1fr); }
+    .model-card, .output-card { min-width: 0; }
+    .col-entry { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<h1>SG Estate Framework</h1>
+<p class="subtitle">{{estate_count}} estates · versioned transactional pipeline · {{master_columns}}-column deliverable · model v{{model_version}}</p>
+
+<div class="diagram">
+
+  <!-- ── COL 1: Inputs ── -->
+  <div class="col-inputs">
+    <div class="section-label">Inputs</div>
+
+    <div class="input-box geo">
+      <div class="label">Geospatial layers</div>
+      <div class="detail">20 Provision components from transport · health · schools · amenities · environment · stewardship layers</div>
+    </div>
+
+    <div class="input-box">
+      <div class="label">Reviewed inputs</div>
+      <div class="detail">judged_inputs.csv · pipeline_data.json<br>review-gated momentum · manual fallbacks<br><em style="color:#374151">never blindly promoted</em></div>
+    </div>
+
+    <div class="input-box transact">
+      <div class="label">HDB resale txns</div>
+      <div class="detail">hdb_resale.csv<br>{{hdb_rows}} normalized transactions</div>
+    </div>
+
+    <div class="input-box transact">
+      <div class="label">URA private txns</div>
+      <div class="detail">ura_private.csv<br>{{private_rows}} normalized transactions<br>kept separate from the HDB tenure universe</div>
+    </div>
+  </div>
+
+  <!-- ── COL 2: Arrow 1 ── -->
+  <div class="col-arr1">
+    <svg width="40" height="520" style="overflow:visible">
+      <!-- single right-pointing arrow spanning full height -->
+      <defs>
+        <marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#334155"/>
+        </marker>
+      </defs>
+      <!-- line from input col to models col -->
+      <line x1="20" y1="50" x2="20" y2="440" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <line x1="20" y1="50"  x2="36" y2="50"  stroke="#1e293b" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="20" y1="160" x2="36" y2="160" stroke="#1e293b" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="20" y1="280" x2="36" y2="280" stroke="#1e293b" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="20" y1="390" x2="36" y2="390" stroke="#1e293b" stroke-width="1.5" marker-end="url(#ah)"/>
+    </svg>
+  </div>
+
+  <!-- ── COL 3: Models ── -->
+  <div class="col-models">
+    <div class="section-label">Models</div>
+
+    <div class="models-grid">
+
+      <!-- Provision -->
+      <div class="model-card card-provision">
+        <div class="model-num">Model 1</div>
+        <div class="model-name">Provision</div>
+        <div class="model-body">
+          20 components → weighted sum with missing-input renormalisation<br><br>
+          <b style="color:#7dd3fc">Measured (14):</b> operational supply and proximity layers<br>
+          <b style="color:#7dd3fc">Partly measured (6):</b> density · environment · momentum · air quality · stewardship · hawker<br>
+          <b style="color:#7dd3fc">Judged (0):</b> none in a complete canonical run<br><br>
+          Public and private Provision weights remain distinct.
+        </div>
+        <div class="model-out">
+          → <span class="tag tag-blue">provision_score</span>
+          <span class="tag tag-blue">provision_band</span><br>
+          → <span class="tag tag-blue">archetype A–G/X</span>
+        </div>
+      </div>
+
+      <!-- Liveability -->
+      <div class="model-card card-liveability">
+        <div class="model-num">Model 2</div>
+        <div class="model-name">Liveability Matrix</div>
+        <div class="model-body">
+          Input: provision score + persona weights + time factors<br><br>
+          <b style="color:#86efac">Personas (4):</b> YoungFam · SinglePro · Retiree · Lifestyle<br>
+          <b style="color:#86efac">Horizons (3):</b> T0 now · T5 2031 · T15 2041<br><br>
+          C veto rules · certainty discounts<br>
+          T5: confirmed/gazetted only<br>
+          T15: planned items @ 0.40×<br>
+          Nonnegative persona weights · D disruption multiplier<br>
+          Gap = continuous liveability − continuous provision
+        </div>
+        <div class="model-out">
+          → <span class="tag tag-green">24 liveability cells</span><br>
+          → <span class="tag tag-green">12 gap columns</span>
+        </div>
+      </div>
+
+      <!-- Value -->
+      <div class="model-card card-value">
+        <div class="model-num">Model 3</div>
+        <div class="model-name">Value Residual</div>
+        <div class="model-body">
+          Regress ln(price_psm) ~ within-segment controls + month<br>
+          Value = base_score × exp(−residual) capped [0.75×, 1.25×]<br><br>
+          <b style="color:#fde68a">HDB segment:</b> flat_type · storey · lease<br>
+          <b style="color:#fde68a">Private segment:</b> property_type · tenure · age<br>
+          Hierarchical shrinkage k=30<br>
+          Decimals hidden when n &lt; 100<br><br>
+          HDB and private rows remain separate segments
+        </div>
+        <div class="model-out">
+          → <span class="tag tag-amber">HDB resale Value</span><br>
+          → <span class="tag tag-amber">Private value</span>
+        </div>
+      </div>
+
+      <!-- Life Paths -->
+      <div class="model-card card-lifepath">
+        <div class="model-num">Model 4</div>
+        <div class="model-name">Life Paths</div>
+        <div class="model-body">
+          5 cross-persona diagonals per estate<br><br>
+          <b style="color:#e9d5ff">forming_family:</b> SP/T0 → YF/T5<br>
+          <b style="color:#e9d5ff">downsizing:</b> YF/T0 → Ret/T5<br>
+          <b style="color:#e9d5ff">settling_single:</b> LS/T0 → SP/T5<br>
+          <b style="color:#e9d5ff">ageing_in_place:</b> Ret/T0 → Ret/T5<br>
+          <b style="color:#e9d5ff">upgrader:</b> SP/T0 → LS/T5<br><br>
+          {{life_path_rows}} rows (residential estates × 5 paths)
+        </div>
+        <div class="model-out">
+          → <span class="tag tag-purple">best/worst lifepath</span><br>
+          → <span class="tag tag-purple">start→end band delta</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- internal flow note -->
+    <div style="margin-top:12px; padding:10px 14px; border:1px solid #1e293b; border-radius:8px; font-size:11px; color:#475569; background:#0a0d14; display:flex; gap:24px; flex-wrap:wrap;">
+      <span>Provision → <b style="color:#4ade80">Liveability</b> (base score)</span>
+      <span>Provision → <b style="color:#fbbf24">Value</b> (base score, HDB)</span>
+      <span>Liveability → <b style="color:#c084fc">Life Paths</b> (cross-persona diagonals)</span>
+      <span>All outputs → <b style="color:#a855f7">strict master join</b> (status-aware)</span>
+    </div>
+  </div>
+
+  <!-- ── COL 4: Arrow 2 ── -->
+  <div class="col-arr2">
+    <svg width="40" height="560" style="overflow:visible">
+      <defs>
+        <marker id="ah2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#7c3aed"/>
+        </marker>
+      </defs>
+      <line x1="20" y1="60"  x2="20" y2="480" stroke="#2d1f4e" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <line x1="4"  y1="60"  x2="36" y2="60"  stroke="#2d1f4e" stroke-width="1.5" marker-end="url(#ah2)"/>
+      <line x1="4"  y1="200" x2="36" y2="200" stroke="#2d1f4e" stroke-width="1.5" marker-end="url(#ah2)"/>
+      <line x1="4"  y1="340" x2="36" y2="340" stroke="#2d1f4e" stroke-width="1.5" marker-end="url(#ah2)"/>
+      <line x1="4"  y1="470" x2="36" y2="470" stroke="#2d1f4e" stroke-width="1.5" marker-end="url(#ah2)"/>
+    </svg>
+  </div>
+
+  <!-- ── COL 5: Output ── -->
+  <div class="col-output">
+    <div class="section-label">Deliverable</div>
+    <div class="output-card">
+      <div class="out-label">master_output.csv</div>
+      <div class="out-name">{{estate_count}} rows · {{master_columns}} cols</div>
+      <div class="out-dim">{{residential_count}} residential estates + {{nr_count}} N/R</div>
+
+      <div class="col-group">
+        <div class="col-group-label">Identity</div>
+        <div class="col-entry"><span class="n">3</span><span class="nm">estate · archetype · model_version</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Provision and context</div>
+        <div class="col-entry"><span class="n">9</span><span class="nm">public/private score · band · D horizons · coverage</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Liveability (32)</div>
+        <div class="col-entry"><span class="n">8</span><span class="nm">YoungFam</span><span class="desc">T0/T5/T15 × score+band</span></div>
+        <div class="col-entry"><span class="n">8</span><span class="nm">SinglePro</span><span class="desc">T0/T5/T15 × score+band</span></div>
+        <div class="col-entry"><span class="n">8</span><span class="nm">Retiree + Lifestyle</span><span class="desc">same</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Gap (24)</div>
+        <div class="col-entry"><span class="n">24</span><span class="nm">score + label × persona × horizon</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">HDB Value (5)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">score · band · basis · n · status</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Private Value (5)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">score · band · basis · n · status</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Employment and lease (9)</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">employment score · band · nodes · status</span></div>
+        <div class="col-entry"><span class="n">4</span><span class="nm">lease score · band · source · status</span></div>
+      </div>
+
+      <div class="col-group">
+        <div class="col-group-label">Availability semantics</div>
+        <div class="col-entry"><span class="n">5</span><span class="nm">typed status columns</span><span class="desc">available · no_data · not_covered · N/R</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Key invariants strip ── -->
+<div class="notes-strip">
+
+  <div class="note-box nb-inv">
+    <div class="note-label">Invariant — No cross-archetype ranking</div>
+    <div class="note-body">
+      Raw provision scores are <b>not ranked</b> across different archetype tags (A–G).
+      Only compare: same archetype + same horizon + same persona + score diff &gt; ±0.3.
+    </div>
+  </div>
+
+  <div class="note-box nb-gap">
+    <div class="note-label">Primary signal — Provision–Liveability Gap</div>
+    <div class="note-body">
+      <b>Gap = liveability_band_numeric − provision_band_numeric</b><br>
+      Positive: lovable beyond checklist (e.g. TENGAH T15 gap_ls = +3.0)<br>
+      Negative: over-equipped for this persona
+    </div>
+  </div>
+
+  <div class="note-box nb-val">
+    <div class="note-label">Invariant — HDB ≠ Private</div>
+    <div class="note-body">
+      HDB and private are <b>separate universes</b> — modelled independently, never blended or ranked against each other.
+      Divergence (e.g. QST HDB=D vs private=B) is a signal, not an error.
+    </div>
+  </div>
+
+  <div class="note-box nb-arch">
+    <div class="note-label">Output — Profile not ranking</div>
+    <div class="note-body">
+      Default output is a <b>profile per estate</b>. The framework's central thesis: in a uniformly-provisioned city,
+      price-for-equivalent-provision is the discriminating axis.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

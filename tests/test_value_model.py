@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+import pytest
 import value_model
+from sg_estate.contracts import ContractError
 
 
 def test_build_formula_excludes_provision_score(tiny_hdb):
@@ -82,3 +84,35 @@ def test_hdb_segment_still_uses_public_score():
     out = value_model.value_scores(resid, scores, {"BISHAN"})
     row = out[out["estate"] == "BISHAN"].iloc[0]
     assert abs(row["value_score"] - 3.61) < 1e-9
+
+
+def test_shared_alias_target_does_not_duplicate_transactions():
+    transactions = pd.DataFrame(
+        {
+            "town": ["KALLANG/WHAMPOA"] * 4,
+            "resale_price": [300_000, 330_000, 360_000, 390_000],
+            "floor_area_sqm": [60, 65, 70, 75],
+            "flat_type": ["3 ROOM"] * 4,
+            "storey_band": ["04 TO 06"] * 4,
+            "remaining_lease_years": [60, 61, 62, 63],
+            "month": ["2026-01", "2026-02", "2026-03", "2026-04"],
+        }
+    )
+    scores = pd.DataFrame(
+        {
+            "estate": ["BOON KENG", "KALLANG"],
+            "score": [3.4, 3.6],
+        }
+    )
+
+    residuals = value_model.fit_segment(transactions, "hdb_resale", scores)
+
+    assert residuals.loc[0, "estate"] == "KALLANG/WHAMPOA"
+    assert residuals.loc[0, "n"] == len(transactions)
+
+
+def test_value_scores_rejects_duplicate_residual_keys():
+    duplicate = pd.concat([_resid_df().iloc[[0]], _resid_df().iloc[[0]]])
+
+    with pytest.raises(ContractError, match="duplicate keys"):
+        value_model.value_scores(duplicate, _scores(), set(_scores()["estate"]))

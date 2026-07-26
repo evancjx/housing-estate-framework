@@ -1,35 +1,35 @@
-estate,emp_score,emp_band,t_cbd,t_jld,t_one_north,t_changi,t_woodlands_rc,best_node,worst_node,s_cbd,s_jld,s_one_north,s_changi,s_woodlands_rc
-QUEENSTOWN,4.4,B+,12,22,15,42,50,cbd,woodlands_rc,5.0,4.5,5.0,3.0,2.0
-DOVER,4.4,B+,15,18,12,45,50,one_north,woodlands_rc,5.0,4.5,5.0,3.0,2.0
-CLEMENTI,4.28,B+,22,12,12,42,48,jld,woodlands_rc,4.5,5.0,5.0,3.0,2.0
-BUKIT MERAH,4.22,B+,12,30,20,38,48,cbd,woodlands_rc,5.0,4.0,4.5,3.0,2.0
-HOLLAND VILLAGE,4.17,B+,22,22,12,45,48,one_north,woodlands_rc,4.5,4.5,5.0,3.0,2.0
-GEYLANG,4.12,B+,15,38,25,30,47,cbd,woodlands_rc,5.0,3.0,4.5,4.0,2.0
-BUKIT BATOK,4.08,B+,33,15,22,52,30,jld,changi,4.0,5.0,4.5,2.0,4.0
-KALLANG,3.92,B,20,38,28,28,42,cbd,woodlands_rc,4.5,3.0,4.0,4.0,3.0
-BOON KENG,3.92,B,18,43,35,35,42,cbd,jld,4.5,3.0,4.0,4.0,3.0
-JURONG WEST,3.88,B,35,15,22,55,55,jld,changi,4.0,5.0,4.5,2.0,2.0
-BUKIT TIMAH,3.88,B,28,25,20,48,45,one_north,changi,4.0,4.5,4.5,2.0,3.0
-JURONG EAST,3.88,B,30,5,18,52,52,jld,changi,4.0,5.0,4.5,2.0,2.0
-MARINE PARADE,3.83,B,18,38,28,32,50,cbd,woodlands_rc,4.5,3.0,4.0,4.0,2.0
-BEDOK,3.83,B,22,42,35,27,50,cbd,woodlands_rc,4.5,3.0,4.0,4.0,2.0
-BISHAN,3.73,B,25,48,30,45,33,cbd,jld,4.5,2.0,4.0,3.0,4.0
-SERANGOON,3.73,B,25,50,35,35,40,cbd,jld,4.5,2.0,4.0,4.0,3.0
-TOA PAYOH,3.62,B,22,50,32,47,35,cbd,jld,4.5,2.0,4.0,2.0,4.0
-WOODLEIGH,3.58,B,22,47,38,35,42,cbd,jld,4.5,2.0,3.0,4.0,3.0
-BUKIT PANJANG,3.35,C,37,22,28,55,37,jld,changi,3.0,4.5,4.0,2.0,3.0
-CHOA CHU KANG,3.35,C,40,22,30,57,28,jld,changi,3.0,4.5,4.0,1.0,4.0
-TAMPINES,3.35,C,32,50,42,15,55,changi,woodlands_rc,4.0,2.0,3.0,5.0,2.0
-HOUGANG,3.35,C,30,55,40,32,43,cbd,jld,4.0,2.0,3.0,4.0,3.0
-LENTOR,3.3,C,28,52,38,50,18,woodlands_rc,jld,4.0,2.0,3.0,2.0,4.5
-TAMPINES WEST,3.3,C,30,48,40,20,53,changi,woodlands_rc,4.0,2.0,3.0,4.5,2.0
-ANG MO KIO,3.25,C,30,52,42,50,28,woodlands_rc,jld,4.0,2.0,3.0,2.0,4.0
-TAMPINES EAST,3.2,C,35,53,45,18,57,changi,woodlands_rc,4.0,2.0,3.0,4.5,1.0
-SENGKANG,3.05,C,35,58,45,30,47,changi,jld,4.0,1.0,3.0,4.0,2.0
-PASIR RIS,2.65,D,40,55,47,12,62,changi,woodlands_rc,3.0,2.0,2.0,5.0,1.0
-YISHUN,2.5,D,37,57,48,54,20,woodlands_rc,jld,3.0,1.0,2.0,2.0,4.5
-CANBERRA,2.45,F,40,60,52,58,12,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
-SEMBAWANG,2.45,F,42,62,54,60,14,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
-PUNGGOL,2.45,F,40,62,50,28,52,changi,jld,3.0,1.0,2.0,4.0,2.0
-WOODLANDS,2.45,F,45,62,55,62,8,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
-TENGAH,2.0,F,55,40,48,65,58,jld,changi,2.0,3.0,2.0,1.0,1.0
+estate,model_version,emp_score,emp_band,t_cbd,t_jld,t_one_north,t_changi,t_woodlands_rc,best_node,worst_node,s_cbd,s_jld,s_one_north,s_changi,s_woodlands_rc
+QUEENSTOWN,2.1.0,4.4,B+,12,22,15,42,50,cbd,woodlands_rc,5.0,4.5,5.0,3.0,2.0
+DOVER,2.1.0,4.4,B+,15,18,12,45,50,one_north,woodlands_rc,5.0,4.5,5.0,3.0,2.0
+CLEMENTI,2.1.0,4.28,B+,22,12,12,42,48,jld,woodlands_rc,4.5,5.0,5.0,3.0,2.0
+BUKIT MERAH,2.1.0,4.22,B+,12,30,20,38,48,cbd,woodlands_rc,5.0,4.0,4.5,3.0,2.0
+HOLLAND VILLAGE,2.1.0,4.17,B+,22,22,12,45,48,one_north,woodlands_rc,4.5,4.5,5.0,3.0,2.0
+GEYLANG,2.1.0,4.12,B+,15,38,25,30,47,cbd,woodlands_rc,5.0,3.0,4.5,4.0,2.0
+BUKIT BATOK,2.1.0,4.08,B+,33,15,22,52,30,jld,changi,4.0,5.0,4.5,2.0,4.0
+KALLANG,2.1.0,3.92,B,20,38,28,28,42,cbd,woodlands_rc,4.5,3.0,4.0,4.0,3.0
+BOON KENG,2.1.0,3.92,B,18,43,35,35,42,cbd,jld,4.5,3.0,4.0,4.0,3.0
+JURONG WEST,2.1.0,3.88,B,35,15,22,55,55,jld,changi,4.0,5.0,4.5,2.0,2.0
+BUKIT TIMAH,2.1.0,3.88,B,28,25,20,48,45,one_north,changi,4.0,4.5,4.5,2.0,3.0
+JURONG EAST,2.1.0,3.88,B,30,5,18,52,52,jld,changi,4.0,5.0,4.5,2.0,2.0
+MARINE PARADE,2.1.0,3.83,B,18,38,28,32,50,cbd,woodlands_rc,4.5,3.0,4.0,4.0,2.0
+BEDOK,2.1.0,3.83,B,22,42,35,27,50,cbd,woodlands_rc,4.5,3.0,4.0,4.0,2.0
+BISHAN,2.1.0,3.73,B,25,48,30,45,33,cbd,jld,4.5,2.0,4.0,3.0,4.0
+SERANGOON,2.1.0,3.73,B,25,50,35,35,40,cbd,jld,4.5,2.0,4.0,4.0,3.0
+TOA PAYOH,2.1.0,3.62,B,22,50,32,47,35,cbd,jld,4.5,2.0,4.0,2.0,4.0
+WOODLEIGH,2.1.0,3.58,B,22,47,38,35,42,cbd,jld,4.5,2.0,3.0,4.0,3.0
+BUKIT PANJANG,2.1.0,3.35,C,37,22,28,55,37,jld,changi,3.0,4.5,4.0,2.0,3.0
+CHOA CHU KANG,2.1.0,3.35,C,40,22,30,57,28,jld,changi,3.0,4.5,4.0,1.0,4.0
+TAMPINES,2.1.0,3.35,C,32,50,42,15,55,changi,woodlands_rc,4.0,2.0,3.0,5.0,2.0
+HOUGANG,2.1.0,3.35,C,30,55,40,32,43,cbd,jld,4.0,2.0,3.0,4.0,3.0
+LENTOR,2.1.0,3.3,C,28,52,38,50,18,woodlands_rc,jld,4.0,2.0,3.0,2.0,4.5
+TAMPINES WEST,2.1.0,3.3,C,30,48,40,20,53,changi,woodlands_rc,4.0,2.0,3.0,4.5,2.0
+ANG MO KIO,2.1.0,3.25,C,30,52,42,50,28,woodlands_rc,jld,4.0,2.0,3.0,2.0,4.0
+TAMPINES EAST,2.1.0,3.2,C,35,53,45,18,57,changi,woodlands_rc,4.0,2.0,3.0,4.5,1.0
+SENGKANG,2.1.0,3.05,C,35,58,45,30,47,changi,jld,4.0,1.0,3.0,4.0,2.0
+PASIR RIS,2.1.0,2.65,D,40,55,47,12,62,changi,woodlands_rc,3.0,2.0,2.0,5.0,1.0
+YISHUN,2.1.0,2.5,D,37,57,48,54,20,woodlands_rc,jld,3.0,1.0,2.0,2.0,4.5
+CANBERRA,2.1.0,2.45,F,40,60,52,58,12,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
+SEMBAWANG,2.1.0,2.45,F,42,62,54,60,14,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
+PUNGGOL,2.1.0,2.45,F,40,62,50,28,52,changi,jld,3.0,1.0,2.0,4.0,2.0
+WOODLANDS,2.1.0,2.45,F,45,62,55,62,8,woodlands_rc,jld,3.0,1.0,2.0,1.0,5.0
+TENGAH,2.1.0,2.0,F,55,40,48,65,58,jld,changi,2.0,3.0,2.0,1.0,1.0
