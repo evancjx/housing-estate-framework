@@ -1,6 +1,6 @@
 # Property-analysis publication contract
 
-Dated condominium research in this directory is published automatically by
+Dated private-property research in this directory is published automatically by
 the GitHub Pages build. Add one Markdown file; do not hand-edit the report
 catalog, landing-page cards or project-finder routes.
 

@@ -1,4 +1,4 @@
-"""Safe, deterministic publication of dated condominium property analyses."""
+"""Safe, deterministic publication of dated private-property analyses."""
 
 from __future__ import annotations
 
@@ -126,10 +126,11 @@ class PropertyAnalysis:
             "kind": "property-analysis",
             "summary": self.summary,
             "tags": [
-                "condominium",
+                "private property",
                 "property analysis",
                 "resale",
                 "valuation",
+                "investment",
                 self.project_name,
             ],
             "project_name": self.project_name,

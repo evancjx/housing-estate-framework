@@ -294,7 +294,8 @@ def _property_cards(analyses: list[PropertyAnalysis]) -> str:
                 analysis.title,
                 analysis.property_description,
                 analysis.summary,
-                "condominium resale valuation quantum investment property analysis",
+                "private property condominium landed resale valuation quantum "
+                "investment property analysis",
             )
         )
         cards.append(

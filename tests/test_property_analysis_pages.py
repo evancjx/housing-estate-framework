@@ -52,7 +52,15 @@ def test_real_property_analyses_are_discovered_newest_first():
     analyses = discover_property_analyses(ANALYSIS_DIR)
 
     by_project = {analysis.project_name: analysis for analysis in analyses}
-    assert {"Arc at Tampines", "Park Place Residences at PLQ"} <= by_project.keys()
+    assert {
+        "144A Lorong Sarina",
+        "Arc at Tampines",
+        "Park Place Residences at PLQ",
+    } <= by_project.keys()
+    assert (
+        by_project["144A Lorong Sarina"].captured_iso
+        == "2026-07-27T21:45:49+08:00"
+    )
     assert by_project["Arc at Tampines"].captured_iso == "2026-07-26T12:46:23+08:00"
     assert (
         by_project["Park Place Residences at PLQ"].captured_iso
@@ -69,6 +77,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     (
         "2026-07-26-arc-at-tampines.md",
         "2026-07-26-park-place-residences-at-plq.md",
+        "2026-07-27-144a-lorong-sarina.md",
     ),
 )
 def test_real_analysis_renders_semantic_responsive_html(source_name):
@@ -87,6 +96,16 @@ def test_real_analysis_renders_semantic_responsive_html(source_name):
     assert 'rel="canonical"' in page
     assert "<script>alert" not in page
     assert render_property_analysis_page(analysis) == page
+
+
+def test_landed_analysis_has_generic_private_property_catalog_tags():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-07-27-144a-lorong-sarina.md"
+    )
+    tags = analysis.catalog_entry(is_latest=True)["tags"]
+
+    assert "private property" in tags
+    assert "condominium" not in tags
 
 
 def test_parse_rejects_filename_and_capture_date_mismatch(tmp_path):
