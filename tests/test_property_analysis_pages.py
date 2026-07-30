@@ -16,6 +16,28 @@ from sg_estate.reporting.property_analysis import (
 
 ROOT = Path(__file__).parent.parent
 ANALYSIS_DIR = ROOT / "property_analysis"
+TANAH_MERAH_PORTFOLIO = {
+    "2026-07-30-bedok-court.md": "Bedok Court",
+    "2026-07-30-bedok-rise-gls-future-condominium.md": (
+        "Bedok Rise GLS future condominium"
+    ),
+    "2026-07-30-casa-flora.md": "Casa Flora",
+    "2026-07-30-casa-merah.md": "Casa Merah",
+    "2026-07-30-east-meadows.md": "East Meadows",
+    "2026-07-30-east-village.md": "East Village",
+    "2026-07-30-eco.md": "eCO",
+    "2026-07-30-grandeur-park-residences.md": "Grandeur Park Residences",
+    "2026-07-30-limau-park.md": "Limau Park",
+    "2026-07-30-optima-at-tanah-merah.md": "Optima @ Tanah Merah",
+    "2026-07-30-palmwoods.md": "Palmwoods",
+    "2026-07-30-sceneca-residence.md": "Sceneca Residence",
+    "2026-07-30-stratford-court.md": "Stratford Court",
+    "2026-07-30-tanah-merah-mansion.md": "Tanah Merah Mansion",
+    "2026-07-30-tanamera-crest.md": "Tanamera Crest",
+    "2026-07-30-the-glades.md": "The Glades",
+    "2026-07-30-the-tanamera.md": "The Tanamera",
+    "2026-07-30-urban-vista.md": "Urban Vista",
+}
 
 
 def _write_analysis(
@@ -72,12 +94,22 @@ def test_real_property_analyses_are_discovered_newest_first():
     assert all(analysis.summary for analysis in analyses)
 
 
+def test_tanah_merah_property_analysis_portfolio_is_complete():
+    sources = {
+        path.name: parse_property_analysis(path).project_name
+        for path in ANALYSIS_DIR.glob("2026-07-30-*.md")
+    }
+
+    assert TANAH_MERAH_PORTFOLIO.items() <= sources.items()
+
+
 @pytest.mark.parametrize(
     "source_name",
     (
         "2026-07-26-arc-at-tampines.md",
         "2026-07-26-park-place-residences-at-plq.md",
         "2026-07-27-144a-lorong-sarina.md",
+        *TANAH_MERAH_PORTFOLIO,
     ),
 )
 def test_real_analysis_renders_semantic_responsive_html(source_name):
@@ -105,7 +137,33 @@ def test_landed_analysis_has_generic_private_property_catalog_tags():
     tags = analysis.catalog_entry(is_latest=True)["tags"]
 
     assert "private property" in tags
+    assert "resale" in tags
     assert "condominium" not in tags
+
+
+def test_future_gls_analysis_is_not_catalogued_as_resale(tmp_path):
+    source = _write_analysis(
+        tmp_path,
+        slug="sample-gls-future-condominium",
+        project="Sample GLS future condominium",
+        metadata="Market stage: **future project**",
+    )
+    entry = parse_property_analysis(source).catalog_entry(is_latest=True)
+    tags = entry["tags"]
+
+    assert entry["market_stage"] == "future project"
+    assert "future project" in tags
+    assert "resale" not in tags
+
+
+def test_parse_rejects_unknown_market_stage(tmp_path):
+    source = _write_analysis(
+        tmp_path,
+        metadata="Market stage: **planned someday**",
+    )
+
+    with pytest.raises(ValueError, match="Market stage must be one of"):
+        parse_property_analysis(source)
 
 
 def test_parse_rejects_filename_and_capture_date_mismatch(tmp_path):

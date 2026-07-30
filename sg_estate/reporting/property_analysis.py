@@ -37,6 +37,7 @@ REQUIRED_METADATA = {
     "Analysis type",
     "Status",
 }
+ALLOWED_MARKET_STAGES = {"future project", "resale"}
 IGNORED_MARKDOWN_FILES = {"README.md"}
 ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
 FORBIDDEN_TAGS = {"embed", "iframe", "object", "script", "style"}
@@ -89,6 +90,7 @@ class PropertyAnalysis:
     captured_display: str
     analysis_type: str
     status: str
+    market_stage: str
     summary: str
     body_markdown: str
 
@@ -128,7 +130,7 @@ class PropertyAnalysis:
             "tags": [
                 "private property",
                 "property analysis",
-                "resale",
+                self.market_stage,
                 "valuation",
                 "investment",
                 self.project_name,
@@ -137,6 +139,7 @@ class PropertyAnalysis:
             "project_slug": self.project_slug,
             "captured_at": self.captured_iso,
             "status": self.status,
+            "market_stage": self.market_stage,
             "source_path": self.source_relative_path,
             "is_latest": is_latest,
         }
@@ -266,7 +269,7 @@ def parse_property_analysis(source_path: Path) -> PropertyAnalysis:
         raise ValueError(
             f"{source_path.name} is missing metadata: {', '.join(sorted(missing))}"
         )
-    unknown = metadata.keys() - (REQUIRED_METADATA | {"Summary"})
+    unknown = metadata.keys() - (REQUIRED_METADATA | {"Market stage", "Summary"})
     if unknown:
         raise ValueError(
             f"{source_path.name} has unknown metadata: {', '.join(sorted(unknown))}"
@@ -294,6 +297,12 @@ def parse_property_analysis(source_path: Path) -> PropertyAnalysis:
     summary = _plain_markdown(summary)
     if not summary:
         raise ValueError(f"{source_path.name} Summary cannot be empty")
+    market_stage = metadata.get("Market stage", "resale").casefold()
+    if market_stage not in ALLOWED_MARKET_STAGES:
+        raise ValueError(
+            f"{source_path.name} Market stage must be one of: "
+            f"{', '.join(sorted(ALLOWED_MARKET_STAGES))}"
+        )
 
     return PropertyAnalysis(
         source_path=source_path.resolve(),
@@ -305,6 +314,7 @@ def parse_property_analysis(source_path: Path) -> PropertyAnalysis:
         captured_display=metadata["Research captured"],
         analysis_type=metadata["Analysis type"],
         status=metadata["Status"],
+        market_stage=market_stage,
         summary=summary,
         body_markdown=body_markdown,
     )

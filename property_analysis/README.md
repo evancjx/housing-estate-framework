@@ -29,11 +29,21 @@ The date in `Research captured` must match the filename. A `Summary` metadata
 line may be added after `Status`; otherwise the first Decision paragraph is
 used for the library card and page description.
 
+For a GLS site or another development that is not yet resale stock, add:
+
+```markdown
+Market stage: **future project**
+```
+
+Resale is the default market stage when this optional line is absent.
+
 Publication rules:
 
 - Keep advertised inventory, achieved transactions and scenario assumptions
   visibly separate.
 - Preserve the research timestamp and link claims to dated public sources.
+- For a future project, keep the official name, launch price, unit mix and TOP
+  as TBA until announced; do not fabricate live inventory, caveats or rents.
 - Use `##` and `###` headings below the single title.
 - Use HTTP(S), email or in-page links only. Raw HTML, embedded media, relative
   links and executable URL schemes are rejected during the build.

@@ -288,14 +288,15 @@ def _prepare_property_publication(
 def _property_cards(analyses: list[PropertyAnalysis]) -> str:
     cards: list[str] = []
     for analysis in latest_property_analyses(analyses):
+        catalog_tags = analysis.catalog_entry(is_latest=True)["tags"]
         search_text = " ".join(
             (
                 analysis.project_name,
                 analysis.title,
                 analysis.property_description,
                 analysis.summary,
-                "private property condominium landed resale valuation quantum "
-                "investment property analysis",
+                *catalog_tags,
+                "quantum",
             )
         )
         cards.append(

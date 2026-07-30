@@ -126,6 +126,17 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         ) in landing
         assert landing.index('"ONE AMBER"') < landing.index('"ARC AT TAMPINES"')
         assert "data-kind=\"analysis project\"" in landing
+        future_card = next(
+            line
+            for line in landing.splitlines()
+            if (
+                'href="property-analysis-2026-07-30-bedok-rise-gls-'
+                'future-condominium.html"'
+            )
+            in line
+        )
+        assert "future project" in future_card
+        assert " resale " not in future_card
         report = (output / "comparison_table.html").read_text(encoding="utf-8")
         assert report.count("assets/research-shell.css") == 1
         assert report.count("assets/research-shell.js") == 1
