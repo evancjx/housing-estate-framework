@@ -37,7 +37,7 @@ REQUIRED_METADATA = {
     "Analysis type",
     "Status",
 }
-ALLOWED_MARKET_STAGES = {"future project", "resale"}
+ALLOWED_MARKET_STAGES = {"future project", "new launch", "resale"}
 IGNORED_MARKDOWN_FILES = {"README.md"}
 ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
 FORBIDDEN_TAGS = {"embed", "iframe", "object", "script", "style"}
@@ -544,6 +544,7 @@ def render_property_analysis_page(analysis: PropertyAnalysis) -> str:
         captured_display=escape(analysis.captured_display),
         captured_iso=escape(analysis.captured_iso, quote=True),
         analysis_type=escape(analysis.analysis_type),
+        market_stage=escape(analysis.market_stage),
         status=escape(analysis.status),
         summary=escape(analysis.summary),
         toc_html=toc_html,

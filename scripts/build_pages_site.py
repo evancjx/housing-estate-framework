@@ -307,6 +307,7 @@ def _property_cards(analyses: list[PropertyAnalysis]) -> str:
                     f'data-search="{escape(search_text, quote=True)}" '
                     f'href="{escape(analysis.output_path, quote=True)}">',
                     f'        <span class="tag">Property analysis · '
+                    f"{escape(analysis.market_stage.title())} · "
                     f"{escape(analysis.date_label)}</span>"
                     f"<h3>{escape(analysis.project_name)}</h3>",
                     f"        <p>{escape(analysis.summary)}</p>",

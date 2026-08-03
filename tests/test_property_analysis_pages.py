@@ -78,6 +78,7 @@ def test_real_property_analyses_are_discovered_newest_first():
         "144A Lorong Sarina",
         "Arc at Tampines",
         "Park Place Residences at PLQ",
+        "The LakeGarden Residences",
     } <= by_project.keys()
     assert (
         by_project["144A Lorong Sarina"].captured_iso
@@ -88,6 +89,11 @@ def test_real_property_analyses_are_discovered_newest_first():
         by_project["Park Place Residences at PLQ"].captured_iso
         == "2026-07-26T12:25:08+08:00"
     )
+    assert (
+        by_project["The LakeGarden Residences"].captured_iso
+        == "2026-08-03T20:36:46+08:00"
+    )
+    assert by_project["The LakeGarden Residences"].market_stage == "new launch"
     assert [analysis.captured_at for analysis in analyses] == sorted(
         (analysis.captured_at for analysis in analyses), reverse=True
     )
@@ -109,6 +115,7 @@ def test_tanah_merah_property_analysis_portfolio_is_complete():
         "2026-07-26-arc-at-tampines.md",
         "2026-07-26-park-place-residences-at-plq.md",
         "2026-07-27-144a-lorong-sarina.md",
+        "2026-08-03-the-lakegarden-residences.md",
         *TANAH_MERAH_PORTFOLIO,
     ),
 )
@@ -154,6 +161,38 @@ def test_future_gls_analysis_is_not_catalogued_as_resale(tmp_path):
     assert entry["market_stage"] == "future project"
     assert "future project" in tags
     assert "resale" not in tags
+
+
+def test_new_launch_analysis_is_not_catalogued_as_resale_or_future(tmp_path):
+    source = _write_analysis(
+        tmp_path,
+        slug="sample-launched-condominium",
+        project="Sample Launched Condominium",
+        metadata="Market stage: **new launch**",
+    )
+    entry = parse_property_analysis(source).catalog_entry(is_latest=True)
+    tags = entry["tags"]
+
+    assert entry["market_stage"] == "new launch"
+    assert "new launch" in tags
+    assert "resale" not in tags
+    assert "future project" not in tags
+
+
+def test_real_lakegarden_card_and_page_show_new_launch_stage():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-08-03-the-lakegarden-residences.md"
+    )
+    entry = analysis.catalog_entry(is_latest=True)
+    card = build_pages_site._property_cards([analysis])
+    page = render_property_analysis_page(analysis)
+
+    assert entry["market_stage"] == "new launch"
+    assert " new launch " in card
+    assert " resale " not in card
+    assert "Property analysis · New Launch · 03 Aug 2026" in card
+    assert "<dt>Market stage</dt>" in page
+    assert "<dd>new launch</dd>" in page
 
 
 def test_parse_rejects_unknown_market_stage(tmp_path):
