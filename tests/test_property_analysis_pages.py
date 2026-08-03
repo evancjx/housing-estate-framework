@@ -91,7 +91,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     )
     assert (
         by_project["The LakeGarden Residences"].captured_iso
-        == "2026-08-03T20:36:46+08:00"
+        == "2026-08-03T22:21:00+08:00"
     )
     assert by_project["The LakeGarden Residences"].market_stage == "new launch"
     assert [analysis.captured_at for analysis in analyses] == sorted(
@@ -193,6 +193,9 @@ def test_real_lakegarden_card_and_page_show_new_launch_stage():
     assert "Property analysis · New Launch · 03 Aug 2026" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
+    assert 'id="september-2026-one-bedroom-owner-exit-analysis"' in page
+    assert "S$44,551" in page
+    assert "S$53,326" in page
 
 
 def test_parse_rejects_unknown_market_stage(tmp_path):

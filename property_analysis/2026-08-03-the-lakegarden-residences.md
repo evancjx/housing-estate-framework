@@ -1,13 +1,17 @@
 # The LakeGarden Residences — new-launch inventory, valuation and potential-quantum analysis
 
-Research captured: **2026-08-03 20:36:46 SGT (UTC+08:00)**  
+Research captured: **2026-08-03 22:21:00 SGT (UTC+08:00)**  
 Property: **The LakeGarden Residences, 80/82 Yuan Ching Road, Singapore 619613/619614**  
-Analysis type: **property resale inventory, valuation and investment analysis**  
+Analysis type: **property resale inventory, owner-exit valuation and investment analysis**  
 Status: **point-in-time market snapshot**  
 Market stage: **new launch**  
-Summary: **Selective verified units may suit buyers who value Jurong Lake Gardens, but conflicting final inventory, no achieved secondary exits and nearby supply do not support a project-wide huge-potential-quantum thesis.**
+Summary: **An August 2023 ordinary one-bedroom owner could make about S$45,000–S$53,000 in the ask-informed September 2026 cases before financing, but transaction-indexed downside ranges from a S$5,000 loss to breakeven and no achieved LakeGarden owner exit yet validates the estimate.**
 
 ## Decision
+
+For the requested owner-exit case, **there is no single “one-bedder bought in August 2023.”** The official brochure separates four ordinary one-bedroom garden homes from the larger 1BR + Study stack. Two ordinary one-bedrooms sold in August 2023: a 484 sq ft A1-G at S$1.0406 million and a 538 sq ft A2-G at S$1.1306 million. An evidence-scenario September 2026 range is about **S$1.10m–S$1.19m** for the 484 sq ft unit and **S$1.19m–S$1.29m** for the 538 sq ft unit. Under the stated no-ABSD capital-only convention, the ask-informed cases produce about **S$44,600 and S$53,300 respectively before financing and holding costs**. Across the transaction-indexed downside and broad-index upper cases, the result is about **-S$5,200 to +S$93,300**—not a guaranteed September buyer or a point appraisal.
+
+If “one-bedder” means the project's 527 sq ft **1BR + Study**, eight August 2023 purchases ranged from S$1.0541m to S$1.1538m. A prudent S$1.18m–S$1.25m September 2026 sale range produces about **S$26,600–S$94,800** for the median launch buyer, but about **-S$39,100 to +S$29,200** for the highest-priced launch buyer. Exact layout, unit, purchase price and ABSD history must therefore be known before quoting an owner-specific earning.
 
 **The LakeGarden Residences does not offer blanket huge-potential-quantum at the public asks captured.** The best low-quantum screen is a sale-type-unverified 678 sq ft ground-floor card at S$1.520 million, but a S$500,000 capital-only profit would require about S$2.124 million, or S$3,132 psf. The S$4.280 million penthouses can reach a nominal S$500,000 target at a lower growth rate because the capital base is much larger, yet the exit must exceed S$5.1 million and depends on a thin-format buyer pool. This is a **selective lifestyle/own-stay purchase**, not a high-conviction quantum trade.
 
@@ -39,6 +43,138 @@ The immediate blocker is inventory truth. Two self-updated sales microsites both
 | Matched 678 sq ft latest-12-month cohort | 8 rows; median S$1.591m / S$2,346.5 psf |
 | Apparent low ask | S$1.520m / S$2,242 psf, 678 sq ft ground floor |
 | Apparent penthouse list asks | S$4.280m for 2,002 or 2,153 sq ft |
+
+## September 2026 one-bedroom owner-exit analysis
+
+### First identify the unit: ordinary 1BR is not 1BR + Study
+
+The [official developer brochure](https://thelakegardenresidences.sg/assets/downloads/ebrochure.pdf) shows that the ordinary one-bedroom supply consists of only **four ground-floor private-enclosed-space (PES) homes**. Their stated strata areas include PES and air-con ledges. An ordinary high-floor or balcony one-bedroom is therefore not a same-layout comparison.
+
+| Official layout | Inferred August 2023 unit | EdgeProp Date of Sale | Area | Original price | Original PSF | Layout distinction |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| A1-G ordinary 1BR | 82 Yuan Ching Road #01-11 | 5 Aug 2023 | 484 sq ft | **S$1,040,600** | S$2,148 | Compact living/kitchen arrangement and PES |
+| A2-G ordinary 1BR | 80 Yuan Ching Road #01-07 | 5 Aug 2023 | 538 sq ft | **S$1,130,600** | Separate dining zone, larger PES and different ledge geometry |
+
+The public transaction ledger masks the final unit digits. The inferred unit numbers above follow the brochure's block-and-stack schedule: block 82 has only one 484 sq ft A1-G, while block 80 has only one 538 sq ft A2-G. Contract documents remain authoritative.
+
+The other exact ordinary one-bedroom homes provide the best same-layout checks, but both are developer New Sales rather than owner exits:
+
+| Same official layout | EdgeProp Date of Sale | Area | Achieved New Sale | PSF | Difference from August purchase |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Other A1-G | 9 Nov 2023 | 484 sq ft | S$1,061,500 | S$2,191 | +2.0% quantum |
+| Other A2-G | 19 Mar 2024 | 538 sq ft | S$1,153,300 | S$2,143 | +2.0% quantum |
+
+Eight 527 sq ft homes also sold in August 2023, but the brochure labels them **AS1 1BR + Study**, not ordinary one-bedroom. Their original prices ranged from S$1.0541m to S$1.1538m, with a **S$1.0907m median**. They are analysed separately below because mixing their study, balcony and higher-floor layouts with the ground-PES homes would overstate comparability.
+
+### Amenity and physical matching
+
+There is no achieved peer that matches size, ordinary one-bedroom layout, 2023 lease, ground PES, garden frontage, school access and transport at the same time. The analysis therefore uses a hierarchy rather than pooling unlike transactions.
+
+| Project / evidence tier | Small-unit evidence | Nearest operational MRT, straight line | Indicative nearest primary school / count within 1 km | Match and necessary adjustment |
+| --- | --- | ---: | --- | --- |
+| **The LakeGarden Residences** | 484/538 sq ft ordinary 1BR; 527 sq ft 1BR + Study | Lakeside about **1,001m** | Lakeside Primary about **855m** / 1 | Subject; brochure says about 15-minute walk to Lakeside MRT; bus stops 21649/21641 are about 50m/71m from the project geocode |
+| **SORA** | 538 sq ft 1BR + Study | Chinese Garden about **1,197m** | Lakeside Primary about **925m** / 1 | Best same-road, same-garden, same-lease-window amenity match; wrong layout and New Sale universe |
+| **The Lakefront Residences** | 484–506 sq ft ordinary 1BR | Lakeside about **257m** | Rulang Primary about **420m** / 4 | Strong size match but older 2010 lease, completed/rentable and materially better rail access; no ground-PES equivalence |
+| **Lake Grande** | 474–517 sq ft 1BR | Lakeside about **399m** | Shuqun Primary about **286m** / 2 | Same district/size, older 2015 lease and better rail; affordability floor rather than equal PSF comp |
+| **J Gateway** | 474–527 sq ft 1BR | Jurong East about **281m** | Fuhua Primary about **710m** / 2 | Same quantum control but integrated rail/mall setting, no garden frontage and older 2012 lease |
+| **J'DEN** | 527 sq ft ordinary 1BR | Jurong East about **246m** | Fuhua Primary about **573m** / 1 | Same 2023 lease vintage and near-size; integrated rail/retail premium makes it a ceiling |
+
+Distances are straight-line calculations from reviewed OneMap project points to committed LTA station and MOE school coordinates. They are useful feature controls, **not walking routes or official MOE home-school distance (HSD)**. A live [OneMap SchoolQuery](https://www.onemap.gov.sg/school) for both 619613 and 619614 returned Lakeside Primary in the official **within-1km category** at 22:19–22:20 SGT on 3 August 2026. MOE's [P1 address guidance](https://www.moe.gov.sg/primary/p1-registration/home-address) says HSD uses the shortest distance from the home building outline to the school boundary and should be rechecked in OneMap for the applicable registration exercise. The category does not guarantee a school place. The [Lakeside Primary profile](https://www.moe.gov.sg/schoolfinder/schooldetail?schoolname=Lakeside+Primary+School) confirms the current school identity and address.
+
+The subject's [developer location page](https://thelakegardenresidences.sg/thelocation.html) states a 15-minute walk to Lakeside MRT. Its close bus stops partly offset the rail walk, while the completed comparables offer markedly better station access. Wing Tai's claimed garden side gate and frontage are meaningful lifestyle differentiators, but the [completed Jurong Lake Gardens](https://www.nparks.gov.sg/news/news-detail/nparks-completes-jurong-lake-gardens-with-opening-of-rejuvenated-chinese-and-japanese-gardens) are already visible to buyers and are not a new September 2026 catalyst.
+
+### Achieved transaction set and price anchors
+
+The strict latest matched district window uses D22 homes of about 450–550 sq ft from July 2025 through June 2026. It contains **12 achieved Resales, zero New Sales and zero Sub Sales**, at a median **S$995,000 / S$1,991.5 psf**. Keeping sale universes separate is essential: completed Resales produce rent and have proven occupancy; the uncompleted subject does not.
+
+| Latest-12-month achieved Resale cohort | N | Median quantum | Median PSF | Observed range / role |
+| --- | ---: | ---: | ---: | --- |
+| J Gateway | 7 | S$1.025m | S$2,129 | S$0.992m–S$1.100m; transit-integrated quantum control |
+| Lake Grande | 2 | S$0.901m | S$1,820 | Older-lease Lakeside affordability control |
+| The Lakefront Residences | 3 | S$0.828m | S$1,672 | S$0.825m–S$0.860m; closest exact-size station-side control |
+
+The same-vintage and new-build anchors are higher, but neither proves September owner liquidity:
+
+- [J'DEN's official launch release](https://www.capitaland.com/en/about-capitaland/newsroom/news-releases/international/2023/october/CLD-to-launch-Jden-in-Jurong-Gateway.html) describes its integrated Jurong East proposition. Its 37 achieved 527 sq ft developer New Sales in November 2023 had a S$1.306m / S$2,476 psf median; its three low-floor sales had about a **S$1.207m / S$2,288 psf median**. The location makes this a ceiling, not a direct equal.
+- [SORA's developer page](https://www.singhaiyi.com/sora.html) confirms its same-road project identity. Its 34 achieved 538 sq ft 1BR + Study New Sales from July to October 2024 ranged from S$0.996m to S$1.288m, with a **S$1.106m / S$2,055 psf median**. Floor medians rose from about S$1.014m on floors 1–5 to S$1.240m on floors 16–20, showing why floor mix cannot be called appreciation.
+- The subject's **ten later achieved 527 sq ft AS1 New Sales**, from September 2023 through April 2025, had a **S$1.1887m / S$2,254 psf median** and a S$1.0698m–S$1.3483m range. Floors 15–18 achieved S$1.2613m, S$1.3155m, S$1.3319m and S$1.3483m. These are the best same-layout evidence, but they are different developer-sold units: floor/view, release timing and incentives explain part of the spread, and none demonstrates an owner's executable resale.
+- A recent duplicated LakeGarden 527 sq ft apparent owner-subsale campaign asked about **S$1.20m–S$1.25m / S$2,277–S$2,372 psf**. One [S$1.25m campaign card](https://www.propertyguru.com.sg/listing/for-sale-the-lakegarden-residences-500125934) explicitly used subsale wording, while a separate [S$1.20m card](https://www.propertyguru.com.sg/listing/for-sale-the-lakegarden-residences-60148259) lacked enough unit detail. The cards do not prove unique stock and the S$1.25m direct pages later expired or redirected. They are recent asking anchors, not achieved transactions.
+- URA's OCR non-landed index rose from 237.4 in Q3 2023 to about 271.1 in Q2 2026, or 14.2%. Applying that broad movement mechanically gives about S$1.188m and S$1.291m for the two ordinary units. The [URA Q2 2026 release](https://www.ura.gov.sg/news/media/pr26-57/) and [official index annex](https://isomer-user-content.by.gov.sg/467/ee78457a-9c05-4a99-95a0-3c6f4d87aa7d/pr26-57a1.pdf) also show OCR non-landed prices fell 0.1% QoQ and warn households to be prudent; the index is therefore an optimistic cross-check, not a project appraisal.
+
+### September 2026 valuation
+
+The three cases are deliberately reproducible rather than an opaque weighted average:
+
+1. **Transaction-indexed downside:** the cohort is every 450–550 sq ft achieved Resale in J Gateway, Lake Grande and The Lakefront Residences in the raw D22 ledger. Calendar 2023 had N=21 / median S$1,935 psf, calendar 2024 N=22 / S$1,944 psf, and January–June 2026 N=9 / S$2,010 psf. Applying the 2023-to-2026 change (+3.9%) to the other A1-G's S$1.0615m gives about S$1.103m. Applying the 2024-to-2026 change (+3.4%) to the other A2-G's S$1.1533m gives about S$1.192m. These round to S$1.10m and S$1.19m.
+2. **Ask-informed case:** transferring the recent 527 sq ft LakeGarden ask range of S$2,277–S$2,372 psf gives S$1.102m–S$1.148m for 484 sq ft and S$1.225m–S$1.276m for 538 sq ft. S$1.145m and S$1.250m are used, retaining a modest smaller-unit PSF premium for A1-G. This is asking evidence, not an achieved midpoint.
+3. **Broad-index upper:** multiplying each original price by the 14.2% OCR index change gives about S$1.188m and S$1.291m. It is the optimistic case because a broad mixed-project index is not repeat-sale proof.
+
+No extra August-to-September catalyst premium is assumed. Implied PSF is shown so the size effect remains visible.
+
+| August 2023 owner | Transaction-indexed downside | Ask-informed case | Broad-index upper | Gross price gain range | September scenario range |
+| --- | ---: | ---: | ---: | ---: | --- |
+| **A1-G, 484 sq ft, bought S$1.0406m** | S$1.100m / S$2,273 psf | **S$1.145m / S$2,366 psf** | S$1.188m / S$2,455 psf | S$59k–S$147k | **S$1.10m–S$1.19m** |
+| **A2-G, 538 sq ft, bought S$1.1306m** | S$1.190m / S$2,212 psf | **S$1.250m / S$2,323 psf** | S$1.291m / S$2,400 psf | S$59k–S$160k | **S$1.19m–S$1.29m** |
+
+These are possible exercised prices, not forecasts. A seller who needs a buyer to exercise an OTP within September should plan around the **transaction-indexed to ask-informed cases**, because there is no captured achieved LakeGarden secondary sale and the format has only four units. If title has not issued, an assignment also has more legal and financing work.
+
+### How much the owner can earn
+
+This section uses the report's common capital-only convention so the result is consistent with the other project cases:
+
+- owner is a Singapore citizen who bought a first residential property in August 2023 and paid no ABSD;
+- original acquisition basis is purchase price + 2023 BSD + S$5,000 legal/technical allowance;
+- net exit proceeds are 97.5% of gross price, allowing 2.5% for selling agency, GST/legal and possible assignment friction;
+- profit is net exit proceeds less acquisition basis; finance, progressive-payment interest, maintenance, tax, insurance and opportunity cost are excluded.
+
+| Ordinary 1BR | Original BSD | Acquisition basis | Transaction-indexed profit | **Ask-informed profit** | Broad-index profit | Breakeven gross sale |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| A1-G, 484 sq ft | S$26,224 | S$1,071,824 | **S$676** | **S$44,551** | **S$86,476** | S$1,099,307 |
+| A2-G, 538 sq ft | S$29,824 | S$1,165,424 | **-S$5,174** | **S$53,326** | **S$93,301** | S$1,195,307 |
+
+Formula: `capital-only profit = 0.975 × gross sale price − purchase price − original BSD − S$5,000`.
+
+**Answer for an ordinary 1BR:** about **S$44,600 for A1-G or S$53,300 for A2-G in the ask-informed cases**, before financing and holding costs. Across the modelled evidence cases, the result is about **-S$5,200 to +S$93,300**. The A1 ask-informed sale produces about S$1.116m after 2.5% friction; A2 produces about S$1.219m. Those proceeds are not the owner's cash cheque: the eventual cash/CPF split also depends on outstanding progressive payments, bank redemption, CPF principal plus accrued-interest refund, and completion adjustments.
+
+### If the owner meant a 527 sq ft 1BR + Study
+
+For the eight August 2023 purchases, a prudent September exercised-price range is about **S$1.18m–S$1.25m**, with S$1.22m as a base—not above S$1.25m without a strong high-floor/lake-view case. The lower exit range versus the S$1.261m–S$1.348m upper-floor developer sales recognizes that those were different-unit New Sales and that a seller needing September execution must compete with cheaper completed homes without any achieved subject resale proof.
+
+| August 2023 purchase case | Original price | Capital profit at S$1.18m sale | **At S$1.22m base** | At S$1.25m sale |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Lowest launch purchase | S$1.0541m | +S$64.6k | **+S$103.6k** | +S$132.9k |
+| Median launch purchase | S$1.0907m | +S$26.6k | **+S$65.6k** | +S$94.8k |
+| Highest launch purchase | S$1.1538m | -S$39.1k | **about S$0** | +S$29.2k |
+
+This dispersion is mostly original floor/price, not an error range. It demonstrates why the exact unit and acquisition price are indispensable.
+
+### Tax, ABSD and possible pre-title sale effects
+
+An August 2023 acquisition remains under the **three-year SSD schedule** for properties bought from 11 March 2017 through 3 July 2025. IRAS says no SSD applies when the disposal is on or after the exact third anniversary. A legally effective September 2026 disposal should therefore have **zero SSD**, but the solicitor must verify the original acquisition date and controlling disposal date. The current four-year schedule for purchases from 4 July 2025 does not apply retrospectively. See the current [IRAS SSD rules](https://www.iras.gov.sg/taxes/stamp-duty/for-property/selling-or-disposing-property/seller%27s-stamp-duty-%28ssd%29-for-residential-property) and [IRAS declaration notes](https://www.iras.gov.sg/media/docs/default-source/uploadedfiles/pdf/declaration-form-ssd-for-residential-properties.pdf?sfvrsn=eef90150_16); the disposal date is generally when the buyer exercises the OTP or signs the S&P, not the later completion date.
+
+If ABSD was paid in August 2023, subtract the actual net ABSD **dollar for dollar** from every profit above:
+
+| Owner profile at acquisition | ABSD rate | A1 ask-informed after ABSD | A2 ask-informed after ABSD | 527 sq ft median/base after ABSD |
+| --- | ---: | ---: | ---: | ---: |
+| Singapore citizen, first residential property | 0% | +S$44.6k | +S$53.3k | +S$65.6k |
+| Singapore PR, first residential property | 5% | **-S$7.5k** | **-S$3.2k** | **+S$11.1k** |
+| Singapore citizen, second residential property | 20% | **-S$163.6k** | **-S$172.8k** | **-S$152.5k** |
+
+Other August 2023 profiles, remissions and ownership structures require the actual stamped documents; current [IRAS ABSD guidance](https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/additional-buyer%27s-stamp-duty-%28absd%29) should not replace those records.
+
+At the research timestamp, no TOP/VP notice, issued title, achieved project rent or owner resale was located. The legal expected-VP date of August 2027 is a contractual deadline, however—not proof that early TOP, VP or title **cannot** occur before September 2026. If title has not issued at disposal, CEA's [uncompleted-property seller checklist](https://www.cea.gov.sg/docs/default-source/Professionals/Agreements-Checklists/checklist-for-seller-%28sale-of-uncompleted-private-residential-property%29_jan21.pdf) requires attention to mortgage/CPF redemption, negative sale and developer notification, while its [standard private-property agreement](https://www.cea.gov.sg/docs/default-source/Professionals/Agreements-Checklists/agreement-for-the-sale-and-purchase-of-private-residential-property-2021.pdf) provides for assignment of the vendor's S&P. If TOP/VP or title has issued, occupancy, financing and conveyancing mechanics may differ. Verify current BCA/developer, solicitor and land-title status immediately before marketing and obtain specific developer, bank and legal quotations; the S$5,000/2.5% allowances above are underwriting conventions, not legal-fee quotes.
+
+No project rent had been achieved at capture. If early handover produces any rent before disposal, add the actual net rent separately rather than capitalizing it into the sale estimate. Every S$10,000 of progressive-payment interest, loan/assignment fees or other unrecovered ownership cost reduces the stated economic profit by S$10,000. IRAS generally regards investment gains as capital, but its [property-gain guidance](https://www.iras.gov.sg/taxes/individual-income-tax/basics-of-individual-income-tax/what-is-taxable-what-is-not/gains-from-sale-of-property-shares-and-financial-instruments) says trading gains can be taxable depending on facts such as frequency, motive and holding period.
+
+### September execution checklist for this owner
+
+1. Match the original S&P and stamp certificate to A1-G, A2-G or AS1; confirm exact unit, price, acquisition date, BSD, ABSD and any remission.
+2. Check current TOP, VP, title and occupancy status with the developer, BCA records and solicitor; do not infer September status from the contractual expected-VP deadline.
+3. Ask two agencies for a same-week written comparative market analysis, but reject generic 1BR cards that recycle the project's old developer caveats.
+4. Have the solicitor confirm assignment/subsale or conveyance mechanics, developer notice where applicable, buyer-OTP/S&P timing for SSD, outstanding payments, bank redemption and CPF refund.
+5. Price near the lower cases if September exercise is mandatory. Do not confuse a September listing with a September transaction.
+6. Recheck Lucerne Grand's **actual achieved caveats and unit mix if it launches by then**. [CDL currently plans](https://citydevelopmentslimited.gcs-web.com/static-files/8edd9eb6-9b49-449b-8d30-5c631477c3cf) the 570-unit Lakeside Drive project for Q3 2026; guessed launch pricing has zero value in this estimate.
+7. Compare net offers after commission, GST, legal/assignment, bank and completion adjustments—not headline sale price alone.
 
 ## Scope and evidence rules
 
