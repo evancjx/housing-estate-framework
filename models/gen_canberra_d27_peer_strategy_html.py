@@ -867,7 +867,8 @@ def render_integration(
 <section><div class="callout"><h3>Spatial boundary</h3><p>
 Distances are project-coordinate to station-coordinate haversine calculations.
 They are not walking routes, and retail labels are qualitative factual profiles—not
-price adjustments or guaranteed liveability outcomes.</p></div></section>
+price adjustments or guaranteed liveability outcomes. NS12 uses the reviewed
+11 Canberra Link location because the legacy input row is invalid.</p></div></section>
 <section>
   <div class="section-head"><h2>Direct sources and method caveats</h2><p>
   Retail format sources establish factual project relationships. They do not

@@ -115,3 +115,35 @@ def test_transaction_diagnostics_keep_sale_states_and_cohort_breadth_visible():
     assert launch["analysis"].str.contains("launch-position signal only").all()
     assert resale["cohort_project_n"].eq(2).all()
     assert resale["analysis"].str.contains("2 projects in cohort").all()
+
+
+def test_canberra_mrt_uses_reviewed_ns12_coordinate_not_bad_legacy_point():
+    locations = {
+        canberra.SUBJECT: {
+            "lat": 1.449921230269529,
+            "lon": 103.8293971626456,
+        },
+        "THE COMMODORE": {
+            "lat": 1.441213593738426,
+            "lon": 103.8277840489972,
+        },
+    }
+    mrt = pd.DataFrame(
+        [
+            {
+                "lat": 1.44967,
+                "lon": 103.82988,
+                "name": "Canberra",
+                "stn_code": "NS12",
+                "operational": 1,
+            }
+        ]
+    )
+
+    subject = canberra.nearest_station(canberra.SUBJECT, locations, mrt)
+    commodore = canberra.nearest_station("THE COMMODORE", locations, mrt)
+
+    assert subject["station"] == "Canberra (NS12)"
+    assert 740 <= subject["station_distance_m"] <= 755
+    assert 290 <= commodore["station_distance_m"] <= 305
+    assert commodore["station_distance_m"] < subject["station_distance_m"]

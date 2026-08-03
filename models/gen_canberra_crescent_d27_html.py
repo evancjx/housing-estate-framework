@@ -74,6 +74,12 @@ DEFAULT_OUT = ROOT / "canberra_crescent_d27_deep_analysis.html"
 
 SUBJECT = "CANBERRA CRESCENT RESIDENCES"
 SUBJECT_UNITS = 376
+# Reviewed against the LTA MRT-station-exit dataset and OneMap on 2026-08-03.
+# The legacy geocoded input places NS12 beside the subject instead of at
+# 11 Canberra Link, reversing the closest-project comparison. Keep this
+# correction local to the Canberra private-project diagnostics so an
+# estate-level input refresh remains a separately reviewed pipeline change.
+MRT_COORDINATE_OVERRIDES = {"NS12": (1.4432, 103.8296)}
 MIN_DELTA_SAMPLE = 3
 TAB_KEYS = ("all", "1", "2", "3", "4")
 TAB_LABELS = {
@@ -348,6 +354,12 @@ def nearest_station(
     if not location:
         return {"station": "—", "station_distance_m": None}
     stations = mrt.copy()
+    codes = stations.get(
+        "stn_code", pd.Series("", index=stations.index)
+    ).astype(str).str.strip().str.upper()
+    for code, (reviewed_lat, reviewed_lon) in MRT_COORDINATE_OVERRIDES.items():
+        mask = codes.eq(code)
+        stations.loc[mask, ["lat", "lon"]] = (reviewed_lat, reviewed_lon)
     stations["lat"] = pd.to_numeric(stations["lat"], errors="coerce")
     stations["lon"] = pd.to_numeric(stations["lon"], errors="coerce")
     stations["operational"] = pd.to_numeric(
@@ -1232,7 +1244,7 @@ def render_html(
 
 <h2>Sources and calculation register</h2>
 {_source_register(window)}
-<div class="caveat"><b>Read before deciding.</b> URA caveats are voluntary and not exhaustive. Identical public rows can represent distinct apartment transactions, so official multiplicity is preserved. Exact unit numbers, view, facing, condition, discounts and purchaser identity are unavailable. Bedroom labels are secondary EdgeProp row matches because URA does not publish bedrooms. New Sale, Sub Sale and Resale prices reflect different asset states. Straight-line MRT and school diagnostics are not routed walking distances or official Primary 1 home-school measurements. This is descriptive research, not a valuation or financial recommendation.</div>
+<div class="caveat"><b>Read before deciding.</b> URA caveats are voluntary and not exhaustive. Identical public rows can represent distinct apartment transactions, so official multiplicity is preserved. Exact unit numbers, view, facing, condition, discounts and purchaser identity are unavailable. Bedroom labels are secondary EdgeProp row matches because URA does not publish bedrooms. New Sale, Sub Sale and Resale prices reflect different asset states. Straight-line MRT and school diagnostics are not routed walking distances or official Primary 1 home-school measurements. NS12 uses the reviewed 11 Canberra Link location because the legacy input row is invalid. This is descriptive research, not a valuation or financial recommendation.</div>
 </main>
 <script>
 document.querySelectorAll(".matched-tab").forEach(function(button) {{
