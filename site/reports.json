@@ -20,6 +20,16 @@
       "tags": ["persona", "household", "liveability"]
     },
     {
+      "id": "home-loan-planner",
+      "path": "home_loan_planner.html",
+      "title": "Home loan planner",
+      "category": "home-finance",
+      "kind": "tool",
+      "summary": "Calculate a new home-loan repayment path or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.",
+      "tags": ["home loan", "mortgage", "calculator", "refinance", "reprice", "repayment"],
+      "featured": true
+    },
+    {
       "id": "mrt-comparison",
       "path": "mrt_comparison_table.html",
       "title": "MRT station comparison",

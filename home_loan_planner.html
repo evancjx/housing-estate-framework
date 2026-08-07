@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en-SG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Calculate a new Singapore home loan or compare an existing loan with a new package using live repayment schedules.">
+<title>Repayment calculator · Singapore Estate Research Hub</title>
+<link rel="stylesheet" href="assets/research-shell.css">
+<style>
+  :root {
+    --ink:#172a25; --muted:#697872; --line:#d5dfda; --paper:#f3f6f5; --card:#fff;
+    --accent:#08786d; --accent-dark:#075b54; --accent-soft:#e4f3ef; --warm:#edae2d;
+    --warm-soft:#fff5df; --danger:#a93834; --danger-soft:#fff0ef;
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  button,input,select { font:inherit; }
+  button { cursor:pointer; }
+  a { color:var(--accent-dark); }
+  main { max-width:1040px; margin:0 auto; padding:28px 20px 70px; }
+  .calculator-intro { display:flex; align-items:center; gap:24px; padding:28px 18px 32px; }
+  .calculator-icon { flex:0 0 auto; display:grid; width:72px; height:72px; place-items:center;
+    border-radius:18px; background:var(--accent-soft); color:var(--accent); }
+  .calculator-intro h1 { margin:0 0 7px; font-size:28px; line-height:1.15; letter-spacing:-.03em; }
+  .calculator-intro p { margin:0; color:var(--muted); font-size:16px; line-height:1.5; }
+  .local-note { margin:0 0 18px; padding:11px 15px; border-left:3px solid var(--accent);
+    background:#eaf6f3; color:#416159; font-size:13px; line-height:1.45; }
+  .loan-card,.schedule-card,.progressive-card { margin-bottom:18px; border:1px solid var(--line);
+    border-radius:7px; background:var(--card); overflow:hidden; }
+  .loan-title { margin:0; padding:24px 26px 17px; font-size:22px; }
+  .loan-tabs { display:flex; gap:10px; padding:0 18px; border-bottom:1px solid var(--line); }
+  .loan-tabs button { min-height:52px; padding:13px 9px 11px; border:0; border-bottom:3px solid transparent;
+    background:transparent; color:#76827d; font-size:15px; font-weight:750; }
+  .loan-tabs button[aria-selected="true"] { border-bottom-color:var(--accent); color:var(--ink); }
+  .loan-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.08fr); }
+  .loan-inputs,.loan-summary { min-width:0; padding:27px 26px 28px; }
+  .loan-inputs { border-right:1px solid #e3e9e6; }
+  .loan-inputs h3,.loan-summary h3 { margin:0 0 25px; font-size:17px; }
+  .field { margin-bottom:22px; }
+  .field:last-child { margin-bottom:0; }
+  label,.field-label { display:block; margin-bottom:8px; color:var(--muted); font-size:13px; }
+  input,select { width:100%; min-height:47px; padding:9px 11px; border:1px solid #b9c7c1;
+    border-radius:4px; background:white; color:var(--ink); font-size:16px; outline:none; }
+  input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  [aria-invalid="true"] { border-color:var(--danger); background:var(--danger-soft); }
+  .money-input { display:grid; grid-template-columns:52px minmax(0,1fr); border:1px solid #b9c7c1;
+    border-radius:4px; overflow:hidden; }
+  .money-input:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  .money-input span { display:grid; place-items:center; background:#f0f3f2; font-weight:750; }
+  .money-input input { min-width:0; border:0; border-radius:0; box-shadow:none; font-size:23px; font-weight:700; }
+  .compact-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }
+  .inline-unit { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end;
+    border-bottom:1px solid #aebdb6; }
+  .inline-unit input { min-width:0; padding:8px 2px; border:0; border-radius:0; box-shadow:none;
+    font-size:17px; font-weight:700; }
+  .inline-unit span { padding:0 3px 10px 8px; color:#83918b; font-size:14px; font-weight:700; }
+  .tenure-input { display:grid; grid-template-columns:minmax(45px,1fr) auto minmax(45px,1fr) auto;
+    align-items:end; border-bottom:1px solid #aebdb6; }
+  .tenure-input input { min-width:0; padding:8px 2px; border:0; border-radius:0; box-shadow:none;
+    font-size:17px; font-weight:700; }
+  .tenure-input span { padding:0 6px 10px; color:#83918b; font-size:14px; font-weight:700; }
+  .expand-button { display:flex; align-items:center; gap:8px; width:100%; margin-top:13px; padding:3px 0;
+    border:0; background:transparent; color:#293c35; text-align:left; font-size:13px; }
+  .plus { display:inline-grid; width:17px; height:17px; place-items:center; border:1px solid #8fa099;
+    border-radius:2px; color:#63766e; font-size:15px; line-height:1; }
+  .rate-segments { display:grid; gap:9px; margin-top:12px; }
+  .rate-row { display:grid; grid-template-columns:1fr 1fr auto; gap:9px; align-items:end; padding:11px;
+    border-radius:5px; background:#f4f7f6; }
+  .rate-row label { margin:0; font-size:11px; }
+  .rate-row input { min-height:40px; margin-top:5px; font-size:14px; }
+  .remove-rate { width:38px; min-height:40px; border:1px solid #cbd6d1; border-radius:4px;
+    background:white; color:#6b7b74; font-size:18px; }
+  .switch-row { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:20px;
+    font-size:14px; font-weight:750; }
+  .switch { position:relative; flex:0 0 auto; width:49px; height:27px; }
+  .switch input { position:absolute; width:1px; height:1px; opacity:0; }
+  .switch span { position:absolute; inset:0; border-radius:99px; background:#bdcac5; transition:.16s; }
+  .switch span::after { content:""; position:absolute; top:3px; left:3px; width:21px; height:21px;
+    border-radius:50%; background:white; box-shadow:0 2px 5px rgba(0,0,0,.18); transition:.16s; }
+  .switch input:checked + span { background:var(--accent); }
+  .switch input:checked + span::after { transform:translateX(22px); }
+  .construction-fields { margin-top:17px; padding:15px; border-radius:5px; background:var(--accent-soft); }
+  .construction-fields .compact-fields { gap:12px; }
+  .construction-fields input { background:white; }
+  .section-kicker { display:flex; align-items:center; gap:8px; margin:5px 0 16px; font-size:14px;
+    font-weight:800; }
+  .section-kicker::before { content:""; width:7px; height:7px; border-radius:50%; background:#c8d0cd; }
+  .section-kicker.candidate::before { background:var(--warm); }
+  details.fees { margin-top:14px; border-top:1px solid #e4eae7; }
+  details.fees summary { padding:15px 0 2px; list-style:none; cursor:pointer; font-size:13px; }
+  details.fees summary::-webkit-details-marker { display:none; }
+  .fee-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:13px; }
+  .fee-grid label { font-size:11px; }
+  .fee-grid input { min-height:40px; font-size:14px; }
+  .loan-summary { display:flex; flex-direction:column; justify-content:center; }
+  .summary-message { display:flex; gap:18px; align-items:center; color:#3d5149; font-size:15px; line-height:1.5; }
+  .summary-home { flex:0 0 auto; display:grid; width:50px; height:50px; place-items:center;
+    border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); }
+  .summary-message strong { color:var(--ink); }
+  .savings-bars { display:grid; gap:19px; }
+  .saving-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:15px; align-items:center; }
+  .saving-row strong { font-size:15px; }
+  .saving-row output { font-size:17px; font-weight:800; }
+  .bar { grid-column:1 / -1; width:68%; height:7px; margin-top:-8px; border-radius:99px; background:#d7ddda; }
+  .bar.candidate { width:60%; background:var(--warm); }
+  .saving-total { display:flex; align-items:baseline; justify-content:space-between; gap:15px;
+    padding:17px 0; border-top:1px solid #e5ebe8; border-bottom:1px solid #e5ebe8; }
+  .saving-total output { font-size:24px; font-weight:800; }
+  .saving-copy { margin:22px 0 0; color:#52655d; font-size:14px; line-height:1.5; }
+  .saving-copy strong { color:var(--ink); }
+  .net-note { margin-top:11px; padding:10px 12px; border-left:3px solid var(--accent);
+    background:#edf6f3; color:#486159; font-size:12px; line-height:1.45; }
+  .calculator-errors { margin:0; padding:12px 25px; border-top:1px solid #efc3c0;
+    background:var(--danger-soft); color:#7a2926; font-size:13px; }
+  .mobile-schedule-link { display:none; }
+  .card-heading { margin:0; padding:24px 26px; border-bottom:1px solid var(--line); font-size:22px; }
+  .schedule-overview { display:grid; grid-template-columns:1fr 1fr; gap:34px; padding:25px 26px 20px; }
+  .start-controls { display:flex; gap:8px; margin:8px 0 14px; }
+  .start-controls select { width:auto; min-width:112px; border:0; border-bottom:1px solid #aebdb6;
+    border-radius:0; font-weight:700; }
+  .payoff-copy { margin:0; color:#53665e; font-size:15px; }
+  .totals { margin:0; }
+  .totals div { display:grid; grid-template-columns:1fr auto; gap:20px; padding:9px 0;
+    border-bottom:1px solid #dce4e0; }
+  .totals dt { color:var(--muted); }
+  .totals dd { margin:0; text-align:right; }
+  .totals .grand { font-weight:800; }
+  .table-scroll { max-width:100%; margin:0 20px; overflow-x:auto; border-top:1px solid var(--line); }
+  table { width:100%; min-width:900px; border-collapse:collapse; font-size:13px; }
+  th,td { padding:15px 10px; border-bottom:1px solid #dce4e0; text-align:right; white-space:nowrap; }
+  thead th { color:var(--muted); font-weight:600; }
+  th:first-child,td:first-child { text-align:left; }
+  tbody th { font-size:15px; }
+  .year-toggle { width:29px; min-height:29px; border:0; background:transparent; color:#687972; }
+  .month-details td { padding:0; background:#f6f8f7; }
+  .month-details table { min-width:780px; font-size:12px; }
+  .month-details th,.month-details td { padding:9px 12px; }
+  .schedule-actions { padding:16px 26px; }
+  .text-button { padding:5px 0; border:0; background:transparent; color:var(--accent); font-weight:750; }
+  .partial { border-top:1px solid var(--line); }
+  .partial summary { padding:19px 26px; list-style:none; cursor:pointer; font-size:13px; }
+  .partial summary::-webkit-details-marker { display:none; }
+  .partial-fields { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; padding:0 26px 22px; }
+  .partial-option-fields { display:contents; }
+  .progressive-content { display:grid; grid-template-columns:280px 1fr; gap:34px; padding:25px 26px 28px; }
+  .initial-total { padding:17px; border-radius:5px; background:var(--accent-soft); }
+  .initial-total output { display:block; margin:5px 0 13px; font-size:25px; font-weight:800; }
+  .initial-total div { display:flex; justify-content:space-between; gap:15px; padding:7px 0;
+    border-top:1px solid #cce2dc; font-size:13px; }
+  .progressive-head { display:flex; justify-content:space-between; gap:15px; align-items:center; margin-bottom:10px; }
+  .progressive-head h3 { margin:0; font-size:17px; }
+  .timeline { display:grid; gap:1px; background:#dfe7e3; border:1px solid #dfe7e3; border-radius:5px; overflow:hidden; }
+  .timeline-row { display:grid; grid-template-columns:80px minmax(0,1fr) auto; gap:12px; align-items:center;
+    padding:11px 13px; background:white; }
+  .timeline-row b { font-size:13px; }
+  .timeline-row small { display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+  .timeline-row output { font-size:14px; font-weight:800; }
+  .timeline-month { width:70px; min-height:34px; padding:4px 6px; font-size:13px; }
+  .disclaimer { margin:23px 10px 0; color:#7b8983; text-align:center; font-size:12px; line-height:1.6; }
+  .sources { margin-top:13px; color:#78867f; text-align:center; font-size:11px; }
+  :focus-visible { outline:3px solid #f2a900; outline-offset:2px; }
+  @media(max-width:760px) {
+    main { padding:10px 0 55px; }
+    .calculator-intro { flex-direction:column; padding:30px 22px 24px; text-align:center; }
+    .calculator-intro h1 { font-size:21px; }
+    .calculator-intro p { font-size:14px; }
+    .local-note { margin:0 12px 16px; }
+    .loan-card,.schedule-card,.progressive-card { border-radius:4px; }
+    .loan-title { display:none; }
+    .loan-tabs { justify-content:space-around; padding:0; }
+    .loan-tabs button { flex:1; font-size:14px; }
+    .loan-layout { grid-template-columns:1fr; }
+    .loan-inputs,.loan-summary { padding:28px 20px; }
+    .loan-inputs { border-right:0; }
+    .loan-summary { border-top:1px solid var(--line); }
+    .loan-inputs h3,.loan-summary h3 { text-align:center; }
+    .mobile-schedule-link { display:flex; justify-content:space-between; padding:17px 14px;
+      border-top:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--accent);
+      text-decoration:none; font-size:14px; font-weight:800; }
+    .summary-message { justify-content:center; }
+    .schedule-overview,.progressive-content { grid-template-columns:1fr; }
+    .schedule-overview { gap:20px; padding:20px 14px; }
+    .card-heading { padding:21px 14px; font-size:20px; }
+    .table-scroll { margin:0; }
+    .schedule-actions { padding:14px; }
+    .partial summary { padding:18px 14px; }
+    .partial-fields { grid-template-columns:1fr; padding:0 14px 20px; }
+    .progressive-content { gap:18px; padding:20px 14px; }
+    .rate-row { grid-template-columns:1fr 1fr auto; }
+    .fee-grid { grid-template-columns:1fr; }
+    .disclaimer { margin:20px 15px 0; text-align:left; }
+  }
+  @media(max-width:430px) {
+    .compact-fields { gap:13px; }
+    .loan-inputs,.loan-summary { padding-left:17px; padding-right:17px; }
+    .summary-message { align-items:flex-start; }
+    .summary-home { width:42px; height:42px; }
+    .timeline-row { grid-template-columns:65px minmax(0,1fr) auto; padding:10px 8px; }
+  }
+  @media print {
+    .research-shell-nav,.research-shell-skip,.calculator-intro,.local-note,.loan-inputs,
+    .loan-tabs,.mobile-schedule-link,.schedule-actions,.partial,.sources { display:none !important; }
+    body { background:white; }
+    main { max-width:none; padding:0; }
+    .loan-layout { display:block; }
+    .loan-summary { border:0; }
+    .loan-card,.schedule-card,.progressive-card { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<main id="research-content">
+  <header class="calculator-intro">
+    <span class="calculator-icon" aria-hidden="true">
+      <svg width="42" height="48" viewBox="0 0 42 48" fill="none"><rect x="5" y="2" width="29" height="39" rx="3" stroke="currentColor" stroke-width="2"/><rect x="10" y="7" width="19" height="7" fill="currentColor" opacity=".2"/><path d="M10 20h4m5 0h4m5 0h1M10 26h4m5 0h4m5 0h1M10 32h4m5 0h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="33" cy="38" r="8" fill="#edae2d"/><path d="M33 33v10m2.5-7.5c0-1-1-1.5-2.5-1.5s-2.5.7-2.5 1.7c0 2.7 5 1.3 5 4 0 1.1-1 1.8-2.5 1.8s-2.7-.6-2.7-1.7" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </span>
+    <div><h1>Repayment calculator</h1><p>See your monthly repayment schedule and compare an existing home loan with a new package.</p></div>
+  </header>
+
+  <p class="local-note"><strong>Private and local:</strong> calculations update in this browser only. Illustration rates are not live offers, and the tool does not assess eligibility or approval.</p>
+
+  <section class="loan-card" aria-labelledby="loan-card-title">
+    <h2 class="loan-title" id="loan-card-title">Your home loan</h2>
+    <div class="loan-tabs" role="tablist" aria-label="Home loan type">
+      <button id="loan-tab-new" type="button" role="tab" data-loan-tab="new" aria-selected="true" aria-controls="loan-panel-new">New loan</button>
+      <button id="loan-tab-existing" type="button" role="tab" data-loan-tab="existing" aria-selected="false" aria-controls="loan-panel-existing" tabindex="-1">Existing loan</button>
+    </div>
+    <p class="calculator-errors" id="calculator-errors" role="status" aria-live="polite" hidden></p>
+
+    <div id="loan-panel-new" role="tabpanel" aria-labelledby="loan-tab-new" data-loan-panel="new">
+      <div class="loan-layout">
+        <form class="loan-inputs" id="new-loan-form" novalidate>
+          <h3>Loan details</h3>
+          <div class="field">
+            <label for="new-loan-amount">Loan amount</label>
+            <div class="money-input"><span>S$</span><input id="new-loan-amount" type="text" value="750,000" inputmode="decimal" data-currency-input></div>
+          </div>
+          <div class="compact-fields">
+            <div class="field">
+              <label for="new-interest-rate">Interest rate</label>
+              <div class="inline-unit"><input id="new-interest-rate" type="number" min="0" max="20" step="0.01" value="3.65" inputmode="decimal"><span>%</span></div>
+            </div>
+            <div class="field">
+              <span class="field-label">Loan period</span>
+              <div class="tenure-input"><input id="new-years" aria-label="Loan period years" type="number" min="0" max="35" step="1" value="25" inputmode="numeric"><span>yrs</span><input id="new-months" aria-label="Additional loan period months" type="number" min="0" max="11" step="1" value="0" inputmode="numeric"><span>mths</span></div>
+            </div>
+          </div>
+          <div class="rate-segments" id="new-rate-segments"></div>
+          <button class="expand-button" id="new-add-rate" type="button"><span class="plus" aria-hidden="true">+</span>Add interest rates for subsequent years</button>
+          <div class="switch-row">
+            <label for="construction-toggle" style="margin:0;color:inherit">I own a condominium under construction</label>
+            <label class="switch" aria-label="Condominium under construction"><input id="construction-toggle" type="checkbox"><span aria-hidden="true"></span></label>
+          </div>
+          <div class="construction-fields" id="construction-fields" hidden>
+            <div class="compact-fields">
+              <div><label for="property-price">Property price</label><input id="property-price" type="text" value="1,000,000" inputmode="decimal" data-currency-input></div>
+              <div><label for="down-payment">Downpayment</label><input id="down-payment" type="text" value="250,000" inputmode="decimal" data-currency-input></div>
+            </div>
+          </div>
+        </form>
+        <a class="mobile-schedule-link" href="#repayment-schedule"><span>View repayment schedule</span><span aria-hidden="true">↓</span></a>
+        <aside class="loan-summary" aria-labelledby="new-summary-title">
+          <h3 id="new-summary-title">Loan repayment summary</h3>
+          <div class="summary-message">
+            <span class="summary-home" aria-hidden="true">⌂</span>
+            <p id="new-summary-copy">Calculating your repayment summary…</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="loan-panel-existing" role="tabpanel" aria-labelledby="loan-tab-existing" data-loan-panel="existing" hidden>
+      <div class="loan-layout">
+        <form class="loan-inputs" id="existing-loan-form" novalidate>
+          <h3>Loan details</h3>
+          <div class="field">
+            <label for="existing-loan-amount">Outstanding loan amount</label>
+            <div class="money-input"><span>S$</span><input id="existing-loan-amount" type="text" value="500,000" inputmode="decimal" data-currency-input></div>
+          </div>
+          <div class="section-kicker">Current</div>
+          <div class="compact-fields">
+            <div class="field"><label for="current-interest-rate">Existing interest rate</label><div class="inline-unit"><input id="current-interest-rate" type="number" min="0" max="20" step="0.01" value="4.15" inputmode="decimal"><span>%</span></div></div>
+            <div class="field"><span class="field-label">Loan period</span><div class="tenure-input"><input id="current-years" aria-label="Current loan years" type="number" min="0" max="35" value="10"><span>yrs</span><input id="current-months" aria-label="Current loan additional months" type="number" min="0" max="11" value="0"><span>mths</span></div></div>
+          </div>
+          <div class="rate-segments" id="current-rate-segments"></div>
+          <button class="expand-button" id="current-add-rate" type="button"><span class="plus" aria-hidden="true">+</span>Add interest rates for subsequent years</button>
+
+          <div class="section-kicker candidate">New package details</div>
+          <div class="compact-fields">
+            <div class="field"><label for="package-interest-rate">Interest rate</label><div class="inline-unit"><input id="package-interest-rate" type="number" min="0" max="20" step="0.01" value="3.65" inputmode="decimal"><span>%</span></div></div>
+            <div class="field"><span class="field-label">Loan period</span><div class="tenure-input"><input id="package-years" aria-label="New package years" type="number" min="0" max="35" value="10"><span>yrs</span><input id="package-months" aria-label="New package additional months" type="number" min="0" max="11" value="0"><span>mths</span></div></div>
+          </div>
+          <div class="rate-segments" id="package-rate-segments"></div>
+          <button class="expand-button" id="package-add-rate" type="button"><span class="plus" aria-hidden="true">+</span>Add interest rates for subsequent years</button>
+          <details class="fees" id="fees-details">
+            <summary><span class="plus" aria-hidden="true">+</span> Additional fees &amp; rebates</summary>
+            <div class="fee-grid">
+              <label>Legal cost<input id="switch-legal" type="text" value="0" inputmode="decimal" data-currency-input></label>
+              <label>Valuation cost<input id="switch-valuation" type="text" value="0" inputmode="decimal" data-currency-input></label>
+              <label>Admin / conversion<input id="switch-admin" type="text" value="0" inputmode="decimal" data-currency-input></label>
+              <label>Penalty / clawback<input id="switch-penalty" type="text" value="0" inputmode="decimal" data-currency-input></label>
+              <label>Other cost<input id="switch-other" type="text" value="0" inputmode="decimal" data-currency-input></label>
+              <label>Cash rebate<input id="switch-rebate" type="text" value="0" inputmode="decimal" data-currency-input></label>
+            </div>
+          </details>
+        </form>
+        <a class="mobile-schedule-link" href="#repayment-schedule"><span>View repayment schedule</span><span aria-hidden="true">↓</span></a>
+        <aside class="loan-summary" aria-labelledby="existing-summary-title">
+          <h3 id="existing-summary-title">How much could I save if I switch packages?</h3>
+          <div class="savings-bars">
+            <div class="saving-row"><strong>Current monthly instalment</strong><output id="current-monthly">—</output><span class="bar" aria-hidden="true"></span></div>
+            <div class="saving-row"><strong>New monthly instalment</strong><output id="package-monthly">—</output><span class="bar candidate" aria-hidden="true"></span></div>
+            <div class="saving-total"><strong>Reduction in instalment</strong><output id="monthly-reduction">—</output></div>
+          </div>
+          <p class="saving-copy">You potentially save <strong id="first-year-saving">—</strong> in interest for the first year and <strong id="lifetime-saving">—</strong> over the entered loan periods.</p>
+          <p class="net-note" id="net-saving-note">Add fees and rebates to see their effect on the lifetime comparison.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="progressive-card" id="progressive-card" aria-labelledby="progressive-title" hidden>
+    <h2 class="card-heading" id="progressive-title">Progressive payment schedule</h2>
+    <div class="progressive-content">
+      <div>
+        <h3 style="margin-top:0">1. Initial payment</h3>
+        <div class="initial-total"><span>Total initial</span><output id="progress-initial">—</output><div><span>Option to purchase (5%)</span><b id="progress-option">—</b></div><div><span>Sale &amp; purchase (15%)</span><b id="progress-sale">—</b></div></div>
+      </div>
+      <div>
+        <div class="progressive-head"><h3>2. Subsequent payments</h3><button class="text-button" id="edit-progressive" type="button" aria-pressed="false">Edit timeframe</button></div>
+        <div class="timeline" id="progressive-timeline"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="schedule-card" id="repayment-schedule" aria-labelledby="schedule-title">
+    <h2 class="card-heading" id="schedule-title">Your repayment schedule</h2>
+    <div class="schedule-overview">
+      <div>
+        <label for="schedule-start-month">Start date</label>
+        <div class="start-controls"><select id="schedule-start-month" aria-label="Repayment start month"></select><select id="schedule-start-year" aria-label="Repayment start year"></select></div>
+        <p class="payoff-copy">Estimated payoff date is <strong id="schedule-payoff">—</strong>.</p>
+      </div>
+      <dl class="totals">
+        <div><dt>Total interest payable</dt><dd id="schedule-interest">—</dd></div>
+        <div><dt>Total principal</dt><dd id="schedule-principal">—</dd></div>
+        <div class="grand"><dt>Total payable</dt><dd id="schedule-payable">—</dd></div>
+      </dl>
+    </div>
+    <div class="table-scroll" role="region" aria-label="Scrollable annual repayment schedule" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Date</th><th scope="col">Interest rate</th><th scope="col">Beginning principal</th><th scope="col">Monthly instalment</th><th scope="col">Interest paid</th><th scope="col">Principal paid</th><th scope="col">Ending principal</th><th scope="col"><span class="sr-only">Details</span></th></tr></thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+    <div class="schedule-actions"><button class="text-button" id="schedule-show-more" type="button">Show more</button></div>
+    <details class="partial" id="partial-details">
+      <summary><span class="plus" aria-hidden="true">+</span> Add partial repayment</summary>
+      <div class="partial-fields">
+        <label>Repayment amount<input id="partial-amount" type="text" value="0" inputmode="decimal" data-currency-input></label>
+        <label>Repayment month<input id="partial-date" type="month"></label>
+        <label>Display new schedule with<select id="partial-mode"><option value="recast">No change to loan period</option><option value="target-term">New loan period</option><option value="target-payment">New monthly instalment</option></select></label>
+        <div class="partial-option-fields" id="partial-term-fields" hidden>
+          <label>New period (years)<input id="partial-new-years" type="number" min="0" max="35" step="1" value="20"></label>
+          <label>Additional months<input id="partial-new-months" type="number" min="0" max="11" step="1" value="0"></label>
+        </div>
+        <div class="partial-option-fields" id="partial-payment-fields" hidden>
+          <label>New monthly instalment<input id="partial-new-payment" type="text" value="3,500" inputmode="decimal" data-currency-input></label>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <p class="disclaimer">This illustration is for general educational use and is not an offer of credit, financial advice, an HFE, an IPA or approval. Rates entered for later periods are scenarios, not forecasts. Actual lender schedules may differ because of daily accrual, drawdown timing, payment dates, rounding and contractual terms.</p>
+  <p class="sources">Method references: <a href="https://www.moneysense.gov.sg/how-home-loans-work/" target="_blank" rel="noopener noreferrer">MoneySense home-loan guidance</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/mortgage-duty" target="_blank" rel="noopener noreferrer">IRAS mortgage duty</a></p>
+</main>
+<script src="assets/home-loan-planner.js?v=20260808-3"></script>
+<script src="assets/research-shell.js"></script>
+</body>
+</html>

@@ -36,6 +36,7 @@
         <span class="research-shell-links">
           <a class="research-shell-primary" href="private_project_comparison_table.html">Find a condo</a>
           <a href="comparison_table.html">Research an estate</a>
+          <a href="home_loan_planner.html">Plan a home loan</a>
           <button class="research-shell-copy" type="button">Copy report link</button>
         </span>`;
       const firstContent = Array.from(body.children).find(element =>
