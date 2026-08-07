@@ -36,6 +36,7 @@ def test_pages_landing_page_links_only_to_existing_html_reports():
     assert "condo_framework_comparison.html" in report_links
     assert "multi_condo_framework_comparison.html" in report_links
     assert "canberra_crescent_d27_deep_analysis.html" in report_links
+    assert "home_loan_planner.html" in report_links
     for number, slug in (
         (1, "micro_location"),
         (2, "newness"),
@@ -45,7 +46,7 @@ def test_pages_landing_page_links_only_to_existing_html_reports():
         (6, "planning_context"),
     ):
         assert f"canberra_strategy_{number}_{slug}.html" in report_links
-    assert len(report_links) == 22
+    assert len(report_links) == 23
     assert all((ROOT / href).is_file() for href in report_links)
 
 
@@ -69,6 +70,7 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     assets.mkdir()
     (assets / "research-shell.css").write_text("body {}", encoding="utf-8")
     (assets / "research-shell.js").write_text("void 0;", encoding="utf-8")
+    (assets / "home-loan-planner.js").write_text("void 0;", encoding="utf-8")
     (assets / "property-analysis.css").write_text("body {}", encoding="utf-8")
     transaction_assets = assets / "condo-transactions"
     transaction_assets.mkdir()
@@ -89,6 +91,8 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert (output / "reports.json").is_file()
         assert (output / "projects.json").is_file()
         assert (output / "assets" / "research-shell.css").is_file()
+        assert (output / "assets" / "home-loan-planner.js").is_file()
+        assert (output / "home_loan_planner.html").is_file()
         assert (
             output / "assets" / "condo-transactions" / "manifest.json"
         ).is_file()
