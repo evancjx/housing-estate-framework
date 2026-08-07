@@ -73,7 +73,10 @@ def _write_analysis(
 def test_real_property_analyses_are_discovered_newest_first():
     analyses = discover_property_analyses(ANALYSIS_DIR)
 
-    by_project = {analysis.project_name: analysis for analysis in analyses}
+    by_project = {
+        analysis.project_name: analysis
+        for analysis in latest_property_analyses(analyses)
+    }
     assert {
         "144A Lorong Sarina",
         "Arc at Tampines",
@@ -92,7 +95,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     )
     assert (
         by_project["The LakeGarden Residences"].captured_iso
-        == "2026-08-03T22:21:00+08:00"
+        == "2026-08-08T01:30:38+08:00"
     )
     assert (
         by_project["Canberra Crescent Residences"].captured_iso
@@ -123,6 +126,7 @@ def test_tanah_merah_property_analysis_portfolio_is_complete():
         "2026-07-27-144a-lorong-sarina.md",
         "2026-08-03-canberra-crescent-residences.md",
         "2026-08-03-the-lakegarden-residences.md",
+        "2026-08-08-the-lakegarden-residences.md",
         *TANAH_MERAH_PORTFOLIO,
     ),
 )
@@ -188,7 +192,7 @@ def test_new_launch_analysis_is_not_catalogued_as_resale_or_future(tmp_path):
 
 def test_real_lakegarden_card_and_page_show_new_launch_stage():
     analysis = parse_property_analysis(
-        ANALYSIS_DIR / "2026-08-03-the-lakegarden-residences.md"
+        ANALYSIS_DIR / "2026-08-08-the-lakegarden-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
     card = build_pages_site._property_cards([analysis])
@@ -197,12 +201,12 @@ def test_real_lakegarden_card_and_page_show_new_launch_stage():
     assert entry["market_stage"] == "new launch"
     assert " new launch " in card
     assert " resale " not in card
-    assert "Property analysis · New Launch · 03 Aug 2026" in card
+    assert "Property analysis · New Launch · 08 Aug 2026" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
-    assert 'id="september-2026-one-bedroom-owner-exit-analysis"' in page
-    assert "S$44,551" in page
-    assert "S$53,326" in page
+    assert 'id="gross-seller-premium"' in page
+    assert "S$129,300" in page
+    assert "S$65,572" in page
 
 
 def test_real_canberra_card_and_page_show_new_launch_quantum_analysis():
