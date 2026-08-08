@@ -30,6 +30,16 @@
       "featured": true
     },
     {
+      "id": "condo-loan-timeline-planner",
+      "path": "condo_loan_timeline_planner.html",
+      "title": "Condo timeline and funding ledger",
+      "category": "home-finance",
+      "kind": "tool",
+      "summary": "Model a BUC or completed condominium and allocate each acquisition cost and progressive payment across co-owners' cash, CPF and loan funding with an exact-dollar ledger.",
+      "tags": ["condominium", "BUC", "couple", "partner", "co-owner", "funding ledger", "progressive payment", "CPF"],
+      "featured": true
+    },
+    {
       "id": "mrt-comparison",
       "path": "mrt_comparison_table.html",
       "title": "MRT station comparison",

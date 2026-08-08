@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en-SG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Plan a Singapore condominium purchase, progressive bank loan and optional couple ownership with an exact-dollar, reconciled acquisition funding ledger.">
+<title>Condo timeline &amp; funding ledger · Singapore Estate Research Hub</title>
+<link rel="stylesheet" href="assets/research-shell.css">
+<style>
+  :root {
+    --ink:#172a25; --muted:#63736d; --line:#d5dfda; --paper:#f3f6f5; --card:#fff;
+    --accent:#08786d; --accent-dark:#075b54; --accent-soft:#e4f3ef; --warm:#d98719;
+    --warm-soft:#fff4df; --danger:#a93834; --danger-soft:#fff0ef; --blue:#32749b;
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  button,input,select { font:inherit; }
+  button { cursor:pointer; }
+  a { color:var(--accent-dark); }
+  main { max-width:1440px; margin:0 auto; padding:30px 20px 72px; }
+  .hero { display:grid; grid-template-columns:auto minmax(0,1fr); gap:22px; align-items:center;
+    padding:24px 18px 30px; }
+  .hero-icon { display:grid; width:70px; height:70px; place-items:center; border-radius:18px;
+    background:var(--accent-soft); color:var(--accent); font-size:35px; }
+  .eyebrow { margin:0 0 7px; color:var(--accent-dark); font-size:12px; font-weight:850;
+    letter-spacing:.09em; text-transform:uppercase; }
+  h1 { margin:0 0 8px; font-size:31px; line-height:1.12; letter-spacing:-.035em; }
+  .hero p:last-child { max-width:770px; margin:0; color:var(--muted); line-height:1.55; }
+  .local-note { margin:0 0 18px; padding:11px 15px; border-left:3px solid var(--accent);
+    background:#eaf6f3; color:#416159; font-size:13px; line-height:1.5; }
+  .planner-grid { display:grid; grid-template-columns:minmax(400px,.55fr) minmax(0,1fr);
+    gap:18px; align-items:start; }
+  .input-card,.result-card,.dashboard-card { border:1px solid var(--line); border-radius:8px;
+    background:var(--card); overflow:hidden; }
+  .input-card { grid-column:2; min-width:0; }
+  .card-head { padding:22px 24px 17px; border-bottom:1px solid var(--line); }
+  .card-head h2 { margin:0 0 5px; font-size:21px; }
+  .card-head p { margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
+  form { padding:22px 24px 24px; }
+  fieldset { min-width:0; margin:0; padding:0; border:0; }
+  legend,.form-section h3 { width:100%; margin:0 0 14px; color:var(--ink); font-size:15px;
+    font-weight:820; }
+  .form-section { margin-top:24px; padding-top:21px; border-top:1px solid #e2e9e6; }
+  .route-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .route-option { position:relative; }
+  .route-option input { position:absolute; width:1px; height:1px; opacity:0; }
+  .route-option label { display:block; height:100%; min-height:96px; margin:0; padding:14px;
+    border:1px solid #bac8c2; border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+  .route-option label b { display:block; margin-bottom:5px; font-size:14px; }
+  .route-option label small { display:block; color:var(--muted); font-size:11px; line-height:1.4; }
+  .route-option input:checked + label { border:2px solid var(--accent); padding:13px;
+    background:var(--accent-soft); }
+  .route-option input:focus-visible + label { outline:3px solid #f2a900; outline-offset:2px; }
+  .field { margin-bottom:17px; }
+  .field:last-child { margin-bottom:0; }
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+  label,.field-label { display:block; margin-bottom:7px; color:var(--muted); font-size:12px; }
+  input,select { width:100%; min-width:0; min-height:45px; padding:9px 10px; border:1px solid #b9c7c1;
+    border-radius:5px; background:white; color:var(--ink); font-size:15px; outline:none; }
+  input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  [aria-invalid="true"] { border-color:var(--danger); background:var(--danger-soft); }
+  .money-input { display:grid; grid-template-columns:43px minmax(0,1fr); border:1px solid #b9c7c1;
+    border-radius:5px; overflow:hidden; background:white; }
+  .money-input:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  .money-input span { display:grid; place-items:center; background:#f0f3f2; color:#53655e;
+    font-size:12px; font-weight:800; }
+  .money-input input { border:0; border-radius:0; box-shadow:none; font-weight:720; }
+  .unit-input { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+    border:1px solid #b9c7c1; border-radius:5px; overflow:hidden; background:white; }
+  .unit-input:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  .unit-input input { border:0; border-radius:0; box-shadow:none; }
+  .unit-input span { padding-right:11px; color:var(--muted); font-size:12px; font-weight:750; }
+  .help { margin:6px 0 0; color:#7a8983; font-size:11px; line-height:1.4; }
+  .route-fields { margin-top:15px; padding:14px; border-radius:6px; background:var(--accent-soft); }
+  .route-fields strong { display:block; margin-bottom:5px; font-size:13px; }
+  .route-fields p { margin:0 0 12px; color:#49635a; font-size:11px; line-height:1.45; }
+  details.advanced { margin-top:22px; border-top:1px solid #e1e8e4; }
+  details.advanced summary { padding:18px 0 4px; list-style:none; cursor:pointer; font-size:13px;
+    font-weight:780; }
+  details.advanced summary::-webkit-details-marker { display:none; }
+  details.advanced summary::before { content:"+"; display:inline-grid; width:18px; height:18px;
+    margin-right:8px; place-items:center; border:1px solid #94a49d; border-radius:3px; }
+  details.advanced[open] summary::before { content:"−"; }
+  .advanced-fields { padding-top:14px; }
+  details.compact-details { margin-top:14px; border:1px solid #cad6d1; border-radius:6px;
+    background:#f8faf9; overflow:hidden; }
+  details.compact-details > summary { display:flex; align-items:center; gap:10px; padding:13px 14px;
+    list-style:none; cursor:pointer; color:var(--ink); font-size:12px; font-weight:800; }
+  details.compact-details > summary::-webkit-details-marker { display:none; }
+  details.compact-details > summary::before { content:"+"; display:inline-grid; flex:0 0 auto;
+    width:20px; height:20px; place-items:center; border:1px solid #8fa29a; border-radius:4px; }
+  details.compact-details[open] > summary::before { content:"−"; }
+  details.compact-details > summary span { display:block; color:var(--muted); font-size:10px;
+    font-weight:500; line-height:1.35; }
+  .compact-details-body { padding:15px 14px 14px; border-top:1px solid #dce5e1; }
+  .actions { display:flex; gap:10px; margin-top:23px; }
+  .primary,.secondary { min-height:47px; padding:10px 16px; border-radius:5px; font-weight:800; }
+  .primary { flex:1; border:1px solid var(--accent); background:var(--accent); color:white; }
+  .primary:hover { background:var(--accent-dark); }
+  .secondary { border:1px solid #b9c7c1; background:white; color:var(--ink); }
+  .errors { margin:0 0 18px; padding:13px 16px; border:1px solid #e5b6b3; border-radius:6px;
+    background:var(--danger-soft); color:#7a2926; font-size:13px; }
+  .errors strong { display:block; margin-bottom:5px; }
+  .errors ul { margin:0; padding-left:20px; }
+  .errors a { color:inherit; }
+  .result-card { grid-column:1; grid-row:1; position:sticky; top:12px; align-self:start;
+    z-index:4; min-width:0;
+    max-height:calc(100vh - 24px); overflow:auto; overscroll-behavior:contain;
+    scrollbar-gutter:stable; box-shadow:0 14px 34px rgba(18,40,34,.08); }
+  .result-hero { padding:25px 27px 22px; background:linear-gradient(135deg,#f5fbf9 0%,#fff 66%); }
+  .result-hero h2 { margin:0 0 12px; font-size:23px; }
+  .verdict { margin:0; color:#435a51; font-size:15px; line-height:1.6; }
+  .kpis { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line); }
+  .kpi { min-width:0; padding:18px 20px; border-right:1px solid var(--line); }
+  .kpi:nth-child(3n) { border-right:0; }
+  .kpi:nth-child(n+4) { border-top:1px solid var(--line); }
+  .kpi span { display:block; min-height:30px; color:var(--muted); font-size:11px; line-height:1.35; }
+  .kpi output { display:block; margin-top:4px; font-size:20px; font-weight:850; letter-spacing:-.02em;
+    overflow-wrap:anywhere; }
+  .kpi small { display:block; margin-top:4px; color:#71817b; font-size:10px; line-height:1.35; }
+  .negative { color:var(--danger) !important; }
+  .positive { color:var(--accent-dark) !important; }
+  .ssd-banner { margin:20px 24px; padding:14px 15px; border-left:4px solid var(--warm);
+    background:var(--warm-soft); color:#665133; font-size:13px; line-height:1.5; }
+  .ssd-banner b { color:#47361e; }
+  .definitions { margin:0 24px 23px; padding-top:15px; border-top:1px solid #e1e8e4;
+    color:var(--muted); font-size:11px; line-height:1.55; }
+  .definitions b { color:var(--ink); }
+  .dashboard-card { grid-column:2; min-width:0; margin-top:18px; }
+  .dashboard-heading { display:flex; justify-content:space-between; gap:18px; align-items:end;
+    padding:22px 24px 17px; border-bottom:1px solid var(--line); }
+  .dashboard-heading h2 { margin:0 0 4px; font-size:21px; }
+  .dashboard-heading p { margin:0; color:var(--muted); font-size:12px; line-height:1.45; }
+  .dashboard-heading button { flex:0 0 auto; padding:8px 11px; border:1px solid #b9c7c1;
+    border-radius:4px; background:white; color:var(--ink); font-size:12px; font-weight:750; }
+  .scenario-wrap,.table-scroll { max-width:100%; overflow-x:auto; }
+  table { width:100%; min-width:720px; border-collapse:separate; border-spacing:0; font-size:12px; }
+  th,td { padding:13px 16px; border-bottom:1px solid #dce4e0; text-align:right; white-space:nowrap; }
+  th:first-child,td:first-child { text-align:left; }
+  thead th { background:#f7f9f8; color:var(--muted); font-weight:700; }
+  tbody th { color:#41564e; }
+  .scenario-base { background:#f0f8f5; }
+
+  /* Couple setup */
+  .partner-enable { display:flex; align-items:center; justify-content:space-between; gap:18px;
+    padding:14px; border:1px solid #c9d5d0; border-radius:6px; background:#f7faf9; }
+  .partner-enable label:first-child { margin:0; color:var(--ink); font-size:13px; font-weight:800; }
+  .partner-enable small { display:block; margin-top:4px; color:var(--muted); font-size:11px;
+    font-weight:400; line-height:1.4; }
+  .v3-switch { position:relative; flex:0 0 auto; width:50px; height:28px; margin:0; }
+  .v3-switch input { position:absolute; width:1px; height:1px; opacity:0; }
+  .v3-switch span { position:absolute; inset:0; border-radius:99px; background:#bac8c2; transition:.16s; }
+  .v3-switch span::after { content:""; position:absolute; top:3px; left:3px; width:22px; height:22px;
+    border-radius:50%; background:white; box-shadow:0 2px 5px rgba(0,0,0,.18); transition:.16s; }
+  .v3-switch input:checked + span { background:var(--accent); }
+  .v3-switch input:checked + span::after { transform:translateX(22px); }
+  .v3-switch input:focus-visible + span { outline:3px solid #f2a900; outline-offset:2px; }
+  .partner-settings { margin-top:13px !important; padding:0; background:var(--accent-soft) !important; }
+  .ownership-preview { display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin:-3px 0 13px; color:#4b635a; font-size:11px; }
+  .ownership-preview output { color:var(--ink); font-size:14px; font-weight:850; }
+  .regenerate-ledger { width:100%; min-height:42px; padding:8px 12px; border:1px solid var(--accent);
+    border-radius:5px; background:white; color:var(--accent-dark); font-size:12px; font-weight:800; }
+  .edit-couple-funding { display:inline-flex; align-items:center; justify-content:center; min-height:36px;
+    margin-bottom:8px; padding:7px 10px; border:1px solid #9fb8ae; border-radius:5px;
+    background:#f8fbfa; color:var(--accent-dark); font-size:11px; font-weight:800; }
+  .edit-couple-funding:hover { border-color:var(--accent); background:white; }
+  .couple-plan-status { display:block; margin:-2px 0 9px; color:#526b61; font-size:10px;
+    font-weight:750; line-height:1.4; }
+  .partner-form-note { margin:11px 0 0; color:#557067; font-size:10px; line-height:1.5; }
+  .draft-note { display:flex; align-items:center; gap:7px; margin:12px 0 0; color:#667871;
+    font-size:10px; line-height:1.45; }
+  .draft-note::before { content:""; flex:0 0 auto; width:7px; height:7px; border-radius:50%;
+    background:var(--accent); }
+
+  /* Couple funding setup dialog. The [open] rules also provide a readable non-modal fallback. */
+  .couple-funding-dialog { position:fixed; inset:0; width:min(760px,calc(100vw - 32px));
+    max-width:none; max-height:min(850px,calc(100dvh - 32px)); margin:auto; padding:0;
+    border:1px solid #b9c9c2; border-radius:12px; background:white; color:var(--ink);
+    box-shadow:0 26px 80px rgba(18,44,36,.3); overflow:hidden; }
+  .couple-funding-dialog:not([open]) { display:none; }
+  .couple-funding-dialog[open] { display:block; }
+  .couple-funding-dialog::backdrop { background:rgba(13,31,26,.58); backdrop-filter:blur(2px); }
+  .couple-funding-form { display:flex; flex-direction:column; max-height:min(850px,calc(100dvh - 32px));
+    padding:0; }
+  .couple-dialog-head { display:flex; justify-content:space-between; gap:22px; align-items:start;
+    padding:23px 25px 18px; border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg,#edf8f5 0%,#fff 76%); }
+  .couple-dialog-head h2 { margin:0 0 7px; font-size:23px; letter-spacing:-.025em; }
+  .couple-dialog-head p { max-width:620px; margin:0; color:#50665d; font-size:12px; line-height:1.55; }
+  .couple-dialog-close { flex:0 0 auto; display:grid; width:36px; height:36px; padding:0;
+    place-items:center; border:1px solid #bdcbc5; border-radius:50%; background:white; color:#40564d;
+    font-size:21px; line-height:1; }
+  .couple-dialog-body { min-height:0; padding:20px 25px 24px; overflow-y:auto; }
+  .couple-dialog-callout { margin:0 0 18px; padding:12px 14px; border-left:3px solid var(--accent);
+    background:#f0f7f5; color:#496259; font-size:11px; line-height:1.55; }
+  .couple-dialog-section { min-width:0; margin:0 0 20px; padding:0; border:0; }
+  .couple-dialog-section:last-child { margin-bottom:0; }
+  .couple-dialog-section legend,.couple-dialog-section h3 { margin:0 0 6px; color:var(--ink);
+    font-size:14px; font-weight:850; }
+  .couple-section-copy { margin:0 0 11px; color:var(--muted); font-size:10px; line-height:1.45; }
+  .borrower-options { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .borrower-option { position:relative; margin:0; }
+  .borrower-option input { position:absolute; width:1px; height:1px; opacity:0; }
+  .borrower-option label { display:block; height:100%; min-height:64px; margin:0; padding:11px 12px;
+    border:1px solid #bdcbc5; border-radius:6px; background:white; color:var(--ink); cursor:pointer; }
+  .borrower-option label b { display:block; margin-bottom:3px; font-size:12px; }
+  .borrower-option label small { display:block; color:var(--muted); font-size:9px; line-height:1.35; }
+  .borrower-option input:checked + label { border:2px solid var(--accent); padding:10px 11px;
+    background:var(--accent-soft); }
+  .borrower-option input:focus-visible + label { outline:3px solid #f2a900; outline-offset:2px; }
+  .couple-name-grid,.couple-owner-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .couple-owner-card { min-width:0; padding:14px; border:1px solid var(--line); border-radius:7px;
+    background:#fbfcfc; }
+  .couple-owner-card h4 { margin:0 0 5px; font-size:13px; }
+  .couple-owner-card > p { margin:0 0 12px; color:var(--muted); font-size:9px; line-height:1.4; }
+  .couple-owner-card .field { margin-bottom:12px; }
+  .couple-owner-card .field:last-child { margin-bottom:0; }
+  .couple-money-input { display:grid; grid-template-columns:39px minmax(0,1fr); border:1px solid #b9c7c1;
+    border-radius:5px; overflow:hidden; background:white; }
+  .couple-money-input:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(8,120,109,.14); }
+  .couple-money-input span { display:grid; place-items:center; background:#f0f3f2; color:#53655e;
+    font-size:10px; font-weight:800; }
+  .couple-money-input input { min-height:40px; border:0; border-radius:0; box-shadow:none;
+    text-align:right; font-size:13px; font-weight:750; font-variant-numeric:tabular-nums; }
+  .couple-reconciliation { display:grid; grid-template-columns:repeat(3,1fr); margin-top:18px;
+    border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .couple-reconciliation div { min-width:0; padding:13px 14px; border-right:1px solid var(--line);
+    background:#f8faf9; }
+  .couple-reconciliation div:last-child { border-right:0; }
+  .couple-reconciliation span { display:block; color:var(--muted); font-size:9px; line-height:1.35; }
+  .couple-reconciliation output { display:block; margin-top:5px; font-size:14px; font-weight:850;
+    overflow-wrap:anywhere; }
+  .couple-funding-errors { margin:14px 0 0; padding:10px 12px; border:1px solid #e5b6b3;
+    border-radius:5px; background:var(--danger-soft); color:#7a2926; font-size:11px; line-height:1.45; }
+  .couple-dialog-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px;
+    padding:14px 25px; border-top:1px solid var(--line); background:#f7f9f8; }
+  .couple-dialog-actions small { margin-right:auto; color:var(--muted); font-size:9px; line-height:1.35; }
+  .couple-dialog-actions button { min-height:41px; padding:8px 14px; border-radius:5px; font-weight:800; }
+  .couple-dialog-cancel { border:1px solid #b9c7c1; background:white; color:var(--ink); }
+  .couple-dialog-apply { border:1px solid var(--accent); background:var(--accent); color:white; }
+  .couple-dialog-apply:hover { background:var(--accent-dark); }
+
+  /* Exact-dollar acquisition ledger */
+  .ledger-heading-actions { display:flex; flex:0 0 auto; gap:9px; align-items:center; }
+  .ledger-badge { display:inline-flex; align-items:center; min-height:30px; padding:6px 10px;
+    border-radius:99px; font-size:11px; font-weight:850; white-space:nowrap; }
+  .ledger-badge-ok { background:var(--accent-soft); color:var(--accent-dark); }
+  .ledger-badge-warning { background:var(--warm-soft); color:#704b16; }
+  .ledger-stale { display:flex; justify-content:space-between; gap:14px; margin:16px 20px 0;
+    padding:11px 13px; border:1px solid #e9c98f; border-radius:5px; background:var(--warm-soft);
+    color:#674a20; font-size:12px; line-height:1.45; }
+  .ledger-stale strong { color:#4f3512; }
+  .ledger-errors { margin:16px 20px 0; padding:11px 13px; border:1px solid #e5b6b3;
+    border-radius:5px; background:var(--danger-soft); color:#7a2926; font-size:12px; }
+  .ledger-guide { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin:17px 20px 0;
+    border:1px solid var(--line); border-radius:6px; overflow:hidden; background:var(--line); }
+  .ledger-guide div { padding:12px 13px; background:#fbfcfc; }
+  .ledger-guide b { display:block; margin-bottom:4px; font-size:11px; }
+  .ledger-guide span { display:block; color:var(--muted); font-size:10px; line-height:1.4; }
+  .reconciliation-grid { display:grid; grid-template-columns:repeat(4,1fr); margin-top:17px;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .reconciliation-tile { min-width:0; padding:15px 17px; border-right:1px solid var(--line); }
+  .reconciliation-tile:last-child { border-right:0; }
+  .reconciliation-tile span,.payer-tile span,.outcome-tile span { display:block; color:var(--muted);
+    font-size:10px; line-height:1.35; }
+  .reconciliation-tile output { display:block; margin-top:6px; font-size:13px; font-weight:850;
+    line-height:1.35; overflow-wrap:anywhere; }
+  .payer-summary { display:grid; grid-template-columns:repeat(5,1fr); border-bottom:1px solid var(--line); }
+  .payer-tile { min-width:0; padding:14px 17px; border-right:1px solid var(--line); }
+  .payer-tile:last-child { border-right:0; }
+  .payer-tile output { display:block; margin-top:5px; font-size:15px; font-weight:850; }
+  .outcome-summary { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--line); }
+  .outcome-tile { padding:13px 17px; border-right:1px solid var(--line); }
+  .outcome-tile:last-child { border-right:0; }
+  .outcome-tile output { display:block; margin-top:5px; font-size:13px; font-weight:820; }
+  .ledger-table-wrap { margin-top:16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    overflow-x:auto; overscroll-behavior-inline:contain; }
+  #funding-ledger-card table { min-width:2110px; table-layout:fixed; font-size:11px; }
+  #funding-ledger-card col:nth-child(1) { width:135px; }
+  #funding-ledger-card col:nth-child(2) { width:235px; }
+  #funding-ledger-card col:nth-child(3) { width:165px; }
+  #funding-ledger-card col:nth-child(4) { width:145px; }
+  #funding-ledger-card col:nth-child(5) { width:90px; }
+  #funding-ledger-card col:nth-child(n+6):nth-child(-n+12) { width:135px; }
+  #funding-ledger-card col:nth-child(13) { width:175px; }
+  #funding-ledger-card col:nth-child(14) { width:70px; }
+  #funding-ledger-card th,#funding-ledger-card td { height:58px; padding:9px 8px; vertical-align:middle; }
+  #funding-ledger-card thead th { position:sticky; top:0; z-index:3; border-bottom:1px solid #cbd7d1;
+    text-align:right; }
+  #funding-ledger-card thead th:nth-child(-n+3) { text-align:left; }
+  #funding-ledger-card td:nth-child(5),#funding-ledger-card td:nth-child(n+11):nth-child(-n+13) {
+    font-weight:760; }
+  #funding-ledger-card th:nth-child(1),#funding-ledger-card td:nth-child(1) { position:sticky; left:0;
+    z-index:2; background:white; box-shadow:1px 0 #dce4e0; }
+  #funding-ledger-card th:nth-child(2),#funding-ledger-card td:nth-child(2) { position:sticky; left:135px;
+    z-index:2; background:white; box-shadow:1px 0 #dce4e0; }
+  #funding-ledger-card thead th:nth-child(-n+2) { z-index:5; background:#f7f9f8; }
+  #funding-ledger-card tfoot th,#funding-ledger-card tfoot td { border-top:2px solid var(--ink);
+    border-bottom:0; background:#f7f9f8; font-weight:850; }
+  #funding-ledger-card tfoot th { position:sticky; left:0; z-index:3; text-align:left; }
+  .ledger-input { min-height:38px; padding:6px 7px; font-size:11px; font-weight:650; }
+  .ledger-action { text-align:left; }
+  .ledger-paymentAmount,.ledger-primaryCash,.ledger-primaryCpf,.ledger-loan,
+  .ledger-partnerCash,.ledger-partnerCpf { text-align:right; font-variant-numeric:tabular-nums; }
+  .ledger-row-warning td { background:#fff9ed; }
+  .ledger-row-warning td:nth-child(-n+2) { background:#fff9ed !important; }
+  .ledger-status-ok { color:var(--accent-dark); font-weight:800; }
+  .ledger-status-bad { color:var(--danger); font-weight:800; white-space:normal; line-height:1.35; }
+  .ledger-remove { width:34px; height:34px; padding:0; border:1px solid #d9aaa7; border-radius:5px;
+    background:white; color:var(--danger); font-size:19px; line-height:1; }
+  .ledger-remove:hover { background:var(--danger-soft); }
+  .ledger-footnote { margin:13px 20px 18px; color:#63756e; font-size:10px; line-height:1.55; }
+
+  .timeline-wrap { padding:22px 24px 25px; overflow-x:auto; }
+  .timeline { position:relative; display:flex; gap:0; min-width:max-content; padding:12px 5px 5px; }
+  .timeline::before { content:""; position:absolute; top:28px; left:35px; right:35px; height:3px;
+    background:#d8e2dd; }
+  .event { position:relative; width:160px; padding:39px 10px 8px; }
+  .event::before { content:""; position:absolute; top:9px; left:16px; width:15px; height:15px;
+    border:4px solid white; border-radius:50%; background:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+  .event.sale::before { background:var(--warm); box-shadow:0 0 0 2px var(--warm); }
+  .event.after-sale { opacity:.48; }
+  .event time { display:block; color:var(--muted); font-size:10px; font-weight:750; }
+  .event b { display:block; margin:5px 0; font-size:12px; line-height:1.3; }
+  .event small { display:block; color:#667770; font-size:10px; line-height:1.45; }
+  .chart-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr); }
+  .chart-panel { min-width:0; padding:22px 24px; border-right:1px solid var(--line); }
+  .chart-panel h3,.waterfall h3 { margin:0 0 5px; font-size:16px; }
+  .chart-panel > p,.waterfall > p { margin:0 0 15px; color:var(--muted); font-size:11px; line-height:1.45; }
+  .legend { display:flex; flex-wrap:wrap; gap:13px; margin-bottom:9px; color:#5d6e67; font-size:10px; }
+  .legend span::before { content:""; display:inline-block; width:17px; height:3px; margin:0 5px 3px 0;
+    background:var(--accent); }
+  .legend span:last-child::before { background:var(--warm); }
+  #loan-value-chart { display:block; width:100%; height:auto; min-height:240px; }
+  .chart-axis { stroke:#cdd8d3; stroke-width:1; }
+  .chart-value { fill:none; stroke:var(--accent); stroke-width:4; }
+  .chart-obligation { fill:none; stroke:var(--warm); stroke-width:4; }
+  .chart-fill { fill:rgba(8,120,109,.07); }
+  .chart-label { fill:#687a72; font-size:11px; }
+  .waterfall { padding:22px 24px; }
+  .waterfall dl { margin:0; }
+  .waterfall div { display:grid; grid-template-columns:1fr auto; gap:15px; padding:9px 0;
+    border-bottom:1px solid #e0e7e3; }
+  .waterfall dt { color:var(--muted); font-size:12px; }
+  .waterfall dd { margin:0; text-align:right; font-size:12px; font-weight:750; }
+  .waterfall .total { margin-top:5px; padding-top:14px; border-top:2px solid var(--ink); border-bottom:0; }
+  .waterfall .total dt,.waterfall .total dd { color:var(--ink); font-size:15px; font-weight:850; }
+  .waterfall-note { margin-top:14px !important; padding:10px 11px; background:#f4f7f6; }
+  .schedule-caption { padding:13px 16px; color:var(--muted); text-align:left; font-size:11px; }
+  .method { padding:18px 24px 23px; }
+  .method summary { cursor:pointer; font-size:14px; font-weight:800; }
+  .method-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:17px; }
+  .method h3 { margin:0 0 7px; font-size:13px; }
+  .method p,.method li { color:var(--muted); font-size:11px; line-height:1.55; }
+  .method ul { margin:7px 0 0; padding-left:18px; }
+  .formula { padding:9px 10px; border-radius:4px; background:#f3f6f5; color:#40554d;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; overflow-wrap:anywhere; }
+  .disclaimer { grid-column:2; margin:24px 12px 0; color:#778680; text-align:center;
+    font-size:11px; line-height:1.65; }
+  .sources { grid-column:2; margin-top:12px; color:#78867f; text-align:center;
+    font-size:11px; line-height:1.7; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  :focus-visible { outline:3px solid #f2a900; outline-offset:2px; }
+
+  @media(min-width:921px) {
+    .result-card .kpi { padding:16px 14px; }
+    .result-card .kpi output { font-size:clamp(16px,1.25vw,18px); white-space:nowrap;
+      overflow-wrap:normal; font-variant-numeric:tabular-nums; }
+  }
+  @media(max-width:920px) {
+    .hero { grid-template-columns:auto 1fr; }
+    .planner-grid { grid-template-columns:1fr; }
+    .input-card,.result-card,.dashboard-card,.disclaimer,.sources { grid-column:1; }
+    .result-card { grid-row:auto; position:static; max-height:none; overflow:hidden; box-shadow:none; }
+    .chart-grid { grid-template-columns:1fr; }
+    .chart-panel { border-right:0; border-bottom:1px solid var(--line); }
+    .reconciliation-grid { grid-template-columns:1fr 1fr; }
+    .reconciliation-tile:nth-child(2) { border-right:0; }
+    .reconciliation-tile:nth-child(n+3) { border-top:1px solid var(--line); }
+    .payer-summary { grid-template-columns:repeat(3,1fr); }
+    .payer-tile:nth-child(3) { border-right:0; }
+    .payer-tile:nth-child(n+4) { border-top:1px solid var(--line); }
+  }
+  @media(max-width:650px) {
+    main { padding:12px 0 55px; }
+    .hero { grid-template-columns:1fr; padding:28px 20px 23px; text-align:center; }
+    .hero-icon { margin:auto; }
+    h1 { font-size:24px; }
+    .local-note { margin:0 12px 15px; }
+    .input-card,.result-card,.dashboard-card { border-radius:4px; }
+    .card-head,form,.result-hero { padding-left:18px; padding-right:18px; }
+    .route-grid,.field-row,.method-grid { grid-template-columns:1fr; }
+    .route-option label { min-height:72px; }
+    .kpis { grid-template-columns:1fr 1fr; }
+    .kpi,.kpi:nth-child(3n) { border-right:1px solid var(--line); }
+    .kpi:nth-child(2n) { border-right:0; }
+    .kpi:nth-child(n+3) { border-top:1px solid var(--line); }
+    .dashboard-heading { align-items:start; padding-left:18px; padding-right:18px; }
+    .ledger-heading-actions { flex-direction:column; align-items:end; }
+    .ledger-guide { grid-template-columns:1fr; margin-left:14px; margin-right:14px; }
+    .reconciliation-grid { grid-template-columns:1fr; }
+    .reconciliation-tile,.reconciliation-tile:nth-child(2) { border-right:0; }
+    .reconciliation-tile:nth-child(n+2) { border-top:1px solid var(--line); }
+    .payer-summary { grid-template-columns:1fr 1fr; }
+    .payer-tile,.payer-tile:nth-child(3) { border-right:1px solid var(--line); }
+    .payer-tile:nth-child(2n) { border-right:0; }
+    .payer-tile:nth-child(n+3) { border-top:1px solid var(--line); }
+    .payer-tile:last-child { grid-column:1/-1; }
+    .outcome-summary { grid-template-columns:1fr; }
+    .outcome-tile { border-right:0; }
+    .outcome-tile + .outcome-tile { border-top:1px solid var(--line); }
+    .couple-funding-dialog { width:calc(100vw - 16px); max-height:calc(100dvh - 16px);
+      border-radius:9px; }
+    .couple-funding-form { max-height:calc(100dvh - 16px); }
+    .couple-dialog-head { padding:19px 18px 15px; }
+    .couple-dialog-head h2 { font-size:20px; }
+    .couple-dialog-body { padding:17px 18px 20px; }
+    .borrower-options,.couple-name-grid,.couple-owner-grid,.couple-reconciliation {
+      grid-template-columns:1fr; }
+    .borrower-option label { min-height:54px; }
+    .couple-reconciliation div { border-right:0; border-bottom:1px solid var(--line); }
+    .couple-reconciliation div:last-child { border-bottom:0; }
+    .couple-dialog-actions { flex-wrap:wrap; padding:12px 18px; }
+    .couple-dialog-actions small { flex:1 0 100%; margin:0 0 2px; }
+    #funding-ledger-card th:nth-child(2),#funding-ledger-card td:nth-child(2) { position:static; }
+    .timeline-wrap,.chart-panel,.waterfall,.method { padding-left:18px; padding-right:18px; }
+    .event { width:145px; }
+    .ssd-banner,.definitions { margin-left:18px; margin-right:18px; }
+    .actions { flex-direction:column; }
+    .secondary { order:2; }
+    .disclaimer,.sources { margin-left:18px; margin-right:18px; text-align:left; }
+  }
+  @media(max-width:390px) {
+    .kpis { grid-template-columns:1fr; }
+    .kpi,.kpi:nth-child(2n),.kpi:nth-child(3n) { border-right:0; }
+    .kpi:nth-child(n+2) { border-top:1px solid var(--line); }
+    .dashboard-heading { flex-direction:column; align-items:start; }
+    .ledger-heading-actions { align-items:start; }
+  }
+  @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
+  @media print {
+    .research-shell-nav,.research-shell-skip,.hero-icon,.local-note,.actions,
+    .dashboard-heading button,.ledger-remove,.couple-funding-dialog { display:none !important; }
+    body { background:white; }
+    main { max-width:none; padding:0; }
+    .planner-grid { display:block; }
+    .input-card,.result-card { position:static; max-height:none; overflow:visible; box-shadow:none; }
+    .input-card { margin-bottom:15px; }
+    details.advanced:not([open]) .advanced-fields,
+    details.compact-details:not([open]) .compact-details-body { display:block; }
+    .dashboard-card,.input-card,.result-card { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<main id="research-content">
+  <header class="hero">
+    <span class="hero-icon" aria-hidden="true">⌂</span>
+    <div>
+      <p class="eyebrow">Interactive condo planner · Exact-dollar funding</p>
+      <h1>Condo timeline &amp; funding ledger</h1>
+      <p>Model a BUC or completed-property holding path, then allocate every purchase payment and acquisition cost across each owner’s cash, CPF and the selected bank loan.</p>
+    </div>
+  </header>
+
+  <p class="local-note"><strong>Funding stays transparent:</strong> purchase consideration, acquisition costs and timeline-only actions remain distinct. Exact-dollar entries stay in this browser and are checked against the entered price and loan.</p>
+
+  <div class="planner-grid">
+    <section class="input-card" aria-labelledby="inputs-title">
+      <div class="card-head"><h2 id="inputs-title">Build your holding plan</h2><p>Start with the essential figures. Open the optional sections only when you need more control.</p></div>
+      <form id="timeline-form" novalidate>
+        <div class="errors" id="planner-errors" role="alert" aria-live="polite" hidden></div>
+
+        <fieldset>
+          <legend>1. What are you buying?</legend>
+          <div class="route-grid">
+            <div class="route-option"><input id="route-buc" name="property-route" type="radio" value="buc" checked><label for="route-buc"><b>Under construction (BUC)</b><small>Loan drawdowns and instalments rise with construction progress.</small></label></div>
+            <div class="route-option"><input id="route-resale" name="property-route" type="radio" value="resale"><label for="route-resale"><b>Completed / resale condo</b><small>The full loan is drawn at completion.</small></label></div>
+          </div>
+        </fieldset>
+
+        <section class="form-section" aria-labelledby="purchase-title">
+          <h3 id="purchase-title">2. Essential purchase details</h3>
+          <div class="field-row">
+            <div class="field"><label for="purchase-price">Purchase price</label><div class="money-input"><span>S$</span><input id="purchase-price" type="text" value="1,600,000" inputmode="decimal" data-currency-input></div></div>
+            <div class="field"><label for="loan-amount">Loan amount</label><div class="money-input"><span>S$</span><input id="loan-amount" type="text" value="1,200,000" inputmode="decimal" data-currency-input></div><p class="help" id="ltv-help">Downpayment and LTV are derived automatically.</p></div>
+          </div>
+          <div class="field"><label for="acquisition-date">Legal acquisition date</label><input id="acquisition-date" type="date" value="2026-08-08" aria-describedby="acquisition-help"><p class="help" id="acquisition-help">Used for growth and SSD; confirm the controlling instrument date.</p></div>
+          <div class="route-fields" id="buc-fields" data-route-panel="buc">
+            <strong>BUC construction timing</strong>
+            <p>A standard schedule is generated as a starting point. Replace it with the dates and exact amounts in your signed agreement.</p>
+            <label for="buc-top-date">Expected Temporary Occupation Permit (TOP)</label><input id="buc-top-date" type="date" value="2030-08-08">
+          </div>
+          <div class="route-fields" id="resale-fields" data-route-panel="resale" hidden>
+            <strong>Completed-property timing</strong>
+            <p>The full purchase and loan draw are modelled at completion.</p>
+            <label for="resale-completion-date">Completion / full loan draw date</label><input id="resale-completion-date" type="date" value="2026-10-08">
+          </div>
+          <details class="compact-details" id="property-loan-details">
+            <summary>More property and loan assumptions <span>Project name, area, interest rate and tenure</span></summary>
+            <div class="compact-details-body">
+              <div class="field"><label for="project-name">Project name <span aria-hidden="true">(optional)</span></label><input id="project-name" type="text" value="My condominium" autocomplete="off"></div>
+              <div class="field"><label for="area-sqft">Strata area</label><div class="unit-input"><input id="area-sqft" type="number" min="1" step="1" value="700" inputmode="numeric"><span>sq ft</span></div></div>
+              <div class="field-row">
+                <div class="field"><label for="loan-rate">Illustration interest rate</label><div class="unit-input"><input id="loan-rate" type="number" min="0" max="20" step="0.01" value="3.00" inputmode="decimal"><span>% p.a.</span></div></div>
+                <div class="field"><label for="loan-years">Loan tenure</label><div class="unit-input"><input id="loan-years" type="number" min="1" max="35" step="1" value="30" inputmode="numeric"><span>years</span></div></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="form-section" aria-labelledby="ownership-title">
+          <h3 id="ownership-title">3. Couple ownership and funding</h3>
+          <div class="partner-enable">
+            <label for="partner-enabled">Include a partner / co-owner<small>Enable legal ownership fields and the exact-dollar acquisition ledger.</small></label>
+            <label class="v3-switch" aria-label="Include a partner or co-owner"><input id="partner-enabled" type="checkbox" aria-controls="partner-settings funding-ledger-card" aria-expanded="false"><span aria-hidden="true"></span></label>
+          </div>
+          <details class="partner-settings compact-details" id="partner-settings" hidden>
+            <summary>Partner settings <span>Legal ownership and the saved funding setup</span></summary>
+            <div class="compact-details-body">
+              <input id="primary-owner-name" type="hidden" value="Owner 1">
+              <input id="partner-owner-name" type="hidden" value="Partner">
+              <input id="default-partner-payment-share" type="hidden" value="50">
+              <div class="field"><label for="partner-ownership-share">Partner legal ownership share</label><div class="unit-input"><input id="partner-ownership-share" type="number" min="0" max="100" step="0.1" value="50" inputmode="decimal"><span>%</span></div></div>
+              <div class="ownership-preview"><span>Primary owner’s legal share</span><output id="primary-ownership-preview">50%</output></div>
+              <button class="edit-couple-funding" id="edit-couple-funding" type="button">Edit couple funding setup</button>
+              <output class="couple-plan-status" id="couple-plan-status" aria-live="polite">Complete the couple funding setup</output>
+              <button class="regenerate-ledger" id="regenerate-funding-ledger" type="button">Rebuild ledger from couple funding setup</button>
+              <p class="partner-form-note">Legal ownership allocates only the projected outcome. Rebuilding replaces manual ledger-row edits using the saved cash and CPF setup. Borrower labels do not determine legal bank liability.</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="form-section" aria-labelledby="exit-title">
+          <h3 id="exit-title">4. Growth and planned sale</h3>
+          <div class="field-row">
+            <div class="field"><label for="annual-growth">Annualised property growth</label><div class="unit-input"><input id="annual-growth" type="number" min="-99" max="30" step="0.1" value="3.0" inputmode="decimal"><span>% p.a.</span></div><p class="help">Compounded from purchase date to sale date.</p></div>
+            <div class="field"><label for="sale-date">When do you plan to sell?</label><input id="sale-date" type="date" value="2031-08-08"></div>
+          </div>
+        </section>
+
+        <details class="advanced" id="advanced-cost-details">
+          <summary>Optional costs, duties and proceeds</summary>
+          <div class="advanced-fields">
+            <div class="field"><label for="selling-cost-percent">Selling cost allowance</label><div class="unit-input"><input id="selling-cost-percent" type="number" min="0" max="20" step="0.01" value="2.18" inputmode="decimal"><span>% of price</span></div><p class="help">Default illustrates 2% agency fee plus 9% GST; enter your own assumption.</p></div>
+            <div class="field"><label for="purchase-market-value">Purchase market value <span aria-hidden="true">(optional)</span></label><div class="money-input"><span>S$</span><input id="purchase-market-value" type="text" value="" placeholder="Uses purchase price" inputmode="decimal" data-currency-input></div><p class="help">BSD is modelled on the higher entered purchase price or market value.</p></div>
+            <div class="field"><label for="absd-paid">ABSD actually paid and not refunded</label><div class="money-input"><span>S$</span><input id="absd-paid" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">Enter the net amount yourself; eligibility and remission are not inferred.</p></div>
+            <div class="field-row">
+              <div class="field"><label for="purchase-legal">Purchase legal costs</label><div class="money-input"><span>S$</span><input id="purchase-legal" type="text" value="3,000" inputmode="decimal" data-currency-input></div></div>
+              <div class="field"><label for="purchase-other">Other purchase costs</label><div class="money-input"><span>S$</span><input id="purchase-other" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+            </div>
+            <div class="field"><label for="sale-market-value">Sale market value for SSD <span aria-hidden="true">(optional)</span></label><div class="money-input"><span>S$</span><input id="sale-market-value" type="text" value="" placeholder="Uses projected sale price" inputmode="decimal" data-currency-input></div><p class="help">SSD uses the higher applicable sale price or market value.</p></div>
+            <div class="field-row">
+              <div class="field"><label for="sale-legal">Sale legal costs</label><div class="money-input"><span>S$</span><input id="sale-legal" type="text" value="3,000" inputmode="decimal" data-currency-input></div></div>
+              <div class="field"><label for="sale-other">Other sale / assignment costs</label><div class="money-input"><span>S$</span><input id="sale-other" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="holding-costs">Total holding costs to sale</label><div class="money-input"><span>S$</span><input id="holding-costs" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+              <div class="field"><label for="net-rent">Net rent received to sale</label><div class="money-input"><span>S$</span><input id="net-rent" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+            </div>
+            <div class="field"><label for="cpf-refund">CPF principal plus accrued interest to refund</label><div class="money-input"><span>S$</span><input id="cpf-refund" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">This changes cash released, not economic profit.</p></div>
+          </div>
+        </details>
+
+        <div class="actions"><button class="primary" type="submit">Update projection</button><button class="secondary" id="reset-plan" type="reset">Reset draft</button></div>
+        <p class="draft-note"><span id="draft-save-status" role="status" aria-live="polite">Draft saves automatically in this browser. Reset clears it.</span></p>
+      </form>
+    </section>
+
+    <section class="result-card" id="results-panel" aria-labelledby="result-heading">
+      <div class="result-hero">
+        <p class="eyebrow" id="result-route">BUC holding scenario</p>
+        <h2 id="result-heading" tabindex="-1">Your planned exit at a glance</h2>
+        <p class="verdict" id="result-verdict">Calculating your holding projection…</p>
+        <span class="sr-only" id="result-live" role="status" aria-live="polite"></span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Projected sale price</span><output id="kpi-sale-price">—</output><small id="kpi-sale-psf">—</small></div>
+        <div class="kpi"><span>Gross price CAGR</span><output id="kpi-gross-cagr">—</output><small>Before every cost</small></div>
+        <div class="kpi"><span>Outstanding bank loan</span><output id="kpi-loan-balance">—</output><small id="kpi-loan-drawn">—</small></div>
+        <div class="kpi"><span>Economic profit after entered costs</span><output id="kpi-economic-profit">—</output><small id="kpi-net-return">—</small></div>
+        <div class="kpi"><span>Estimated cash released</span><output id="kpi-cash-released">—</output><small>After loan, developer balance, SSD and CPF refund</small></div>
+        <div class="kpi"><span>Growth needed to break even</span><output id="kpi-break-even-growth">—</output><small id="kpi-break-even-price">—</small></div>
+      </div>
+      <div class="ssd-banner" id="ssd-banner">Checking the applicable Seller’s Stamp Duty window…</div>
+      <p class="definitions"><b>Keep the measures separate:</b> gross price gain ignores every cost. Capital profit includes purchase and sale costs but excludes financing. Economic profit also includes modelled mortgage interest and entered holding income/costs. Cash released after redemption is not the same as profit.</p>
+    </section>
+
+  <section class="dashboard-card" aria-labelledby="scenario-title">
+    <div class="dashboard-heading"><div><h2 id="scenario-title">Growth sensitivity</h2><p>Downside and upside use your annual growth assumption minus or plus 1 percentage point.</p></div></div>
+    <div class="scenario-wrap" role="region" aria-label="Scrollable growth scenario comparison" tabindex="0">
+      <table><thead><tr><th scope="col">Measure</th><th scope="col">Downside</th><th class="scenario-base" scope="col">Your assumption</th><th scope="col">Upside</th></tr></thead><tbody id="scenario-body"></tbody></table>
+    </div>
+  </section>
+
+  <section class="dashboard-card" id="funding-ledger-card" aria-labelledby="funding-ledger-title" hidden>
+    <div class="dashboard-heading">
+      <div><h2 id="funding-ledger-title">Acquisition funding ledger</h2><p id="ledger-route-copy">BUC funding ledger · purchase payments, acquisition costs and timeline-only actions</p></div>
+      <div class="ledger-heading-actions"><span class="ledger-badge ledger-badge-ok" id="ledger-overall-status" role="status">All rows and totals reconcile</span><button id="add-funding-row" type="button">+ Add row</button></div>
+    </div>
+    <div class="ledger-stale" id="ledger-stale" role="status" hidden><span><strong>The generated plan has changed.</strong> Your exact-dollar edits were kept, so the ledger may no longer match the property inputs.</span><span>Review it or use “Regenerate ledger” above.</span></div>
+    <p class="ledger-errors" id="funding-ledger-errors" role="alert" aria-live="polite" hidden></p>
+
+    <div class="ledger-guide" aria-label="Ledger row type definitions">
+      <div><b>Property payment</b><span>Purchase consideration. Counts toward the price and can include a bank-loan draw.</span></div>
+      <div><b>Acquisition cost</b><span>BSD, legal fees and other costs. Included in owner outlay, never in the purchase price.</span></div>
+      <div><b>Timeline note</b><span>A dated action such as receiving or exercising the S&amp;P. No amount or funding.</span></div>
+    </div>
+
+    <div class="reconciliation-grid" aria-label="Ledger reconciliation">
+      <div class="reconciliation-tile"><span>Purchase consideration</span><output id="ledger-purchase-reconciliation">—</output></div>
+      <div class="reconciliation-tile"><span>Scheduled bank loan</span><output id="ledger-loan-reconciliation">—</output></div>
+      <div class="reconciliation-tile"><span>Owner-funded consideration</span><output id="ledger-equity-reconciliation">—</output></div>
+      <div class="reconciliation-tile"><span>Acquisition fees and duties</span><output id="ledger-cost-reconciliation">—</output></div>
+    </div>
+
+    <div class="payer-summary" aria-label="Funding source totals">
+      <div class="payer-tile"><span id="ledger-primary-cash-heading">Owner 1 cash</span><output id="ledger-primary-cash-total">—</output></div>
+      <div class="payer-tile"><span id="ledger-primary-cpf-heading">Owner 1 CPF</span><output id="ledger-primary-cpf-total">—</output></div>
+      <div class="payer-tile"><span id="ledger-loan-heading">Joint bank loan</span><output id="ledger-loan-total">—</output></div>
+      <div class="payer-tile"><span id="ledger-partner-cash-heading">Partner cash</span><output id="ledger-partner-cash-total">—</output></div>
+      <div class="payer-tile"><span id="ledger-partner-cpf-heading">Partner CPF</span><output id="ledger-partner-cpf-total">—</output></div>
+    </div>
+
+    <div class="outcome-summary" aria-label="Illustrative ownership outcome">
+      <div class="outcome-tile"><span>Primary owner · projected cash released by legal ownership</span><output id="ledger-owner-outcome">—</output></div>
+      <div class="outcome-tile"><span>Partner · projected cash released by legal ownership</span><output id="ledger-partner-outcome">—</output></div>
+    </div>
+
+    <div class="ledger-table-wrap table-scroll" role="region" aria-label="Scrollable exact-dollar acquisition funding ledger" tabindex="0">
+      <table>
+        <colgroup><col><col><col><col><col><col><col><col><col><col><col><col><col><col></colgroup>
+        <thead><tr>
+          <th scope="col">Date</th><th scope="col">Action</th><th scope="col">Type</th><th scope="col">Payment amount</th><th scope="col">% of price</th>
+          <th scope="col">Owner cash</th><th scope="col">Owner CPF</th><th id="ledger-loan-column-heading" scope="col">Joint loan</th><th scope="col">Partner cash</th><th scope="col">Partner CPF</th>
+          <th scope="col">Allocated</th><th scope="col">Difference</th><th scope="col">Check</th><th scope="col">Remove</th>
+        </tr></thead>
+        <tbody id="funding-ledger-body"></tbody>
+        <tfoot><tr>
+          <th colspan="3" scope="row">Full acquisition ledger</th><td id="ledger-payment-total">—</td><td>—</td>
+          <td id="ledger-primary-cash-footer">—</td><td id="ledger-primary-cpf-footer">—</td><td id="ledger-loan-footer">—</td><td id="ledger-partner-cash-footer">—</td><td id="ledger-partner-cpf-footer">—</td>
+          <td id="ledger-allocated-footer">—</td><td id="ledger-difference-footer">—</td><td>—</td><td aria-label="No action">—</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <p class="ledger-footnote">Enter the sample dates and exact amounts directly in the rows above. Each monetary row balances only when its five funding sources equal its payment amount. Ledger-edited dates and amounts are planning allocations: they do not rewrite the base loan-interest schedule unless you change the main property inputs and regenerate the ledger. Purchase-price, loan, owner-equity and acquisition-cost checks remain independent.</p>
+  </section>
+
+  <section class="dashboard-card" aria-labelledby="timeline-title">
+    <div class="dashboard-heading"><div><h2 id="timeline-title">Property and loan timeline</h2><p id="timeline-copy">BUC progress calls, owner contributions, bank draws and the selected sale date.</p></div><button id="print-plan" type="button">Print / save PDF</button></div>
+    <div class="timeline-wrap" role="region" aria-label="Scrollable property and loan events" tabindex="0"><div class="timeline" id="timeline-events"></div></div>
+  </section>
+
+  <section class="dashboard-card" aria-labelledby="chart-title">
+    <div class="dashboard-heading"><div><h2 id="chart-title">Value versus remaining obligations</h2><p>Property value follows your growth input. Obligations combine the outstanding loan and uncalled BUC payments.</p></div></div>
+    <div class="chart-grid">
+      <div class="chart-panel">
+        <h3>Holding-path chart</h3><p>Modelled checkpoints from acquisition to sale.</p>
+        <div class="legend" aria-hidden="true"><span>Property value</span><span>Loan + uncalled developer balance</span></div>
+        <svg id="loan-value-chart" viewBox="0 0 820 300" role="img" aria-label="Chart of projected property value and remaining obligations through the planned sale date">
+          <line class="chart-axis chart-axis-y" x1="65" y1="20" x2="65" y2="255"></line><line class="chart-axis chart-axis-x" x1="65" y1="255" x2="800" y2="255"></line>
+          <path class="chart-fill" id="chart-fill" d=""></path><polyline class="chart-value" id="chart-value-line" points=""></polyline><polyline class="chart-obligation" id="chart-obligation-line" points=""></polyline>
+          <text class="chart-label" id="chart-y-top" x="5" y="27">—</text><text class="chart-label" x="21" y="259">S$0</text><text class="chart-label" id="chart-x-start" x="65" y="280">—</text><text class="chart-label" id="chart-x-end" x="800" y="280" text-anchor="end">—</text>
+        </svg>
+      </div>
+      <aside class="waterfall" aria-labelledby="waterfall-title">
+        <h3 id="waterfall-title">Sale proceeds waterfall</h3><p>What is deducted from the projected selling price before cash is released.</p>
+        <dl>
+          <div><dt>Projected sale price</dt><dd id="waterfall-sale">—</dd></div>
+          <div><dt>Uncalled developer payments</dt><dd id="waterfall-uncalled">—</dd></div>
+          <div><dt>Outstanding bank loan</dt><dd id="waterfall-loan">—</dd></div>
+          <div><dt>Selling allowance</dt><dd id="waterfall-selling">—</dd></div>
+          <div><dt>Seller’s Stamp Duty</dt><dd id="waterfall-ssd">—</dd></div>
+          <div><dt>Sale legal / other costs</dt><dd id="waterfall-fixed">—</dd></div>
+          <div><dt>CPF refund entered</dt><dd id="waterfall-cpf">—</dd></div>
+          <div class="total"><dt id="waterfall-total-label">Estimated cash released</dt><dd id="waterfall-total">—</dd></div>
+        </dl>
+        <p class="waterfall-note">Cash released is not investment profit. Loan principal repayment and CPF refund move owner equity; they are not additional property losses.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="dashboard-card" aria-labelledby="schedule-title">
+    <div class="dashboard-heading"><div><h2 id="schedule-title">Annual holding checkpoints</h2><p>Each row estimates the property, loan and owner equity on that date.</p></div></div>
+    <div class="table-scroll" role="region" aria-label="Scrollable annual condo loan timeline" tabindex="0">
+      <table><thead><tr><th scope="col">Checkpoint</th><th scope="col">Property value</th><th scope="col">Loan drawn</th><th scope="col">Monthly instalment</th><th scope="col">Interest paid to date</th><th scope="col">Outstanding loan</th><th scope="col">Uncalled developer balance</th><th scope="col">Gross equity if sold</th></tr></thead><tbody id="checkpoint-body"></tbody></table>
+    </div>
+    <p class="schedule-caption" id="schedule-caption">Monthly-rest illustration; exact lender timing, daily accrual and rounding will differ.</p>
+  </section>
+
+  <section class="dashboard-card">
+    <details class="method">
+      <summary>How this planner calculates the result</summary>
+      <div class="method-grid">
+        <div><h3>Return definitions</h3><p class="formula">projected sale = purchase price × (1 + annual growth)<sup>holding years</sup></p><p class="formula">economic profit = sale − purchase − acquisition costs − sale costs − SSD − mortgage interest − holding costs + net rent</p><p>Mortgage principal is not subtracted again: it either reduces the loan balance or returns as owner equity.</p></div>
+        <div><h3>Ledger reconciliation</h3><p class="formula">row difference = payment amount − cash − CPF − bank loan</p><p>Property-payment rows reconcile to the purchase price. Acquisition costs reconcile separately, while timeline notes have no financial value.</p></div>
+        <div><h3>Duties included</h3><ul><li>BSD is estimated automatically on the higher entered purchase price or market value.</li><li>ABSD is included only when you enter an amount.</li><li>Mortgage duty is estimated at 0.4% of the loan, capped at S$500.</li><li>SSD is estimated from exact entered legal dates and the higher entered sale value.</li></ul></div>
+        <div><h3>Planning limits</h3><ul><li>The ledger is not evidence of beneficial ownership or debt liability.</li><li>CPF accrued interest is excluded unless entered in the refund field.</li><li>Developer-specific clauses, bank fees and exact lender accrual are not inferred.</li><li>Confirm every amount and payment date against signed documents.</li></ul></div>
+      </div>
+    </details>
+  </section>
+
+  <p class="disclaimer">This is an educational scenario tool, not a valuation, forecast, offer of credit, tax opinion, ownership declaration or conveyancing advice. Confirm contractual payments, loan liability, CPF usage and refund, stamp duties, legal dates and exemptions with the relevant bank, developer, CPF Board, IRAS and your solicitor.</p>
+  <p class="sources">Method references, checked 8 August 2026: <a href="https://www.ura.gov.sg/-/media/Corporate/Property/Home-Buyers-Guide/Home-Buyers-Guide-Sep-2025-full.pdf" target="_blank" rel="noopener noreferrer">URA Home Buyers’ Guide</a> · <a href="https://www.moneysense.gov.sg/costs-of-borrowing-flat-rate-monthly-rest-and-effective-interest-rate/" target="_blank" rel="noopener noreferrer">MoneySense monthly-rest guidance</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer%27s-stamp-duty-%28bsd%29" target="_blank" rel="noopener noreferrer">IRAS BSD</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/selling-or-disposing-property/seller%27s-stamp-duty-%28ssd%29-for-residential-property" target="_blank" rel="noopener noreferrer">IRAS SSD</a></p>
+  </div>
+</main>
+
+<dialog class="couple-funding-dialog" id="couple-funding-dialog" aria-labelledby="couple-dialog-title" aria-describedby="couple-dialog-intro couple-dialog-helper">
+  <form class="couple-funding-form" id="couple-funding-form" novalidate>
+    <header class="couple-dialog-head">
+      <div>
+        <p class="eyebrow">Couple purchase setup</p>
+        <h2 id="couple-dialog-title">Plan the funding each person will use</h2>
+        <p id="couple-dialog-intro">Enter planned amounts for this property purchase—not either person’s total cash, CPF balance or wealth. Use exact dollar amounts from your own plan.</p>
+      </div>
+      <button class="couple-dialog-close" id="couple-dialog-close" type="button" aria-label="Close couple funding setup">×</button>
+    </header>
+
+    <div class="couple-dialog-body">
+      <p class="couple-dialog-callout" id="couple-dialog-helper"><strong>A shortage or excess stays visible.</strong> You can still apply the setup and then adjust the generated allocation row by row in the ledger.</p>
+
+      <fieldset class="couple-dialog-section">
+        <legend>Who is the planned borrower?</legend>
+        <p class="couple-section-copy">This choice labels the loan facility in the planning ledger. It does not determine either person’s legal liability to the bank.</p>
+        <div class="borrower-options">
+          <div class="borrower-option">
+            <input id="loan-borrower-joint" name="loan-borrower" type="radio" value="joint" checked>
+            <label for="loan-borrower-joint"><b>Joint borrowers</b><small>Show a shared bank facility.</small></label>
+          </div>
+          <div class="borrower-option">
+            <input id="loan-borrower-primary" name="loan-borrower" type="radio" value="primary">
+            <label for="loan-borrower-primary"><b>Primary owner</b><small>Label the facility under the primary owner.</small></label>
+          </div>
+          <div class="borrower-option">
+            <input id="loan-borrower-partner" name="loan-borrower" type="radio" value="partner">
+            <label for="loan-borrower-partner"><b>Partner</b><small>Label the facility under the partner.</small></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <section class="couple-dialog-section" aria-labelledby="couple-names-title">
+        <h3 id="couple-names-title">Who is contributing?</h3>
+        <p class="couple-section-copy">These names become the payer labels in the funding summary and editable ledger.</p>
+        <div class="couple-name-grid">
+          <div class="field"><label for="couple-primary-name">Primary owner name</label><input id="couple-primary-name" type="text" value="Owner 1" autocomplete="off"></div>
+          <div class="field"><label for="couple-partner-name">Partner name</label><input id="couple-partner-name" type="text" value="Partner" autocomplete="off"></div>
+        </div>
+      </section>
+
+      <section class="couple-dialog-section" aria-labelledby="couple-amounts-title">
+        <h3 id="couple-amounts-title">Planned owner funding</h3>
+        <p class="couple-section-copy" id="couple-amount-help">Enter only the cash and CPF each person plans to use for purchase consideration, duties and acquisition costs. The first draft allocates by payment date using primary cash, partner cash, primary CPF, then partner CPF; every row remains editable.</p>
+        <div class="couple-owner-grid">
+          <article class="couple-owner-card">
+            <h4>Primary owner</h4>
+            <p>Planned amounts to contribute to this purchase.</p>
+            <div class="field"><label for="couple-primary-cash">Cash to use</label><div class="couple-money-input"><span>S$</span><input id="couple-primary-cash" type="text" value="0" inputmode="decimal" autocomplete="off" aria-describedby="couple-amount-help"></div></div>
+            <div class="field"><label for="couple-primary-cpf">CPF to use</label><div class="couple-money-input"><span>S$</span><input id="couple-primary-cpf" type="text" value="0" inputmode="decimal" autocomplete="off" aria-describedby="couple-amount-help"></div></div>
+          </article>
+          <article class="couple-owner-card">
+            <h4>Partner</h4>
+            <p>Planned amounts to contribute to this purchase.</p>
+            <div class="field"><label for="couple-partner-cash">Cash to use</label><div class="couple-money-input"><span>S$</span><input id="couple-partner-cash" type="text" value="0" inputmode="decimal" autocomplete="off" aria-describedby="couple-amount-help"></div></div>
+            <div class="field"><label for="couple-partner-cpf">CPF to use</label><div class="couple-money-input"><span>S$</span><input id="couple-partner-cpf" type="text" value="0" inputmode="decimal" autocomplete="off" aria-describedby="couple-amount-help"></div></div>
+          </article>
+        </div>
+      </section>
+
+      <div class="couple-reconciliation" aria-label="Couple funding reconciliation" aria-live="polite">
+        <div><span>Required owner funding</span><output id="couple-required-funding">—</output></div>
+        <div><span>Entered cash + CPF</span><output id="couple-entered-funding">—</output></div>
+        <div><span>Shortage / excess</span><output id="couple-funding-difference">—</output></div>
+      </div>
+      <p class="couple-funding-errors" id="couple-funding-errors" role="alert" aria-live="assertive" hidden></p>
+    </div>
+
+    <footer class="couple-dialog-actions">
+      <small>Changing a Cash/CPF amount rebuilds the active route’s ledger and replaces its manual row edits. The other route is retained and flagged if it becomes stale.</small>
+      <button class="couple-dialog-cancel" id="couple-dialog-cancel" type="button">Cancel</button>
+      <button class="couple-dialog-apply" id="couple-dialog-apply" type="submit">Apply funding setup</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="assets/condo-loan-timeline-planner.js?v=20260808-1"></script>
+<script src="assets/condo-loan-timeline-funding-v3.js?v=20260808-2"></script>
+<script src="assets/research-shell.js"></script>
+</body>
+</html>
