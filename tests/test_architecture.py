@@ -15,6 +15,7 @@ from sg_estate import MODEL_VERSION
 from sg_estate.contracts import ContractError, DataFrameContract, MASTER_OUTPUT
 from sg_estate.domain import aliases as domain_aliases
 from sg_estate.domain import framework as domain_framework
+from sg_estate.reporting.builders import buyer_profile as buyer_profile_builder
 from sg_estate.reporting.builders import comparison as comparison_builder
 from sg_estate.reporting.builders import mrt_comparison as mrt_comparison_builder
 
@@ -54,12 +55,15 @@ def test_liveability_uses_shared_nonnegative_persona_weights():
 
 
 def test_report_compatibility_modules_are_import_safe():
+    buyer_compat = importlib.import_module("gen_buyer_profile_html")
     comparison_compat = importlib.import_module("gen_comparison_html")
     mrt_compat = importlib.import_module("gen_mrt_comparison_html")
     diagram = importlib.import_module("gen_framework_diagram_html")
+    assert callable(buyer_compat.main)
     assert callable(comparison_compat.main)
     assert callable(mrt_compat.main)
     assert callable(diagram.main)
+    assert callable(buyer_profile_builder.build)
     assert callable(comparison_builder.build)
     assert callable(mrt_comparison_builder.build)
 

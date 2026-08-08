@@ -13,11 +13,11 @@
     {
       "id": "buyer-profiles",
       "path": "buyer_profile_table.html",
-      "title": "Buyer profile evaluation",
+      "title": "Buyer profile explorer",
       "category": "estate-framework",
       "kind": "explorer",
-      "summary": "Explore which estate characteristics fit different household profiles and time horizons.",
-      "tags": ["persona", "household", "liveability"]
+      "summary": "Build a household-specific shortlist with hard constraints, persona-and-horizon fit and tenure-separated Value—without creating a universal estate ranking.",
+      "tags": ["persona", "household", "screening", "liveability", "value"]
     },
     {
       "id": "home-loan-planner",
