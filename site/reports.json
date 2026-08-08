@@ -4,11 +4,11 @@
     {
       "id": "estate-comparison",
       "path": "comparison_table.html",
-      "title": "Estate comparison table",
+      "title": "Estate context explorer",
       "category": "estate-framework",
       "kind": "comparison",
-      "summary": "Compare Provision, persona-relative Liveability, tenure-segmented Value, employment and risk across Singapore estates.",
-      "tags": ["estate", "provision", "liveability", "value"]
+      "summary": "Explore Provision, persona-relative Liveability, tenure-separated Value and future context without collapsing estates into one ranking.",
+      "tags": ["estate", "context", "provision", "liveability", "value"]
     },
     {
       "id": "buyer-profiles",

@@ -72,6 +72,8 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     assets.mkdir()
     (assets / "research-shell.css").write_text("body {}", encoding="utf-8")
     (assets / "research-shell.js").write_text("void 0;", encoding="utf-8")
+    (assets / "estate-explorer.css").write_text("body {}", encoding="utf-8")
+    (assets / "estate-comparison.js").write_text("void 0;", encoding="utf-8")
     (assets / "home-loan-planner.js").write_text("void 0;", encoding="utf-8")
     (assets / "condo-loan-timeline-planner.js").write_text(
         "void 0;", encoding="utf-8"
@@ -99,6 +101,8 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert (output / "reports.json").is_file()
         assert (output / "projects.json").is_file()
         assert (output / "assets" / "research-shell.css").is_file()
+        assert (output / "assets" / "estate-explorer.css").is_file()
+        assert (output / "assets" / "estate-comparison.js").is_file()
         assert (output / "assets" / "home-loan-planner.js").is_file()
         assert (output / "assets" / "condo-loan-timeline-planner.js").is_file()
         assert (output / "assets" / "condo-loan-timeline-funding-v3.js").is_file()
