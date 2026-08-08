@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore Singapore estate Provision, persona-relative Liveability, tenure-separated Value and future context without collapsing them into one ranking.">
+<title>Singapore estate context explorer</title>
+<link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
+<link rel="stylesheet" href="assets/estate-explorer.css">
+</head>
+<body>
+<main id="research-content">
+  <header class="explorer-hero">
+    <p class="eyebrow">Singapore Estate Liveability Framework · model __MODEL_VERSION__</p>
+    <h1>Compare estate context without forcing a winner.</h1>
+    <p class="lede">Explore what each estate provides, how that context fits four household profiles, and how price evidence changes the Value read. These are separate lenses—not ingredients for one universal league table.</p>
+    <div class="proof" aria-label="Explorer coverage">
+      <span>__ESTATE_COUNT__ estate contexts</span>
+      <span>20-component Provision</span>
+      <span>Four T0 persona profiles</span>
+      <span>HDB and private Value kept separate</span>
+    </div>
+    <p class="vintage"><b>Snapshot:</b> committed pipeline outputs · <b>Generated:</b> <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time></p>
+  </header>
+
+  <section class="stance-grid" aria-labelledby="stance-title">
+    <h2 class="sr-only" id="stance-title">How the framework separates its lenses</h2>
+    <article class="stance-card stance-provision">
+      <span>01 · Supply</span>
+      <h3>Provision</h3>
+      <p>Objective evidence about what is present. Compare cautiously within the stated archetype; differences inside ±0.3 are not a defensible rank.</p>
+    </article>
+    <article class="stance-card stance-liveability">
+      <span>02 · Household fit</span>
+      <h3>Liveability</h3>
+      <p>A persona-and-horizon profile. Young-family, professional, retiree and lifestyle cells answer different questions and are not one score.</p>
+    </article>
+    <article class="stance-card stance-value">
+      <span>03 · Price relationship</span>
+      <h3>Value</h3>
+      <p>A segment-specific price adjustment around the model baseline. HDB and private resale evidence are never blended or ranked against each other.</p>
+    </article>
+  </section>
+
+  <section class="control-card" aria-labelledby="controls-title">
+    <div class="control-heading">
+      <div>
+        <p class="eyebrow">Build your view</p>
+        <h2 id="controls-title">Start focused, then reveal the evidence you need.</h2>
+      </div>
+      <button class="reset-button" id="reset-view" type="button">Reset view</button>
+    </div>
+
+    <div class="primary-controls">
+      <label class="search-field" for="estate-search">
+        <span>Find an estate</span>
+        <input id="estate-search" type="search" autocomplete="off" placeholder="e.g. Tampines or Canberra">
+      </label>
+      <div class="result-summary" role="status" aria-live="polite" aria-atomic="true">
+        <strong id="visible-count">__ESTATE_COUNT__</strong>
+        <span id="visible-copy">estate contexts shown</span>
+      </div>
+    </div>
+
+    <fieldset class="choice-group" id="view-options">
+      <legend>Evidence focus</legend>
+      <div class="choice-list">
+        <button type="button" class="choice-button active" data-view="overview" aria-pressed="true">Overview</button>
+        <button type="button" class="choice-button" data-view="provision" aria-pressed="false">Provision</button>
+        <button type="button" class="choice-button" data-view="liveability" aria-pressed="false">Household fit</button>
+        <button type="button" class="choice-button" data-view="value" aria-pressed="false">Value</button>
+        <button type="button" class="choice-button" data-view="future" aria-pressed="false">Future &amp; context</button>
+        <button type="button" class="choice-button" data-view="all" aria-pressed="false">All evidence</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="choice-group" id="archetype-options">
+      <legend>Archetype filter <span>Interpretive metadata, not a grade</span></legend>
+      <div class="choice-list archetype-list">
+        <button type="button" class="filter-button active" data-arch="all" aria-pressed="true">All</button>
+        <button type="button" class="filter-button" data-arch="A" aria-pressed="false">A · Regional</button>
+        <button type="button" class="filter-button" data-arch="B" aria-pressed="false">B · Mature HDB</button>
+        <button type="button" class="filter-button" data-arch="C" aria-pressed="false">C · Coastal</button>
+        <button type="button" class="filter-button" data-arch="D" aria-pressed="false">D · Private enclave</button>
+        <button type="button" class="filter-button" data-arch="E" aria-pressed="false">E · New central-edge</button>
+        <button type="button" class="filter-button" data-arch="F" aria-pressed="false">F · Infill MRT node</button>
+        <button type="button" class="filter-button" data-arch="G" aria-pressed="false">G · New town</button>
+        <button type="button" class="filter-button" data-arch="X" aria-pressed="false">X · Not rated</button>
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="table-card" aria-labelledby="table-title">
+    <div class="table-heading">
+      <div>
+        <p class="eyebrow">Estate profiles</p>
+        <h2 id="table-title">Evidence by estate</h2>
+        <p id="table-guidance">The default row order is alphabetical. Sorting reorganises evidence for inspection; it does not create an overall ranking.</p>
+      </div>
+      <div class="sort-status" id="sort-status" aria-live="polite">Estate · A to Z</div>
+    </div>
+
+    <div class="view-caveat" id="view-caveat">
+      Overview keeps the lenses visibly separate. Choose a focused view for definitions, provenance and model diagnostics.
+    </div>
+
+    <div class="tbl-wrap" role="region" aria-label="Scrollable Singapore estate comparison table" tabindex="0">
+      <table id="estate-table" aria-describedby="table-guidance">
+        <caption>Singapore estate Provision, persona-relative Liveability, tenure-separated Value, employment, risk proxies and life-path context.</caption>
+        <thead id="estate-table-head"></thead>
+        <tbody id="estate-table-body"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="empty-state" hidden>
+      <h3>No estate matches this view.</h3>
+      <p>Try a shorter search or clear the archetype filter.</p>
+      <button type="button" id="empty-reset">Show every estate</button>
+    </div>
+  </section>
+
+  <details class="method-card">
+    <summary>How to read bands, gaps, price adjustments and missing evidence</summary>
+    <div class="method-grid">
+      <article>
+        <h3>Bands and gaps</h3>
+        <p>A, B+, B, C, D and F are framework bands, not a universal winner scale. Gap labels use the canonical ±0.5 dead band: values inside it are shown as <b>matched</b>, not directional.</p>
+      </article>
+      <article>
+        <h3>Value evidence</h3>
+        <p>The price adjustment is the segment model’s capped residual multiplier. Above 1 means price evidence sat below its model baseline; below 1 means above baseline. It is not a forecast or an instruction to buy.</p>
+      </article>
+      <article>
+        <h3>Evidence quality</h3>
+        <p>Direct and proxy bases remain visible. Samples below 100 are reported as bands only. “No data,” “not covered” and the non-residential X gate are intentionally distinct.</p>
+      </article>
+      <article>
+        <h3>Context fields</h3>
+        <p>D is a current disruption-loss multiplier applied in Liveability. Noise is an expressway-distance proxy, Lease is HDB-specific, and employment access is not an automatic price-growth forecast.</p>
+      </article>
+    </div>
+  </details>
+
+  <footer class="page-footer">
+    <p><b>Decision boundary:</b> default to an estate profile. Only rank when archetype, persona, horizon and private household anchors genuinely match and the difference exceeds the framework noise floor.</p>
+    <nav aria-label="Related research"><a href="framework_diagram.html">Framework architecture</a><a href="buyer_profile_table.html">Buyer profiles</a><a href="private_project_comparison_table.html">Condominium explorer</a></nav>
+  </footer>
+</main>
+
+<noscript><p class="noscript-note">Enable JavaScript to filter and render the estate evidence table.</p></noscript>
+<script id="estate-comparison-data" type="application/json">__ESTATE_DATA_JSON__</script>
+<script src="assets/estate-comparison.js"></script>
+<script src="assets/research-shell.js" data-research-shell></script>
+</body>
+</html>
