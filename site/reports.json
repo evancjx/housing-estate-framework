@@ -42,11 +42,11 @@
     {
       "id": "mrt-comparison",
       "path": "mrt_comparison_table.html",
-      "title": "MRT station comparison",
+      "title": "MRT and LRT context explorer",
       "category": "estate-framework",
-      "kind": "comparison",
-      "summary": "Research MRT and LRT stations alongside nearby estate framework evidence.",
-      "tags": ["mrt", "lrt", "transport", "estate"]
+      "kind": "explorer",
+      "summary": "Inspect official-source station-code-line memberships, a bounded five-year planned overlay, derived representative points and separately labelled estate framework context without ranking the rail network.",
+      "tags": ["mrt", "lrt", "transport", "interchange", "planned rail", "centroid", "estate", "context"]
     },
     {
       "id": "framework-diagram",

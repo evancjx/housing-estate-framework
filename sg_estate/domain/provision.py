@@ -149,8 +149,18 @@ C_CHILDCARE= [(4,5),(2,4),(1,3),(0,1)]   # within 500m
 # ----------------------------------------------------------------------
 # Component scorers
 # ----------------------------------------------------------------------
+def _operational_mrt_rows(mrt):
+    """Return only rail rows that are operational in the current horizon."""
+    if mrt is None or len(mrt) == 0 or 'operational' not in mrt.columns:
+        return mrt
+    operational = mrt['operational'].astype(str).str.strip().str.lower()
+    return mrt[operational.isin(['1', 'true', 'yes', 'y'])]
+
 def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None):
-    d_mrt = nearest_m(lat, lon, pts_of(mrt))
+    # ``mrt_operational`` is retained for compatibility with the original scorer
+    # signature. The canonical caller passes None, so filter the code-row layer.
+    current_mrt = mrt_operational if mrt_operational is not None else mrt
+    d_mrt = nearest_m(lat, lon, pts_of(_operational_mrt_rows(current_mrt)))
     s_mrt = score_by_distance(d_mrt, A_MRT)
     if bus is not None and 'route_count' in bus.columns:
         rpts = list(zip(bus['lat'].astype(float), bus['lon'].astype(float), bus['route_count'].astype(int)))
@@ -201,8 +211,7 @@ def score_eldercare(lat, lon, eldercare):
 
 def score_infra(lat, lon, mrt, mrt_operational):
     if mrt is None or len(mrt) == 0: return 1.0, {'note': 'no mrt data'}
-    op = mrt[mrt['operational'].astype(str).str.lower().isin(['1','true','yes','y'])] \
-         if 'operational' in mrt.columns else mrt
+    op = _operational_mrt_rows(mrt)
     d = nearest_m(lat, lon, pts_of(op))
     return float(score_by_distance(d, A_MRT)), {'nearest_operational_mrt_m': _safe_round_dist(d)}
 
@@ -524,7 +533,9 @@ if __name__ == '__main__':
 #   --estates estates.csv     columns: estate,lat,lon
 #
 # GEOSPATIAL LAYERS (each CSV: lat,lon [+ extra cols ignored]):
-#   --mrt mrt.csv             lat,lon,operational   (operational=1/0)
+#   --mrt mrt.csv             lat,lon,operational   (operational=1/0). Only
+#                             operational rows contribute to current conn/infra;
+#                             future stations belong in horizon/momentum evidence.
 #   --bus bus.csv             lat,lon               (LTA bus stops)
 #   --clinics chas.csv        lat,lon               (CHAS clinics)
 #   --polyclinics poly.csv    lat,lon               (MOH polyclinics)

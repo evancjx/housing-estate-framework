@@ -1,31 +1,102 @@
-"""Internal MRT report renderer; execute only through ``mrt_comparison.build``.
-Generate mrt_comparison_table.html from committed MRT and estate outputs.
+"""Internal MRT comparison renderer; execute through ``mrt_comparison.build``.
 
-Reads:
-  data/inputs/mrt_layer.csv        - station coordinates, line, operational flag
-  data/inputs/estates.csv          - framework estate centroids
-  data/outputs/master_output.csv    - estate-level model context
-
-Writes:
-  mrt_comparison_table.html
-
-Run:
-  python3 models/gen_mrt_comparison_html.py
+The report joins each committed station-code record to the nearest framework
+estate centroid.  That spatial join is context only: it is neither a formal
+station catchment nor a station-level Provision, Liveability or Value score.
 """
 
 from __future__ import annotations
 
-import math
-import re
 from datetime import date
+import math
+from pathlib import Path
+import re
+from typing import Any
 
 import pandas as pd
 
 from sg_estate.paths import REPOSITORY_ROOT as ROOT
-from sg_estate.reporting.common import atomic_write_text, html_json, optional_value
+from sg_estate.domain.value import CFG as VALUE_CFG
+from sg_estate.reporting.common import (
+    atomic_write_text,
+    html_json,
+    optional_float,
+    optional_value,
+)
+
+
+DEFAULT_MRT = ROOT / "data/inputs/mrt_layer.csv"
+DEFAULT_ESTATES = ROOT / "data/inputs/estates.csv"
+DEFAULT_MASTER = ROOT / "data/outputs/master_output.csv"
+DEFAULT_OUT = ROOT / "mrt_comparison_table.html"
+TEMPLATE = ROOT / "sg_estate/reporting/templates/mrt_comparison_table.html"
+VALUE_TRUST_THRESHOLD = int(VALUE_CFG["trust_decimal_n"])
+
+MRT_COLUMNS = {
+    "lat",
+    "lon",
+    "name",
+    "stn_code",
+    "line",
+    "operational",
+    "network_status",
+    "planned_opening",
+    "status_as_of",
+    "network_status_source",
+    "geometry_basis",
+    "geometry_source",
+}
+NETWORK_STATUSES = {"open", "under_construction", "deferred", "planned"}
+ESTATE_COLUMNS = {"estate", "lat", "lon"}
+MASTER_COLUMNS = {
+    "estate",
+    "model_version",
+    "archetype",
+    "provision_band",
+    "provision_score",
+    "measured_only",
+    "yf_T0_band",
+    "sp_T0_band",
+    "ret_T0_band",
+    "ls_T0_band",
+    "ls_T5_band",
+    "ls_T15_band",
+    "value_hdb_band",
+    "value_hdb_basis",
+    "value_hdb_n",
+    "value_hdb_status",
+    "value_private_band",
+    "value_private_basis",
+    "value_private_n",
+    "value_private_status",
+    "emp_band",
+    "employment_status",
+    "lease_band",
+    "lease_status",
+    "lease_source",
+}
+
+LINE_SHORT_NAMES = {
+    "Bukit Panjang LRT": "BPLRT",
+    "Changi Airport Branch Line": "CG",
+    "Circle Line": "CCL",
+    "Cross Island Line": "CRL",
+    "Downtown Line": "DTL",
+    "East West Line": "EWL",
+    "East-West Line": "EWL",
+    "Jurong Region Line": "JRL",
+    "North East Line": "NEL",
+    "North South Line": "NSL",
+    "North-South Line": "NSL",
+    "Punggol LRT": "PLRT",
+    "Sengkang LRT": "SLRT",
+    "Thomson-East Coast Line": "TEL",
+}
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Return great-circle distance in metres between two WGS84 points."""
+
     radius = 6_371_000.0
     p1, p2 = math.radians(lat1), math.radians(lat2)
     dp = math.radians(lat2 - lat1)
@@ -39,379 +110,370 @@ def slug(value: str) -> str:
 
 
 def distance_band(meters: float) -> str:
+    """Bucket centroid distance without implying a walking catchment."""
+
     if meters <= 600:
-        return "core"
+        return "le600"
     if meters <= 1000:
-        return "near"
+        return "601-1000"
     if meters <= 1400:
-        return "edge"
-    return "outside"
+        return "1001-1400"
+    return "gt1400"
 
 
-def val(value, default=None):
-    result = optional_value(value)
-    return default if result is None else result
+def clean_text(value: Any, default: str | None = None) -> str | None:
+    value = optional_value(value)
+    if value is None:
+        return default
+    text = str(value).strip()
+    return text or default
+
+
+def clean_band(value: Any) -> str | None:
+    return clean_text(value)
+
+
+def controlled_text(value: Any) -> str | None:
+    """Preserve controlled states such as ``no_data`` and ``not_covered``."""
+
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def clean_number(value: Any, digits: int | None = None) -> float | None:
+    number = optional_float(value)
+    if number is None:
+        return None
+    return round(number, digits) if digits is not None else number
+
+
+def clean_integer(value: Any) -> int | None:
+    number = optional_float(value)
+    return int(number) if number is not None else None
+
+
+def bool_value(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
 
 
 def short_line(line: str) -> str:
+    if line in LINE_SHORT_NAMES:
+        return LINE_SHORT_NAMES[line]
     words = str(line).replace("-", " ").split()
-    ignore = {"line", "branch"}
-    code = "".join(word[0].upper() for word in words if word.lower() not in ignore)
-    return code or "MRT"
+    code = "".join(word[0].upper() for word in words if word.lower() not in {"line", "branch"})
+    return code or "RAIL"
 
 
-mrt = pd.read_csv(ROOT / "data/inputs/mrt_layer.csv")
-estates = pd.read_csv(ROOT / "data/inputs/estates.csv")
-master = pd.read_csv(ROOT / "data/outputs/master_output.csv").set_index("estate")
+def _require_columns(frame: pd.DataFrame, required: set[str], path: Path) -> None:
+    missing = sorted(required - set(frame.columns))
+    if missing:
+        raise SystemExit(f"{path} missing required columns: {missing}")
 
-rows = []
-for _, station in mrt.iterrows():
-    slat = float(station["lat"])
-    slon = float(station["lon"])
-    distances = [
-        (
-            str(estate["estate"]).strip(),
-            haversine_m(slat, slon, float(estate["lat"]), float(estate["lon"])),
+
+def _validated_coordinates(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
+    result = frame.copy()
+    for column in ("lat", "lon"):
+        result[column] = pd.to_numeric(result[column], errors="coerce")
+    invalid = result[~result["lat"].between(-90, 90) | ~result["lon"].between(-180, 180)]
+    if not invalid.empty:
+        raise SystemExit(f"{path} contains {len(invalid)} invalid coordinate row(s)")
+    return result
+
+
+def _context_value(context: pd.Series | None, column: str) -> Any:
+    if context is None:
+        return None
+    return context.get(column)
+
+
+def _masked_context_row(
+    station: pd.Series,
+    context: pd.Series | None,
+    *,
+    nearest_estate: str,
+    nearest_m: float,
+    centroids_800m: int,
+    centroids_1400m: int,
+) -> dict[str, Any]:
+    line = clean_text(station["line"], "Unspecified line") or "Unspecified line"
+    archetype = clean_text(_context_value(context, "archetype"))
+    context_status = (
+        "unavailable"
+        if context is None
+        else "not_residential"
+        if archetype == "X"
+        else "out_of_range"
+        if nearest_m > 1400
+        else "available"
+    )
+    publish_model = context_status == "available"
+
+    def model_text(column: str) -> str | None:
+        return controlled_text(_context_value(context, column)) if publish_model else None
+
+    def model_band(column: str) -> str | None:
+        return clean_band(_context_value(context, column)) if publish_model else None
+
+    def model_number(column: str, digits: int | None = None) -> float | None:
+        return clean_number(_context_value(context, column), digits) if publish_model else None
+
+    status = "open" if clean_integer(station["operational"]) == 1 else "future"
+    network_status = controlled_text(station.get("network_status")) or status
+    mode = "lrt" if "lrt" in line.lower() else "mrt"
+    return {
+        "station": clean_text(station["name"], "Unnamed station"),
+        "code": clean_text(station["stn_code"], "No code"),
+        "line": line,
+        "line_key": slug(line),
+        "line_short": short_line(line),
+        "mode": mode,
+        "status": status,
+        "network_status": network_status,
+        "planned_opening": controlled_text(station.get("planned_opening")),
+        "status_as_of": controlled_text(station.get("status_as_of")),
+        "network_status_source": controlled_text(station.get("network_status_source")),
+        "geometry_basis": controlled_text(station.get("geometry_basis")),
+        "geometry_source": controlled_text(station.get("geometry_source")),
+        "lat": round(float(station["lat"]), 6),
+        "lon": round(float(station["lon"]), 6),
+        "estate": nearest_estate,
+        "distance_m": int(round(nearest_m)),
+        "distance_band": distance_band(nearest_m),
+        "centroids_800m": centroids_800m,
+        "centroids_1400m": centroids_1400m,
+        "context_status": context_status,
+        "archetype": archetype if publish_model else None,
+        "provision_band": model_band("provision_band"),
+        "provision_score": model_number("provision_score", 2),
+        "measured_only": bool_value(_context_value(context, "measured_only")) if publish_model else False,
+        "yf0": model_band("yf_T0_band"),
+        "sp0": model_band("sp_T0_band"),
+        "ret0": model_band("ret_T0_band"),
+        "ls0": model_band("ls_T0_band"),
+        "ls5": model_band("ls_T5_band"),
+        "ls15": model_band("ls_T15_band"),
+        "hdb_value_band": model_band("value_hdb_band"),
+        "hdb_value_basis": model_text("value_hdb_basis"),
+        "hdb_value_n": model_number("value_hdb_n"),
+        "hdb_value_status": model_text("value_hdb_status") or ("unavailable" if publish_model else context_status),
+        "private_value_band": model_band("value_private_band"),
+        "private_value_basis": model_text("value_private_basis"),
+        "private_value_n": model_number("value_private_n"),
+        "private_value_status": model_text("value_private_status") or ("unavailable" if publish_model else context_status),
+        "employment_band": model_band("emp_band"),
+        "employment_status": model_text("employment_status") or ("unavailable" if publish_model else context_status),
+        "lease_band": model_band("lease_band"),
+        "lease_status": model_text("lease_status") or ("unavailable" if publish_model else context_status),
+        "lease_source": model_text("lease_source"),
+    }
+
+
+def load_rows(
+    mrt_path: Path = DEFAULT_MRT,
+    estates_path: Path = DEFAULT_ESTATES,
+    master_path: Path = DEFAULT_MASTER,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str, int]:
+    """Load and join canonical inputs, returning rows and display metadata."""
+
+    mrt = pd.read_csv(mrt_path)
+    estates = pd.read_csv(estates_path)
+    master = pd.read_csv(master_path)
+    _require_columns(mrt, MRT_COLUMNS, mrt_path)
+    _require_columns(estates, ESTATE_COLUMNS, estates_path)
+    _require_columns(master, MASTER_COLUMNS, master_path)
+    mrt = _validated_coordinates(mrt, mrt_path)
+    estates = _validated_coordinates(estates, estates_path)
+
+    if mrt["stn_code"].astype(str).str.strip().duplicated().any():
+        raise SystemExit(f"{mrt_path} contains duplicate station codes")
+    if estates["estate"].astype(str).str.strip().duplicated().any():
+        raise SystemExit(f"{estates_path} contains duplicate estate keys")
+    if master["estate"].astype(str).str.strip().duplicated().any():
+        raise SystemExit(f"{master_path} contains duplicate estate keys")
+
+    operational = pd.to_numeric(mrt["operational"], errors="coerce")
+    if not operational.isin([0, 1]).all():
+        raise SystemExit(f"{mrt_path} operational must contain only 0 or 1")
+    mrt = mrt.assign(operational=operational.astype(int))
+
+    network_status = mrt["network_status"].astype(str).str.strip()
+    invalid_statuses = sorted(set(network_status) - NETWORK_STATUSES)
+    if invalid_statuses:
+        raise SystemExit(
+            f"{mrt_path} network_status has invalid values: {invalid_statuses}"
         )
-        for _, estate in estates.iterrows()
+    mismatched_status = (mrt["operational"] == 1) != network_status.eq("open")
+    if mismatched_status.any():
+        raise SystemExit(
+            f"{mrt_path} operational and network_status disagree on "
+            f"{int(mismatched_status.sum())} row(s)"
+        )
+    status_dates = mrt["status_as_of"].astype(str).str.strip()
+    if status_dates.nunique() != 1:
+        raise SystemExit(f"{mrt_path} must contain one consistent status_as_of date")
+    try:
+        date.fromisoformat(status_dates.iloc[0])
+    except ValueError as error:
+        raise SystemExit(f"{mrt_path} status_as_of must be an ISO date") from error
+    for column in (
+        "name",
+        "stn_code",
+        "line",
+        "network_status_source",
+        "geometry_basis",
+        "geometry_source",
+    ):
+        if mrt[column].isna().any() or mrt[column].astype(str).str.strip().eq("").any():
+            raise SystemExit(f"{mrt_path} {column} must be populated on every row")
+    mrt = mrt.assign(network_status=network_status, status_as_of=status_dates)
+
+    estate_points = [
+        (clean_text(row["estate"], "") or "", float(row["lat"]), float(row["lon"]))
+        for _, row in estates.iterrows()
     ]
-    nearest_estate, nearest_m = min(distances, key=lambda item: item[1])
-    within_800 = sum(1 for _, distance in distances if distance <= 800)
-    within_1400 = sum(1 for _, distance in distances if distance <= 1400)
+    if not estate_points:
+        raise SystemExit(f"{estates_path} contains no estate centroids")
+    context_by_estate = {
+        clean_text(row["estate"], "") or "": row
+        for _, row in master.iterrows()
+    }
 
-    context = master.loc[nearest_estate] if nearest_estate in master.index else {}
-    line = str(station["line"]).strip()
-    status = "Open" if int(station["operational"]) == 1 else "Future"
-    ls0 = val(context.get("ls_T0_band") if hasattr(context, "get") else None, "-")
-    ls5 = val(context.get("ls_T5_band") if hasattr(context, "get") else None, "-")
-    ls15 = val(context.get("ls_T15_band") if hasattr(context, "get") else None, "-")
+    rows: list[dict[str, Any]] = []
+    for _, station in mrt.iterrows():
+        slat = float(station["lat"])
+        slon = float(station["lon"])
+        distances = [
+            (estate, haversine_m(slat, slon, latitude, longitude))
+            for estate, latitude, longitude in estate_points
+        ]
+        nearest_estate, nearest_m = min(distances, key=lambda item: item[1])
+        rows.append(
+            _masked_context_row(
+                station,
+                context_by_estate.get(nearest_estate),
+                nearest_estate=nearest_estate,
+                nearest_m=nearest_m,
+                centroids_800m=sum(distance <= 800 for _, distance in distances),
+                centroids_1400m=sum(distance <= 1400 for _, distance in distances),
+            )
+        )
 
-    rows.append(
+    rows.sort(key=lambda row: (str(row["station"]), str(row["code"])))
+    line_summary = []
+    for line, group in mrt.groupby("line", sort=True):
+        line_text = clean_text(line, "Unspecified line") or "Unspecified line"
+        line_summary.append(
+            {
+                "line": line_text,
+                "line_key": slug(line_text),
+                "line_short": short_line(line_text),
+                "mode": "lrt" if "lrt" in line_text.lower() else "mrt",
+                "records": int(len(group)),
+                "open": int((group["operational"] == 1).sum()),
+                "future": int((group["operational"] == 0).sum()),
+            }
+        )
+
+    model_versions = sorted(
         {
-            "station": str(station["name"]).strip(),
-            "code": str(station["stn_code"]).strip(),
-            "line": line,
-            "line_key": slug(line),
-            "line_short": short_line(line),
-            "status": status,
-            "lat": round(slat, 6),
-            "lon": round(slon, 6),
-            "estate": nearest_estate,
-            "distance_m": int(round(nearest_m)),
-            "distance_band": distance_band(nearest_m),
-            "within_800": within_800,
-            "within_1400": within_1400,
-            "provision_band": val(context.get("provision_band") if hasattr(context, "get") else None, "-"),
-            "provision_score": round(float(context.get("provision_score")), 2)
-            if hasattr(context, "get") and val(context.get("provision_score")) is not None
-            else None,
-            "ls_traj": f"{ls0} -> {ls5} -> {ls15}",
-            "hdb_value_band": val(context.get("value_hdb_band") if hasattr(context, "get") else None, "-"),
-            "private_value_band": val(context.get("value_private_band") if hasattr(context, "get") else None, "-"),
-            "employment_band": val(context.get("emp_band") if hasattr(context, "get") else None, "-"),
-            "lease_band": val(context.get("lease_band") if hasattr(context, "get") else None, "-"),
+            str(value).strip()
+            for value in master["model_version"].dropna()
+            if str(value).strip()
         }
     )
+    model_version = ", ".join(model_versions) or "not recorded"
+    return rows, line_summary, model_version, len(estate_points)
 
-rows.sort(key=lambda row: row["station"])
 
-line_counts = mrt.groupby("line").size().sort_index()
-line_buttons = "\n".join(
-    f'  <button class="filter-btn" data-line="{slug(line)}" onclick="filterLine(\'{slug(line)}\', this)">{line} ({count})</button>'
-    for line, count in line_counts.items()
-)
+def render_html(
+    rows: list[dict[str, Any]] | None = None,
+    line_summary: list[dict[str, Any]] | None = None,
+    *,
+    model_version: str | None = None,
+    estate_count: int | None = None,
+    generated_on: date | str | None = None,
+) -> str:
+    """Render the station explorer without writing its public artifact."""
 
-today = date.today().strftime("%Y-%m-%d")
-open_count = int((mrt["operational"] == 1).sum())
-future_count = int((mrt["operational"] == 0).sum())
-data_js = html_json(rows, indent=2)
+    if rows is None or line_summary is None or model_version is None or estate_count is None:
+        loaded_rows, loaded_lines, loaded_version, loaded_estates = load_rows()
+        rows = loaded_rows if rows is None else rows
+        line_summary = loaded_lines if line_summary is None else line_summary
+        model_version = loaded_version if model_version is None else model_version
+        estate_count = loaded_estates if estate_count is None else estate_count
 
-HTML = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SG MRT Station Comparison</title>
-<style>
-  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", monospace;
-    background: #0b0d12;
-    color: #cbd5e1;
-    padding: 32px;
-    font-size: 12px;
-  }}
-  h1 {{ font-size: 17px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }}
-  .meta {{ font-size: 11px; color: #64748b; margin-bottom: 18px; }}
-  .summary {{
-    display: grid;
-    grid-template-columns: repeat(4, minmax(120px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
-  }}
-  .metric {{
-    border: 1px solid #1e293b;
-    border-radius: 6px;
-    background: #0d1117;
-    padding: 9px 10px;
-  }}
-  .metric b {{ display: block; color: #f1f5f9; font-size: 16px; margin-bottom: 2px; }}
-  .metric span {{ color: #64748b; font-size: 10px; }}
-  .help-note {{
-    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
-    margin-bottom: 16px; padding: 8px 10px;
-    border: 1px solid #1e293b; border-radius: 6px;
-    background: #0d1117; color: #64748b; font-size: 11px; line-height: 1.45;
-  }}
-  .help-note strong {{ color: #cbd5e1; }}
-  .controls {{ display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }}
-  .filter-btn {{
-    padding: 5px 10px; border-radius: 5px; border: 1px solid #1e293b;
-    background: #111827; color: #94a3b8; font-size: 11px; cursor: pointer;
-    transition: all 0.15s;
-  }}
-  .filter-btn:hover, .filter-btn.active {{ border-color: #38bdf8; color: #bae6fd; background: #082f49; }}
-  .search {{
-    padding: 5px 10px; border-radius: 5px; border: 1px solid #1e293b;
-    background: #111827; color: #e2e8f0; font-size: 11px; outline: none; width: 190px;
-  }}
-  .search::placeholder {{ color: #475569; }}
-  .search:focus {{ border-color: #38bdf8; }}
-  .line-controls {{ margin-bottom: 16px; }}
-  .tbl-wrap {{ overflow-x: auto; border-radius: 8px; border: 1px solid #1e293b; }}
-  table {{ border-collapse: collapse; width: 100%; white-space: nowrap; }}
-  thead tr.group th {{
-    padding: 8px 10px 6px;
-    font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
-    border-bottom: 1px solid #1e293b;
-    text-align: center;
-  }}
-  thead tr.cols th {{
-    padding: 6px 10px 8px;
-    font-size: 10px; font-weight: 600; color: #64748b;
-    border-bottom: 2px solid #1e293b;
-    cursor: pointer; user-select: none;
-    text-align: center;
-  }}
-  thead tr.cols th:hover {{ color: #94a3b8; }}
-  thead tr.cols th.sorted {{ color: #bae6fd; }}
-  thead tr.cols th.sorted-asc::after {{ content: " asc"; }}
-  thead tr.cols th.sorted-desc::after {{ content: " desc"; }}
-  .g-station {{ background:#0d1117; color:#38bdf8; }}
-  .g-catchment {{ background:#0d1117; color:#22c55e; }}
-  .g-model {{ background:#0d1117; color:#a78bfa; }}
-  .g-risk {{ background:#0d1117; color:#f59e0b; }}
-  tbody tr {{ border-bottom: 1px solid #111827; transition: background 0.1s; }}
-  tbody tr:hover {{ background: #111827; }}
-  tbody tr.hidden {{ display: none; }}
-  td {{ padding: 7px 10px; text-align: center; }}
-  td.station-name {{ text-align: left; font-weight: 700; color: #e2e8f0; min-width: 150px; }}
-  td.estate-name {{ text-align: left; font-weight: 600; color: #cbd5e1; }}
-  .line-badge {{
-    display: inline-flex; min-width: 36px; height: 18px; align-items: center; justify-content: center;
-    border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800;
-    background: #172554; color: #bfdbfe;
-  }}
-  .line-north-south-line {{ background:#3f0909; color:#fca5a5; }}
-  .line-east-west-line {{ background:#052e16; color:#86efac; }}
-  .line-north-east-line {{ background:#2d1b4e; color:#c4b5fd; }}
-  .line-circle-line, .line-circle-line-extension {{ background:#3b2f0b; color:#fde68a; }}
-  .line-downtown-line {{ background:#0b2f4a; color:#7dd3fc; }}
-  .line-thomson-east-coast-line {{ background:#3b2414; color:#fdba74; }}
-  .line-jurong-region-line {{ background:#064e3b; color:#6ee7b7; }}
-  .line-punggol-lrt, .line-sengkang-lrt, .line-bukit-panjang-lrt {{ background:#1f2937; color:#d1d5db; }}
-  .line-changi-airport-branch-line {{ background:#083344; color:#67e8f9; }}
-  .status {{ display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }}
-  .status-open {{ background:#052e16; color:#4ade80; }}
-  .status-future {{ background:#422006; color:#fbbf24; }}
-  .catch-core {{ color:#4ade80; font-weight:700; }}
-  .catch-near {{ color:#86efac; }}
-  .catch-edge {{ color:#fbbf24; }}
-  .catch-outside {{ color:#f87171; }}
-  .band {{
-    display: inline-block; padding: 1px 6px; border-radius: 4px;
-    font-weight: 700; font-size: 11px; letter-spacing: 0.3px;
-  }}
-  .b-A {{ background:#14532d; color:#4ade80; }}
-  .b-Bp {{ background:#1e3a5f; color:#60a5fa; }}
-  .b-B {{ background:#1e293b; color:#94a3b8; }}
-  .b-C {{ background:#292524; color:#a8a29e; }}
-  .b-D {{ background:#431407; color:#fb923c; }}
-  .b-F {{ background:#3f0909; color:#f87171; }}
-  .b-NR {{ background:transparent; color:#475569; }}
-  .muted {{ color:#64748b; font-size: 10px; }}
-  @media (max-width: 760px) {{
-    body {{ padding: 18px; }}
-    .summary {{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }}
-    .search {{ width: 100%; }}
-  }}
-  @media (max-width: 480px) {{
-    body {{ padding: 18px 14px 28px; }}
-    .summary {{ grid-template-columns: 1fr; }}
-    .filter-btn {{ min-height: 36px; }}
-  }}
-</style>
-</head>
-<body>
-<h1>SG MRT Station Comparison</h1>
-<p class="meta">{len(rows)} station records | {open_count} open | {future_count} future | nearest-estate context from framework outputs | {today}</p>
+    generated_on = generated_on or date.today()
+    if isinstance(generated_on, str):
+        generated_date = date.fromisoformat(generated_on)
+    else:
+        generated_date = generated_on
 
-<div class="summary">
-  <div class="metric"><b>{len(rows)}</b><span>station records</span></div>
-  <div class="metric"><b>{len(line_counts)}</b><span>lines represented</span></div>
-  <div class="metric"><b>{open_count}</b><span>open stations</span></div>
-  <div class="metric"><b>{future_count}</b><span>future stations</span></div>
-</div>
+    open_count = sum(row["status"] == "open" for row in rows)
+    future_count = sum(row["status"] == "future" for row in rows)
+    status_dates = sorted(
+        {
+            str(row["status_as_of"]).strip()
+            for row in rows
+            if row.get("status_as_of") and str(row["status_as_of"]).strip()
+        }
+    )
+    status_as_of = status_dates[-1] if status_dates else "not recorded"
+    try:
+        parsed_status_date = date.fromisoformat(status_as_of)
+        status_as_of_label = f"{parsed_status_date.day} {parsed_status_date:%b %Y}"
+    except ValueError:
+        status_as_of_label = status_as_of
+    html = TEMPLATE.read_text(encoding="utf-8")
+    replacements = {
+        "__STATION_COUNT__": str(len(rows)),
+        "__LINE_COUNT__": str(len(line_summary)),
+        "__OPEN_COUNT__": str(open_count),
+        "__FUTURE_COUNT__": str(future_count),
+        "__ESTATE_COUNT__": str(estate_count),
+        "__MODEL_VERSION__": model_version,
+        "__VALUE_TRUST_THRESHOLD__": str(VALUE_TRUST_THRESHOLD),
+        "__GENERATED_DATE_ISO__": generated_date.isoformat(),
+        "__GENERATED_DATE_LABEL__": f"{generated_date.day} {generated_date:%b %Y}",
+        "__STATUS_AS_OF__": status_as_of,
+        "__STATUS_AS_OF_LABEL__": status_as_of_label,
+        "__MRT_COMPARISON_DATA_JSON__": html_json(rows, indent=2),
+        "__MRT_LINE_SUMMARY_JSON__": html_json(line_summary, indent=2),
+        "__MRT_CONFIG_JSON__": html_json(
+            {
+                "value_trust_threshold": VALUE_TRUST_THRESHOLD,
+                "status_as_of": status_as_of,
+                "planned_horizon": 2031,
+            }
+        ),
+    }
+    for marker, value in replacements.items():
+        html = html.replace(marker, str(value))
+    unresolved = [marker for marker in replacements if marker in html]
+    if unresolved:
+        raise RuntimeError(f"Unresolved MRT comparison template markers: {unresolved}")
+    return html
 
-<div class="help-note">
-  <strong>Station context:</strong>
-  <span>Nearest estate is based on framework estate centroid distance, not formal planning-area station assignment.</span>
-  <span>Model columns describe that nearest estate, so HDB/private value remains segmented at estate level.</span>
-</div>
 
-<div class="controls">
-  <button class="filter-btn active" onclick="filterStatus('all', this)">All</button>
-  <button class="filter-btn" onclick="filterStatus('Open', this)">Open</button>
-  <button class="filter-btn" onclick="filterStatus('Future', this)">Future</button>
-  <input class="search" id="search" placeholder="Search station, code, estate..." oninput="filterTable()">
-</div>
-<div class="controls line-controls">
-  <button class="filter-btn active" data-line="all" onclick="filterLine('all', this)">All lines</button>
-{line_buttons}
-</div>
+def main() -> None:
+    rows, line_summary, model_version, estate_count = load_rows()
+    output = atomic_write_text(
+        DEFAULT_OUT,
+        render_html(
+            rows,
+            line_summary,
+            model_version=model_version,
+            estate_count=estate_count,
+        ),
+    )
+    print(
+        f"Written: {output} ({output.stat().st_size // 1024} KB, "
+        f"{len(rows)} station-code records)"
+    )
 
-<div class="tbl-wrap">
-<table>
-<thead>
-  <tr class="group">
-    <th colspan="5" class="g-station">Station</th>
-    <th colspan="5" class="g-catchment">Nearest Estate Context</th>
-    <th colspan="5" class="g-model">Estate Model Signals</th>
-    <th colspan="2" class="g-risk">Employment / Risk</th>
-  </tr>
-  <tr class="cols">
-    <th onclick="sortTable(0)">Station</th>
-    <th onclick="sortTable(1)">Code</th>
-    <th onclick="sortTable(2)">Line</th>
-    <th onclick="sortTable(3)">Status</th>
-    <th onclick="sortTable(4)">Line name</th>
-    <th onclick="sortTable(5)">Nearest estate</th>
-    <th onclick="sortTable(6)">Distance</th>
-    <th onclick="sortTable(7)">Catchment</th>
-    <th onclick="sortTable(8)">Estates 800m</th>
-    <th onclick="sortTable(9)">Estates 1.4km</th>
-    <th onclick="sortTable(10)">Prov</th>
-    <th onclick="sortTable(11)">Score</th>
-    <th onclick="sortTable(12)">LS path</th>
-    <th onclick="sortTable(13)">HDB value</th>
-    <th onclick="sortTable(14)">Private value</th>
-    <th onclick="sortTable(15)">Employment</th>
-    <th onclick="sortTable(16)">Lease</th>
-  </tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
-</div>
 
-<script>
-const DATA = {data_js};
-
-function bandHTML(value) {{
-  if (!value || value === "-") return '<span class="muted">-</span>';
-  const cls = value === "B+" ? "Bp" : value.replace("/", "R");
-  return `<span class="band b-${{cls}}">${{value}}</span>`;
-}}
-function statusHTML(value) {{
-  const cls = value === "Open" ? "status-open" : "status-future";
-  return `<span class="status ${{cls}}">${{value}}</span>`;
-}}
-function distanceHTML(row) {{
-  return `<span class="catch-${{row.distance_band}}">${{row.distance_m.toLocaleString()}}m</span>`;
-}}
-function renderRow(row) {{
-  return `<tr data-line="${{row.line_key}}" data-status="${{row.status}}" data-search="${{[row.station,row.code,row.line,row.estate].join(' ').toLowerCase()}}">
-    <td class="station-name">${{row.station}}</td>
-    <td>${{row.code}}</td>
-    <td><span class="line-badge line-${{row.line_key}}">${{row.line_short}}</span></td>
-    <td>${{statusHTML(row.status)}}</td>
-    <td class="muted">${{row.line}}</td>
-    <td class="estate-name">${{row.estate}}</td>
-    <td>${{distanceHTML(row)}}</td>
-    <td>${{row.distance_band}}</td>
-    <td>${{row.within_800}}</td>
-    <td>${{row.within_1400}}</td>
-    <td>${{bandHTML(row.provision_band)}}</td>
-    <td>${{row.provision_score !== null ? row.provision_score.toFixed(2) : '<span class="muted">-</span>'}}</td>
-    <td class="muted">${{row.ls_traj}}</td>
-    <td>${{bandHTML(row.hdb_value_band)}}</td>
-    <td>${{bandHTML(row.private_value_band)}}</td>
-    <td>${{bandHTML(row.employment_band)}}</td>
-    <td>${{bandHTML(row.lease_band)}}</td>
-  </tr>`;
-}}
-
-const tbody = document.getElementById("tbody");
-tbody.innerHTML = DATA.map(renderRow).join("");
-
-let activeStatus = "all";
-let activeLine = "all";
-let searchVal = "";
-function filterStatus(status, btn) {{
-  activeStatus = status;
-  btn.parentElement.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  applyFilters();
-}}
-function filterLine(line, btn) {{
-  activeLine = line;
-  document.querySelectorAll(".line-controls .filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  applyFilters();
-}}
-function filterTable() {{
-  searchVal = document.getElementById("search").value.toLowerCase();
-  applyFilters();
-}}
-function applyFilters() {{
-  document.querySelectorAll("#tbody tr").forEach(tr => {{
-    const statusOk = activeStatus === "all" || tr.dataset.status === activeStatus;
-    const lineOk = activeLine === "all" || tr.dataset.line === activeLine;
-    const searchOk = tr.dataset.search.includes(searchVal);
-    tr.classList.toggle("hidden", !(statusOk && lineOk && searchOk));
-  }});
-}}
-
-let sortCol = -1;
-let sortAsc = true;
-function sortTable(col) {{
-  const ths = document.querySelectorAll("thead tr.cols th");
-  ths.forEach(th => th.classList.remove("sorted","sorted-asc","sorted-desc"));
-  if (sortCol === col) sortAsc = !sortAsc;
-  else {{ sortCol = col; sortAsc = true; }}
-  ths[col].classList.add("sorted", sortAsc ? "sorted-asc" : "sorted-desc");
-  const rows = Array.from(document.querySelectorAll("#tbody tr"));
-  const bandOrder = {{A:6,"B+":5,B:4,C:3,D:2,F:1,"-":0}};
-  const catchmentOrder = {{core:4,near:3,edge:2,outside:1}};
-  rows.sort((a, b) => {{
-    const at = a.querySelectorAll("td")[col]?.innerText.trim() || "";
-    const bt = b.querySelectorAll("td")[col]?.innerText.trim() || "";
-    const an = parseFloat(at.replace(/[^0-9.\\-]/g, ""));
-    const bn = parseFloat(bt.replace(/[^0-9.\\-]/g, ""));
-    let cmp;
-    if (!isNaN(an) && !isNaN(bn)) cmp = an - bn;
-    else if (bandOrder[at] !== undefined && bandOrder[bt] !== undefined) cmp = bandOrder[at] - bandOrder[bt];
-    else if (catchmentOrder[at] !== undefined && catchmentOrder[bt] !== undefined) cmp = catchmentOrder[at] - catchmentOrder[bt];
-    else cmp = at.localeCompare(bt);
-    return sortAsc ? cmp : -cmp;
-  }});
-  rows.forEach(row => tbody.appendChild(row));
-}}
-sortTable(0);
-</script>
-</body>
-</html>
-"""
-
-out = ROOT / "mrt_comparison_table.html"
-atomic_write_text(out, HTML)
-print(f"Written: {out} ({out.stat().st_size // 1024} KB, {len(rows)} station records)")
+if __name__ == "__main__":
+    main()

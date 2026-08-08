@@ -11,8 +11,11 @@ requires-python = ">=3.11,<3.15"
 dependencies = [
     "numpy>=2.0,<3",
     "pandas>=2.2,<3",
+    "pyproj>=3.6,<4",
+    "pyshp>=3,<4",
     "shapely>=2.0,<3",
     "statsmodels>=0.14,<0.15",
+    "xlrd>=2,<3",
 ]
 
 [project.optional-dependencies]

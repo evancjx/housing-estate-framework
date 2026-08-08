@@ -3,11 +3,61 @@ import math
 import os
 
 import numpy as np
+import pandas as pd
 
 import provision_model as p
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data", "inputs")
+
+
+def test_connectivity_ignores_a_nearer_future_station():
+    bus = pd.DataFrame(columns=["lat", "lon"])
+    open_station = pd.DataFrame(
+        [{"lat": 1.35, "lon": 103.82, "operational": 1}]
+    )
+    with_nearer_future = pd.concat(
+        [
+            open_station,
+            pd.DataFrame(
+                [{"lat": 1.35, "lon": 103.801, "operational": 0}]
+            ),
+        ],
+        ignore_index=True,
+    )
+
+    baseline = p.score_connectivity(1.35, 103.8, open_station, bus, None)
+    with_future = p.score_connectivity(
+        1.35, 103.8, with_nearer_future, bus, None
+    )
+
+    assert with_future == baseline
+
+
+def test_connectivity_improves_when_the_nearer_station_is_open():
+    bus = pd.DataFrame(columns=["lat", "lon"])
+    far_open_station = pd.DataFrame(
+        [{"lat": 1.35, "lon": 103.82, "operational": 1}]
+    )
+    with_nearer_open = pd.concat(
+        [
+            far_open_station,
+            pd.DataFrame(
+                [{"lat": 1.35, "lon": 103.801, "operational": 1}]
+            ),
+        ],
+        ignore_index=True,
+    )
+
+    baseline_score, baseline_meta = p.score_connectivity(
+        1.35, 103.8, far_open_station, bus, None
+    )
+    open_score, open_meta = p.score_connectivity(
+        1.35, 103.8, with_nearer_open, bus, None
+    )
+
+    assert open_score > baseline_score
+    assert open_meta["nearest_mrt_m"] < baseline_meta["nearest_mrt_m"]
 
 
 def test_jtc_missing_returns_nan():

@@ -4,11 +4,11 @@ WOODLANDS,2.1.0,settling_single,2.115,F,3.334,C,1.219,↑,F→C
 WOODLANDS,2.1.0,ageing_in_place,2.166,F,3.204,C,1.038,↑,F→C
 WOODLANDS,2.1.0,downsizing,2.348,F,3.204,C,0.856,↑,F→C
 WOODLANDS,2.1.0,upgrader,2.259,F,3.131,C,0.872,↑,F→C
-PASIR RIS,2.1.0,forming_family,3.312,C,4.06,B+,0.748,↑,C→B+
-PASIR RIS,2.1.0,settling_single,3.278,C,3.814,B,0.536,↑,C→B
-PASIR RIS,2.1.0,ageing_in_place,3.647,B,3.962,B,0.315,↑,B→B
-PASIR RIS,2.1.0,downsizing,3.802,B,3.962,B,0.16,↑,B→B
-PASIR RIS,2.1.0,upgrader,3.312,C,3.753,B,0.441,↑,C→B
+PASIR RIS,2.1.0,forming_family,3.873,B,4.212,B+,0.339,↑,B→B+
+PASIR RIS,2.1.0,settling_single,3.815,B,4.04,B+,0.225,↑,B→B+
+PASIR RIS,2.1.0,ageing_in_place,4.023,B+,4.128,B+,0.105,↑,B+→B+
+PASIR RIS,2.1.0,downsizing,4.126,B+,4.128,B+,0.002,→,B+→B+
+PASIR RIS,2.1.0,upgrader,3.873,B,3.973,B,0.1,→,B→B
 JURONG EAST,2.1.0,forming_family,2.566,D,3.71,B,1.144,↑,D→B
 JURONG EAST,2.1.0,settling_single,2.421,F,3.897,B,1.476,↑,F→B
 JURONG EAST,2.1.0,ageing_in_place,2.425,F,3.669,B,1.244,↑,F→B
@@ -24,11 +24,11 @@ BEDOK,2.1.0,settling_single,3.313,C,4.212,B+,0.899,↑,C→B+
 BEDOK,2.1.0,ageing_in_place,3.512,B,4.237,B+,0.725,↑,B→B+
 BEDOK,2.1.0,downsizing,3.483,C,4.237,B+,0.754,↑,C→B+
 BEDOK,2.1.0,upgrader,3.496,C,3.992,B,0.496,↑,C→B
-TAMPINES,2.1.0,forming_family,2.45,F,3.798,B,1.348,↑,F→B
-TAMPINES,2.1.0,settling_single,2.343,F,3.786,B,1.443,↑,F→B
-TAMPINES,2.1.0,ageing_in_place,2.49,F,3.723,B,1.233,↑,F→B
-TAMPINES,2.1.0,downsizing,2.572,D,3.723,B,1.151,↑,D→B
-TAMPINES,2.1.0,upgrader,2.45,F,3.619,B,1.169,↑,F→B
+TAMPINES,2.1.0,forming_family,2.649,D,3.849,B,1.2,↑,D→B
+TAMPINES,2.1.0,settling_single,2.534,D,3.849,B,1.315,↑,D→B
+TAMPINES,2.1.0,ageing_in_place,2.623,D,3.774,B,1.151,↑,D→B
+TAMPINES,2.1.0,downsizing,2.688,D,3.774,B,1.086,↑,D→B
+TAMPINES,2.1.0,upgrader,2.649,D,3.682,B,1.033,↑,D→B
 TOA PAYOH,2.1.0,forming_family,3.648,B,4.337,B+,0.689,↑,B→B+
 TOA PAYOH,2.1.0,settling_single,3.474,C,4.275,B+,0.801,↑,C→B+
 TOA PAYOH,2.1.0,ageing_in_place,3.653,B,4.354,B+,0.701,↑,B→B+
@@ -84,11 +84,11 @@ TAMPINES WEST,2.1.0,settling_single,3.537,B,3.642,B,0.105,↑,B→B
 TAMPINES WEST,2.1.0,ageing_in_place,3.745,B,3.745,B,0.0,→,B→B
 TAMPINES WEST,2.1.0,downsizing,3.879,B,3.745,B,-0.134,↓,B→B
 TAMPINES WEST,2.1.0,upgrader,3.642,B,3.537,B,-0.105,↓,B→B
-TAMPINES EAST,2.1.0,forming_family,3.467,C,3.608,B,0.141,↑,C→B
-TAMPINES EAST,2.1.0,settling_single,3.343,C,3.502,B,0.159,↑,C→B
-TAMPINES EAST,2.1.0,ageing_in_place,3.418,C,3.435,C,0.017,→,C→C
-TAMPINES EAST,2.1.0,downsizing,3.597,B,3.435,C,-0.162,↓,B→C
-TAMPINES EAST,2.1.0,upgrader,3.467,C,3.375,C,-0.092,→,C→C
+TAMPINES EAST,2.1.0,forming_family,2.907,D,3.363,C,0.456,↑,D→C
+TAMPINES EAST,2.1.0,settling_single,2.807,D,3.083,C,0.276,↑,D→C
+TAMPINES EAST,2.1.0,ageing_in_place,3.042,C,3.153,C,0.111,↑,C→C
+TAMPINES EAST,2.1.0,downsizing,3.273,C,3.153,C,-0.12,↓,C→C
+TAMPINES EAST,2.1.0,upgrader,2.907,D,2.973,D,0.066,→,D→D
 ANG MO KIO,2.1.0,forming_family,3.594,B,4.153,B+,0.559,↑,B→B+
 ANG MO KIO,2.1.0,settling_single,3.396,C,4.209,B+,0.813,↑,C→B+
 ANG MO KIO,2.1.0,ageing_in_place,3.734,B,4.137,B+,0.403,↑,B→B+

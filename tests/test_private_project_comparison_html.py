@@ -27,9 +27,17 @@ def test_aggregate_projects_includes_private_school_metrics():
             "stn_code": "TS1",
             "line": "Test Line",
             "lat": 1.0,
-            "lon": 103.0,
+            "lon": 103.01,
             "operational": 1,
-        }
+        },
+        {
+            "name": "FUTURE MRT",
+            "stn_code": "FS1",
+            "line": "Future Line",
+            "lat": 1.0,
+            "lon": 103.0,
+            "operational": 0,
+        },
     ])
     master = pd.DataFrame([
         {
@@ -65,6 +73,8 @@ def test_aggregate_projects_includes_private_school_metrics():
 
     assert len(rows) == 1
     row = rows[0]
+    assert row["station"] == "TEST MRT"
+    assert row["station_status"] == "Open"
     assert row["has_primary_1km"] is True
     assert row["primary_1km_count"] == 2
     assert row["primary_1km_schools"] == "TOP PRIMARY; NEAR PRIMARY"
