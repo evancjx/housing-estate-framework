@@ -14,11 +14,11 @@ Outputs written to ../data/:
     markets.csv         --markets flag  (hawker centres)
     schools.csv         --schools flag
     polyclinics.csv     --polyclinics flag
-    mrt_layer_names.csv skeleton for onemap_geocode_mrt.py (no coordinates)
     hdb_resale.csv      --hdb flag (cleaned for value_model.py)
 
-Layers NOT fetched (require LTA DataMall or OneMap token):
-    mrt_layer.csv       use onemap_geocode_mrt.py with ONEMAP_TOKEN
+Layers managed by dedicated ingesters:
+    mrt_layer.csv and mrt_layer_names.csv
+                        use ingest_lta_rail.py with reviewed LTA/URA sources
     bus_routes.csv      requires LTA DataMall API key
     chas.csv            CHAS clinic layer requires OneMap token
 
@@ -64,11 +64,6 @@ DATASETS = {
         "ids": ["d_4a086da0a5553be1d89383cd90d07ecd"],
         "format": "geojson",
         "desc": "NEA Hawker Centres (GeoJSON)",
-    },
-    "mrt_names": {
-        "ids": ["d_d312a5b127e1ae74299b8ae664cedd4e"],
-        "format": "csv",
-        "desc": "Train Station Names (CSV — no coordinates)",
     },
     "hdb_resale": {
         # collection 189 — try each ID until one returns ResaleFlatPrices...
@@ -368,39 +363,6 @@ def process_schools(raw: bytes) -> pd.DataFrame:
             return pd.DataFrame()
 
 
-def process_mrt_names(raw: bytes) -> pd.DataFrame:
-    """
-    Train Station Names CSV (no coordinates).
-    Outputs skeleton mrt_layer_names.csv for use with onemap_geocode_mrt.py.
-    Expected columns: stn_code, mrt_station_english, mrt_line_english
-    """
-    import io
-    try:
-        df = pd.read_csv(io.BytesIO(raw), encoding="utf-8-sig")
-    except Exception as exc:
-        print(f"    [mrt_names] CSV parse failed: {exc}")
-        return pd.DataFrame()
-
-    print(f"    MRT names CSV columns: {list(df.columns)}")
-
-    # Normalise column names
-    col_map = {c.lower().strip(): c for c in df.columns}
-    rename = {}
-    for src, dst in [
-        ("stn_code", "stn_code"),
-        ("mrt_station_english", "mrt_station_english"),
-        ("mrt_line_english", "mrt_line_english"),
-    ]:
-        if src in col_map:
-            rename[col_map[src]] = dst
-
-    df = df.rename(columns=rename)
-    keep = [c for c in ["stn_code", "mrt_station_english", "mrt_line_english"] if c in df.columns]
-    df = df[keep].dropna(subset=["mrt_station_english"])
-    df = df.drop_duplicates(subset=["mrt_station_english"])
-    return df
-
-
 def process_hdb_resale(raw: bytes) -> pd.DataFrame:
     """
     HDB Resale Flat Prices (Jan 2017 onwards).
@@ -659,31 +621,13 @@ def main():
         time.sleep(3)
 
     # ------------------------------------------------------------------
-    # 5. MRT NAMES skeleton
+    # 5. MRT/LRT layer (owned by the dedicated official-source ingester)
     # ------------------------------------------------------------------
-    print("\n[5/6] MRT station names (data.gov.sg — no coordinates)...")
-    if should_skip("mrt_layer_names.csv"):
-        status["mrt_layer_names.csv"] = "SKIP — already exists"
-    else:
-        raw = None
-        for did in DATASETS["mrt_names"]["ids"]:
-            raw = poll_download(did)
-            if raw:
-                print(f"  Fetched {len(raw):,} bytes (id={did})")
-                break
-        if raw:
-            df = process_mrt_names(raw)
-            if not df.empty:
-                out = os.path.join(DATA_DIR, "mrt_layer_names.csv")
-                df.to_csv(out, index=False)
-                status["mrt_layer_names.csv"] = (
-                    f"OK  — {len(df)} stations (NAMES ONLY, no coordinates) -> {out}"
-                )
-            else:
-                status["mrt_layer_names.csv"] = "WARN — fetched but parsed 0 rows"
-        else:
-            status["mrt_layer_names.csv"] = "FAIL — could not fetch from data.gov.sg"
-        time.sleep(3)
+    print("\n[5/6] MRT/LRT memberships and geometry...")
+    status["mrt_layer.csv"] = (
+        "SKIP — managed with models/ingest_lta_rail.py; this general ingester "
+        "never replaces the audited rail files"
+    )
 
     # ------------------------------------------------------------------
     # 6. HDB RESALE (value_model.py --hdb)
@@ -738,8 +682,8 @@ def main():
 
     print()
     print("LAYERS REQUIRING MANUAL STEPS:")
-    print("  [X] mrt_layer.csv        — run onemap_geocode_mrt.py with ONEMAP_TOKEN")
-    print("                             mrt_layer_names.csv (above) provides the name/code list")
+    print("  [X] MRT/LRT rail files   — run models/ingest_lta_rail.py")
+    print("                             reviewed LTA/URA sources; no OneMap token required")
     print("  [X] bus_routes.csv       — requires LTA DataMall API key")
     print("                             https://datamall.lta.gov.sg/content/datamall/en/request-for-api.html")
     print("  [X] chas.csv             — CHAS clinic layer requires OneMap token")
@@ -747,7 +691,7 @@ def main():
 
     print()
     print("NEXT STEPS:")
-    print("  1. Obtain ONEMAP_TOKEN, run onemap_geocode_mrt.py to produce mrt_layer.csv")
+    print("  1. Run ingest_lta_rail.py to refresh mrt_layer.csv and mrt_layer_names.csv")
     print("  2. Obtain LTA DataMall key, download bus stops to bus_routes.csv (lat,lon)")
     print("  3. (Optional) With OneMap token: download CHAS clinics to chas.csv (lat,lon)")
     print("  4. Prepare estates.csv  (estate,lat,lon) and judged_inputs.csv (estate,dens,env,mom)")

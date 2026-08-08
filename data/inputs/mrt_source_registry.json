@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "status_as_of": "2026-08-08",
+  "coordinate_note": "All emitted station coordinates are derived representative points, not official station points.",
+  "sources": {
+    "lta_station_codes_jan_2025": {
+      "publisher": "Land Transport Authority",
+      "title": "Train Station Codes and Chinese Names",
+      "published_as_of": "2025-01",
+      "role": "Open code-line membership base",
+      "sha256": "2d518f326e0e76444722caa96e784b5b86f8767652a2f730417294f1b4c4f2b6",
+      "catalog_url": "https://datamall.lta.gov.sg/content/datamall/en/static-data.html",
+      "download_url": "https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/Train%20Station%20Codes%20and%20Chinese%20Names.zip"
+    },
+    "lta_train_station_mar_2026": {
+      "publisher": "Land Transport Authority",
+      "title": "Train Station",
+      "published_as_of": "2026-03",
+      "role": "Primary station geometry; polygon unions are reduced to derived centroids",
+      "sha256": "7a7c6730ce7a9092b38d095ef7b663e8281ae612b1c9477449ea7c215b477e09",
+      "catalog_url": "https://datamall.lta.gov.sg/content/datamall/en/static-data.html",
+      "download_url": "https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStation_Mar2026.zip"
+    },
+    "lta_train_station_exits_jul_2026": {
+      "publisher": "Land Transport Authority",
+      "title": "Train Station Exit",
+      "published_as_of": "2026-07",
+      "role": "Fallback for open CCL6 stations missing from the March polygon release; exit coordinates are reduced to a derived mean point",
+      "sha256": "3f4a2a3ea3908ff4b8642aa4665a14543ab6a1d0901227c170ccc40c44bb53ba",
+      "catalog_url": "https://datamall.lta.gov.sg/content/datamall/en/static-data.html",
+      "download_url": "https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStationExit.zip"
+    },
+    "ura_mp2019_rail_station_sep_2025": {
+      "publisher": "Urban Redevelopment Authority",
+      "title": "Master Plan 2019 Rail Station layer (amended)",
+      "published_as_of": "2025-09",
+      "role": "Fallback footprint geometry for planned, deferred, and under-construction memberships; outline unions are reduced to derived centroids",
+      "sha256": "256af088c5e0c1150541c23c225f835fb37a898a45468911f4eb2f8aab4972b1",
+      "dataset_url": "https://data.gov.sg/datasets/d_9a6bdc9d93bd041eb0cfbb6a8cb3248f/view",
+      "poll_url": "https://api-open.data.gov.sg/v1/public/api/datasets/d_9a6bdc9d93bd041eb0cfbb6a8cb3248f/poll-download"
+    },
+    "lta_system_map_jul_2026": {
+      "publisher": "Land Transport Authority",
+      "title": "Singapore MRT System Map, CCL6 edition",
+      "published_as_of": "2026-07-21",
+      "role": "Reconciles CE1/CE2 to current CC33/CC34 codes and confirms current/future memberships",
+      "url": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_EN_%28Ver210726%29_CCL6.pdf"
+    },
+    "lta_ccl6_opening_jul_2026": {
+      "publisher": "Land Transport Authority",
+      "title": "Circle Line Stage 6 opening announcement",
+      "published_as_of": "2026-05",
+      "role": "Open status and opening date for CC30-CC34 memberships",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/5/news-releases/circle-line-stage-6-to-open-for-public-preview-on-4-july-2026.html"
+    },
+    "lta_tel_project": {
+      "publisher": "Land Transport Authority",
+      "title": "Thomson-East Coast Line",
+      "accessed_as_of": "2026-08-08",
+      "role": "TEL deferred and under-construction status overlay",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/thomson_east_coast_line.html"
+    },
+    "lta_dtl_extensions": {
+      "publisher": "Land Transport Authority",
+      "title": "Downtown Line 2 and 3 Extensions",
+      "accessed_as_of": "2026-08-08",
+      "role": "DTL3 extension under-construction status overlay",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/downtown_line_2_and_3_extensions.html"
+    },
+    "lta_jrl_project": {
+      "publisher": "Land Transport Authority",
+      "title": "Jurong Region Line",
+      "accessed_as_of": "2026-08-08",
+      "role": "JRL 2028-2029 planned membership overlay",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/jurong_region_line.html"
+    },
+    "lta_crl1_project": {
+      "publisher": "Land Transport Authority",
+      "title": "Cross Island Line",
+      "accessed_as_of": "2026-08-08",
+      "role": "CRL Phase 1 2030 planned membership overlay",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/cross_island_line.html"
+    }
+  }
+}

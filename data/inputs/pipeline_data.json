@@ -221,10 +221,10 @@
       "significance": "HIGH",
       "certainty": "CONFIRMED",
       "expected_year": 2026,
-      "notes": "LTA confirmed. Keppel (CC29) and Cantonment (CC30) serve Bukit Merah / Tanjong Pagar fringe. Prince Edward Road (CC31) sits at the Queenstown/Central edge. Completes the Circle Line — no more dead-end at HarbourFront or Dhoby Ghaut. Queenstown already provisioned B+; incremental gain is marginal given existing CCL and MRT density. Bukit Merah (currently rail-thin) gains more meaningfully."
+      "notes": "LTA confirmed passenger service began on 12 July 2026. Keppel (CC30) and Cantonment (CC31) serve the Bukit Merah / Tanjong Pagar fringe, while Prince Edward Road (CC32) sits at the Central Area edge. Marina Bay and Bayfront now carry CC33 and CC34 respectively, superseding the former CE2 and CE1 extension codes. Queenstown already has substantial rail provision; the more direct operational-access change is around Bukit Merah and the southern waterfront."
     },
     {
-      "description": "TEL Stage 5: Bedok South (TE30) and Sungei Bedok (TE31) open, extending the Thomson-East Coast Line from Bayshore. Sungei Bedok is a DTL interchange. Target: 2H 2026 — no specific date confirmed as of June 2026.",
+      "description": "TEL Stage 5: Bedok South (TE30) and Sungei Bedok (TE31) are planned to open, extending the Thomson-East Coast Line from Bayshore. Sungei Bedok is a DTL interchange. Target: 2H 2026 — no specific date confirmed as of 8 August 2026.",
       "benefiting_estates": [
         "BEDOK",
         "EAST COAST"
@@ -233,7 +233,7 @@
       "significance": "HIGH",
       "certainty": "GAZETTED",
       "expected_year": 2026,
-      "notes": "LTA announced 2H 2026 in December 2024. Exact date not yet set; TEL service adjustments running May–July 2026 suggest imminent final testing. Bedok South serves the Bayshore/East Coast Park precinct — primarily a new-supply area (Bayshore BTO) rather than existing estate resale uplift. Sungei Bedok DTL interchange expands east-west connectivity. Bedok town gains a second TEL touchpoint after Bedok (EWL) and Upper East Coast. Use 2026 but flag as not confirmed-dated."
+      "notes": "LTA still lists 2H 2026. No exact opening date had been announced by 8 August 2026; final integration testing includes TEL service adjustments through July and DTL adjustments through 5 September 2026. Bedok South serves the Bayshore/East Coast Park precinct — primarily a new-supply area (Bayshore BTO) rather than existing estate resale uplift. Sungei Bedok DTL interchange expands east-west connectivity. Use 2026 but flag as not confirmed-dated."
     },
     {
       "description": "JB–Singapore RTS Link: Woodlands North (Singapore) to Bukit Chagar (JB) standalone LRT across the Straits of Johor. ~5-minute cross-border journey. Connects underground to TEL Woodlands North station.",

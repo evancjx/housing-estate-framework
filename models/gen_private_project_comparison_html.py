@@ -316,12 +316,24 @@ def nearest_station(lat: float, lon: float, stations: list[dict[str, Any]]) -> d
     }
 
 
+def operational_station_records(mrt: pd.DataFrame) -> list[dict[str, Any]]:
+    """Return current-service station memberships for access diagnostics."""
+
+    if "operational" not in mrt.columns:
+        raise ValueError("MRT layer is missing the operational column")
+    operational = pd.to_numeric(mrt["operational"], errors="coerce")
+    stations = mrt[operational.eq(1)]
+    if stations.empty:
+        raise ValueError("MRT layer contains no operational station rows")
+    return list(stations.to_dict("records"))
+
+
 def build_station_lookup(estates: pd.DataFrame, mrt: pd.DataFrame) -> dict[str, dict[str, Any]]:
     estate_rows = {
         str(row["estate"]).strip().upper(): row
         for _, row in estates.iterrows()
     }
-    stations = list(mrt.to_dict("records"))
+    stations = operational_station_records(mrt)
     lookup: dict[str, dict[str, Any]] = {}
     for area, estate_row in estate_rows.items():
         lat = float(estate_row["lat"])
@@ -369,7 +381,7 @@ def aggregate_projects(
     school_metrics: dict[tuple[str, str, str, str], dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     station_lookup = build_station_lookup(estates, mrt)
-    stations = list(mrt.to_dict("records"))
+    stations = operational_station_records(mrt)
     max_month = private["sale_month_dt"].max()
     recent_start = max_month - pd.DateOffset(months=11) if not pd.isna(max_month) else None
 

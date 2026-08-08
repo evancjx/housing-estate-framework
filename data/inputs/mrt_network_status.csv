@@ -1,0 +1,51 @@
+record_action,stn_code,name,line,network_status,planned_opening,status_as_of,source_key
+remove,CE1,Bayfront,Circle Line Extension,open,,2026-08-08,lta_system_map_jul_2026
+remove,CE2,Marina Bay,Circle Line Extension,open,,2026-08-08,lta_system_map_jul_2026
+upsert,CC30,Keppel,Circle Line,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026
+upsert,CC31,Cantonment,Circle Line,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026
+upsert,CC32,Prince Edward Road,Circle Line,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026
+upsert,CC33,Marina Bay,Circle Line,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026
+upsert,CC34,Bayfront,Circle Line,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026
+upsert,TE10,Mount Pleasant,Thomson-East Coast Line,deferred,TBA,2026-08-08,lta_tel_project
+upsert,TE21,Marina South,Thomson-East Coast Line,deferred,TBA,2026-08-08,lta_tel_project
+upsert,TE22A,Founders' Memorial,Thomson-East Coast Line,deferred,TBA,2026-08-08,lta_tel_project
+upsert,TE30,Bedok South,Thomson-East Coast Line,under_construction,2026-H2,2026-08-08,lta_tel_project
+upsert,TE31,Sungei Bedok,Thomson-East Coast Line,under_construction,2026-H2,2026-08-08,lta_tel_project
+upsert,DT36,Xilin,Downtown Line,under_construction,2026-H2,2026-08-08,lta_dtl_extensions
+upsert,DT37,Sungei Bedok,Downtown Line,under_construction,2026-H2,2026-08-08,lta_dtl_extensions
+upsert,JS1,Choa Chu Kang,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS2,Choa Chu Kang West,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS3,Tengah,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS4,Hong Kah,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS5,Corporation,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS6,Jurong West,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS7,Bahar Junction,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS8,Boon Lay,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JW1,Gek Poh,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JW2,Tawas,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE1,Tengah Plantation,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE2,Tengah Park,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE3,Bukit Batok West,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE4,Toh Guan,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE5,Jurong East,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE6,Jurong Town Hall,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JE7,Pandan Reservoir,Jurong Region Line,planned,2028,2026-08-08,lta_jrl_project
+upsert,JS9,Enterprise,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JS10,Tukang,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JS11,Jurong Hill,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JS12,Jurong Pier,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JW3,Nanyang Gateway,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JW4,Nanyang Crescent,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,JW5,Peng Kang Hill,Jurong Region Line,planned,2029,2026-08-08,lta_jrl_project
+upsert,CR2,Aviation Park,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR3,Loyang,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR4,Pasir Ris East,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR5,Pasir Ris,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR6,Tampines North,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR7,Defu,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR8,Hougang,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR9,Serangoon North,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR10,Tavistock,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR11,Ang Mo Kio,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR12,Teck Ghee,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project
+upsert,CR13,Bright Hill,Cross Island Line,planned,2030,2026-08-08,lta_crl1_project

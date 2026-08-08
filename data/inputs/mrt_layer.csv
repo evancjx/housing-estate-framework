@@ -1,184 +1,260 @@
-lat,lon,name,stn_code,line,operational
-1.3330275154394,103.742370487607,Jurong East,NS1,North South Line,1
-1.34903331201636,103.749566478309,Bukit Batok,NS2,North South Line,1
-1.35861159094192,103.751790910733,Bukit Gombak,NS3,North South Line,1
-1.38536846992147,103.744084909492,Choa Chu Kang,NS4,North South Line,1
-1.39753506936297,103.747405150236,Yew Tee,NS5,North South Line,1
-1.42508698073648,103.762137459497,Kranji,NS7,North South Line,1
-1.43252114855026,103.774074641403,Marsiling,NS8,North South Line,1
-1.43681962961519,103.786066799253,Woodlands,NS9,North South Line,1
-1.44058856161847,103.800990519771,Admiralty,NS10,North South Line,1
-1.44905082158502,103.820046140211,Sembawang,NS11,North South Line,1
-1.42944308477331,103.835005047246,Yishun,NS13,North South Line,1
-1.41738337009565,103.832979908243,Khatib,NS14,North South Line,1
-1.38175587099132,103.84494727118,Yio Chu Kang,NS15,North South Line,1
-1.36993284962264,103.849558091776,Ang Mo Kio,NS16,North South Line,1
-1.35101889777844,103.850057208608,Bishan,NS17,North South Line,1
-1.34010520696434,103.846755921048,Braddell,NS18,North South Line,1
-1.33262928096888,103.847502198048,Toa Payoh,NS19,North South Line,1
-1.32044079120154,103.843825618748,Novena,NS20,North South Line,1
-1.31257031730604,103.838031555215,Newton,NS21,North South Line,1
-1.30242224836722,103.823868523249,Orchard,NS22,North South Line,1
-1.30025287710542,103.839158336848,Somerset,NS23,North South Line,1
-1.29891164362677,103.84629250696,Dhoby Ghaut,NS24,North South Line,1
-1.29298990700923,103.852542630339,City Hall,NS25,North South Line,1
-1.28393326234538,103.851463066212,Raffles Place,NS26,North South Line,1
-1.27631114381584,103.854604975361,Marina Bay,NS27,North South Line,1
-1.27102703612006,103.862447515736,Marina South Pier,NS28,North South Line,1
-1.36712928287615,103.960557318417,Pasir Ris,EW1,East West Line,1
-1.35619148271544,103.9546344625,Tampines,EW2,East West Line,1
-1.34319707851829,103.953377214378,Simei,EW3,East West Line,1
-1.32718729074675,103.946348600798,Tanah Merah,EW4,East West Line,1
-1.32397996868158,103.929984495066,Bedok,EW5,East West Line,1
-1.3210381335934,103.912947930851,Kembangan,EW6,East West Line,1
-1.31978354916088,103.903225807255,Eunos,EW7,East West Line,1
-1.3172473854035,103.892260753884,Paya Lebar,EW8,East West Line,1
-1.3164326118157,103.882906044385,Aljunied,EW9,East West Line,1
-1.31148890998818,103.871386541754,Kallang,EW10,East West Line,1
-1.30739187893137,103.862784610013,Lavender,EW11,East West Line,1
-1.30026468984101,103.855614760658,Bugis,EW12,East West Line,1
-1.27656131737246,103.845725186759,Tanjong Pagar,EW15,East West Line,1
-1.2802415328084,103.840052100136,Outram Park,EW16,East West Line,1
-1.28619457890544,103.826998939732,Tiong Bahru,EW17,East West Line,1
-1.28963453412887,103.81674097205,Redhill,EW18,East West Line,1
-1.29455085184931,103.806077155982,Queenstown,EW19,East West Line,1
-1.30250199924325,103.798228523336,Commonwealth,EW20,East West Line,1
-1.30627534823257,103.790363200126,Buona Vista,EW21,East West Line,1
-1.31140529320963,103.778637841909,Dover,EW22,East West Line,1
-1.31511625277378,103.765191452888,Clementi,EW23,East West Line,1
-1.34235282081401,103.732596738363,Chinese Garden,EW25,East West Line,1
-1.34425911493819,103.720949087456,Lakeside,EW26,East West Line,1
-1.33860405469845,103.706064622772,Boon Lay,EW27,East West Line,1
-1.33758701106708,103.697321608474,Pioneer,EW28,East West Line,1
-1.3277170408447,103.678374996165,Joo Koon,EW29,East West Line,1
-1.31947090075208,103.660530461345,Gul Circle,EW30,East West Line,1
-1.32102695598684,103.649078235627,Tuas Crescent,EW31,East West Line,1
-1.32998504653102,103.639616648771,Tuas West Road,EW32,East West Line,1
-1.34088242451105,103.636991425128,Tuas Link,EW33,East West Line,1
-1.33454977824817,103.961548211018,Expo,CG1,Changi Airport Branch Line,1
-1.35747897447692,103.98788356959,Changi Airport,CG2,Changi Airport Branch Line,1
-1.26531139858465,103.820557316696,HarbourFront,NE1,North East Line,1
-1.2839640518753,103.843141945391,Chinatown,NE4,North East Line,1
-1.28745211415803,103.846119192727,Clarke Quay,NE5,North East Line,1
-1.30724381608438,103.849841614124,Little India,NE7,North East Line,1
-1.31314029963164,103.854754721344,Farrer Park,NE8,North East Line,1
-1.31993957653291,103.862052698446,Boon Keng,NE9,North East Line,1
-1.33137808528793,103.869363547741,Potong Pasir,NE10,North East Line,1
-1.33982824592182,103.87096088798,Woodleigh,NE11,North East Line,1
-1.3510482896351,103.871070417199,Serangoon,NE12,North East Line,1
-1.35990191952976,103.884494725197,Kovan,NE13,North East Line,1
-1.37033472429161,103.892261757937,Hougang,NE14,North East Line,1
-1.38369417199994,103.893049981318,Buangkok,NE15,North East Line,1
-1.39169462601522,103.895484694279,Sengkang,NE16,North East Line,1
-1.41492733388605,103.910166388177,Punggol,NE17,North East Line,1
-1.29686168649656,103.850667371637,Bras Basah,CC2,Circle Line,1
-1.29131493573099,103.855192585584,Esplanade,CC3,Circle Line,1
-1.29399798636232,103.860350000188,Promenade,CC4,Circle Line,1
-1.29976684675139,103.86363696572,Nicoll Highway,CC5,Circle Line,1
-1.3028124684707,103.875337711089,Stadium,CC6,Circle Line,1
-1.30615406128913,103.883045148696,Mountbatten,CC7,Circle Line,1
-1.30843144331463,103.889268208422,Dakota,CC8,Circle Line,1
-1.32683963232487,103.890007860464,MacPherson,CC10,Circle Line,1
-1.33514150139202,103.888389300191,Tai Seng,CC11,Circle Line,1
-1.3424454382925,103.880197087117,Bartley,CC12,Circle Line,1
-1.35153128621585,103.864812169514,Lorong Chuan,CC14,Circle Line,1
-1.348707263451,103.839423132332,Marymount,CC16,Circle Line,1
-1.33734722320212,103.839544077561,Caldecott,CC17,Circle Line,1
-1.32238699517166,103.815385463093,Botanic Gardens,CC19,Circle Line,1
-1.31743915158967,103.807379214161,Farrer Road,CC20,Circle Line,1
-1.31224029631595,103.796399122407,Holland Village,CC21,Circle Line,1
-1.29975987493555,103.78745750525,one-north,CC23,Circle Line,1
-1.29353349887123,103.784572738173,Kent Ridge,CC24,Circle Line,1
-1.28195688684898,103.781988990137,Haw Par Villa,CC25,Circle Line,1
-1.27621352233766,103.791350313288,Pasir Panjang,CC26,Circle Line,1
-1.27236838626952,103.803416232089,Labrador Park,CC27,Circle Line,1
-1.27070647717762,103.809761611219,Telok Blangah,CC28,Circle Line,1
-1.28187378879209,103.859079764874,Bayfront,CE1,Circle Line Extension,1
-1.37956121236613,103.761188866252,Bukit Panjang,DT1,Downtown Line,1
-1.36984601365741,103.764315051619,Cashew,DT2,Downtown Line,1
-1.36288845715168,103.767780907707,Hillview,DT3,Downtown Line,1
-1.34090149001429,103.775746717778,Beauty World,DT5,Downtown Line,1
-1.335893496278,103.783235863233,King Albert Park,DT6,Downtown Line,1
-1.33085764536226,103.796906838288,Sixth Avenue,DT7,Downtown Line,1
-1.32639224146351,103.806548201692,Tan Kah Kee,DT8,Downtown Line,1
-1.32006555750626,103.826024401924,Stevens,DT10,Downtown Line,1
-1.30385218527656,103.852769428884,Rochor,DT13,Downtown Line,1
-1.27944638178916,103.852840829581,Downtown,DT17,Downtown Line,1
-1.28206894769394,103.848648781083,Telok Ayer,DT18,Downtown Line,1
-1.29248194822996,103.844331362465,Fort Canning,DT20,Downtown Line,1
-1.29891843369422,103.850353762717,Bencoolen,DT21,Downtown Line,1
-1.3051713878069,103.855295713435,Jalan Besar,DT22,Downtown Line,1
-1.31367252847691,103.862977620945,Bendemeer,DT23,Downtown Line,1
-1.32130110228321,103.871622627142,Geylang Bahru,DT24,Downtown Line,1
-1.32687671501334,103.883247509542,Mattar,DT25,Downtown Line,1
-1.32997425973974,103.899226655439,Ubi,DT27,Downtown Line,1
-1.33496735995428,103.908459338046,Kaki Bukit,DT28,Downtown Line,1
-1.33474211664091,103.91797832995,Bedok North,DT29,Downtown Line,1
-1.33660782955099,103.932234623286,Bedok Reservoir,DT30,Downtown Line,1
-1.34551530560119,103.938436971222,Tampines West,DT31,Downtown Line,1
-1.3552,103.96108,Tampines East,DT33,Downtown Line,1
-1.34173977444995,103.961472788634,Upper Changi,DT34,Downtown Line,1
-1.38029828742399,103.745291799824,South View,BP2,Bukit Panjang LRT,1
-1.3786032506373,103.749055668925,Keat Hong,BP3,Bukit Panjang LRT,1
-1.37668467920808,103.753712232337,Teck Whye,BP4,Bukit Panjang LRT,1
-1.37861545104083,103.757995558346,Phoenix,BP5,Bukit Panjang LRT,1
-1.37777204259082,103.766645782497,Petir,BP7,Bukit Panjang LRT,1
-1.37613574334988,103.771261175571,Pending,BP8,Bukit Panjang LRT,1
-1.38002223010088,103.772647370452,Bangkit,BP9,Bukit Panjang LRT,1
-1.38457317668026,103.770887223018,Fajar,BP10,Bukit Panjang LRT,1
-1.38778508663361,103.769599685249,Segar,BP11,Bukit Panjang LRT,1
-1.38673926997961,103.76453408646,Jelapang,BP12,Bukit Panjang LRT,1
-1.38272547134453,103.76234425472,Senja,BP13,Bukit Panjang LRT,1
-1.39449304450373,103.900492450944,Compassvale,SE1,Sengkang LRT,1
-1.39146849534132,103.90597359341,Rumbia,SE2,Sengkang LRT,1
-1.38799431054768,103.905415300171,Bakau,SE3,Sengkang LRT,1
-1.38395911688913,103.90222537044,Kangkar,SE4,Sengkang LRT,1
-1.38423355918277,103.897194667804,Ranggung,SE5,Sengkang LRT,1
-1.39627763344324,103.893797181731,Cheng Lim,SW1,Sengkang LRT,1
-1.39717019591821,103.889304824196,Farmway,SW2,Sengkang LRT,1
-1.39821283031379,103.881256222255,Kupang,SW3,Sengkang LRT,1
-1.39731815581938,103.875635154729,Thanggam,SW4,Sengkang LRT,1
-1.39188589234766,103.87630862552,Fernvale,SW5,Sengkang LRT,1
-1.39207983659997,103.880029600546,Layar,SW6,Sengkang LRT,1
-1.38934794658941,103.885844150116,Tongkang,SW7,Sengkang LRT,1
-1.38670058991904,103.89062131608,Renjong,SW8,Sengkang LRT,1
-1.39928198837342,103.905961941214,Cove,PE1,Punggol LRT,1
-1.3969120498774,103.908950224489,Meridian,PE2,Punggol LRT,1
-1.39390922863313,103.912580845515,Coral Edge,PE3,Punggol LRT,1
-1.39451978540251,103.916169381157,Riviera,PE4,Punggol LRT,1
-1.39950910636258,103.916574974234,Kadaloor,PE5,Punggol LRT,1
-1.40228667971123,103.912727352412,Oasis,PE6,Punggol LRT,1
-1.40523483636957,103.908603542566,Damai,PE7,Punggol LRT,1
-1.40961268528804,103.904831550608,Sam Kee,PW1,Punggol LRT,1
-1.4127708937463,103.906577622768,Teck Lee,PW2,Punggol LRT,1
-1.41684852031206,103.906650789313,Punggol Point,PW3,Punggol LRT,1
-1.41590172160383,103.902156317163,Samudera,PW4,Punggol LRT,1
-1.41185447744238,103.900339452055,Nibong,PW5,Punggol LRT,1
-1.40845241943079,103.898558450395,Sumang,PW6,Punggol LRT,1
-1.40532331860455,103.897290522033,Soo Teck,PW7,Punggol LRT,1
-1.44967,103.82988,Canberra,NS12,North South Line,1
-1.30223,103.90737,Marine Parade,TE26,Thomson-East Coast Line,1
-1.3748,103.741,Tengah (JRL planned),JR1,Jurong Region Line,0
-1.38597,103.83682,Lentor,TE5,Thomson-East Coast Line,1
-1.316,103.939,Bedok South,TE30,Thomson-East Coast Line,0
-1.3205,103.942,Sungei Bedok,TE31,Thomson-East Coast Line,0
-1.302,103.862,Founders' Memorial,TE22A,Thomson-East Coast Line,0
-1.4482924,103.785692,Woodlands North,TE1,Thomson-East Coast Line,1
-1.427396,103.793264,Woodlands South,TE3,Thomson-East Coast Line,1
-1.397581,103.817856,Springleaf,TE4,Thomson-East Coast Line,1
-1.3714631,103.836567,Mayflower,TE6,Thomson-East Coast Line,1
-1.3632831,103.832893,Bright Hill,TE7,Thomson-East Coast Line,1
-1.3544164,103.832898,Upper Thomson,TE8,Thomson-East Coast Line,1
-1.3067822,103.818956,Napier,TE12,Thomson-East Coast Line,1
-1.3024222,103.823868,Orchard Boulevard,TE13,Thomson-East Coast Line,1
-1.2939481,103.83372,Great World,TE15,Thomson-East Coast Line,1
-1.2885052,103.833585,Havelock,TE16,Thomson-East Coast Line,1
-1.2805332,103.843883,Maxwell,TE18,Thomson-East Coast Line,1
-1.2777168,103.850367,Shenton Way,TE19,Thomson-East Coast Line,1
-1.2784872,103.867454,Gardens by the Bay,TE22,Thomson-East Coast Line,1
-1.29726507940646,103.873453254621,Tanjong Rhu,TE23,Thomson-East Coast Line,1
-1.29783147778951,103.886178949925,Katong Park,TE24,Thomson-East Coast Line,1
-1.29931925769899,103.897368742078,Tanjong Katong,TE25,Thomson-East Coast Line,1
-1.30666510344814,103.9151067005,Marine Terrace,TE27,Thomson-East Coast Line,1
-1.31000869432289,103.930025826708,Siglap,TE28,Thomson-East Coast Line,1
-1.31312248291264,103.942309776767,Bayshore,TE29,Thomson-East Coast Line,1
+lat,lon,name,stn_code,line,operational,network_status,planned_opening,status_as_of,network_status_source,geometry_basis,geometry_source
+1.3851009447007478,103.7444056427662,Choa Chu Kang,BP1,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.38453267812522,103.77083795599009,Fajar,BP10,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3877564079180014,103.76965965330062,Segar,BP11,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3866966743897435,103.7645005769824,Jelapang,BP12,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.382699241110327,103.76236875401857,Senja,BP13,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3802982859121633,103.74529179982422,South View,BP2,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3786121661808872,103.749051504225,Keat Hong,BP3,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3766592936677757,103.75369963012857,Teck Whye,BP4,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3786249495777958,103.75803362350752,Phoenix,BP5,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.379064076801204,103.7616847634505,Bukit Panjang,BP6,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3777546489373798,103.76666731246796,Petir,BP7,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3761265378818879,103.77127974986774,Pending,BP8,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3800154940432494,103.77266121712539,Bangkit,BP9,Bukit Panjang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.29937532378885,103.84571545130635,Dhoby Ghaut,CC1,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3262483643227896,103.88987764662726,MacPherson,CC10,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3354531033639623,103.88816447580918,Tai Seng,CC11,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3428468440311465,103.87972518707302,Bartley,CC12,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.350005490735138,103.87313727417494,Serangoon,CC13,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3516197561190195,103.86414412633293,Lorong Chuan,CC14,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.35108597291661,103.84877558086843,Bishan,CC15,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.348776656282285,103.83941284500592,Marymount,CC16,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.33748940543794,103.83983720927479,Caldecott,CC17,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.322229299461947,103.81546922960197,Botanic Gardens,CC19,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2968267735253725,103.8506555108639,Bras Basah,CC2,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3174545708674896,103.80748912467556,Farrer Road,CC20,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3119456174947703,103.79623333603709,Holland Village,CC21,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3067609114617156,103.79038477947218,Buona Vista,CC22,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2996564796754784,103.78739399257225,one-north,CC23,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2934009386725291,103.78449793831082,Kent Ridge,CC24,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2825029023308565,103.78182132863105,Haw Par Villa,CC25,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2762296702669356,103.79134196564955,Pasir Panjang,CC26,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2723234940934274,103.80292770501198,Labrador Park,CC27,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2705817863242321,103.80973975589153,Telok Blangah,CC28,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.265341837378836,103.82149832356076,HarbourFront,CC29,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2932599000655098,103.85561173048427,Esplanade,CC3,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.27038674504626,103.83010999639494,Keppel,CC30,Circle Line,1,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026,derived_lta_station_exit_points_mean,lta_train_station_exits_jul_2026
+1.2730476244702422,103.83697665713747,Cantonment,CC31,Circle Line,1,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026,derived_lta_station_exit_points_mean,lta_train_station_exits_jul_2026
+1.2732346336180156,103.84621824156011,Prince Edward Road,CC32,Circle Line,1,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026,derived_lta_station_exit_points_mean,lta_train_station_exits_jul_2026
+1.2756992818126485,103.85498359251949,Marina Bay,CC33,Circle Line,1,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2818719112921144,103.85907645389945,Bayfront,CC34,Circle Line,1,open,2026-07-12,2026-08-08,lta_ccl6_opening_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2931585031785204,103.86096253619196,Promenade,CC4,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2998028299201994,103.86363313769341,Nicoll Highway,CC5,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3028540998754146,103.87534796361363,Stadium,CC6,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3061937869977824,103.88254701504702,Mountbatten,CC7,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3083751546451665,103.88866829968163,Dakota,CC8,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3176684105528589,103.89259502750474,Paya Lebar,CC9,Circle Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3349714801716055,103.96204661805372,Expo,CG1,Changi Airport Branch Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3573079309122364,103.98837058084158,Changi Airport,CG2,Changi Airport Branch Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3701885491112453,103.86325202011615,Tavistock,CR10,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3699486591934034,103.8496163528243,Ang Mo Kio,CR11,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.365421569047663,103.84351959304189,Teck Ghee,CR12,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3632672644671089,103.83293672048511,Bright Hill,CR13,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3702113881849443,104.00351384805843,Aviation Park,CR2,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.37114439390361,103.97192000259376,Loyang,CR3,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3670184950776265,103.96058066603902,Pasir Ris East,CR4,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3729518782222085,103.94925763871005,Pasir Ris,CR5,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3694285704909677,103.93813242151005,Tampines North,CR6,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.362340217706898,103.89899601290712,Defu,CR7,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.371281174691941,103.89234753407565,Hougang,CR8,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3706026103890114,103.87379114279732,Serangoon North,CR9,Cross Island Line,0,planned,2030,2026-08-08,lta_crl1_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.379064076801204,103.7616847634505,Bukit Panjang,DT1,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.319665648573752,103.82575182379132,Stevens,DT10,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3129583848425352,103.83803849488095,Newton,DT11,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3071606312976864,103.84930972983781,Little India,DT12,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3039275594307014,103.85243888424918,Rochor,DT13,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.300130337617512,103.85628181256011,Bugis,DT14,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2931585031785204,103.86096253619196,Promenade,DT15,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2818719112921144,103.85907645389945,Bayfront,DT16,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2794414873782018,103.85285112534702,Downtown,DT17,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2822805842997462,103.848312848472,Telok Ayer,DT18,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2844473786444484,103.84393203026923,Chinatown,DT19,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3693615843249332,103.76469719053986,Cashew,DT2,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2924715941138984,103.84432545085234,Fort Canning,DT20,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2987271895608459,103.85024488980041,Bencoolen,DT21,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3053804831214166,103.85543504033971,Jalan Besar,DT22,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.313644996150244,103.86289119741424,Bendemeer,DT23,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3215128864792325,103.87191146433439,Geylang Bahru,DT24,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.32686568205406,103.88325305881898,Mattar,DT25,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3262483643227896,103.88987764662726,MacPherson,DT26,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3299552645270356,103.89924886676648,Ubi,DT27,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3349629787882433,103.90845515816943,Kaki Bukit,DT28,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3347556341377083,103.91787672273168,Bedok North,DT29,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3623400896876234,103.76742925198232,Hillview,DT3,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3365987357963531,103.93228754664719,Bedok Reservoir,DT30,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3455175069678105,103.93842947024064,Tampines West,DT31,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3542978976958786,103.94399292750927,Tampines,DT32,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3562130023610186,103.95480497245946,Tampines East,DT33,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3417404783166411,103.96147329708074,Upper Changi,DT34,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3349714801716055,103.96204661805372,Expo,DT35,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3287345373811676,103.96486809286563,Xilin,DT36,Downtown Line,0,under_construction,2026-H2,2026-08-08,lta_dtl_extensions,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3203959600538664,103.95720762125941,Sungei Bedok,DT37,Downtown Line,0,under_construction,2026-H2,2026-08-08,lta_dtl_extensions,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3545108356453068,103.76910392899998,Hume,DT4,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.341203562716049,103.77581897683307,Beauty World,DT5,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3356381112935833,103.78387153213814,King Albert Park,DT6,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3307848577315728,103.79732046041522,Sixth Avenue,DT7,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3258706042426365,103.8073308651868,Tan Kah Kee,DT8,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.322229299461947,103.81546922960197,Botanic Gardens,DT9,Downtown Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3729518782222085,103.94925763871005,Pasir Ris,EW1,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3113966417459602,103.87131526313172,Kallang,EW10,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3073717305406238,103.86283780137497,Lavender,EW11,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.300130337617512,103.85628181256011,Bugis,EW12,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2929332373080271,103.8526085043901,City Hall,EW13,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.284067270013051,103.85145931530387,Raffles Place,EW14,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2765150316206098,103.84585358294987,Tanjong Pagar,EW15,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2806594461192335,103.83931247739983,Outram Park,EW16,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2862197403648734,103.82703434066724,Tiong Bahru,EW17,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2896195391445053,103.81679002791165,Redhill,EW18,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2946113321306543,103.80604523694412,Queenstown,EW19,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3542978976958786,103.94399292750927,Tampines,EW2,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3024476462799686,103.79829071892578,Commonwealth,EW20,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3067609114617156,103.79038477947218,Buona Vista,EW21,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3113946902168594,103.77864915478327,Dover,EW22,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3150782269966002,103.7652330284684,Clementi,EW23,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.333209024406938,103.74226323357735,Jurong East,EW24,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3421449756432844,103.73281439469824,Chinese Garden,EW25,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3442631495697484,103.72096531649909,Lakeside,EW26,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3386040235633818,103.70605907165447,Boon Lay,EW27,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3375865012263775,103.69731852936503,Pioneer,EW28,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3277168592366733,103.6783869369899,Joo Koon,EW29,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3431974420302133,103.95337711674757,Simei,EW3,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.319564314920689,103.66059386897847,Gul Circle,EW30,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3210532515588156,103.64906349734215,Tuas Crescent,EW31,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3299818232294567,103.63962756178739,Tuas West Road,EW32,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3403799470752327,103.63681865744921,Tuas Link,EW33,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3272540817841356,103.94654794344736,Tanah Merah,EW4,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3240113188941398,103.93017252010469,Bedok,EW5,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3210380696122812,103.91294752872169,Kembangan,EW6,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3197792312864234,103.90336181818702,Eunos,EW7,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3176684105528589,103.89259502750474,Paya Lebar,EW8,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3164324721955845,103.88290604462229,Aljunied,EW9,East-West Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3573321352640935,103.73345298368655,Tengah Plantation,JE1,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3523297593717925,103.7367909105953,Tengah Park,JE2,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3456739510392088,103.73950196752172,Bukit Batok West,JE3,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3399090568905165,103.742494812135,Toh Guan,JE4,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.333209024406938,103.74226323357735,Jurong East,JE5,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3263789776471053,103.74521205260879,Jurong Town Hall,JE6,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.320458223153171,103.7448007651914,Pandan Reservoir,JE7,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3851009447007478,103.7444056427662,Choa Chu Kang,JS1,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3254102896356106,103.70924521471403,Tukang,JS10,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3186246498002983,103.71013468205803,Jurong Hill,JS11,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.313131168920915,103.71039877677765,Jurong Pier,JS12,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3792210090842536,103.74001342904067,Choa Chu Kang West,JS2,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3663843951975747,103.73008354165445,Tengah,JS3,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3580131191311908,103.72610121212793,Hong Kah,JS4,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.352969534325782,103.71381299545625,Corporation,JS5,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3491851409286144,103.70825683283655,Jurong West,JS6,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3461917322908319,103.70303410199654,Bahar Junction,JS7,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3386040235633818,103.70605907165447,Boon Lay,JS8,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3327316696655689,103.70857975779323,Enterprise,JS9,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3483461900930258,103.69811603259505,Gek Poh,JW1,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.350658112905559,103.6918897365732,Tawas,JW2,Jurong Region Line,0,planned,2028,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3536887485623879,103.68660681630412,Nanyang Gateway,JW3,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3484063188524165,103.6808044018065,Nanyang Crescent,JW4,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3432055533670537,103.6785642956184,Peng Kang Hill,JW5,Jurong Region Line,0,planned,2029,2026-08-08,lta_jrl_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.265341837378836,103.82149832356076,HarbourFront,NE1,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3313873883895007,103.86906995797435,Potong Pasir,NE10,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3392070867482375,103.87080919000739,Woodleigh,NE11,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.350005490735138,103.87313727417494,Serangoon,NE12,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3601798706506054,103.88509111564177,Kovan,NE13,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.371281174691941,103.89234753407565,Hougang,NE14,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.382771583513829,103.89309246857367,Buangkok,NE15,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3915125715438703,103.89541304228126,Sengkang,NE16,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4051306108922648,103.90237295989755,Punggol,NE17,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4149380395652096,103.91021788518965,Punggol Coast,NE18,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2806594461192335,103.83931247739983,Outram Park,NE3,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2844473786444484,103.84393203026923,Chinatown,NE4,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2885422163244435,103.8466047937103,Clarke Quay,NE5,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.29937532378885,103.84571545130635,Dhoby Ghaut,NE6,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3071606312976864,103.84930972983781,Little India,NE7,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3124482279810736,103.85427015831633,Farrer Park,NE8,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3194470897134363,103.86168108539829,Boon Keng,NE9,North East Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.333209024406938,103.74226323357735,Jurong East,NS1,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.440587089699446,103.80097700864262,Admiralty,NS10,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.449069633698365,103.82019386194229,Sembawang,NS11,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.443118375010165,103.82971481738953,Canberra,NS12,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4295817514879388,103.83497216232473,Yishun,NS13,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4175768084100262,103.83303805970739,Khatib,NS14,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3817576067531654,103.8448008232047,Yio Chu Kang,NS15,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3699486591934034,103.8496163528243,Ang Mo Kio,NS16,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.35108597291661,103.84877558086843,Bishan,NS17,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3404441140484697,103.84679989873356,Braddell,NS18,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3326773928212523,103.84742121689158,Toa Payoh,NS19,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3489966464349066,103.74954065600356,Bukit Batok,NS2,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3204300815219443,103.84381813067145,Novena,NS20,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3129583848425352,103.83803849488095,Newton,NS21,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3032441016212188,103.83169832633321,Orchard,NS22,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3002576149469325,103.83907542827603,Somerset,NS23,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.29937532378885,103.84571545130635,Dhoby Ghaut,NS24,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2929332373080271,103.8526085043901,City Hall,NS25,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.284067270013051,103.85145931530387,Raffles Place,NS26,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2756992818126485,103.85498359251949,Marina Bay,NS27,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.271377381149496,103.86291089278309,Marina South Pier,NS28,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3586719215970804,103.7519101088861,Bukit Gombak,NS3,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3851009447007478,103.7444056427662,Choa Chu Kang,NS4,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3975496331645392,103.74740209264961,Yew Tee,NS5,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4252396284248883,103.76218063434013,Kranji,NS7,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4325651685938978,103.77419400264611,Marsiling,NS8,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4363484315171033,103.78725599478112,Woodlands,NS9,North-South Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.399361706782195,103.90591744030257,Cove,PE1,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3968523389961178,103.90899093845887,Meridian,PE2,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3939263504020372,103.91256353494164,Coral Edge,PE3,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.394636478692996,103.91622379060156,Riviera,PE4,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3996385095763013,103.91639497889241,Kadaloor,PE5,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4023508794150528,103.91263185180144,Oasis,PE6,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.405316022132421,103.90850357750466,Damai,PE7,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4051306108922648,103.90237295989755,Punggol,PTC,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.409613763299779,103.90483111309005,Sam Kee,PW1,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4128738704562314,103.90662621178124,Teck Lee,PW2,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.416910852621644,103.90653551133657,Punggol Point,PW3,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4158186972419142,103.90208724236359,Samudera,PW4,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4117555853849253,103.90029894783824,Nibong,PW5,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4083532967845986,103.89851028671289,Sumang,PW6,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4052096470452735,103.89723440823597,Soo Teck,PW7,Punggol LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3944787833996302,103.90055527746425,Compassvale,SE1,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3915644449764613,103.90589048259643,Rumbia,SE2,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3881050155276435,103.90552634673892,Bakau,SE3,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3840307669555787,103.90225755100238,Kangkar,SE4,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.383921479226034,103.89749260337356,Ranggung,SE5,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3915125715438703,103.89541304228126,Sengkang,STC,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3962489157601012,103.89390790799162,Cheng Lim,SW1,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3971619025633122,103.8893828608299,Farmway,SW2,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3981975781089038,103.8813742829636,Kupang,SW3,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3974369932129012,103.87565537166792,Thanggam,SW4,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.391944192301356,103.87627965682016,Fernvale,SW5,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.392092871915538,103.88015787523572,Layar,SW6,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3893387808264515,103.88593735844421,Tongkang,SW7,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3867475130766058,103.89042878846818,Renjong,SW8,Sengkang LRT,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4483500982892412,103.78567472161538,Woodlands North,TE1,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3285471134383062,103.83506011911706,Mount Pleasant,TE10,Thomson-East Coast Line,0,deferred,TBA,2026-08-08,lta_tel_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.319665648573752,103.82575182379132,Stevens,TE11,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3067313563005127,103.81903764055825,Napier,TE12,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.302633023962424,103.82385764843515,Orchard Boulevard,TE13,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3032441016212188,103.83169832633321,Orchard,TE14,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2945316921778918,103.83344691889354,Great World,TE15,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2884503881586142,103.83357369642785,Havelock,TE16,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2806594461192335,103.83931247739983,Outram Park,TE17,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2805933534773526,103.84392208289995,Maxwell,TE18,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.277619878766435,103.85062726536285,Shenton Way,TE19,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4363484315171033,103.78725599478112,Woodlands,TE2,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2756992818126485,103.85498359251949,Marina Bay,TE20,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2742572613232674,103.86335054803517,Marina South,TE21,Thomson-East Coast Line,0,deferred,TBA,2026-08-08,lta_tel_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2791345486762813,103.86791501999907,Gardens by the Bay,TE22,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2909790064285487,103.86891637803251,Founders' Memorial,TE22A,Thomson-East Coast Line,0,deferred,TBA,2026-08-08,lta_tel_project,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2972145278824423,103.87345170668743,Tanjong Rhu,TE23,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.297822496461215,103.88618207854142,Katong Park,TE24,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.2993637230817727,103.89745064541658,Tanjong Katong,TE25,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3036478690536497,103.90668373718047,Marine Parade,TE26,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3067861814062411,103.9153158404512,Marine Terrace,TE27,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3098767361346713,103.92987890883363,Siglap,TE28,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3129732918060146,103.9419783994235,Bayshore,TE29,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.4270954765065307,103.79389595226307,Woodlands South,TE3,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3166456856958286,103.94923038002243,Bedok South,TE30,Thomson-East Coast Line,0,under_construction,2026-H2,2026-08-08,lta_tel_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3203959600538664,103.95720762125941,Sungei Bedok,TE31,Thomson-East Coast Line,0,under_construction,2026-H2,2026-08-08,lta_tel_project,derived_ura_station_outline_union_centroid,ura_mp2019_rail_station_sep_2025
+1.3981083795560536,103.81792447398784,Springleaf,TE4,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.384931206149239,103.83634746157776,Lentor,TE5,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3721031070709435,103.83679074465117,Mayflower,TE6,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3632672644671089,103.83293672048511,Bright Hill,TE7,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.3544050509729382,103.83292375545018,Upper Thomson,TE8,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026
+1.33748940543794,103.83983720927479,Caldecott,TE9,Thomson-East Coast Line,1,open,,2026-08-08,lta_system_map_jul_2026,derived_lta_station_polygon_union_centroid,lta_train_station_mar_2026

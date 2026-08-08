@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore audited Singapore MRT and LRT station-code-line memberships, a five-year planned overlay, straight-line estate-centroid associations and separately governed estate framework context.">
+<title>Singapore MRT and LRT context explorer</title>
+<link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
+<link rel="stylesheet" href="assets/estate-explorer.css">
+<link rel="stylesheet" href="assets/mrt-comparison.css">
+</head>
+<body>
+<main id="research-content">
+  <header class="explorer-hero mrt-hero">
+    <p class="eyebrow">Audited transport evidence · estate framework model __MODEL_VERSION__</p>
+    <h1>Inspect station context without ranking the network.</h1>
+    <p class="lede">Start with an official-source station-code-line membership, then inspect its straight-line link to the nearest framework estate centroid. Any estate bands are contextual evidence—not station scores, walk times or an investment-return forecast.</p>
+    <div class="proof" aria-label="Transport layer coverage">
+      <span>__STATION_COUNT__ station-code records</span>
+      <span>__LINE_COUNT__ rail lines</span>
+      <span>__OPEN_COUNT__ open memberships · __FUTURE_COUNT__ non-open memberships</span>
+      <span>__ESTATE_COUNT__ framework centroids tested</span>
+    </div>
+    <p class="vintage"><b>Rail status reconciled:</b> <time datetime="__STATUS_AS_OF__">__STATUS_AS_OF_LABEL__</time> against LTA's current system map; not a live service feed · <b>Generated:</b> <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time></p>
+  </header>
+
+  <section class="stance-grid" aria-labelledby="stance-title">
+    <h2 class="sr-only" id="stance-title">How to interpret station and estate evidence</h2>
+    <article class="stance-card stance-rail">
+      <span>01 · Station record</span>
+      <h3>Code, line and audited status</h3>
+      <p>Each row is one station-code-line membership. Interchanges repeat once per service code. The planned overlay is bounded to the framework's T5 horizon through 2031, plus physically deferred TEL stations.</p>
+    </article>
+    <article class="stance-card stance-proximity">
+      <span>02 · Geometric reference</span>
+      <h3>Nearest centroid, not catchment</h3>
+      <p>Distance is straight-line from the station point to the nearest of __ESTATE_COUNT__ estate centroids. It is not a route, entrance-to-home walk time, planning boundary or formal station assignment.</p>
+    </article>
+    <article class="stance-card stance-framework">
+      <span>03 · Context only</span>
+      <h3>Estate signals stay separate</h3>
+      <p>Provision, persona-relative Liveability, HDB Value and private Value retain their own meanings. Context is withheld for non-residential constructs and centroid links beyond 1.4 km.</p>
+    </article>
+  </section>
+
+  <section class="control-card mrt-controls" aria-labelledby="controls-title">
+    <div class="control-heading">
+      <div>
+        <p class="eyebrow">Build your view</p>
+        <h2 id="controls-title">Find a station, then reveal only the evidence you need.</h2>
+      </div>
+      <button class="reset-button" id="reset-view" type="button">Reset view</button>
+    </div>
+
+    <div class="primary-controls">
+      <label class="search-field" for="station-search">
+        <span>Find a station, code, line or nearest centroid</span>
+        <input id="station-search" type="search" autocomplete="off" placeholder="e.g. Tampines, EW2 or Downtown Line">
+      </label>
+      <div class="result-summary" role="status" aria-live="polite" aria-atomic="true">
+        <strong id="visible-count">__STATION_COUNT__</strong>
+        <span id="visible-copy">station-code records shown</span>
+      </div>
+    </div>
+
+    <fieldset class="choice-group" id="view-options">
+      <legend>Evidence focus</legend>
+      <div class="choice-list">
+        <button type="button" class="choice-button active" data-view="overview" aria-pressed="true">Overview</button>
+        <button type="button" class="choice-button" data-view="rail" aria-pressed="false">Station &amp; line</button>
+        <button type="button" class="choice-button" data-view="proximity" aria-pressed="false">Centroid association</button>
+        <button type="button" class="choice-button" data-view="household" aria-pressed="false">Estate context</button>
+        <button type="button" class="choice-button" data-view="value" aria-pressed="false">Tenure Value</button>
+        <button type="button" class="choice-button" data-view="future" aria-pressed="false">Future &amp; risk context</button>
+        <button type="button" class="choice-button" data-view="all" aria-pressed="false">All diagnostics</button>
+      </div>
+    </fieldset>
+
+    <div class="paired-filters">
+      <fieldset class="choice-group" id="status-options">
+        <legend>Audited status group <span>As at __STATUS_AS_OF_LABEL__; not live service information</span></legend>
+        <div class="choice-list">
+          <button type="button" class="filter-button active" data-status="all" aria-pressed="true">All</button>
+          <button type="button" class="filter-button" data-status="open" aria-pressed="false">Open</button>
+          <button type="button" class="filter-button" data-status="future" aria-pressed="false">Future</button>
+        </div>
+      </fieldset>
+      <fieldset class="choice-group" id="mode-options">
+        <legend>Rail mode</legend>
+        <div class="choice-list">
+          <button type="button" class="filter-button active" data-mode="all" aria-pressed="true">All</button>
+          <button type="button" class="filter-button" data-mode="mrt" aria-pressed="false">MRT</button>
+          <button type="button" class="filter-button" data-mode="lrt" aria-pressed="false">LRT</button>
+        </div>
+      </fieldset>
+    </div>
+
+    <fieldset class="choice-group line-choice" id="line-options">
+      <legend>Rail line <span>One record per code-line membership; interchanges repeat</span></legend>
+      <div class="choice-list line-choice-list" id="line-choice-list"></div>
+    </fieldset>
+  </section>
+
+  <section class="table-card" aria-labelledby="table-title">
+    <div class="table-heading">
+      <div>
+        <p class="eyebrow">Station evidence</p>
+        <h2 id="table-title">Rail records with controlled estate context</h2>
+        <p id="table-guidance">The default order is station A–Z. Sorting reorganises evidence for inspection; it does not identify a “best” station or estate.</p>
+      </div>
+      <div class="sort-status" id="sort-status" aria-live="polite">Station · A to Z</div>
+    </div>
+
+    <div class="view-caveat" id="view-caveat">
+      Overview keeps rail facts, centroid geometry and estate context visibly separate. Choose a focused view for definitions and evidence states.
+    </div>
+
+    <details class="column-guide">
+      <summary>Column definitions for this view</summary>
+      <dl id="column-guide-list"></dl>
+    </details>
+
+    <div class="tbl-wrap" role="region" aria-label="Scrollable MRT and LRT station context table" tabindex="0">
+      <table id="mrt-comparison-table" aria-describedby="table-guidance">
+        <caption>Committed Singapore station-code records, straight-line nearest-estate-centroid diagnostics and separately labelled estate framework context.</caption>
+        <thead id="mrt-comparison-table-head"></thead>
+        <tbody id="mrt-comparison-table-body"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="empty-state" hidden>
+      <h3>No station record matches this view.</h3>
+      <p>Try a shorter search or clear the status, mode and line filters.</p>
+      <button type="button" id="empty-reset">Show every station record</button>
+    </div>
+  </section>
+
+  <details class="method-card">
+    <summary>How to read the source layer, centroid association and estate evidence</summary>
+    <div class="method-grid">
+      <article>
+        <h3>Row grain and status</h3>
+        <p>A row is one station-code-line membership and carries its reviewed LTA status-source key. Open memberships are reconciled to LTA's 21 July 2026 system map. Non-open rows distinguish under-construction, deferred and planned services; the broader Future filter groups those states for exploration.</p>
+      </article>
+      <article>
+        <h3>Distance and association</h3>
+        <p>Distances use a great-circle calculation between points. The 600 m, 1 km and 1.4 km buckets are geometric diagnostics only. Count columns report estate centroids within 800 m and 1.4 km—not station catchments or households served.</p>
+      </article>
+      <article>
+        <h3>Framework boundary</h3>
+        <p>The nearest estate is a reference anchor. Its Provision score is not a station score; differences inside ±0.3 are not a defensible rank. Liveability bands answer different persona questions and are non-comparable by design.</p>
+      </article>
+      <article>
+        <h3>Value and limitations</h3>
+        <p>HDB and private Value remain separate tenure universes, with direct and proxy bases plus unavailable statuses visible. Below __VALUE_TRUST_THRESHOLD__ transactions, the framework publishes bands rather than decimal precision. Rail context is not a price-growth forecast.</p>
+      </article>
+      <article>
+        <h3>Official sources and derived points</h3>
+        <p>Codes start from the <a href="https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/Train%20Station%20Codes%20and%20Chinese%20Names.zip">LTA DataMall workbook</a> and are reconciled to the <a href="https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_EN_%28Ver210726%29_CCL6.pdf">21 July 2026 system map</a>. Representative points are derived—not official station centroids—from <a href="https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStation_Mar2026.zip">LTA station footprints</a>, <a href="https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStationExit.zip">LTA exits</a>, or the URA Master Plan rail-station outline for planned sites.</p>
+      </article>
+      <article>
+        <h3>Planned-overlay boundary</h3>
+        <p>The overlay includes TEL/DTL services under construction, physically deferred TEL stations, all announced JRL stages through 2029 and CRL Phase 1 targeted for 2030. Later CRL phases, the Punggol extension and other post-2031 proposals stay in the pipeline model rather than this point overlay.</p>
+      </article>
+    </div>
+  </details>
+
+  <footer class="page-footer">
+    <p><b>Decision boundary:</b> use this page to inspect the audited transport snapshot and locate relevant estate context. Verify live service notices, delivery dates, routes, walking access and project-level distances before a housing decision.</p>
+    <nav aria-label="Related research"><a href="comparison_table.html">Estate context explorer</a><a href="buyer_profile_table.html">Buyer profiles</a><a href="framework_diagram.html">Framework architecture</a></nav>
+  </footer>
+</main>
+
+<noscript><p class="noscript-note">Enable JavaScript to filter and render the station evidence table.</p></noscript>
+<script id="mrt-comparison-data" type="application/json">__MRT_COMPARISON_DATA_JSON__</script>
+<script id="mrt-line-summary" type="application/json">__MRT_LINE_SUMMARY_JSON__</script>
+<script id="mrt-comparison-config" type="application/json">__MRT_CONFIG_JSON__</script>
+<script src="assets/mrt-comparison.js"></script>
+<script src="assets/research-shell.js" data-research-shell></script>
+</body>
+</html>

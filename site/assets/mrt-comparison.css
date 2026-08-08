@@ -1,0 +1,446 @@
+.mrt-hero,
+body {
+  --explorer-focus: #754000;
+  --shell-focus: #754000;
+}
+
+.mrt-hero {
+  --explorer-accent: #176b78;
+  --explorer-accent-strong: #0d535e;
+  --explorer-accent-soft: #e4f2f3;
+}
+
+.stance-rail {
+  border-top-color: #176b78;
+}
+
+.stance-rail > span {
+  color: #176b78;
+}
+
+.stance-proximity {
+  border-top-color: #4f6f97;
+}
+
+.stance-proximity > span {
+  color: #4f6f97;
+}
+
+.stance-framework {
+  border-top-color: var(--explorer-warm);
+}
+
+.stance-framework > span {
+  color: var(--explorer-warm);
+}
+
+.paired-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 19px;
+}
+
+.paired-filters .choice-group + .choice-group {
+  margin-top: 0;
+}
+
+.line-choice {
+  margin-top: 19px;
+  padding-top: 19px;
+  border-top: 1px solid var(--explorer-line);
+}
+
+.line-filter-button {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 7px 10px;
+  align-items: center;
+  gap: 7px;
+}
+
+.line-filter-button small {
+  color: #4f625a;
+  font-size: .62rem;
+  font-weight: 750;
+  opacity: 1;
+}
+
+.line-filter-button.active small {
+  color: var(--explorer-accent-strong);
+}
+
+.station-column,
+.station-cell {
+  position: sticky;
+  left: 0;
+  min-width: 176px;
+  max-width: 210px;
+  text-align: left;
+}
+
+.column-row .station-column {
+  z-index: 8;
+  background: #f9fbf9;
+}
+
+tbody .station-cell {
+  z-index: 2;
+  background: #fff;
+  font-weight: 850;
+  white-space: normal;
+}
+
+tbody tr:nth-child(even) .station-cell {
+  background: #fbfcfb;
+}
+
+tbody tr:hover .station-cell {
+  background: #f0f6f2;
+}
+
+.group-row .group-rail {
+  background: #e1f0f1;
+  color: #155c66;
+}
+
+.group-row .group-proximity {
+  background: #e9eef5;
+  color: #455f81;
+}
+
+.group-row .group-estate {
+  background: #eceaf3;
+  color: #5b5172;
+}
+
+.group-row .group-provision {
+  background: #e2f1ed;
+  color: #17645a;
+}
+
+.group-row .group-liveability {
+  background: #e5eef4;
+  color: #315f7c;
+}
+
+.group-row .group-hdb,
+.group-row .group-private {
+  background: #fff0e5;
+  color: #7d482a;
+}
+
+.group-row .group-context {
+  background: #f3ece6;
+  color: #74543d;
+}
+
+.line-badge,
+.mode-badge,
+.rail-status,
+.distance-badge,
+.association-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.line-badge {
+  min-width: 42px;
+  padding: 4px 8px;
+  background: #e4ecef;
+  color: #36535e;
+  font-size: .68rem;
+}
+
+.line-north-south-line {
+  background: #f8dddd;
+  color: #8f2828;
+}
+
+.line-east-west-line {
+  background: #dceee1;
+  color: #24633a;
+}
+
+.line-north-east-line {
+  background: #ece2f4;
+  color: #674286;
+}
+
+.line-circle-line,
+.line-circle-line-extension {
+  background: #f6ecc8;
+  color: #725f19;
+}
+
+.line-downtown-line {
+  background: #dcebf5;
+  color: #245c7d;
+}
+
+.line-thomson-east-coast-line {
+  background: #eee2d7;
+  color: #705038;
+}
+
+.line-jurong-region-line {
+  background: #dcefe8;
+  color: #276a54;
+}
+
+.line-cross-island-line {
+  background: #e8e3f2;
+  color: #5d477b;
+}
+
+.line-changi-airport-branch-line {
+  background: #dff0f2;
+  color: #26646c;
+}
+
+.line-bukit-panjang-lrt,
+.line-punggol-lrt,
+.line-sengkang-lrt {
+  background: #e9ecea;
+  color: #4f5d56;
+}
+
+.mode-badge {
+  min-width: 42px;
+  padding: 3px 7px;
+  background: #edf1ef;
+  color: #52635b;
+  font-size: .65rem;
+  text-transform: uppercase;
+}
+
+.mode-lrt {
+  background: #f0ece5;
+  color: #685a46;
+}
+
+.rail-status {
+  padding: 3px 8px;
+  font-size: .66rem;
+}
+
+.rail-status-open {
+  background: #dcefe5;
+  color: #176045;
+}
+
+.rail-status-under_construction,
+.rail-status-future {
+  background: #fff0d7;
+  color: #76511f;
+}
+
+.rail-status-deferred {
+  background: #f1e5d8;
+  color: #6b4822;
+}
+
+.rail-status-planned {
+  background: #e8e7f4;
+  color: #514679;
+}
+
+.distance-badge {
+  padding: 3px 8px;
+  font-size: .65rem;
+}
+
+.distance-le600 {
+  background: #dcefe5;
+  color: #176045;
+}
+
+.distance-601-1000 {
+  background: #e5f1eb;
+  color: #31654f;
+}
+
+.distance-1001-1400 {
+  background: #fff0d7;
+  color: #76511f;
+}
+
+.distance-gt1400 {
+  background: #f8e2df;
+  color: #8d3c34;
+}
+
+.association-badge {
+  max-width: 160px;
+  padding: 3px 8px;
+  font-size: .63rem;
+  white-space: normal;
+}
+
+.association-available {
+  background: #e3f1ed;
+  color: #17645a;
+}
+
+.association-out_of_range {
+  background: #fff0d7;
+  color: #76511f;
+}
+
+.association-not_residential,
+.association-unavailable {
+  background: #eef0ef;
+  color: #53615b;
+}
+
+.coordinate-cell {
+  color: var(--explorer-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .66rem;
+}
+
+.centroid-count {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.centroid-count small {
+  color: var(--explorer-muted);
+  font-size: .61rem;
+}
+
+.model-withheld {
+  display: inline-flex;
+  max-width: 150px;
+  flex-direction: column;
+  gap: 3px;
+  color: #53615b;
+  white-space: normal;
+}
+
+.model-withheld b {
+  font-size: .68rem;
+}
+
+.model-withheld small {
+  font-size: .61rem;
+}
+
+.basis-badge {
+  display: inline-flex;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #edf1ef;
+  color: #5a6962;
+  font-size: .6rem;
+  font-weight: 850;
+}
+
+.basis-proxy {
+  background: #fff0d7;
+  color: #76511f;
+}
+
+.value-cell {
+  max-width: 190px;
+  white-space: normal;
+}
+
+.sample-thin {
+  color: var(--explorer-warm);
+  font-weight: 850;
+}
+
+.context-warning td,
+.context-warning .station-cell {
+  background-image: linear-gradient(rgba(252, 250, 246, .52), rgba(252, 250, 246, .52));
+}
+
+.column-guide {
+  margin: 0 24px 18px;
+  border: 1px solid var(--explorer-line);
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.column-guide summary {
+  padding: 11px 13px;
+  color: var(--explorer-accent-strong);
+  font-size: .72rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.column-guide[open] summary {
+  border-bottom: 1px solid var(--explorer-line);
+}
+
+.column-guide dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--explorer-line);
+}
+
+.column-guide dl > div {
+  padding: 12px 13px;
+  background: #fff;
+}
+
+.column-guide dt {
+  color: var(--explorer-ink);
+  font-size: .69rem;
+  font-weight: 900;
+}
+
+.column-guide dd {
+  margin: 4px 0 0;
+  color: #53615b;
+  font-size: .67rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 680px) {
+  .paired-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .line-choice-list {
+    flex-wrap: nowrap;
+    margin-right: -17px;
+    padding-right: 17px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .station-column,
+  .station-cell {
+    min-width: 150px;
+    max-width: 165px;
+  }
+
+  .column-guide {
+    margin: 0 17px 15px;
+  }
+
+  .column-guide dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .station-column,
+  .station-cell {
+    position: static;
+  }
+
+
+  .column-guide {
+    display: none;
+  }
+}

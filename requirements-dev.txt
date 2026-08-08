@@ -3,6 +3,9 @@ Markdown==3.10.2
 pytest==9.0.3
 pandas==2.3.2
 numpy==2.3.3
+pyproj==3.7.2
+pyshp==3.0.13
 statsmodels==0.14.6
 shapely==2.1.2
 requests==2.34.2
+xlrd==2.0.2

@@ -76,6 +76,8 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     (assets / "estate-comparison.js").write_text("void 0;", encoding="utf-8")
     (assets / "buyer-profile.css").write_text("body {}", encoding="utf-8")
     (assets / "buyer-profile.js").write_text("void 0;", encoding="utf-8")
+    (assets / "mrt-comparison.css").write_text("body {}", encoding="utf-8")
+    (assets / "mrt-comparison.js").write_text("void 0;", encoding="utf-8")
     (assets / "home-loan-planner.js").write_text("void 0;", encoding="utf-8")
     (assets / "condo-loan-timeline-planner.js").write_text(
         "void 0;", encoding="utf-8"
@@ -107,6 +109,8 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert (output / "assets" / "estate-comparison.js").is_file()
         assert (output / "assets" / "buyer-profile.css").is_file()
         assert (output / "assets" / "buyer-profile.js").is_file()
+        assert (output / "assets" / "mrt-comparison.css").is_file()
+        assert (output / "assets" / "mrt-comparison.js").is_file()
         assert (output / "assets" / "home-loan-planner.js").is_file()
         assert (output / "assets" / "condo-loan-timeline-planner.js").is_file()
         assert (output / "assets" / "condo-loan-timeline-funding-v3.js").is_file()
@@ -171,6 +175,14 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert buyer_report.count("assets/estate-explorer.css") == 1
         assert buyer_report.count("assets/buyer-profile.css") == 1
         assert buyer_report.count("assets/buyer-profile.js") == 1
+        mrt_report = (output / "mrt_comparison_table.html").read_text(
+            encoding="utf-8"
+        )
+        assert mrt_report.count("assets/research-shell.css") == 1
+        assert mrt_report.count("assets/research-shell.js") == 1
+        assert mrt_report.count("assets/estate-explorer.css") == 1
+        assert mrt_report.count("assets/mrt-comparison.css") == 1
+        assert mrt_report.count("assets/mrt-comparison.js") == 1
     finally:
         if output.is_dir():
             for path in sorted(output.rglob("*"), reverse=True):
