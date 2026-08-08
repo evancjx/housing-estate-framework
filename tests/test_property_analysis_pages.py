@@ -81,7 +81,9 @@ def test_real_property_analyses_are_discovered_newest_first():
         "144A Lorong Sarina",
         "Arc at Tampines",
         "Canberra Crescent Residences",
+        "PARKTOWN Residence",
         "Park Place Residences at PLQ",
+        "Pinery Residences",
         "The LakeGarden Residences",
     } <= by_project.keys()
     assert (
@@ -101,7 +103,17 @@ def test_real_property_analyses_are_discovered_newest_first():
         by_project["Canberra Crescent Residences"].captured_iso
         == "2026-08-03T22:54:43+08:00"
     )
+    assert (
+        by_project["PARKTOWN Residence"].captured_iso
+        == "2026-08-08T02:25:47+08:00"
+    )
+    assert (
+        by_project["Pinery Residences"].captured_iso
+        == "2026-08-08T02:21:46+08:00"
+    )
     assert by_project["Canberra Crescent Residences"].market_stage == "new launch"
+    assert by_project["PARKTOWN Residence"].market_stage == "new launch"
+    assert by_project["Pinery Residences"].market_stage == "new launch"
     assert by_project["The LakeGarden Residences"].market_stage == "new launch"
     assert [analysis.captured_at for analysis in analyses] == sorted(
         (analysis.captured_at for analysis in analyses), reverse=True
@@ -127,6 +139,8 @@ def test_tanah_merah_property_analysis_portfolio_is_complete():
         "2026-08-03-canberra-crescent-residences.md",
         "2026-08-03-the-lakegarden-residences.md",
         "2026-08-08-the-lakegarden-residences.md",
+        "2026-08-08-parktown-residence.md",
+        "2026-08-08-pinery-residences.md",
         *TANAH_MERAH_PORTFOLIO,
     ),
 )
@@ -226,6 +240,46 @@ def test_real_canberra_card_and_page_show_new_launch_quantum_analysis():
     assert "S$2,625,498" in page
     assert "S$3,344,916" in page
     assert "~748m" in page
+
+
+def test_real_parktown_card_and_page_show_new_launch_quantum_analysis():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-08-08-parktown-residence.md"
+    )
+    entry = analysis.catalog_entry(is_latest=True)
+    card = build_pages_site._property_cards([analysis])
+    page = render_property_analysis_page(analysis)
+
+    assert entry["market_stage"] == "new launch"
+    assert " new launch " in card
+    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert "<dt>Market stage</dt>" in page
+    assert "<dd>new launch</dd>" in page
+    assert 'id="live-asking-inventory"' in page
+    assert 'id="capital-potential-model"' in page
+    assert "1,165" in page
+    assert "S$3.418m" in page
+    assert "S$4.151m" in page
+
+
+def test_real_pinery_card_and_page_show_new_launch_quantum_analysis():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-08-08-pinery-residences.md"
+    )
+    entry = analysis.catalog_entry(is_latest=True)
+    card = build_pages_site._property_cards([analysis])
+    page = render_property_analysis_page(analysis)
+
+    assert entry["market_stage"] == "new launch"
+    assert " new launch " in card
+    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert "<dt>Market stage</dt>" in page
+    assert "<dd>new launch</dd>" in page
+    assert 'id="advertised-developer-balance-and-portal-inventory"' in page
+    assert 'id="five-and-eight-year-quantum-scenarios"' in page
+    assert "S$2,546 psf" in page
+    assert "S$3.172m" in page
+    assert "S$1.037m" in page
 
 
 def test_parse_rejects_unknown_market_stage(tmp_path):

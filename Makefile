@@ -1,7 +1,7 @@
 PYTHON ?= python3
 AS_OF_YEAR ?= 2026
 
-.PHONY: smoke pages-check pages-build framework-diagram master private-project-locations private-project-school-metrics private-project-table condo-framework-comparison multi-condo-framework-comparison poiz-east-comparison poiz-east-unit-growth katong-comparison canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline pipeline-reuse
+.PHONY: smoke pages-check pages-build framework-diagram master private-project-locations private-project-school-metrics private-project-table condo-framework-comparison multi-condo-framework-comparison poiz-east-comparison poiz-east-unit-growth katong-comparison tampines-area-guide canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline pipeline-reuse
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -14,6 +14,9 @@ pages-check:
 # Assemble the same static artifact deployed by the GitHub Pages workflow.
 pages-build:
 	$(PYTHON) scripts/build_pages_site.py --out _site
+
+tampines-area-guide:
+	$(PYTHON) models/gen_tampines_condo_school_mrt_area_guide_html.py
 
 framework-diagram:
 	$(PYTHON) -m sg_estate.reporting.builders.framework_diagram
