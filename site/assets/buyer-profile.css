@@ -1,0 +1,373 @@
+.buyer-hero h1 {
+  max-width: 1040px;
+}
+
+.stance-screen {
+  border-top-color: var(--explorer-accent);
+}
+
+.buyer-controls {
+  display: grid;
+  gap: 22px;
+}
+
+.buyer-controls .primary-controls,
+.buyer-controls .choice-group + .choice-group {
+  margin-top: 0;
+}
+
+.profile-choice-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.profile-choice-button {
+  min-height: 112px;
+  padding: 14px;
+  border: 1px solid var(--explorer-line);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--explorer-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-choice-button:hover {
+  border-color: #8bb8ad;
+  background: #f7fbf9;
+}
+
+.profile-choice-button.active {
+  border-color: var(--explorer-accent);
+  background: var(--explorer-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--explorer-accent);
+}
+
+.profile-choice-button strong,
+.profile-choice-button span {
+  display: block;
+}
+
+.profile-choice-button strong {
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
+.profile-choice-button span {
+  margin-top: 7px;
+  color: var(--explorer-muted);
+  font-size: .66rem;
+  line-height: 1.45;
+}
+
+.scenario-detail {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(260px, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid #c7dcd4;
+  border-radius: 13px;
+  background: #f3faf7;
+}
+
+.scenario-copy h3 {
+  margin: 3px 0 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  letter-spacing: -.025em;
+}
+
+.scenario-copy > p:last-child {
+  max-width: 700px;
+  margin: 0;
+  color: var(--explorer-muted);
+  font-size: .75rem;
+  line-height: 1.6;
+}
+
+.scenario-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.scenario-fact,
+.weight-chip,
+.gate-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 800;
+}
+
+.scenario-fact {
+  padding: 4px 8px;
+  background: #fff;
+  color: #416158;
+  border: 1px solid #cfdfd9;
+}
+
+.scenario-rules {
+  display: grid;
+  align-content: start;
+  gap: 11px;
+}
+
+.rule-line {
+  min-width: 0;
+}
+
+.rule-line b {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--explorer-muted);
+  font-size: .62rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.weight-chip,
+.gate-chip {
+  padding: 3px 7px;
+}
+
+.weight-chip {
+  background: #e4edf4;
+  color: #315f7c;
+}
+
+.gate-chip {
+  background: #fff0e5;
+  color: #7d482a;
+}
+
+.paired-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, .8fr) minmax(300px, 1.2fr);
+  gap: 22px;
+}
+
+.group-row .group-screening {
+  background: #edf2ef;
+  color: #4f625a;
+}
+
+.group-row .group-profile {
+  background: #e2f1ed;
+  color: #17645a;
+}
+
+.group-row .group-value {
+  background: #fff0e5;
+  color: #7d482a;
+}
+
+.group-row .group-evidence {
+  background: #eeeaf5;
+  color: #5d4e75;
+}
+
+.profile-id-cell {
+  max-width: 190px;
+  text-align: left;
+  white-space: normal;
+}
+
+.profile-id-cell strong {
+  display: block;
+  font-size: .72rem;
+}
+
+.profile-id-cell span {
+  color: var(--explorer-muted);
+  font-size: .63rem;
+}
+
+.estate-cell > strong,
+.estate-cell > .cell-sub {
+  display: block;
+}
+
+.estate-cell > .cell-sub {
+  margin-top: 2px;
+}
+
+.segment-badge,
+.eligibility-badge,
+.rank-badge,
+.reason-badge,
+.coverage-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.segment-badge {
+  padding: 3px 8px;
+  background: #e4edf4;
+  color: #315f7c;
+  font-size: .66rem;
+  text-transform: uppercase;
+}
+
+.eligibility-badge {
+  padding: 3px 8px;
+  font-size: .65rem;
+}
+
+.eligibility-yes {
+  background: var(--explorer-accent-soft);
+  color: #17645a;
+}
+
+.eligibility-no {
+  background: var(--explorer-danger-soft);
+  color: var(--explorer-danger);
+}
+
+.rank-badge {
+  min-width: 34px;
+  padding: 3px 7px;
+  background: #edf4f0;
+  color: var(--explorer-accent-strong);
+  font-size: .68rem;
+}
+
+.profile-score {
+  font-size: .9rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.filtered-copy {
+  color: var(--explorer-muted);
+  font-size: .65rem;
+  font-weight: 750;
+}
+
+.basis-direct {
+  color: #17684f;
+  font-weight: 850;
+}
+
+.basis-proxy {
+  color: #76511f;
+  font-weight: 850;
+}
+
+.basis-missing {
+  color: var(--explorer-muted);
+}
+
+.coverage-badge {
+  padding: 3px 7px;
+  background: #edf1ef;
+  color: #52635b;
+  font-size: .64rem;
+}
+
+.coverage-partial {
+  background: #fff0d7;
+  color: #76511f;
+}
+
+.reason-list {
+  display: flex;
+  max-width: 310px;
+  flex-wrap: wrap;
+  gap: 4px;
+  white-space: normal;
+}
+
+.reason-badge {
+  padding: 3px 7px;
+  background: var(--explorer-danger-soft);
+  color: var(--explorer-danger);
+  font-size: .61rem;
+  line-height: 1.35;
+}
+
+.reason-pass {
+  background: var(--explorer-accent-soft);
+  color: #17645a;
+}
+
+.band-only {
+  color: var(--explorer-warm);
+  font-weight: 850;
+}
+
+.filtered-row td,
+.filtered-row .estate-cell {
+  background: #fcf7f6;
+}
+
+.filtered-row:hover td,
+.filtered-row:hover .estate-cell {
+  background: #f9efed;
+}
+
+.nr-row td,
+.nr-row .estate-cell {
+  color: #77857f;
+  background: #f4f5f4;
+}
+
+@media (max-width: 1120px) {
+  .profile-choice-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .profile-choice-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .scenario-detail,
+  .paired-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .buyer-controls {
+    gap: 18px;
+  }
+
+  .profile-choice-list {
+    display: flex;
+    margin-right: -17px;
+    padding-right: 17px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .profile-choice-button {
+    flex: 0 0 210px;
+    min-height: 118px;
+  }
+
+  .scenario-detail {
+    padding: 15px;
+  }
+}
+
+@media print {
+  .profile-choice,
+  .scenario-detail,
+  .paired-filters {
+    display: none !important;
+  }
+}

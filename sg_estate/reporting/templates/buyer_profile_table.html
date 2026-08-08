@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore household-specific estate shortlists after hard constraints, persona and horizon fit, and tenure-separated Value evidence—without creating a universal estate ranking.">
+<title>Singapore buyer profile explorer</title>
+<link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
+<link rel="stylesheet" href="assets/estate-explorer.css">
+<link rel="stylesheet" href="assets/buyer-profile.css">
+</head>
+<body>
+<main id="research-content">
+  <header class="explorer-hero buyer-hero">
+    <p class="eyebrow">Household decision layer · experimental scenario heuristic</p>
+    <h1>Screen for your household before comparing estates.</h1>
+    <p class="lede">Choose one buyer brief, remove choices that fail its hard constraints, then inspect the remaining trade-offs. A rank only describes that scenario and tenure—it is never a universal estate league table.</p>
+    <div class="proof" aria-label="Buyer profile coverage">
+      <span>__PROFILE_COUNT__ household scenarios</span>
+      <span>__ROW_COUNT__ estate–tenure checks</span>
+      <span>__ELIGIBLE_COUNT__ scenario-local shortlist rows</span>
+      <span>__SEGMENT_COUNT__ tenure segments kept separate</span>
+    </div>
+    <p class="vintage"><b>Snapshot:</b> regenerated from current committed outputs · <b>Generated:</b> <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time></p>
+  </header>
+
+  <section class="stance-grid" aria-labelledby="stance-title">
+    <h2 class="sr-only" id="stance-title">How a buyer profile is evaluated</h2>
+    <article class="stance-card stance-screen">
+      <span>01 · Feasibility</span>
+      <h3>Hard constraints first</h3>
+      <p>Tenure, minimum bands, evidence depth, lease tolerance and disruption gates remove infeasible choices before any rank is shown. “Filtered” means this brief failed—not that the estate is bad.</p>
+    </article>
+    <article class="stance-card stance-liveability">
+      <span>02 · Household fit</span>
+      <h3>One persona, one horizon</h3>
+      <p>Each scenario selects an exact Liveability persona and time horizon. Fit bands across different scenarios answer different household questions and are non-comparable by design.</p>
+    </article>
+    <article class="stance-card stance-value">
+      <span>03 · Conditional trade-offs</span>
+      <h3>Rank inside one tenure only</h3>
+      <p>The profile score is an experimental weighted diagnostic after screening. HDB, condominium and landed Value evidence remain separate; it is not affordability, forecast return or buying advice.</p>
+    </article>
+  </section>
+
+  <section class="control-card buyer-controls" aria-labelledby="controls-title">
+    <div class="control-heading">
+      <div>
+        <p class="eyebrow">Choose your brief</p>
+        <h2 id="controls-title">Start with one household scenario.</h2>
+      </div>
+      <button class="reset-button" id="reset-view" type="button">Reset view</button>
+    </div>
+
+    <fieldset class="choice-group profile-choice" id="profile-options">
+      <legend>Buyer scenario <span>Ranks and scores stay inside the selected scenario</span></legend>
+      <div class="profile-choice-list" id="profile-choice-list"></div>
+    </fieldset>
+
+    <article class="scenario-detail" id="scenario-detail" aria-live="polite"></article>
+
+    <div class="primary-controls">
+      <label class="search-field" for="estate-search">
+        <span>Find an estate</span>
+        <input id="estate-search" type="search" autocomplete="off" placeholder="e.g. Tampines or Canberra">
+      </label>
+      <div class="result-summary" role="status" aria-live="polite" aria-atomic="true">
+        <strong id="visible-count">0</strong>
+        <span id="visible-copy">choices shown</span>
+      </div>
+    </div>
+
+    <fieldset class="choice-group" id="view-options">
+      <legend>Evidence focus</legend>
+      <div class="choice-list">
+        <button type="button" class="choice-button active" data-view="overview" aria-pressed="true">Overview</button>
+        <button type="button" class="choice-button" data-view="screening" aria-pressed="false">Eligibility</button>
+        <button type="button" class="choice-button" data-view="household" aria-pressed="false">Household fit</button>
+        <button type="button" class="choice-button" data-view="value" aria-pressed="false">Tenure Value</button>
+        <button type="button" class="choice-button" data-view="evidence" aria-pressed="false">Evidence diagnostics</button>
+        <button type="button" class="choice-button" data-view="all" aria-pressed="false">All evidence</button>
+      </div>
+    </fieldset>
+
+    <div class="paired-filters">
+      <fieldset class="choice-group" id="status-options">
+        <legend>Screening result</legend>
+        <div class="choice-list">
+          <button type="button" class="filter-button active" data-status="eligible" aria-pressed="true">Shortlist</button>
+          <button type="button" class="filter-button" data-status="filtered" aria-pressed="false">Filtered out</button>
+          <button type="button" class="filter-button" data-status="all" aria-pressed="false">Both</button>
+        </div>
+      </fieldset>
+      <fieldset class="choice-group" id="segment-options">
+        <legend>Tenure segment <span>Never blended for Value or display rank</span></legend>
+        <div class="choice-list" id="segment-choice-list"></div>
+      </fieldset>
+    </div>
+  </section>
+
+  <section class="table-card" aria-labelledby="table-title">
+    <div class="table-heading">
+      <div>
+        <p class="eyebrow">Scenario evidence</p>
+        <h2 id="table-title">Estate choices after screening</h2>
+        <p id="table-guidance">The default order follows the selected profile-and-tenure rank. Sorting reorganises evidence for inspection and does not create a cross-profile ranking.</p>
+      </div>
+      <div class="sort-status" id="sort-status" aria-live="polite">Scenario rank · low to high</div>
+    </div>
+
+    <div class="view-caveat" id="view-caveat">
+      Overview shows the shortlist outcome while keeping household fit and tenure-specific Value visibly separate.
+    </div>
+
+    <div class="tbl-wrap" role="region" aria-label="Scrollable buyer profile evaluation table" tabindex="0">
+      <table id="buyer-profile-table" aria-describedby="table-guidance">
+        <caption>Estate choices evaluated for one household scenario using hard constraints, persona-and-horizon Liveability, tenure-specific Value and evidence diagnostics.</caption>
+        <thead id="buyer-profile-table-head"></thead>
+        <tbody id="buyer-profile-table-body"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="empty-state" hidden>
+      <h3>No choice matches this view.</h3>
+      <p>Try a shorter estate search or return to the shortlist.</p>
+      <button type="button" id="empty-reset">Reset this scenario</button>
+    </div>
+  </section>
+
+  <details class="method-card">
+    <summary>How screening, profile scores, Value evidence and time horizons work</summary>
+    <div class="method-grid">
+      <article>
+        <h3>Filters before scores</h3>
+        <p>Hard constraints determine eligibility first. Filtered choices have no public score or rank on this page, even though diagnostic component data may exist upstream.</p>
+      </article>
+      <article>
+        <h3>Experimental profile score</h3>
+        <p>The score combines available Liveability, Value, employment, lease, Provision and life-path inputs. Missing inputs are omitted and weights renormalised; coverage is therefore part of the result. Scenario weight entries update model defaults rather than replacing them.</p>
+      </article>
+      <article>
+        <h3>Value and tenure</h3>
+        <p>HDB, condominium and landed evidence are separate. Direct, proxy and unavailable bases stay visible. Below 100 transactions, Value is published as a band only; because the composite uses Value, its public score and rank are also withheld and the remaining reportable choices are re-ranked locally.</p>
+      </article>
+      <article>
+        <h3>Time limitations</h3>
+        <p>Liveability uses the stated T0, T5 or T15 horizon, while employment remains current/T0. Life paths are T0→T5 diagnostics and can overlap the selected T5 cell; treat the composite as a screening aid, not an independent forecast.</p>
+      </article>
+    </div>
+  </details>
+
+  <footer class="page-footer">
+    <p><b>Decision boundary:</b> use this page to form a scenario-specific shortlist. Financing, eligibility, project quality, unit layout, school-distance eligibility and personal care anchors still require household- and unit-level checks.</p>
+    <nav aria-label="Related research"><a href="comparison_table.html">Estate context explorer</a><a href="framework_diagram.html">Framework architecture</a><a href="private_project_comparison_table.html">Condominium explorer</a></nav>
+  </footer>
+</main>
+
+<noscript><p class="noscript-note">Enable JavaScript to choose a buyer scenario and render its evidence table.</p></noscript>
+<script id="buyer-profile-data" type="application/json">__BUYER_PROFILE_DATA_JSON__</script>
+<script id="buyer-profile-summary" type="application/json">__BUYER_PROFILE_SUMMARY_JSON__</script>
+<script src="assets/buyer-profile.js"></script>
+<script src="assets/research-shell.js" data-research-shell></script>
+</body>
+</html>
