@@ -125,6 +125,16 @@
       "tags": ["district 18", "tampines", "pasir ris"]
     },
     {
+      "id": "tampines-condo-school-mrt-guide-2026-08-08",
+      "path": "tampines_condo_school_mrt_area_guide_2026-08-08.html",
+      "title": "Tampines condominium, school and MRT area guide — 8 Aug 2026",
+      "category": "district",
+      "kind": "research",
+      "summary": "Compare 34 Tampines Planning Area projects by indicative primary-school proximity and usable walking access to operational MRT entrances.",
+      "tags": ["tampines", "simei", "condominium", "school", "mrt", "area guide"],
+      "featured": true
+    },
+    {
       "id": "district-27",
       "path": "private_project_comparison_D27.html",
       "title": "District 27 private project comparison",

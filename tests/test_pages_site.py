@@ -37,6 +37,7 @@ def test_pages_landing_page_links_only_to_existing_html_reports():
     assert "multi_condo_framework_comparison.html" in report_links
     assert "canberra_crescent_d27_deep_analysis.html" in report_links
     assert "home_loan_planner.html" in report_links
+    assert "tampines_condo_school_mrt_area_guide_2026-08-08.html" in report_links
     for number, slug in (
         (1, "micro_location"),
         (2, "newness"),
@@ -46,7 +47,7 @@ def test_pages_landing_page_links_only_to_existing_html_reports():
         (6, "planning_context"),
     ):
         assert f"canberra_strategy_{number}_{slug}.html" in report_links
-    assert len(report_links) == 23
+    assert len(report_links) == 24
     assert all((ROOT / href).is_file() for href in report_links)
 
 
