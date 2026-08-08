@@ -1,11 +1,11 @@
-# The LakeGarden Residences — refreshed 527 sqft 2026 owner-exit analysis
+# The LakeGarden Residences — 527 sqft 2026 owner-exit and 3% annualised-return analysis
 
 Research captured: **2026-08-08 01:30:38 SGT (UTC+08:00)**  
 Property: **The LakeGarden Residences, 80/82 Yuan Ching Road, Singapore 619613/619614**  
 Analysis type: **property resale inventory, valuation and investment analysis**  
 Status: **point-in-time market snapshot**  
 Market stage: **new launch**  
-Summary: **For an August 2023 buyer of the 527 sqft AS1 1BR + Study, the defensible 2026 exit band is S$1.18m–S$1.25m, with S$1.22m as the working base; the median buyer's gross premium is S$89.3k–S$159.3k, but capital-only profit falls to about S$26.6k–S$94.8k before financing and holding costs, and no achieved LakeGarden secondary sale yet proves the valuation.**
+Summary: **For a September 2026 sale, the median August 2023 buyer clears 3% gross annualised price growth above about S$1.195m, but needs about S$1.263m for a 3% cost-adjusted return before financing and holding costs; the S$1.22m working value implies 3.70% gross but only 1.86% cost-adjusted annualised, so 3% is plausible as paper growth rather than a representative realised return.**
 
 ## Decision
 
@@ -17,6 +17,12 @@ For the **median August 2023 purchase of S$1.0907 million**, that means:
 - **base gross premium at S$1.22 million:** **S$129,300**, or **11.9%**;
 - **capital-only profit after original BSD, a S$5,000 acquisition allowance and 2.5% exit friction:** about **S$26,600–S$94,800**, with **S$65,600 at the base**;
 - **economic profit after mortgage interest, property tax, insurance and other holding costs:** lower, and possibly negative.
+
+For a sale around **September 2026**, the same median buyer's S$1.22 million working case represents approximately **3.70% gross annualised price growth**, but only **1.86% capital-only annualised return** after original BSD, the S$5,000 acquisition allowance and 2.5% exit friction. The median buyer needs about **S$1.195 million** to show 3% gross CAGR and about **S$1.263 million** to retain 3% after those transaction costs, before financing and holding expenses.
+
+Entry dispersion changes the answer. At the S$1.22 million working sale, the lowest August buyer at S$1.0541 million reaches approximately **3.00% capital-only annualised**, while the highest buyer at S$1.1538 million is approximately flat after transaction costs. Consequently, “at least 3% annualised” is plausible for a well-bought unit or as a gross price statistic, but **not for the representative owner on a realised, all-in basis**.
+
+If the owner's actual stamped purchase price was exactly **S$1.000 million**, rather than the public cohort median, the September 2026 hurdles fall to approximately **S$1.095 million gross** and **S$1.157 million capital-only**. Every price in the S$1.18 million–S$1.25 million value band would then clear 3% under the stated capital-only convention. No captured August 2023 527 sqft purchase was exactly S$1.000 million; the lowest reviewed entry was S$1.0541 million, so the actual contract must control.
 
 This is **not a huge-quantum exit**. Entry price matters as much as the 2026 market. At the S$1.22 million base, the lowest-priced August buyer has about **S$103,600** of capital-only profit, while the highest-priced buyer is approximately at breakeven before financing and holding costs.
 
@@ -180,6 +186,47 @@ Formula:
 | #10-XX | S$1,153,800 | S$30,752 | S$66,200 | **-S$52, approximately breakeven** |
 
 This table holds the exit price constant to expose entry-price sensitivity. It is **not** a claim that floor 2 and floor 10 have the same 2026 value. A proper unit-specific appraisal must move both the sale price and original cost.
+
+## Three-percent annualised-return test
+
+This section assumes an exercised sale around September 2026, approximately 37 months after an August 2023 purchase, and zero SSD after the legally effective third anniversary. It separates two meanings of “3% annualised”:
+
+- **gross price CAGR:** annualised change from purchase price to gross sale price, ignoring every cost; and
+- **capital-only annualised return:** annualised change from purchase price plus original BSD and a S$5,000 acquisition allowance to sale proceeds after 2.5% exit friction.
+
+The calculations are:
+
+`gross CAGR = (sale price ÷ purchase price)^(12/37) − 1`
+
+`capital-only annualised return = (0.975 × sale price ÷ acquisition basis)^(12/37) − 1`
+
+### Annualised result across the defensible sale range
+
+| August 2023 entry | S$1.18m sale: gross / capital-only | S$1.22m sale: gross / capital-only | S$1.25m sale: gross / capital-only |
+| --- | ---: | ---: | ---: |
+| **Lowest: S$1.0541m** | 3.73% / 1.89% pa | **4.86% / 3.00% pa** | 5.68% / 3.82% pa |
+| **Median: S$1.0907m** | 2.59% / 0.76% pa | **3.70% / 1.86% pa** | 4.52% / 2.66% pa |
+| **Highest: S$1.1538m** | 0.73% / -1.08% pa | **1.83% / approximately 0.00% pa** | 2.63% / 0.79% pa |
+
+The table shows why a project-level headline can mislead. The median buyer clears 3% **gross** in the S$1.22 million base case, while the highest-entry buyer does not clear 3% gross even at S$1.25 million. Once transaction costs are annualised, only the lowest-entry buyer reaches 3% at the working base.
+
+### Sale price required for exactly 3% annualised
+
+| August 2023 entry | 3% gross-CAGR sale | 3% capital-only sale | Position versus S$1.18m–S$1.25m value band |
+| --- | ---: | ---: | --- |
+| **Hypothetical: S$1.000m** | **S$1.095m** | **S$1.157m** | Every value-band case clears both hurdles; no reviewed cohort purchase was exactly S$1.000m |
+| **Lowest: S$1.0541m** | **S$1.155m** | **S$1.220m** | Capital-only target is approximately the working base |
+| **Median: S$1.0907m** | **S$1.195m** | **S$1.263m** | Gross target is supportable; capital-only target is just above the defensible high case |
+| **Highest: S$1.1538m** | **S$1.264m** | **S$1.336m** | Neither target is supported by the current value band |
+
+The capital-only targets still exclude mortgage and progressive-payment interest, property tax, insurance, ABSD, maintenance, opportunity cost and any renovation. A true 3% all-in economic return therefore requires a higher sale price than the displayed S$1.220 million–S$1.336 million thresholds.
+
+For the median buyer, the practical conclusion is:
+
+1. **S$1.18m exit:** does not reach 3% even on gross price CAGR.
+2. **S$1.22m exit:** reaches 3% gross CAGR, but not 3% after transaction costs.
+3. **S$1.25m exit:** remains below 3% capital-only annualised and requires stronger floor/view evidence.
+4. **About S$1.263m or more:** reaches 3% capital-only under the stated convention, but sits above the current defensible range and still excludes financing and holding costs.
 
 ## SSD timing can remove S$47,000–S$50,000
 
