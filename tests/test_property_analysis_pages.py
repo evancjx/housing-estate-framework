@@ -101,7 +101,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     )
     assert (
         by_project["Canberra Crescent Residences"].captured_iso
-        == "2026-08-03T22:54:43+08:00"
+        == "2026-08-08T11:07:32+08:00"
     )
     assert (
         by_project["PARKTOWN Residence"].captured_iso
@@ -137,6 +137,7 @@ def test_tanah_merah_property_analysis_portfolio_is_complete():
         "2026-07-26-park-place-residences-at-plq.md",
         "2026-07-27-144a-lorong-sarina.md",
         "2026-08-03-canberra-crescent-residences.md",
+        "2026-08-08-canberra-crescent-residences.md",
         "2026-08-03-the-lakegarden-residences.md",
         "2026-08-08-the-lakegarden-residences.md",
         "2026-08-08-parktown-residence.md",
@@ -219,8 +220,12 @@ def test_real_lakegarden_card_and_page_show_new_launch_stage():
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
     assert 'id="gross-seller-premium"' in page
+    assert 'id="three-percent-annualised-return-test"' in page
     assert "S$129,300" in page
     assert "S$65,572" in page
+    assert "3.70% / 1.86% pa" in page
+    assert "S$1.157m" in page
+    assert "S$1.263m" in page
 
 
 def test_real_canberra_card_and_page_show_new_launch_quantum_analysis():
@@ -240,6 +245,23 @@ def test_real_canberra_card_and_page_show_new_launch_quantum_analysis():
     assert "S$2,625,498" in page
     assert "S$3,344,916" in page
     assert "~748m" in page
+
+
+def test_real_canberra_three_bedroom_exit_page_shows_cost_adjusted_result():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-08-08-canberra-crescent-residences.md"
+    )
+    entry = analysis.catalog_entry(is_latest=True)
+    card = build_pages_site._property_cards([analysis])
+    page = render_property_analysis_page(analysis)
+
+    assert entry["market_stage"] == "new launch"
+    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert 'id="three-percent-annualised-return-test"' in page
+    assert 'id="longer-hold-alternative"' in page
+    assert "S$2.497m / S$2,522 psf" in page
+    assert "-S$308k" in page
+    assert "S$2.392m" in page
 
 
 def test_real_parktown_card_and_page_show_new_launch_quantum_analysis():
