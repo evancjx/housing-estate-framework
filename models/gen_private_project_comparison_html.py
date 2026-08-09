@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate private_project_comparison_table.html from committed URA private data.
+Generate the focused private-project explorer from committed URA private data.
 
 Reads:
   data/inputs/ura_private.csv      - URA private residential transactions
@@ -12,6 +12,11 @@ Reads:
 
 Writes:
   private_project_comparison_table.html
+
+Presentation:
+  sg_estate/reporting/templates/private_project_comparison_table.html
+  site/assets/private-project-comparison.css
+  site/assets/private-project-comparison.js
 
 Run:
   python3 models/gen_private_project_comparison_html.py
@@ -31,14 +36,22 @@ import json
 import math
 import pathlib
 import re
+import sys
 from datetime import date
 from typing import Any
 
 import pandas as pd
 
-ROOT = pathlib.Path(__file__).parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.domain.value import CFG as VALUE_CFG  # noqa: E402
+
 DEFAULT_LOCATION_PATH = ROOT / "data/outputs/private_project_locations.csv"
 DEFAULT_SCHOOL_METRICS_PATH = ROOT / "data/outputs/private_project_school_metrics.csv"
+TEMPLATE_PATH = ROOT / "sg_estate/reporting/templates/private_project_comparison_table.html"
+VALUE_TRUST_THRESHOLD = int(VALUE_CFG["trust_decimal_n"])
 
 CONDO_TYPE_RE = re.compile(r"\b(?:apartment|condominium|executive condominium)\b", re.I)
 SALE_TYPE_LABELS = {
@@ -351,6 +364,8 @@ def context_for_area(area: str) -> tuple[str, str]:
 def band_context(master: pd.DataFrame, context_area: str) -> dict[str, Any]:
     if context_area not in master.index:
         return {
+            "context_status": "unavailable",
+            "archetype": None,
             "provision_band": None,
             "provision_score": None,
             "private_value_band": None,
@@ -358,17 +373,34 @@ def band_context(master: pd.DataFrame, context_area: str) -> dict[str, Any]:
             "private_value_n": None,
         }
     row = master.loc[context_area]
+    archetype = normalise_name(row.get("archetype"), "-").upper()
+    if archetype == "X":
+        return {
+            "context_status": "not_residential",
+            "archetype": "X",
+            "provision_band": None,
+            "provision_score": None,
+            "private_value_band": None,
+            "private_value_score": None,
+            "private_value_n": None,
+        }
     private_n = value_or_none(row.get("value_private_n"))
+    private_n_int = int(float(private_n)) if private_n is not None else None
+    private_score = value_or_none(row.get("value_private_score"))
     return {
+        "context_status": "available",
+        "archetype": archetype if archetype != "-" else None,
         "provision_band": value_or_none(row.get("provision_band")),
         "provision_score": round(float(row["provision_score"]), 2)
         if value_or_none(row.get("provision_score")) is not None
         else None,
         "private_value_band": value_or_none(row.get("value_private_band")),
-        "private_value_score": round(float(row["value_private_score"]), 2)
-        if value_or_none(row.get("value_private_score")) is not None
+        "private_value_score": round(float(private_score), 2)
+        if private_score is not None
+        and private_n_int is not None
+        and private_n_int >= VALUE_TRUST_THRESHOLD
         else None,
-        "private_value_n": int(float(private_n)) if private_n is not None else None,
+        "private_value_n": private_n_int,
     }
 
 
@@ -460,6 +492,8 @@ def aggregate_projects(
                 "property_type": mode_text(group["property_type"]),
                 "tenure": mode_text(group.get("tenure", pd.Series(dtype=object))),
                 "market_segment": mode_text(group.get("market_segment", pd.Series(dtype=object))),
+                "context_status": model_context["context_status"],
+                "archetype": model_context["archetype"],
                 "provision_band": model_context["provision_band"],
                 "provision_score": model_context["provision_score"],
                 "private_value_band": model_context["private_value_band"],
@@ -477,9 +511,15 @@ def option_html(value: str, label: str) -> str:
     return f'<option value="{html.escape(value)}">{html.escape(label)}</option>'
 
 
-def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
-    today = date.today().strftime("%Y-%m-%d")
-    data_js = json.dumps(rows, indent=2)
+def render_html(
+    rows: list[dict[str, Any]],
+    latest_month: str | None,
+    *,
+    generated_on: date | None = None,
+) -> str:
+    generated_on = generated_on or date.today()
+    today = generated_on.isoformat()
+    data_js = json.dumps(rows, indent=2).replace("</", "<\\/")
 
     station_counts = pd.Series([row["station_key"] for row in rows]).value_counts().to_dict()
     station_labels = {
@@ -505,632 +545,47 @@ def render_html(rows: list[dict[str, Any]], latest_month: str | None) -> str:
     centroid_count = project_count - geocoded_count
     school_metrics_count = sum(1 for row in rows if row.get("school_metrics_source") == "project_geocode")
 
-    html_template = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SG Private Condo Project Comparison</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", monospace;
-    background: #0b0d12;
-    color: #cbd5e1;
-    padding: 32px;
-    font-size: 12px;
-  }
-  h1 { font-size: 17px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
-  .meta { font-size: 11px; color: #64748b; margin-bottom: 18px; }
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(120px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .metric {
-    border: 1px solid #1e293b;
-    border-radius: 6px;
-    background: #0d1117;
-    padding: 9px 10px;
-  }
-  .metric b { display: block; color: #f1f5f9; font-size: 16px; margin-bottom: 2px; }
-  .metric span { color: #64748b; font-size: 10px; }
-  .help-note {
-    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
-    margin-bottom: 16px; padding: 8px 10px;
-    border: 1px solid #1e293b; border-radius: 6px;
-    background: #0d1117; color: #64748b; font-size: 11px; line-height: 1.45;
-  }
-  .help-note strong { color: #cbd5e1; }
-  .controls {
-    display: grid;
-    grid-template-columns: minmax(200px, 1.4fr) minmax(125px, 0.7fr) minmax(150px, 0.8fr) minmax(125px, 0.7fr) minmax(125px, 0.7fr) minmax(150px, 0.85fr) auto;
-    gap: 8px;
-    margin-bottom: 16px;
-    align-items: start;
-  }
-  .control-field { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
-  .control-label {
-    color: #64748b; font-size: 9px; font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase;
-  }
-  .search, select {
-    padding: 6px 10px; border-radius: 5px; border: 1px solid #1e293b;
-    background: #111827; color: #e2e8f0; font-size: 11px; outline: none;
-    min-height: 30px;
-  }
-  select[multiple] {
-    min-height: 92px;
-    padding: 5px 8px;
-  }
-  select[multiple] option {
-    padding: 2px 4px;
-  }
-  .search::placeholder { color: #475569; }
-  .search:focus, select:focus { border-color: #38bdf8; }
-  .count { padding-top: 20px; color: #64748b; font-size: 11px; text-align: right; }
-  .active-query {
-    display: flex; margin: -4px 0 16px; padding: 8px 10px; align-items: center;
-    justify-content: space-between; gap: 12px; border: 1px solid #164e63;
-    border-radius: 6px; background: #082f49; color: #bae6fd; font-size: 11px;
-  }
-  .active-query[hidden] { display: none; }
-  .clear-filters {
-    flex: 0 0 auto; padding: 5px 8px; border: 1px solid #0e7490;
-    border-radius: 5px; background: transparent; color: #e0f2fe;
-    font: inherit; cursor: pointer;
-  }
-  .clear-filters:hover { background: #164e63; }
-  .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #1e293b; }
-  table { border-collapse: collapse; width: 100%; white-space: nowrap; }
-  thead tr.group th {
-    padding: 8px 10px 6px;
-    font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
-    border-bottom: 1px solid #1e293b;
-    text-align: center;
-  }
-  thead tr.cols th {
-    padding: 6px 10px 8px;
-    font-size: 10px; font-weight: 600; color: #64748b;
-    border-bottom: 2px solid #1e293b;
-    cursor: pointer; user-select: none;
-    text-align: center;
-  }
-  thead tr.cols th:hover { color: #94a3b8; }
-  thead tr.cols th.sorted { color: #bae6fd; }
-  thead tr.cols th.sorted-asc::after { content: " asc"; }
-  thead tr.cols th.sorted-desc::after { content: " desc"; }
-  .tip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    border-bottom: 1px dotted #475569;
-    cursor: help;
-  }
-  .tip::after {
-    content: attr(data-tip);
-    position: absolute;
-    left: 50%;
-    top: calc(100% + 8px);
-    transform: translateX(-50%);
-    z-index: 50;
-    width: max-content;
-    max-width: 260px;
-    padding: 6px 8px;
-    border: 1px solid #334155;
-    border-radius: 5px;
-    background: #020617;
-    color: #cbd5e1;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0;
-    text-transform: none;
-    line-height: 1.35;
-    text-align: left;
-    white-space: normal;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.12s ease;
-  }
-  .tip::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: calc(100% + 3px);
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-bottom-color: #334155;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.12s ease;
-  }
-  .tip:hover::after,
-  .tip:hover::before,
-  .tip:focus-visible::after,
-  .tip:focus-visible::before {
-    opacity: 1;
-  }
-  .row-tip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-  }
-  .row-tip::after {
-    content: attr(data-tip);
-    position: absolute;
-    left: 50%;
-    top: calc(100% + 8px);
-    transform: translateX(-50%);
-    z-index: 60;
-    width: max-content;
-    max-width: 320px;
-    padding: 7px 9px;
-    border: 1px solid #334155;
-    border-radius: 5px;
-    background: #020617;
-    color: #cbd5e1;
-    font-size: 10px;
-    font-weight: 500;
-    line-height: 1.4;
-    text-align: left;
-    white-space: normal;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.12s ease;
-  }
-  .row-tip::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: calc(100% + 3px);
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-bottom-color: #334155;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.12s ease;
-  }
-  .row-tip:hover::after,
-  .row-tip:hover::before,
-  .row-tip:focus-visible::after,
-  .row-tip:focus-visible::before {
-    opacity: 1;
-  }
-  .g-project { background:#0d1117; color:#38bdf8; }
-  .g-location { background:#0d1117; color:#22c55e; }
-  .g-school { background:#0d1117; color:#14b8a6; }
-  .g-price { background:#0d1117; color:#f59e0b; }
-  .g-txn { background:#0d1117; color:#a78bfa; }
-  .g-model { background:#0d1117; color:#94a3b8; }
-  tbody tr { border-bottom: 1px solid #111827; transition: background 0.1s; }
-  tbody tr:hover { background: #111827; }
-  td { padding: 7px 10px; text-align: center; }
-  td.project-name { text-align: left; font-weight: 700; color: #e2e8f0; min-width: 210px; }
-  td.street-name, td.context { text-align: left; color: #94a3b8; }
-  .line-badge {
-    display: inline-flex; min-width: 36px; height: 18px; align-items: center; justify-content: center;
-    border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800;
-    background: #172554; color: #bfdbfe;
-  }
-  .status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-  .status-open { background:#052e16; color:#4ade80; }
-  .status-future { background:#422006; color:#fbbf24; }
-  .source { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-  .source-geocode { background:#052e16; color:#4ade80; }
-  .source-proxy { background:#422006; color:#fbbf24; }
-  .school-yes { background:#052e16; color:#4ade80; }
-  .school-no { background:#3f0909; color:#f87171; }
-  .muted { color:#64748b; font-size: 10px; }
-  .money { color:#f8fafc; font-weight: 700; }
-  .delta-high { color:#f87171; font-weight:700; }
-  .delta-mid { color:#fbbf24; }
-  .delta-low { color:#4ade80; font-weight:700; }
-  .delta-flat { color:#64748b; }
-  .band {
-    display: inline-block; padding: 1px 6px; border-radius: 4px;
-    font-weight: 700; font-size: 11px; letter-spacing: 0.3px;
-  }
-  .b-A { background:#14532d; color:#4ade80; }
-  .b-Bp { background:#1e3a5f; color:#60a5fa; }
-  .b-B { background:#1e293b; color:#94a3b8; }
-  .b-C { background:#292524; color:#a8a29e; }
-  .b-D { background:#431407; color:#fb923c; }
-  .b-F { background:#3f0909; color:#f87171; }
-  .b-NR { background:transparent; color:#475569; }
-  @media (max-width: 900px) {
-    body { padding: 18px; }
-    .summary { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
-    .controls { grid-template-columns: 1fr; }
-    .count { text-align: left; }
-  }
-  @media (max-width: 480px) {
-    body { padding: 18px 14px 28px; }
-    .summary { grid-template-columns: 1fr; }
-    .search, select { width: 100%; min-height: 38px; }
-  }
-</style>
-</head>
-<body>
-<h1>SG Private Condo Project Comparison</h1>
-<p class="meta">{{PROJECT_COUNT}} projects | {{TRANSACTION_COUNT}} apartment/condo transactions | {{DISTRICT_COUNT}} postal districts | {{STATION_COUNT}} MRT stations | {{GEOCODED_COUNT}} geocoded | {{CENTROID_COUNT}} centroid fallback | {{SCHOOL_METRICS_COUNT}} school-metric rows | latest transaction month {{LATEST_MONTH}} | generated {{TODAY}}</p>
-
-<div class="summary">
-  <div class="metric"><b>{{PROJECT_COUNT}}</b><span>projects</span></div>
-  <div class="metric"><b>{{TRANSACTION_COUNT}}</b><span>transactions</span></div>
-  <div class="metric"><b>{{GEOCODED_COUNT}}</b><span>project geocodes</span></div>
-  <div class="metric"><b>{{SCHOOL_METRICS_COUNT}}</b><span>school metrics</span></div>
-</div>
-
-<div class="help-note">
-  <strong>Scope:</strong>
-  <span>Includes URA private Apartment, Condominium, and Executive Condominium rows where present; landed rows are excluded.</span>
-  <span>MRT station uses data/outputs/private_project_locations.csv when available; otherwise the row is marked as a centroid fallback.</span>
-  <span>School columns use data/outputs/private_project_school_metrics.csv when available; primary is checked within 1km, secondary within 2km, and JC within 5km.</span>
-  <span><strong>Recent vs all</strong> compares the recent-window project median with its full-window median; it is mix-sensitive and is not an appreciation rate.</span>
-  <span>Provision and private value bands are estate-level context, not project-level model scores.</span>
-</div>
-
-<div class="controls">
-  <label class="control-field">
-    <span class="control-label">Project or place</span>
-    <input class="search" id="search" type="search"
-      placeholder="Project, street, district or MRT"
-      aria-label="Search private projects" oninput="applyFilters()">
-  </label>
-  <label class="control-field">
-    <span class="control-label">District</span>
-    <select id="districtFilter" multiple size="5" onchange="applyFilters()" aria-label="District filter">
-      <option value="all" selected>All districts</option>
-{{DISTRICT_OPTIONS}}
-    </select>
-  </label>
-  <label class="control-field">
-    <span class="control-label">Nearest MRT</span>
-    <select id="stationFilter" multiple size="5" onchange="applyFilters()" aria-label="MRT station filter">
-      <option value="all" selected>All MRT stations</option>
-{{STATION_OPTIONS}}
-    </select>
-  </label>
-  <label class="control-field">
-    <span class="control-label">Sale evidence</span>
-    <select id="saleFilter" multiple size="5" onchange="applyFilters()" aria-label="Sale mix filter">
-      <option value="all" selected>All sale mixes</option>
-      <option value="New Sale">Has new sales</option>
-      <option value="Resale">Has resale</option>
-      <option value="Sub Sale">Has sub sales</option>
-    </select>
-  </label>
-  <label class="control-field">
-    <span class="control-label">Location quality</span>
-    <select id="sourceFilter" multiple size="4" onchange="applyFilters()" aria-label="Location source filter">
-      <option value="all" selected>All locations</option>
-      <option value="project_geocode">Project geocode</option>
-      <option value="centroid_proxy">Centroid fallback</option>
-    </select>
-  </label>
-  <label class="control-field">
-    <span class="control-label">Primary school access</span>
-    <select id="primaryFilter" multiple size="4" onchange="applyFilters()" aria-label="Primary access filter">
-      <option value="all" selected>All primary access</option>
-      <option value="has_primary_1km">Has primary &lt;=1km</option>
-      <option value="has_ranked_primary_1km">Has ranked primary &lt;=1km</option>
-      <option value="no_primary_1km">No primary &lt;=1km</option>
-    </select>
-  </label>
-  <div class="count"><span id="visibleCount">{{PROJECT_COUNT}}</span> visible</div>
-</div>
-<div class="active-query" id="activeQuery" hidden>
-  <span id="activeQueryText"></span>
-  <button class="clear-filters" id="clearFilters" type="button">Clear filters</button>
-</div>
-
-<div class="tbl-wrap">
-<table>
-<thead>
-  <tr class="group">
-    <th colspan="3" class="g-project"><span class="tip" data-tip="Project identity from URA private transaction records.">Project</span></th>
-    <th colspan="7" class="g-location"><span class="tip" data-tip="Postal, planning-area, MRT, and coordinate-source fields used for filtering and spatial context.">Location Filters</span></th>
-    <th colspan="8" class="g-school"><span class="tip" data-tip="Project-level school access diagnostics from matched geocodes and sourced selectivity proxies.">Schools</span></th>
-    <th colspan="7" class="g-price"><span class="tip" data-tip="Project transaction prices compared with district and recent project medians.">Price Comparison</span></th>
-    <th colspan="5" class="g-txn"><span class="tip" data-tip="Transaction sample depth, dates, sale types, tenure, and market segment.">Transaction Profile</span></th>
-    <th colspan="4" class="g-model"><span class="tip" data-tip="Estate-level framework context joined to the private project row; not project-level scores.">Estate Context</span></th>
-  </tr>
-  <tr class="cols">
-    <th data-sort="project" onclick="sortTable('project', this)"><span class="tip" data-tip="Private project name from URA transactions, grouped with street, district, and planning area.">Project</span></th>
-    <th data-sort="street" onclick="sortTable('street', this)"><span class="tip" data-tip="Street name reported in the URA private transaction feed.">Street</span></th>
-    <th data-sort="property_type" onclick="sortTable('property_type', this)"><span class="tip" data-tip="Dominant private property type in this project group.">Type</span></th>
-    <th data-sort="district" onclick="sortTable('district', this)"><span class="tip" data-tip="Postal district from the private transaction record.">District</span></th>
-    <th data-sort="planning_area" onclick="sortTable('planning_area', this)"><span class="tip" data-tip="Planning area used to join project rows to estate-level framework context.">Planning area</span></th>
-    <th data-sort="station" onclick="sortTable('station', this)"><span class="tip" data-tip="Nearest MRT or LRT station from the project geocode, or from centroid fallback when no project geocode exists.">MRT station</span></th>
-    <th data-sort="line" onclick="sortTable('line', this)"><span class="tip" data-tip="Line code for the nearest MRT or LRT station.">Line</span></th>
-    <th data-sort="station_distance_m" onclick="sortTable('station_distance_m', this)"><span class="tip" data-tip="Straight-line distance in metres to the nearest MRT or LRT station.">MRT dist</span></th>
-    <th data-sort="location_source" onclick="sortTable('location_source', this)"><span class="tip" data-tip="Whether spatial fields use a project OneMap geocode or a planning-area/estate centroid fallback.">Source</span></th>
-    <th data-sort="geocode_score" onclick="sortTable('geocode_score', this)"><span class="tip" data-tip="OneMap match score for project geocodes; blank for centroid fallback rows.">Geocode</span></th>
-    <th data-sort="primary_1km_count" onclick="sortTable('primary_1km_count', this)"><span class="tip" data-tip="Number of MOE primary schools within 1km of the matched project coordinate.">Primary 1km</span></th>
-    <th data-sort="best_primary_1km_school" onclick="sortTable('best_primary_1km_school', this)"><span class="tip" data-tip="Best ranked primary school within 1km, using the sourced selectivity proxy when available.">Best primary</span></th>
-    <th data-sort="best_primary_1km_rank" onclick="sortTable('best_primary_1km_rank', this)"><span class="tip" data-tip="Rank of the best primary proxy within 1km; lower rank is more selective.">P rank</span></th>
-    <th data-sort="best_primary_1km_distance_m" onclick="sortTable('best_primary_1km_distance_m', this)"><span class="tip" data-tip="Distance in metres to the best ranked primary school within 1km.">P dist</span></th>
-    <th data-sort="best_secondary_2km_school" onclick="sortTable('best_secondary_2km_school', this)"><span class="tip" data-tip="Best ranked secondary school within 2km, using the sourced selectivity proxy when available.">Best sec</span></th>
-    <th data-sort="best_secondary_2km_rank" onclick="sortTable('best_secondary_2km_rank', this)"><span class="tip" data-tip="Rank of the best secondary proxy within 2km; lower rank is more selective.">S rank</span></th>
-    <th data-sort="best_jc_5km_school" onclick="sortTable('best_jc_5km_school', this)"><span class="tip" data-tip="Best ranked junior college or Year 5 school within 5km, using the sourced selectivity proxy when available.">Best JC</span></th>
-    <th data-sort="best_jc_5km_rank" onclick="sortTable('best_jc_5km_rank', this)"><span class="tip" data-tip="Rank of the best JC proxy within 5km; lower rank is more selective.">JC rank</span></th>
-    <th data-sort="n" onclick="sortTable('n', this)"><span class="tip" data-tip="Total transaction count in the grouped project record.">n</span></th>
-    <th data-sort="recent_n" onclick="sortTable('recent_n', this)"><span class="tip" data-tip="Transaction count from the recent comparison window.">Recent n</span></th>
-    <th data-sort="median_psm" onclick="sortTable('median_psm', this)"><span class="tip" data-tip="Median transacted price per square metre across project transactions.">Median $psm</span></th>
-    <th data-sort="recent_median_psm" onclick="sortTable('recent_median_psm', this)"><span class="tip" data-tip="Recent-window median transacted price per square metre for this project.">Recent $psm</span></th>
-    <th data-sort="district_delta_pct" onclick="sortTable('district_delta_pct', this)"><span class="tip" data-tip="Project median price per square metre versus its postal-district median.">vs district</span></th>
-    <th data-sort="recent_delta_pct" onclick="sortTable('recent_delta_pct', this)"><span class="tip" data-tip="Recent median price per square metre versus the full project median; mix-sensitive and not an appreciation rate.">Recent vs all</span></th>
-    <th data-sort="median_price_mil" onclick="sortTable('median_price_mil', this)"><span class="tip" data-tip="Median transacted price in Singapore dollars, shown in millions.">Median price</span></th>
-    <th data-sort="median_area_sqm" onclick="sortTable('median_area_sqm', this)"><span class="tip" data-tip="Median transacted unit area in square metres.">Median sqm</span></th>
-    <th data-sort="first_sale" onclick="sortTable('first_sale', this)"><span class="tip" data-tip="Earliest transaction month observed for this project group.">First sale</span></th>
-    <th data-sort="last_sale" onclick="sortTable('last_sale', this)"><span class="tip" data-tip="Latest transaction month observed for this project group.">Last sale</span></th>
-    <th data-sort="sale_mix" onclick="sortTable('sale_mix', this)"><span class="tip" data-tip="Sale types present in the project record, such as New Sale, Resale, or Sub Sale.">Sale mix</span></th>
-    <th data-sort="tenure" onclick="sortTable('tenure', this)"><span class="tip" data-tip="Dominant tenure text reported for transactions in this project group.">Tenure</span></th>
-    <th data-sort="market_segment" onclick="sortTable('market_segment', this)"><span class="tip" data-tip="URA market segment, such as CCR, RCR, or OCR.">Market</span></th>
-    <th data-sort="context_area" onclick="sortTable('context_area', this)"><span class="tip" data-tip="Estate or planning-area context used for framework joins.">Context estate</span></th>
-    <th data-sort="provision_band" onclick="sortTable('provision_band', this)"><span class="tip" data-tip="Estate-level Provision band. This is context for the project, not a project-level score.">Prov</span></th>
-    <th data-sort="private_value_band" onclick="sortTable('private_value_band', this)"><span class="tip" data-tip="Estate-level private value band from the framework, kept separate from HDB value.">Private value</span></th>
-    <th data-sort="private_value_n" onclick="sortTable('private_value_n', this)"><span class="tip" data-tip="Estate-level private value sample count used by the value model.">Value n</span></th>
-  </tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
-</div>
-
-<script>
-const DATA = {{DATA_JSON}};
-const NUMERIC_FIELDS = new Set([
-  "n", "recent_n", "median_psm", "recent_median_psm", "district_delta_pct",
-  "recent_delta_pct", "median_price_mil", "median_area_sqm", "station_distance_m",
-  "provision_score", "private_value_score", "private_value_n", "geocode_score",
-  "primary_1km_count", "primary_1km_ranked_count", "top_primary_1km_count",
-  "best_primary_1km_rank", "best_primary_1km_distance_m", "secondary_2km_count",
-  "best_secondary_2km_rank", "best_secondary_2km_distance_m", "jc_5km_count",
-  "best_jc_5km_rank", "best_jc_5km_distance_m"
-]);
-const BAND_ORDER = {A: 6, "B+": 5, B: 4, C: 3, D: 2, F: 1};
-
-let filtered = DATA.slice();
-let sortField = "district";
-let sortAsc = true;
-
-function escapeHTML(value) {
-  return String(value ?? "-").replace(/[&<>"']/g, ch => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[ch]));
-}
-function moneyPSM(value) {
-  if (value === null || value === undefined) return '<span class="muted">-</span>';
-  return `<span class="money">$${Number(value).toLocaleString()}</span>`;
-}
-function moneyMil(value) {
-  if (value === null || value === undefined) return '<span class="muted">-</span>';
-  return `<span class="money">$${Number(value).toFixed(2)}m</span>`;
-}
-function plain(value) {
-  if (value === null || value === undefined || value === "") return '<span class="muted">-</span>';
-  return escapeHTML(value);
-}
-function distance(value) {
-  if (value === null || value === undefined) return '<span class="muted">-</span>';
-  return `<span class="muted">${Number(value).toLocaleString()}m</span>`;
-}
-function deltaHTML(value) {
-  if (value === null || value === undefined) return '<span class="muted">-</span>';
-  const cls = value >= 10 ? "delta-high" : value <= -10 ? "delta-low" : Math.abs(value) >= 5 ? "delta-mid" : "delta-flat";
-  const sign = value > 0 ? "+" : "";
-  return `<span class="${cls}">${sign}${Number(value).toFixed(1)}%</span>`;
-}
-function bandHTML(value) {
-  if (!value || value === "-") return '<span class="band b-NR">-</span>';
-  const cls = value === "B+" ? "b-Bp" : `b-${value}`;
-  return `<span class="band ${cls in document.documentElement.style ? "b-NR" : cls}">${escapeHTML(value)}</span>`;
-}
-function bandClass(value) {
-  if (!value || value === "-") return "b-NR";
-  return {A: "b-A", "B+": "b-Bp", B: "b-B", C: "b-C", D: "b-D", F: "b-F"}[value] || "b-NR";
-}
-function bandPill(value) {
-  if (!value || value === "-") return '<span class="band b-NR">-</span>';
-  return `<span class="band ${bandClass(value)}">${escapeHTML(value)}</span>`;
-}
-function statusHTML(row) {
-  const cls = row.station_status === "Open" ? "status-open" : "status-future";
-  return `<span class="status ${cls}">${escapeHTML(row.station_status)}</span>`;
-}
-function sourceHTML(row) {
-  if (row.location_source === "project_geocode") return '<span class="source source-geocode">geocode</span>';
-  return '<span class="source source-proxy">centroid</span>';
-}
-function geocodeHTML(row) {
-  if (row.location_source !== "project_geocode") return '<span class="muted">missing</span>';
-  const score = row.geocode_score === null || row.geocode_score === undefined ? "-" : row.geocode_score;
-  return `<span class="muted">${escapeHTML(row.geocode_status)} ${escapeHTML(score)}</span>`;
-}
-function primaryHTML(row) {
-  if (row.primary_1km_count === null || row.primary_1km_count === undefined) return '<span class="muted">-</span>';
-  const cls = row.has_primary_1km ? "school-yes" : "school-no";
-  const label = row.has_primary_1km ? "yes" : "no";
-  const schools = row.primary_1km_schools ? row.primary_1km_schools : "No primary schools within 1km";
-  return `<span class="row-tip" data-tip="${escapeHTML(schools)}"><span class="source ${cls}">${label}</span> <span class="muted">${Number(row.primary_1km_count).toLocaleString()}</span></span>`;
-}
-function schoolHTML(value) {
-  if (!value) return '<span class="muted">-</span>';
-  return escapeHTML(value);
-}
-function rankHTML(value) {
-  if (value === null || value === undefined) return '<span class="muted">-</span>';
-  return `<span class="money">#${Number(value).toLocaleString()}</span>`;
-}
-function contextHTML(row) {
-  const proxy = row.context_basis && row.context_basis !== "direct" ? ` <span class="muted">(${escapeHTML(row.context_basis)})</span>` : "";
-  return `${escapeHTML(row.context_area)}${proxy}`;
-}
-function renderRow(row) {
-  return `<tr>
-    <td class="project-name">${escapeHTML(row.project)}</td>
-    <td class="street-name">${escapeHTML(row.street)}</td>
-    <td>${plain(row.property_type)}</td>
-    <td>D${escapeHTML(row.district)}</td>
-    <td>${escapeHTML(row.planning_area)}</td>
-    <td>${escapeHTML(row.station)} <span class="muted">${escapeHTML(row.station_code)}</span> ${statusHTML(row)}</td>
-    <td><span class="line-badge">${escapeHTML(row.line_short)}</span></td>
-    <td>${distance(row.station_distance_m)}</td>
-    <td>${sourceHTML(row)}</td>
-    <td>${geocodeHTML(row)}</td>
-    <td>${primaryHTML(row)}</td>
-    <td class="street-name">${schoolHTML(row.best_primary_1km_school)}</td>
-    <td>${rankHTML(row.best_primary_1km_rank)}</td>
-    <td>${distance(row.best_primary_1km_distance_m)}</td>
-    <td class="street-name">${schoolHTML(row.best_secondary_2km_school)}</td>
-    <td>${rankHTML(row.best_secondary_2km_rank)}</td>
-    <td class="street-name">${schoolHTML(row.best_jc_5km_school)}</td>
-    <td>${rankHTML(row.best_jc_5km_rank)}</td>
-    <td>${Number(row.n).toLocaleString()}</td>
-    <td>${Number(row.recent_n).toLocaleString()}</td>
-    <td>${moneyPSM(row.median_psm)}</td>
-    <td>${moneyPSM(row.recent_median_psm)}</td>
-    <td>${deltaHTML(row.district_delta_pct)}</td>
-    <td>${deltaHTML(row.recent_delta_pct)}</td>
-    <td>${moneyMil(row.median_price_mil)}</td>
-    <td>${Number(row.median_area_sqm).toLocaleString()}</td>
-    <td class="muted">${plain(row.first_sale)}</td>
-    <td class="muted">${plain(row.last_sale)}</td>
-    <td class="muted">${escapeHTML(row.sale_mix)}</td>
-    <td class="muted">${escapeHTML(row.tenure)}</td>
-    <td class="muted">${escapeHTML(row.market_segment)}</td>
-    <td class="context">${contextHTML(row)}</td>
-    <td>${bandPill(row.provision_band)}</td>
-    <td>${bandPill(row.private_value_band)}</td>
-    <td class="muted">${row.private_value_n !== null && row.private_value_n !== undefined ? Number(row.private_value_n).toLocaleString() : "-"}</td>
-  </tr>`;
-}
-function compareValues(a, b, field) {
-  let av = a[field], bv = b[field];
-  if (field === "provision_band" || field === "private_value_band") {
-    av = BAND_ORDER[av] || 0;
-    bv = BAND_ORDER[bv] || 0;
-  } else if (NUMERIC_FIELDS.has(field)) {
-    av = av === null || av === undefined ? -Infinity : Number(av);
-    bv = bv === null || bv === undefined ? -Infinity : Number(bv);
-  } else {
-    av = String(av ?? "");
-    bv = String(bv ?? "");
-  }
-  if (typeof av === "number" && typeof bv === "number") return av - bv;
-  return av.localeCompare(bv);
-}
-function renderRows() {
-  document.getElementById("tbody").innerHTML = filtered.map(renderRow).join("");
-  document.getElementById("visibleCount").textContent = filtered.length.toLocaleString();
-}
-function selectedValues(id) {
-  return Array.from(document.getElementById(id).selectedOptions)
-    .map(option => option.value)
-    .filter(value => value !== "all");
-}
-function matchesSelected(values, value) {
-  return values.length === 0 || values.includes(String(value));
-}
-function matchesSale(values, saleMix) {
-  return values.length === 0 || values.some(value => String(saleMix ?? "").includes(value));
-}
-function matchesPrimary(values, row) {
-  if (values.length === 0) return true;
-  return values.some(value =>
-    (value === "has_primary_1km" && row.has_primary_1km === true) ||
-    (value === "has_ranked_primary_1km" && row.has_ranked_primary_1km === true) ||
-    (value === "no_primary_1km" && row.has_primary_1km === false)
-  );
-}
-function applyFilters() {
-  const search = document.getElementById("search").value.trim().toLowerCase();
-  const districts = selectedValues("districtFilter");
-  const stations = selectedValues("stationFilter");
-  const sales = selectedValues("saleFilter");
-  const sources = selectedValues("sourceFilter");
-  const primaryValues = selectedValues("primaryFilter");
-  filtered = DATA.filter(row => {
-    const searchText = [
-      row.project, row.street, row.district, row.planning_area, row.station, row.station_code,
-      row.line, row.location_source, row.best_primary_1km_school, row.best_secondary_2km_school,
-      row.best_jc_5km_school
-    ].join(" ").toLowerCase();
-    const searchOk = !search || searchText.includes(search);
-    const districtOk = matchesSelected(districts, row.district);
-    const stationOk = matchesSelected(stations, row.station_key);
-    const saleOk = matchesSale(sales, row.sale_mix);
-    const sourceOk = matchesSelected(sources, row.location_source);
-    const primaryOk = matchesPrimary(primaryValues, row);
-    return searchOk && districtOk && stationOk && saleOk && sourceOk && primaryOk;
-  });
-  filtered.sort((a, b) => {
-    const cmp = compareValues(a, b, sortField);
-    return sortAsc ? cmp : -cmp;
-  });
-  renderRows();
-}
-function sortTable(field, th) {
-  document.querySelectorAll("thead tr.cols th").forEach(el => el.classList.remove("sorted", "sorted-asc", "sorted-desc"));
-  if (sortField === field) sortAsc = !sortAsc;
-  else { sortField = field; sortAsc = true; }
-  th.classList.add("sorted", sortAsc ? "sorted-asc" : "sorted-desc");
-  applyFilters();
-}
-function initialiseFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const query = (params.get("q") || "").trim();
-  const district = (params.get("district") || "").trim().replace(/^D/i, "").padStart(2, "0");
-  if (query) document.getElementById("search").value = query;
-  if (district) {
-    const option = Array.from(document.getElementById("districtFilter").options)
-      .find(item => item.value === district);
-    if (option) {
-      Array.from(option.parentElement.options).forEach(item => { item.selected = false; });
-      option.selected = true;
+    config = {
+        "page_size": 100,
+        "recent_window_months": 12,
+        "value_trust_threshold": VALUE_TRUST_THRESHOLD,
+        "latest_month": latest_month,
+        "generated_on": today,
+        "counts": {
+            "projects": project_count,
+            "transactions": transaction_count,
+            "districts": district_count,
+            "stations": station_count,
+            "project_geocodes": geocoded_count,
+            "centroid_fallbacks": centroid_count,
+            "school_metrics": school_metrics_count,
+        },
     }
-  }
-  if (query || district) {
-    document.getElementById("activeQuery").hidden = false;
-    document.getElementById("activeQueryText").textContent = query
-      ? `Showing matches for “${query}”.`
-      : `Showing projects in District ${district}.`;
-  }
-}
-initialiseFromURL();
-document.getElementById("clearFilters").addEventListener("click", () => {
-  document.getElementById("search").value = "";
-  ["districtFilter", "stationFilter", "saleFilter", "sourceFilter", "primaryFilter"]
-    .forEach(id => {
-      const select = document.getElementById(id);
-      Array.from(select.options).forEach((option, index) => { option.selected = index === 0; });
-    });
-  document.getElementById("activeQuery").hidden = true;
-  window.history.replaceState({}, "", window.location.pathname);
-  applyFilters();
-});
-applyFilters();
-</script>
-</body>
-</html>
-"""
+    template = TEMPLATE_PATH.read_text(encoding="utf-8")
+    replacements = {
+        "__PROJECT_DATA_JSON__": data_js,
+        "__PROJECT_CONFIG_JSON__": json.dumps(config, separators=(",", ":")).replace("</", "<\\/"),
+        "__STATION_OPTIONS__": station_options,
+        "__DISTRICT_OPTIONS__": district_options,
+        "__PROJECT_COUNT__": f"{project_count:,}",
+        "__PROJECT_COUNT_RAW__": str(project_count),
+        "__TRANSACTION_COUNT__": f"{transaction_count:,}",
+        "__DISTRICT_COUNT__": f"{district_count:,}",
+        "__STATION_COUNT__": f"{station_count:,}",
+        "__GEOCODED_COUNT__": f"{geocoded_count:,}",
+        "__CENTROID_COUNT__": f"{centroid_count:,}",
+        "__SCHOOL_METRICS_COUNT__": f"{school_metrics_count:,}",
+        "__LATEST_MONTH__": latest_month or "",
+        "__GENERATED_DATE_ISO__": today,
+        "__GENERATED_DATE_LABEL__": f"{generated_on.day} {generated_on:%b %Y}",
+    }
+    for marker, value in replacements.items():
+        template = template.replace(marker, value)
+    unresolved = sorted(marker for marker in replacements if marker in template)
+    if unresolved:
+        raise RuntimeError(f"Unresolved private-project template markers: {unresolved}")
+    return template
 
-    return (
-        html_template
-        .replace("{{DATA_JSON}}", data_js)
-        .replace("{{STATION_OPTIONS}}", station_options)
-        .replace("{{DISTRICT_OPTIONS}}", district_options)
-        .replace("{{PROJECT_COUNT}}", f"{project_count:,}")
-        .replace("{{TRANSACTION_COUNT}}", f"{transaction_count:,}")
-        .replace("{{DISTRICT_COUNT}}", f"{district_count:,}")
-        .replace("{{STATION_COUNT}}", f"{station_count:,}")
-        .replace("{{GEOCODED_COUNT}}", f"{geocoded_count:,}")
-        .replace("{{CENTROID_COUNT}}", f"{centroid_count:,}")
-        .replace("{{SCHOOL_METRICS_COUNT}}", f"{school_metrics_count:,}")
-        .replace("{{LATEST_MONTH}}", latest_month or "-")
-        .replace("{{TODAY}}", today)
-    )
 
 
 def generate(
@@ -1138,6 +593,8 @@ def generate(
     location_path: pathlib.Path,
     school_metrics_path: pathlib.Path,
     out_path: pathlib.Path,
+    *,
+    generated_on: date | None = None,
 ) -> tuple[pathlib.Path, int]:
     private = load_private(private_path)
     project_locations = load_project_locations(location_path)
@@ -1148,7 +605,7 @@ def generate(
 
     rows = aggregate_projects(private, estates, mrt, master, project_locations, school_metrics)
     latest_month = month_text(private["sale_month_dt"].max())
-    html_text = render_html(rows, latest_month)
+    html_text = render_html(rows, latest_month, generated_on=generated_on)
     out_path.write_text(html_text, encoding="utf-8")
     return out_path, len(rows)
 

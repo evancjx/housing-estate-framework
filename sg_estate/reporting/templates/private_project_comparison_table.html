@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore achieved Singapore private condominium transactions, project-level access and school diagnostics, and separately labelled estate framework context without creating a universal project ranking.">
+<title>Singapore private condominium project explorer</title>
+<link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
+<link rel="stylesheet" href="assets/estate-explorer.css">
+<link rel="stylesheet" href="assets/private-project-comparison.css">
+</head>
+<body>
+<main id="research-content">
+  <header class="explorer-hero private-hero">
+    <p class="eyebrow">Private-project evidence · committed URA transaction snapshot</p>
+    <h1>Inspect condominium projects without forcing a winner.</h1>
+    <p class="lede">Start with achieved project transactions, then inspect straight-line access, school-radius diagnostics and the surrounding estate context. Project evidence and estate framework signals remain separate; neither is an investment-return forecast.</p>
+    <div class="proof" aria-label="Private project coverage">
+      <span>__PROJECT_COUNT__ projects</span>
+      <span>__TRANSACTION_COUNT__ transactions</span>
+      <span>__DISTRICT_COUNT__ postal districts</span>
+      <span>__GEOCODED_COUNT__ project geocodes · __CENTROID_COUNT__ fallbacks</span>
+    </div>
+    <p class="vintage"><b>Latest transaction month:</b> <time datetime="__LATEST_MONTH__">__LATEST_MONTH__</time> · <b>Generated:</b> <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time></p>
+  </header>
+
+  <section class="stance-grid" aria-labelledby="stance-title">
+    <h2 class="sr-only" id="stance-title">How to interpret private-project evidence</h2>
+    <article class="stance-card stance-project">
+      <span>01 · Achieved evidence</span>
+      <h3>Transactions, not asking prices</h3>
+      <p>Each row groups achieved transactions by project, street, district and planning area. Unit sizes, layouts, floors and sale states remain mixed unless separately investigated.</p>
+    </article>
+    <article class="stance-card stance-access">
+      <span>02 · Spatial diagnostics</span>
+      <h3>Distance with source attached</h3>
+      <p>MRT and school distances are straight-line diagnostics. Project geocodes and estate-centroid fallbacks stay visibly distinct; neither distance is a walking route or admissions guarantee.</p>
+    </article>
+    <article class="stance-card stance-context">
+      <span>03 · Estate context</span>
+      <h3>Framework signals stay separate</h3>
+      <p>Provision and private Value describe the surrounding estate evidence. They are not condominium scores and are never blended into a universal project ranking.</p>
+    </article>
+  </section>
+
+  <section class="control-card private-controls" aria-labelledby="controls-title">
+    <div class="control-heading">
+      <div>
+        <p class="eyebrow">Build your project view</p>
+        <h2 id="controls-title">Start focused, then reveal the evidence you need.</h2>
+      </div>
+      <button class="reset-button" id="reset-view" type="button">Reset view</button>
+    </div>
+
+    <div class="primary-controls">
+      <label class="search-field" for="project-search">
+        <span>Find a project, street, district, planning area or station</span>
+        <input id="project-search" type="search" autocomplete="off" placeholder="e.g. The Poiz, Tampines or EW4">
+      </label>
+      <div class="result-summary" role="status" aria-live="polite" aria-atomic="true">
+        <strong id="visible-count">__PROJECT_COUNT_RAW__</strong>
+        <span id="visible-copy">projects match</span>
+      </div>
+    </div>
+
+    <fieldset class="choice-group" id="view-options">
+      <legend>Evidence focus</legend>
+      <div class="choice-list">
+        <button type="button" class="choice-button active" data-view="overview" aria-pressed="true">Overview</button>
+        <button type="button" class="choice-button" data-view="access" aria-pressed="false">Access</button>
+        <button type="button" class="choice-button" data-view="schools" aria-pressed="false">Schools</button>
+        <button type="button" class="choice-button" data-view="price" aria-pressed="false">Price</button>
+        <button type="button" class="choice-button" data-view="transactions" aria-pressed="false">Transactions</button>
+        <button type="button" class="choice-button" data-view="context" aria-pressed="false">Estate context</button>
+      </div>
+    </fieldset>
+
+    <div class="filter-grid" aria-label="Project filters">
+      <label class="filter-field" for="district-filter">
+        <span>Postal district</span>
+        <select id="district-filter">
+          <option value="all">All districts</option>
+__DISTRICT_OPTIONS__
+        </select>
+      </label>
+      <label class="filter-field" for="station-filter">
+        <span>Nearest operational station</span>
+        <select id="station-filter">
+          <option value="all">All stations</option>
+__STATION_OPTIONS__
+        </select>
+      </label>
+      <label class="filter-field" for="sale-filter">
+        <span>Sale evidence</span>
+        <select id="sale-filter">
+          <option value="all">All sale types</option>
+          <option value="New Sale">Has new sales</option>
+          <option value="Resale">Has resale</option>
+          <option value="Sub Sale">Has sub-sales</option>
+        </select>
+      </label>
+      <label class="filter-field" for="source-filter">
+        <span>Location source</span>
+        <select id="source-filter">
+          <option value="all">All location sources</option>
+          <option value="project_geocode">Project geocode</option>
+          <option value="centroid_proxy">Estate-centroid fallback</option>
+        </select>
+      </label>
+      <label class="filter-field" for="primary-filter">
+        <span>Primary-school diagnostic</span>
+        <select id="primary-filter">
+          <option value="all">All school states</option>
+          <option value="has">Has primary school within 1 km</option>
+          <option value="ranked">Has ranked primary proxy within 1 km</option>
+          <option value="none">No primary school within 1 km</option>
+          <option value="missing">School evidence unavailable</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="table-card" aria-labelledby="table-title">
+    <div class="table-heading">
+      <div>
+        <p class="eyebrow">Project evidence</p>
+        <h2 id="table-title">Private projects with controlled context</h2>
+        <p id="table-guidance">The default order is project A–Z. Sorting reorganises evidence for inspection; it does not identify a best project.</p>
+      </div>
+      <div class="sort-status" id="sort-status" aria-live="polite">Project · A to Z</div>
+    </div>
+
+    <div class="view-caveat" id="view-caveat">Overview keeps achieved transactions, access and estate context visibly separate. Choose a focused view for definitions and diagnostics.</div>
+
+    <details class="column-guide">
+      <summary>Column definitions for this view</summary>
+      <dl id="column-guide-list"></dl>
+    </details>
+
+    <div class="tbl-wrap" id="table-wrap" role="region" aria-label="Scrollable private condominium project comparison table" tabindex="0">
+      <table id="private-project-table" aria-describedby="table-guidance">
+        <caption>Achieved private-project transactions, project-level spatial diagnostics and separately labelled surrounding-estate framework context.</caption>
+        <thead id="private-project-table-head"></thead>
+        <tbody id="private-project-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="rendered-copy" id="rendered-copy" aria-live="polite"></p>
+      <button id="show-more" type="button">Show 100 more</button>
+    </div>
+
+    <div class="empty-state" id="empty-state" hidden>
+      <h3>No project matches this view.</h3>
+      <p>Try a shorter search or clear one of the project filters.</p>
+      <button type="button" id="empty-reset">Show every project</button>
+    </div>
+  </section>
+
+  <details class="method-card">
+    <summary>How to read transaction medians, access, schools and estate context</summary>
+    <div class="method-grid">
+      <article>
+        <h3>Project grouping and sample size</h3>
+        <p>A project row combines observed unit sizes, layouts, floors and sale types. Median price and area are descriptive, not like-for-like unit comparisons. Always inspect total and recent sample counts before relying on a median.</p>
+      </article>
+      <article>
+        <h3>Recent versus all</h3>
+        <p>The recent window is the latest 12 months in the committed dataset. “Recent vs all” compares that median with the full observed project median, which includes the recent period. It is mix-sensitive and is not an appreciation rate.</p>
+      </article>
+      <article>
+        <h3>Price comparisons</h3>
+        <p>“Vs district” compares the project’s full-window median price per square metre with the postal-district median across mixed projects and units. It is a screening signal, not a controlled valuation or forecast.</p>
+      </article>
+      <article>
+        <h3>MRT and location quality</h3>
+        <p>The nearest-station field uses operational MRT/LRT records and straight-line distance. Most rows use a matched project geocode; fallbacks use the surrounding estate centroid and must not be interpreted as project distance.</p>
+      </article>
+      <article>
+        <h3>School diagnostics</h3>
+        <p>Primary, secondary and junior-college fields are project-coordinate radius diagnostics with sourced selectivity proxies where available. Verify MOE eligibility boundaries and current admissions rules independently.</p>
+      </article>
+      <article>
+        <h3>Framework boundary</h3>
+        <p>Provision and private Value are joined from the surrounding estate context. Private Value remains separate from HDB, and its sample depth stays visible. Neither field is a project score or recommendation.</p>
+      </article>
+    </div>
+  </details>
+
+  <footer class="page-footer">
+    <p><b>Decision boundary:</b> use this page to discover projects and inspect achieved evidence. Before a purchase, compare the same unit size and layout, verify walking routes and school eligibility, inspect maintenance and lease details, and model financing and exit costs separately.</p>
+    <nav aria-label="Related research"><a href="comparison_table.html">Estate context explorer</a><a href="buyer_profile_table.html">Buyer profiles</a><a href="mrt_comparison_table.html">MRT and LRT context</a><a href="condo_loan_timeline_planner.html">Condo loan timeline</a></nav>
+  </footer>
+</main>
+
+<noscript><p class="noscript-note">Enable JavaScript to filter and render the private-project evidence table.</p></noscript>
+<script id="private-project-comparison-data" type="application/json">__PROJECT_DATA_JSON__</script>
+<script id="private-project-comparison-config" type="application/json">__PROJECT_CONFIG_JSON__</script>
+<script src="assets/private-project-comparison.js"></script>
+<script src="assets/research-shell.js" data-research-shell></script>
+</body>
+</html>

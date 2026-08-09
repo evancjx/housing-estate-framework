@@ -63,7 +63,7 @@
       "title": "Private condominium project comparison",
       "category": "private-property",
       "kind": "explorer",
-      "summary": "Filter private projects by district, station, sale mix and school context using project-level transaction evidence.",
+      "summary": "Inspect achieved project transactions through focused access, school, price, transaction and separately governed estate-context views without creating a universal project ranking.",
       "tags": ["condominium", "project", "transaction", "district"],
       "featured": true
     },

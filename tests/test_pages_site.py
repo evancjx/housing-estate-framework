@@ -78,6 +78,12 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
     (assets / "buyer-profile.js").write_text("void 0;", encoding="utf-8")
     (assets / "mrt-comparison.css").write_text("body {}", encoding="utf-8")
     (assets / "mrt-comparison.js").write_text("void 0;", encoding="utf-8")
+    (assets / "private-project-comparison.css").write_text(
+        "body {}", encoding="utf-8"
+    )
+    (assets / "private-project-comparison.js").write_text(
+        "void 0;", encoding="utf-8"
+    )
     (assets / "home-loan-planner.js").write_text("void 0;", encoding="utf-8")
     (assets / "condo-loan-timeline-planner.js").write_text(
         "void 0;", encoding="utf-8"
