@@ -224,6 +224,134 @@ def test_legal_ownership_changes_outcomes_without_mutating_funding() -> None:
     )
 
 
+def test_owner_sale_outcome_reconciles_legal_and_individual_cpf_allocations() -> None:
+    projection = SAMPLE_PROJECTION.replace("cpfRefund:0", "cpfRefund:100000")
+    result = _run_node(
+        f"(() => {{const projection={projection};"
+        "const outcome=funding.buildOwnerSaleOutcome({projection,partnerEnabled:true,"
+        "partnerOwnershipPct:40,cpfWeightsReliable:true,cpfEstimate:{"
+        "primary:{refundRequired:80000},partner:{refundRequired:20000}}});"
+        "return {outcome,cash:projection.base.cashReleased,"
+        "available:projection.base.cpfRefundAvailable,"
+        "interest:projection.loanAtSale.totalInterestToRedemption,"
+        "economic:projection.base.economicProfit};})()"
+    )
+    outcome = result["outcome"]
+
+    assert outcome["cpfAllocationKnown"] is True
+    assert outcome["cpfAllocationBasis"] == "estimated-p-and-i-ratio"
+    assert outcome["primary"]["share"] == 60
+    assert outcome["partner"]["share"] == 40
+    assert outcome["primary"]["signedCash"] + outcome["partner"][
+        "signedCash"
+    ] == pytest.approx(outcome["household"]["cashReleased"])
+    assert outcome["primary"]["combinedValue"] == pytest.approx(
+        outcome["household"]["combinedValue"] * 0.6,
+        abs=0.01,
+    )
+    assert outcome["partner"]["combinedValue"] == pytest.approx(
+        outcome["household"]["combinedValue"] * 0.4,
+        abs=0.01,
+    )
+    assert outcome["primary"]["cpfAvailable"] == pytest.approx(
+        result["available"] * 0.8,
+        abs=0.01,
+    )
+    assert outcome["primary"]["cpfAvailable"] + outcome["partner"][
+        "cpfAvailable"
+    ] == pytest.approx(result["available"])
+    for owner in (outcome["primary"], outcome["partner"]):
+        assert owner["signedCash"] + owner["cpfAvailable"] == pytest.approx(
+            owner["combinedValue"]
+        )
+    assert outcome["primary"]["bankInterest"] + outcome["partner"][
+        "bankInterest"
+    ] == pytest.approx(result["interest"])
+    assert outcome["primary"]["economicProfit"] + outcome["partner"][
+        "economicProfit"
+    ] == pytest.approx(result["economic"])
+    assert outcome["primary"]["combinedValue"] + outcome["partner"][
+        "combinedValue"
+    ] == pytest.approx(outcome["household"]["combinedValue"])
+
+
+def test_owner_sale_outcome_splits_combined_value_before_each_owners_cpf() -> None:
+    result = _run_node(
+        "(() => {const projection={cpfRefund:154286,acquisitionCosts:0,"
+        "holdingCosts:0,netRent:0,base:{cashReleased:429266,"
+        "cpfRefundAvailable:154286,saleCosts:0,ssd:0,economicProfit:0},"
+        "loanAtSale:{totalInterestToRedemption:0}};"
+        "return funding.buildOwnerSaleOutcome({projection,partnerEnabled:true,"
+        "partnerOwnershipPct:50,cpfWeightsReliable:true,cpfEstimate:{"
+        "primary:{refundRequired:154286},partner:{refundRequired:0}}});})()"
+    )
+
+    assert result["household"]["cashReleased"] == 429_266
+    assert result["household"]["cpfAvailable"] == 154_286
+    assert result["household"]["combinedValue"] == 583_552
+    assert result["primary"]["combinedValue"] == 291_776
+    assert result["partner"]["combinedValue"] == 291_776
+    assert result["primary"]["cpfAvailable"] == 154_286
+    assert result["partner"]["cpfAvailable"] == 0
+    assert result["primary"]["signedCash"] == 137_490
+    assert result["partner"]["signedCash"] == 291_776
+    for owner in (result["primary"], result["partner"]):
+        assert owner["signedCash"] + owner["cpfAvailable"] == owner["combinedValue"]
+
+
+def test_owner_sale_outcome_handles_shortfall_rounding_and_unknown_cpf_split() -> None:
+    projection = SAMPLE_PROJECTION.replace("cpfRefund:0", "cpfRefund:9999999")
+    result = _run_node(
+        f"(() => {{const projection={projection};"
+        "const estimate={primary:{refundRequired:3},partner:{refundRequired:1}};"
+        "const known=funding.buildOwnerSaleOutcome({projection,partnerEnabled:true,"
+        "partnerOwnershipPct:100,cpfWeightsReliable:true,cpfEstimate:estimate});"
+        "const unknown=funding.buildOwnerSaleOutcome({projection,partnerEnabled:true,"
+        "partnerOwnershipPct:50,cpfWeightsReliable:false,cpfEstimate:estimate});"
+        "const suppressed=funding.buildOwnerSaleOutcome({projection,partnerEnabled:false,"
+        "partnerOwnershipPct:0,cpfWeightsReliable:true,suppressCpfAllocation:true,"
+        "cpfEstimate:estimate});return {known,unknown,suppressed};})()"
+    )
+    known = result["known"]
+    unknown = result["unknown"]
+
+    assert known["primary"]["combinedValue"] == 0
+    assert known["primary"]["signedCash"] == -known["primary"]["cpfAvailable"]
+    assert known["primary"]["equalisationGap"] == known["primary"]["cpfAvailable"]
+    assert known["primary"]["signedCash"] + known["partner"][
+        "signedCash"
+    ] == pytest.approx(known["household"]["cashReleased"])
+    for owner in (known["primary"], known["partner"]):
+        assert owner["signedCash"] + owner["cpfAvailable"] == pytest.approx(
+            owner["combinedValue"]
+        )
+    for key in ("cpfRequired", "cpfAvailable", "cpfShortfall"):
+        assert known["primary"][key] + known["partner"][key] == pytest.approx(
+            known["household"][key]
+        )
+    assert known["primary"]["cpfRequired"] == pytest.approx(
+        known["primary"]["cpfAvailable"] + known["primary"]["cpfShortfall"]
+    )
+    assert known["partner"]["cpfRequired"] == pytest.approx(
+        known["partner"]["cpfAvailable"] + known["partner"]["cpfShortfall"]
+    )
+    assert unknown["cpfAllocationKnown"] is False
+    assert unknown["cpfAllocationBasis"] == "unavailable"
+    assert unknown["primary"]["cpfAvailable"] is None
+    assert unknown["primary"]["signedCash"] is None
+    assert unknown["partner"]["signedCash"] is None
+    assert unknown["partner"]["combinedValue"] is not None
+    assert unknown["primary"]["combinedValue"] + unknown["partner"][
+        "combinedValue"
+    ] == pytest.approx(unknown["household"]["combinedValue"])
+    assert result["suppressed"]["cpfAllocationKnown"] is False
+    assert result["suppressed"]["primary"]["cpfAvailable"] is None
+    assert result["suppressed"]["primary"]["signedCash"] is None
+    assert result["suppressed"]["primary"]["combinedValue"] == pytest.approx(
+        result["suppressed"]["household"]["combinedValue"]
+    )
+
+
 def test_exact_couple_plan_allocates_all_four_owner_sources_and_preserves_loan() -> None:
     result = _run_node(
         f"(() => {{const projection={SAMPLE_PROJECTION};"
@@ -299,6 +427,53 @@ def test_v3_exports_a_versioned_browser_draft_key() -> None:
     assert result == {"storageKey": STORAGE_KEY}
 
 
+def test_cpf_refund_estimate_uses_dated_owner_allocations_before_sale_only() -> None:
+    result = _run_node(
+        f"(() => {{const projection={SAMPLE_PROJECTION};"
+        "const ledgerRows=["
+        "{date:'2030-10-25',primaryCpf:100000,partnerCpf:0},"
+        "{date:'2031-10-25',primaryCpf:0,partnerCpf:50000},"
+        "{date:'2032-01-01',primaryCpf:99999,partnerCpf:88888}];"
+        "const estimate=funding.buildCpfRefundEstimate({projection,ledgerRows,"
+        "partnerEnabled:true,primaryAcquisitionCpf:77777,primaryMonthlyCpf:0,"
+        "partnerMonthlyCpf:0,annualRatePct:2.5});"
+        "return estimate;})()"
+    )
+
+    expected_primary = 100_000 * 1.025 ** (365 / 365.2425)
+    assert result["acquisitionSource"] == "ledger"
+    assert result["primary"]["principal"] == 100_000
+    assert result["primary"]["refundRequired"] == pytest.approx(expected_primary)
+    assert result["partner"] == pytest.approx({
+        "usageCount": 1,
+        "annualRatePct": 2.5,
+        "principal": 50_000,
+        "accruedInterest": 0,
+        "refundRequired": 50_000,
+    })
+    assert result["household"]["principal"] == 150_000
+    assert result["household"]["usageCount"] == 2
+
+
+def test_monthly_cpf_estimate_does_not_change_bank_interest() -> None:
+    result = _run_node(
+        f"(() => {{const projection={SAMPLE_PROJECTION};"
+        "const before=projection.loanAtSale.totalInterestToRedemption;"
+        "const estimate=funding.buildCpfRefundEstimate({projection,ledgerRows:[],"
+        "partnerEnabled:true,primaryMonthlyCpf:100,partnerMonthlyCpf:50,"
+        "annualRatePct:2.5});return {before,"
+        "after:projection.loanAtSale.totalInterestToRedemption,estimate};})()"
+    )
+
+    assert result["after"] == pytest.approx(result["before"])
+    assert result["estimate"]["mortgageMonths"] > 0
+    assert result["estimate"]["cappedMonths"] == 0
+    assert result["estimate"]["household"]["principal"] == pytest.approx(
+        result["estimate"]["mortgageMonths"] * 150
+    )
+    assert result["estimate"]["household"]["accruedInterest"] > 0
+
+
 class _StructureParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -330,6 +505,8 @@ def test_planner_structure_and_script_dependencies_are_explicit() -> None:
         "property-loan-details": False,
         "partner-settings": False,
         "advanced-cost-details": False,
+        "cpf-assumptions-details": False,
+        "funding-ledger-editor": False,
     }
     assert {source.split("?", 1)[0] for source in parser.scripts} == {
         "assets/condo-loan-timeline-planner.js",
@@ -372,5 +549,35 @@ def test_planner_structure_and_script_dependencies_are_explicit() -> None:
         "edit-couple-funding",
         "ledger-loan-heading",
         "ledger-loan-column-heading",
+        "funding-ledger-editor",
+        "funding-ledger-editor-summary",
+        "funding-ledger-scroll-hint",
+        "review-funding-ledger",
+        "financing-interest-card",
+        "bank-interest-paid",
+        "bank-interest-accrued",
+        "bank-interest-total",
+        "bank-principal-outstanding",
+        "bank-redemption-total",
+        "cpf-household-principal",
+        "cpf-household-interest",
+        "cpf-estimated-refund",
+        "cpf-estimated-available",
+        "cpf-estimated-shortfall",
+        "cpf-applied-refund",
+        "apply-cpf-estimate",
+        "owner-sale-outcome",
+        "owner-outcome-primary-card",
+        "owner-outcome-partner-card",
+        "owner-outcome-primary-cash",
+        "owner-outcome-primary-cpf",
+        "owner-outcome-primary-combined",
+        "owner-outcome-primary-bank-interest",
+        "owner-outcome-primary-costs",
+        "owner-outcome-primary-profit",
+        "owner-outcome-household-cash",
+        "owner-outcome-household-cpf",
+        "owner-outcome-household-combined",
+        "owner-outcome-status",
     ):
         assert required_id in parser.ids

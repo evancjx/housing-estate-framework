@@ -353,6 +353,26 @@
     const interestPaid = paidRows.reduce((total, row) => total + row.interest, 0);
     const payments = paidRows.reduce((total, row) => total + row.scheduledPayment, 0);
     const balance = Math.max(0, drawn - principalPaid);
+    let accruedInterest = 0;
+    if (balance > EPSILON && schedule.annualRate > EPSILON && schedule.startDate) {
+      const lastPaidRow = paidRows.length ? paidRows[paidRows.length - 1] : null;
+      let anchorDate = lastPaidRow ? lastPaidRow.date : schedule.startDate;
+      let runningBalance = lastPaidRow ? lastPaidRow.endingBalance : 0;
+      const pendingDraws = schedule.draws.filter(draw => (
+        compareDates(draw.date, date) <= 0
+        && (lastPaidRow
+          ? compareDates(draw.date, lastPaidRow.date) > 0
+          : compareDates(draw.date, schedule.startDate) >= 0)
+      ));
+      pendingDraws.forEach(draw => {
+        accruedInterest += runningBalance * schedule.annualRate / 100
+          * Math.max(0, daysBetween(anchorDate, draw.date)) / 365.2425;
+        runningBalance += draw.amount;
+        anchorDate = draw.date;
+      });
+      accruedInterest += runningBalance * schedule.annualRate / 100
+        * Math.max(0, daysBetween(anchorDate, date)) / 365.2425;
+    }
     let currentPayment = paidRows.length ? paidRows[paidRows.length - 1].scheduledPayment : 0;
     if (balance > EPSILON && schedule.startDate) {
       const elapsed = Math.min(
@@ -378,10 +398,45 @@
       drawn,
       principalPaid: Math.min(drawn, principalPaid),
       interestPaid,
+      accruedInterest,
+      totalInterestToRedemption: interestPaid + accruedInterest,
       payments,
       balance,
+      redemptionAmount: balance + accruedInterest,
       currentPayment,
       paymentCount: paidRows.length,
+    };
+  }
+
+  function calculateCpfRefundEstimate(usages, saleDate, annualRatePct) {
+    if (!Array.isArray(usages)) throw new TypeError("usages must be an array");
+    parseISODate(saleDate, "saleDate");
+    const annualRate = nonNegative(annualRatePct, "annualRatePct");
+    if (annualRate > 20) throw new RangeError("annualRatePct must not exceed 20");
+    let principal = 0;
+    let refundRequired = 0;
+    usages.forEach((usage, index) => {
+      if (!usage || typeof usage !== "object") {
+        throw new TypeError(`usages[${index}] must be an object`);
+      }
+      const amount = nonNegative(usage.amount, `usages[${index}].amount`);
+      const date = String(usage.date || "");
+      parseISODate(date, `usages[${index}].date`);
+      if (compareDates(date, saleDate) > 0) {
+        throw new RangeError(`usages[${index}].date must not be after saleDate`);
+      }
+      principal += amount;
+      refundRequired += amount * Math.pow(
+        1 + annualRate / 100,
+        yearFraction(date, saleDate)
+      );
+    });
+    return {
+      usageCount: usages.length,
+      annualRatePct: annualRate,
+      principal,
+      accruedInterest: Math.max(0, refundRequired - principal),
+      refundRequired,
     };
   }
 
@@ -487,10 +542,16 @@
       const grossGain = value - purchasePrice;
       const grossCagr = Math.pow(value / purchasePrice, 1 / holdingYears) - 1;
       const capitalProfit = value - saleCosts - ssd - purchasePrice - acquisitionCosts;
-      const economicProfit = capitalProfit - loanAtSale.interestPaid - holdingCosts + netRent;
+      const economicProfit = capitalProfit - loanAtSale.totalInterestToRedemption
+        - holdingCosts + netRent;
       const grossEquity = value - uncalledDeveloperBalance - loanAtSale.balance;
-      const cashBeforeCpf = grossEquity - saleCosts - ssd;
-      const cashReleased = cashBeforeCpf - cpfRefund;
+      const proceedsAfterLenderRedemption = value - uncalledDeveloperBalance
+        - loanAtSale.redemptionAmount;
+      const cpfRefundProceedsBase = Math.max(0, proceedsAfterLenderRedemption);
+      const cashBeforeCpf = proceedsAfterLenderRedemption - saleCosts - ssd;
+      const cpfRefundAvailable = Math.min(cpfRefund, cpfRefundProceedsBase);
+      const cpfRefundShortfall = Math.max(0, cpfRefund - cpfRefundAvailable);
+      const cashReleased = cashBeforeCpf - cpfRefundAvailable;
       const ownerOutflow = ownerPropertyPaid + acquisitionCosts + loanAtSale.payments
         + holdingCosts - netRent;
       const netReturnBase = purchasePrice + economicProfit;
@@ -512,7 +573,10 @@
         economicProfit,
         economicCagr,
         grossEquity,
+        cpfRefundProceedsBase,
         cashBeforeCpf,
+        cpfRefundAvailable,
+        cpfRefundShortfall,
         cashReleased,
         cashTopUp: Math.max(0, -cashReleased),
         ownerOutflow,
@@ -780,6 +844,10 @@
       const years = numberValue("loan-years", { minimum: 1, maximum: 35 });
       const areaSqft = numberValue("area-sqft", { minimum: 1 });
       const sellingCostPct = numberValue("selling-cost-percent", { minimum: 0, maximum: 20 });
+      currencyValue("cpf-primary-acquisition");
+      currencyValue("cpf-primary-monthly");
+      currencyValue("cpf-partner-monthly");
+      numberValue("cpf-oa-rate", { minimum: 0, maximum: 20 });
 
       if (purchasePrice <= 0) addError("purchase-price", "Purchase price must be above zero.");
       if (loanAmount > purchasePrice) addError("loan-amount", "Loan amount cannot exceed the purchase price.");
@@ -977,10 +1045,11 @@
       byId("waterfall-sale").textContent = money(base.salePrice);
       byId("waterfall-uncalled").textContent = `−${money(result.uncalledDeveloperBalance)}`;
       byId("waterfall-loan").textContent = `−${money(result.loanAtSale.balance)}`;
+      byId("waterfall-bank-accrued").textContent = `−${money(result.loanAtSale.accruedInterest)}`;
       byId("waterfall-selling").textContent = `−${money(base.sellingAllowance)}`;
       byId("waterfall-ssd").textContent = `−${money(base.ssd)}`;
       byId("waterfall-fixed").textContent = `−${money(base.fixedSaleCosts)}`;
-      byId("waterfall-cpf").textContent = `−${money(result.cpfRefund)}`;
+      byId("waterfall-cpf").textContent = `−${money(base.cpfRefundAvailable)}`;
       const total = byId("waterfall-total");
       const label = byId("waterfall-total-label");
       if (base.cashReleased >= 0) {
@@ -991,6 +1060,18 @@
         total.textContent = money(Math.abs(base.cashReleased));
       }
       setSignedClass(total, base.cashReleased);
+    }
+
+    function renderBankInterest(result) {
+      const loan = result.loanAtSale;
+      byId("bank-interest-paid").textContent = money(loan.interestPaid);
+      byId("bank-interest-accrued").textContent = money(loan.accruedInterest);
+      byId("bank-interest-total").textContent = money(loan.totalInterestToRedemption);
+      byId("bank-principal-outstanding").textContent = money(loan.balance);
+      byId("bank-redemption-total").textContent = money(loan.redemptionAmount);
+      byId("bank-interest-note").textContent = loan.balance > EPSILON
+        ? `${loan.paymentCount} whole monthly payments are included through ${dateLabel(result.saleDate)}. The accrued redemption estimate uses the entered rate between the latest modelled payment or draw and that exact sale date.`
+        : `No bank balance remains at the planned sale date. ${loan.paymentCount} whole monthly payments are included.`;
     }
 
     function render(projectName, result, { announce = false } = {}) {
@@ -1009,7 +1090,7 @@
       byId("kpi-gross-cagr").textContent = percentage(base.grossCagr * 100);
       setSignedClass(byId("kpi-gross-cagr"), base.grossCagr);
       byId("kpi-loan-balance").textContent = money(result.loanAtSale.balance);
-      byId("kpi-loan-drawn").textContent = `${money(result.loanAtSale.drawn)} drawn · ${money(result.loanAtSale.interestPaid)} interest paid`;
+      byId("kpi-loan-drawn").textContent = `${money(result.loanAtSale.drawn)} drawn · ${money(result.loanAtSale.totalInterestToRedemption)} interest to redemption`;
       byId("kpi-economic-profit").textContent = signedMoney(base.economicProfit);
       setSignedClass(byId("kpi-economic-profit"), base.economicProfit);
       byId("kpi-net-return").textContent = base.economicCagr == null
@@ -1042,6 +1123,7 @@
       renderChart(result);
       renderCheckpoints(result);
       renderWaterfall(result);
+      renderBankInterest(result);
       if (announce) {
         byId("result-live").textContent = `Projection updated. Economic ${profitWord} ${money(Math.abs(base.economicProfit))}.`;
       }
@@ -1115,6 +1197,7 @@
     buildHoldingProjection,
     buildLoanSchedule,
     calculateBSD,
+    calculateCpfRefundEstimate,
     completedMonthsBetween,
     init,
     loanSnapshot,

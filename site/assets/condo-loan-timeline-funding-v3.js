@@ -30,7 +30,8 @@
     "default-partner-payment-share", "annual-growth", "sale-date",
     "selling-cost-percent", "purchase-market-value", "absd-paid", "purchase-legal",
     "purchase-other", "sale-market-value", "sale-legal", "sale-other", "holding-costs",
-    "net-rent", "cpf-refund",
+    "net-rent", "cpf-primary-acquisition", "cpf-primary-monthly",
+    "cpf-partner-monthly", "cpf-oa-rate", "cpf-refund",
   ];
   const FORM_CHECK_IDS = ["route-buc", "route-resale", "partner-enabled"];
   const ALLOCATION_FIELDS = [
@@ -538,6 +539,16 @@
     const partnerCashReleased = projection.base.cashReleased - primaryCashReleased;
     const primaryEconomicProfit = projection.base.economicProfit * primaryShare / 100;
     const partnerEconomicProfit = projection.base.economicProfit - primaryEconomicProfit;
+    const preCpfValueTotal = roundMoney(
+      roundMoney(projection.base.cashReleased)
+      + roundMoney(projection.base.cpfRefundAvailable || 0)
+    );
+    const preCpfValue = splitSignedByLegalShare(
+      preCpfValueTotal,
+      partnerShare,
+      true,
+      "preCpfSaleValue"
+    );
     return {
       primaryShare,
       partnerShare,
@@ -545,6 +556,270 @@
       partnerCashReleased,
       primaryEconomicProfit,
       partnerEconomicProfit,
+      primaryPreCpfValue: preCpfValue.primary,
+      partnerPreCpfValue: preCpfValue.partner,
+    };
+  }
+
+  function signedMoneyCents(value, name) {
+    const number = finiteNumber(value, name || "amount");
+    const cents = Math.round(number * MONEY_SCALE);
+    if (!Number.isSafeInteger(cents)) {
+      throw new RangeError(`${name || "amount"} is too large`);
+    }
+    return cents;
+  }
+
+  function splitSignedByLegalShare(value, partnerSharePct, partnerEnabled, name) {
+    const totalCents = signedMoneyCents(value, name);
+    const partnerShare = partnerEnabled
+      ? normalizeShare(partnerSharePct, "partnerOwnershipPct")
+      : 0;
+    const partnerCents = Math.round(totalCents * partnerShare / 100);
+    return {
+      primary: fromCents(totalCents - partnerCents),
+      partner: fromCents(partnerCents),
+    };
+  }
+
+  function splitNonNegativeByWeights(value, primaryWeight, partnerWeight) {
+    const totalCents = toCents(roundMoney(value), "weighted amount");
+    const primary = nonNegative(primaryWeight, "primary CPF weight");
+    const partner = nonNegative(partnerWeight, "partner CPF weight");
+    const totalWeight = primary + partner;
+    if (totalCents > 0 && totalWeight <= EPSILON) return null;
+    if (totalCents === 0) return { primary: 0, partner: 0 };
+    const primaryCents = Math.round(totalCents * primary / totalWeight);
+    return {
+      primary: fromCents(primaryCents),
+      partner: fromCents(totalCents - primaryCents),
+    };
+  }
+
+  function buildOwnerSaleOutcome(options) {
+    if (!options || typeof options !== "object") {
+      throw new TypeError("Owner sale outcome options are required");
+    }
+    const projection = options.projection;
+    if (!projection || !projection.base || !projection.loanAtSale) {
+      throw new TypeError("A valid projection is required for the owner sale outcome");
+    }
+    const partnerEnabled = Boolean(options.partnerEnabled);
+    const partnerShare = partnerEnabled
+      ? normalizeShare(options.partnerOwnershipPct, "partnerOwnershipPct")
+      : 0;
+    const primaryShare = 100 - partnerShare;
+    const cpfEstimate = options.cpfEstimate;
+    const cpfWeightsReliable = options.cpfWeightsReliable !== false;
+    const activeCpfRequired = roundMoney(nonNegative(projection.cpfRefund, "cpfRefund"));
+    const activeCpfAvailable = roundMoney(nonNegative(
+      projection.base.cpfRefundAvailable,
+      "cpfRefundAvailable"
+    ));
+    const activeCpfShortfall = roundMoney(activeCpfRequired - activeCpfAvailable);
+
+    let primaryCpfWeight = 1;
+    let partnerCpfWeight = 0;
+    let cpfAllocationKnown = !(
+      Boolean(options.suppressCpfAllocation) && activeCpfRequired > EPSILON
+    );
+    let cpfAllocationBasis = partnerEnabled ? "none-required" : "single-owner";
+    if (!cpfAllocationKnown) {
+      cpfAllocationBasis = "unavailable";
+    } else if (partnerEnabled && activeCpfRequired > EPSILON) {
+      primaryCpfWeight = cpfEstimate && cpfEstimate.primary
+        ? nonNegative(cpfEstimate.primary.refundRequired, "primary CPF estimate")
+        : 0;
+      partnerCpfWeight = cpfEstimate && cpfEstimate.partner
+        ? nonNegative(cpfEstimate.partner.refundRequired, "partner CPF estimate")
+        : 0;
+      cpfAllocationKnown = cpfWeightsReliable
+        && primaryCpfWeight + partnerCpfWeight > EPSILON;
+      cpfAllocationBasis = cpfAllocationKnown ? "estimated-p-and-i-ratio" : "unavailable";
+    }
+
+    const cpfRequired = cpfAllocationKnown
+      ? splitNonNegativeByWeights(activeCpfRequired, primaryCpfWeight, partnerCpfWeight)
+      : null;
+    const cpfAvailable = cpfAllocationKnown
+      ? splitNonNegativeByWeights(activeCpfAvailable, primaryCpfWeight, partnerCpfWeight)
+      : null;
+    const cpfShortfall = cpfRequired && cpfAvailable
+      ? {
+        primary: roundMoney(cpfRequired.primary - cpfAvailable.primary),
+        partner: roundMoney(cpfRequired.partner - cpfAvailable.partner),
+      }
+      : null;
+    // Use the two already-displayed household amounts as the cent-canonical
+    // source. This keeps the owner allocation exactly reconcilable to the
+    // household cash + CPF figures even when the projection has sub-cent
+    // internal values.
+    const householdCash = roundMoney(projection.base.cashReleased);
+    const combinedValueTotal = roundMoney(householdCash + activeCpfAvailable);
+    const preCpfValue = splitSignedByLegalShare(
+      combinedValueTotal,
+      partnerShare,
+      partnerEnabled,
+      "preCpfSaleValue"
+    );
+    const bankInterest = splitSignedByLegalShare(
+      projection.loanAtSale.totalInterestToRedemption,
+      partnerShare,
+      partnerEnabled,
+      "bankInterest"
+    );
+    const genuineCostsTotal = projection.acquisitionCosts
+      + projection.base.saleCosts
+      + projection.base.ssd
+      + projection.loanAtSale.totalInterestToRedemption
+      + projection.holdingCosts;
+    const genuineCosts = splitSignedByLegalShare(
+      genuineCostsTotal,
+      partnerShare,
+      partnerEnabled,
+      "genuineCosts"
+    );
+    const economicProfit = splitSignedByLegalShare(
+      projection.base.economicProfit,
+      partnerShare,
+      partnerEnabled,
+      "economicProfit"
+    );
+
+    function ownerOutcome(owner, share) {
+      const combinedValue = preCpfValue[owner];
+      const cpfValue = cpfAvailable ? cpfAvailable[owner] : null;
+      const cashValue = cpfValue == null
+        ? null
+        : roundMoney(combinedValue - cpfValue);
+      return {
+        share,
+        cashReleased: cashValue == null ? null : Math.max(0, cashValue),
+        cashTopUp: cashValue == null ? null : Math.max(0, -cashValue),
+        equalisationGap: cashValue == null ? null : Math.max(0, -cashValue),
+        signedCash: cashValue,
+        cpfRequired: cpfRequired ? cpfRequired[owner] : null,
+        cpfAvailable: cpfValue,
+        cpfShortfall: cpfShortfall ? cpfShortfall[owner] : null,
+        combinedValue,
+        bankInterest: bankInterest[owner],
+        genuineCosts: genuineCosts[owner],
+        economicProfit: economicProfit[owner],
+      };
+    }
+
+    return {
+      partnerEnabled,
+      primary: ownerOutcome("primary", primaryShare),
+      partner: ownerOutcome("partner", partnerShare),
+      household: {
+        cashReleased: householdCash,
+        cpfRequired: roundMoney(activeCpfRequired),
+        cpfAvailable: roundMoney(activeCpfAvailable),
+        cpfShortfall: roundMoney(activeCpfShortfall),
+        combinedValue: combinedValueTotal,
+        bankInterest: roundMoney(projection.loanAtSale.totalInterestToRedemption),
+        genuineCosts: roundMoney(genuineCostsTotal),
+        economicProfit: roundMoney(projection.base.economicProfit),
+        netRent: roundMoney(projection.netRent),
+      },
+      cpfAllocationKnown,
+      cpfAllocationBasis,
+    };
+  }
+
+  function buildCpfRefundEstimate(options) {
+    if (!options || typeof options !== "object") {
+      throw new TypeError("CPF estimate options are required");
+    }
+    const projection = options.projection;
+    if (!projection || !projection.schedule || !projection.saleDate) {
+      throw new TypeError("A valid projection is required for the CPF estimate");
+    }
+    const partnerEnabled = Boolean(options.partnerEnabled);
+    const annualRatePct = nonNegative(options.annualRatePct, "annualRatePct");
+    const primaryAcquisitionCpf = nonNegative(
+      options.primaryAcquisitionCpf || 0,
+      "primaryAcquisitionCpf"
+    );
+    const primaryMonthlyCpf = nonNegative(
+      options.primaryMonthlyCpf || 0,
+      "primaryMonthlyCpf"
+    );
+    const partnerMonthlyCpf = partnerEnabled
+      ? nonNegative(options.partnerMonthlyCpf || 0, "partnerMonthlyCpf")
+      : 0;
+    const primaryUsages = [];
+    const partnerUsages = [];
+
+    if (partnerEnabled) {
+      const ledgerRows = options.ledgerRows || [];
+      if (!Array.isArray(ledgerRows)) throw new TypeError("ledgerRows must be an array");
+      ledgerRows.forEach((row, index) => {
+        const primaryAmount = nonNegative(row.primaryCpf || 0, `ledgerRows[${index}].primaryCpf`);
+        const partnerAmount = nonNegative(row.partnerCpf || 0, `ledgerRows[${index}].partnerCpf`);
+        if (primaryAmount <= EPSILON && partnerAmount <= EPSILON) return;
+        const date = String(row.date || "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          throw new RangeError(`ledgerRows[${index}].date must use YYYY-MM-DD`);
+        }
+        if (date > projection.saleDate) return;
+        if (primaryAmount > EPSILON) primaryUsages.push({ date, amount: primaryAmount });
+        if (partnerAmount > EPSILON) partnerUsages.push({ date, amount: partnerAmount });
+      });
+    } else if (primaryAcquisitionCpf > EPSILON) {
+      primaryUsages.push({
+        date: projection.acquisitionDate,
+        amount: primaryAcquisitionCpf,
+      });
+    }
+
+    const requestedMonthlyCpf = primaryMonthlyCpf + partnerMonthlyCpf;
+    let cappedMonths = 0;
+    let mortgageMonths = 0;
+    if (requestedMonthlyCpf > EPSILON) {
+      projection.schedule.rows
+        .filter(row => row.date <= projection.saleDate && row.scheduledPayment > EPSILON)
+        .forEach(row => {
+          mortgageMonths += 1;
+          const applied = Math.min(requestedMonthlyCpf, row.scheduledPayment);
+          if (applied + 0.01 < requestedMonthlyCpf) cappedMonths += 1;
+          const primaryApplied = applied * primaryMonthlyCpf / requestedMonthlyCpf;
+          const partnerApplied = applied - primaryApplied;
+          if (primaryApplied > EPSILON) {
+            primaryUsages.push({ date: row.date, amount: primaryApplied });
+          }
+          if (partnerApplied > EPSILON) {
+            partnerUsages.push({ date: row.date, amount: partnerApplied });
+          }
+        });
+    }
+
+    const primary = planner.calculateCpfRefundEstimate(
+      primaryUsages,
+      projection.saleDate,
+      annualRatePct
+    );
+    const partner = planner.calculateCpfRefundEstimate(
+      partnerUsages,
+      projection.saleDate,
+      annualRatePct
+    );
+    const household = {
+      usageCount: primary.usageCount + partner.usageCount,
+      principal: primary.principal + partner.principal,
+      accruedInterest: primary.accruedInterest + partner.accruedInterest,
+      refundRequired: primary.refundRequired + partner.refundRequired,
+    };
+    return {
+      annualRatePct,
+      partnerEnabled,
+      primary,
+      partner,
+      household,
+      mortgageMonths,
+      cappedMonths,
+      acquisitionSource: partnerEnabled ? "ledger" : "manual",
     };
   }
 
@@ -565,6 +840,9 @@
     let coupleDialogDraft = null;
     let coupleDialogDraftActive = false;
     let dialogRequiresEnableConfirmation = false;
+    let latestCpfEstimate = null;
+    let cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
+    let applyingCpfEstimate = false;
     const precise = new Intl.NumberFormat("en-SG", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -574,6 +852,11 @@
       maximumFractionDigits: 1,
     });
     const money = value => `S$${precise.format(roundMoney(Number(value) || 0))}`;
+    const signedMoney = value => {
+      const amount = roundMoney(Number(value) || 0);
+      if (Math.abs(amount) <= 0.001) return "S$0";
+      return `${amount > 0 ? "+" : "−"}${money(Math.abs(amount))}`;
+    };
     const moneyInput = value => precise.format(Number(value) || 0);
 
     function currency(id, optional) {
@@ -602,6 +885,73 @@
       } catch {
         return null;
       }
+    }
+
+    function cpfEstimateSignature(projection, estimate) {
+      return JSON.stringify({
+        route: projection.route,
+        acquisitionDate: projection.acquisitionDate,
+        saleDate: projection.saleDate,
+        partnerEnabled: estimate.partnerEnabled,
+        annualRatePct: estimate.annualRatePct,
+        mortgageMonths: estimate.mortgageMonths,
+        cappedMonths: estimate.cappedMonths,
+        primary: [
+          estimate.primary.usageCount,
+          roundMoney(estimate.primary.principal),
+          roundMoney(estimate.primary.accruedInterest),
+          roundMoney(estimate.primary.refundRequired),
+        ],
+        partner: [
+          estimate.partner.usageCount,
+          roundMoney(estimate.partner.principal),
+          roundMoney(estimate.partner.accruedInterest),
+          roundMoney(estimate.partner.refundRequired),
+        ],
+      });
+    }
+
+    function encodeCpfRefundProvenance() {
+      if (cpfRefundProvenance.source === "manual_exact") {
+        return { source: "manual_exact", estimateSignature: null };
+      }
+      if (
+        cpfRefundProvenance.source !== "applied_estimate"
+        || typeof cpfRefundProvenance.estimateSignature !== "string"
+        || !cpfRefundProvenance.estimateSignature
+      ) {
+        throw new TypeError("CPF refund provenance is invalid");
+      }
+      return {
+        source: "applied_estimate",
+        estimateSignature: cpfRefundProvenance.estimateSignature,
+      };
+    }
+
+    function decodeCpfRefundProvenance(source) {
+      if (source == null) {
+        // Older saved drafts cannot distinguish a manually entered household
+        // figure from an applied estimate, so preserve it as authoritative.
+        return { source: "manual_exact", estimateSignature: null };
+      }
+      if (!source || typeof source !== "object" || Array.isArray(source)) {
+        throw new TypeError("Saved CPF refund provenance is invalid");
+      }
+      if (source.source === "manual_exact") {
+        return { source: "manual_exact", estimateSignature: null };
+      }
+      if (
+        source.source !== "applied_estimate"
+        || typeof source.estimateSignature !== "string"
+        || !source.estimateSignature
+        || source.estimateSignature.length > 5000
+      ) {
+        throw new RangeError("Saved CPF estimate signature is invalid");
+      }
+      return {
+        source: "applied_estimate",
+        estimateSignature: source.estimateSignature,
+      };
     }
 
     function validateCurrentDraftInputs() {
@@ -765,6 +1115,7 @@
         form: { values, checks },
         coupleFunding: encodeCoupleFunding(),
         coupleDialogDraft: encodeCoupleDialogDraft(),
+        cpfRefundProvenance: encodeCpfRefundProvenance(),
         ledgers: savedLedgers,
       };
     }
@@ -869,6 +1220,9 @@
         const restoredCoupleDialogDraft = validateCoupleDialogDraft(
           saved.coupleDialogDraft == null ? null : saved.coupleDialogDraft
         );
+        const restoredCpfRefundProvenance = decodeCpfRefundProvenance(
+          saved.cpfRefundProvenance
+        );
         const restoredLedgers = new Map();
         const savedLedgers = saved.ledgers || {};
         if (!savedLedgers || typeof savedLedgers !== "object") {
@@ -900,6 +1254,7 @@
         coupleFundingPlan = restoredCoupleFunding.plan;
         coupleDialogDraft = restoredCoupleDialogDraft;
         coupleDialogDraftActive = Boolean(restoredCoupleDialogDraft);
+        cpfRefundProvenance = restoredCpfRefundProvenance;
         customCounter = 0;
         ledgers.forEach(state => {
           state.rows.forEach(row => {
@@ -920,6 +1275,7 @@
         coupleFundingPlan = null;
         coupleDialogDraft = null;
         coupleDialogDraftActive = false;
+        cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
         customCounter = 0;
         try {
           storage.removeItem(STORAGE_KEY);
@@ -1253,6 +1609,228 @@
       element.classList.toggle("negative", value < -0.01);
     }
 
+    function renderOwnerOutcomeUnavailable(message) {
+      [
+        "owner-outcome-primary-cash", "owner-outcome-primary-cpf",
+        "owner-outcome-primary-combined", "owner-outcome-primary-bank-interest",
+        "owner-outcome-primary-costs", "owner-outcome-primary-profit",
+        "owner-outcome-partner-cash", "owner-outcome-partner-cpf",
+        "owner-outcome-partner-combined", "owner-outcome-partner-bank-interest",
+        "owner-outcome-partner-costs", "owner-outcome-partner-profit",
+        "owner-outcome-household-cash", "owner-outcome-household-cpf",
+        "owner-outcome-household-combined",
+      ].forEach(id => { byId(id).textContent = "—"; });
+      byId("owner-outcome-status").textContent = message;
+    }
+
+    function renderOwnerSaleOutcome(
+      projection,
+      cpfEstimate,
+      cpfWeightsReliable,
+      cpfEstimateStale
+    ) {
+      const partnerEnabled = enabledInput.checked;
+      const names = ownerNames();
+      const outcome = buildOwnerSaleOutcome({
+        projection,
+        cpfEstimate,
+        cpfWeightsReliable: cpfWeightsReliable && !cpfEstimateStale,
+        suppressCpfAllocation: cpfEstimateStale,
+        partnerEnabled,
+        partnerOwnershipPct: partnerEnabled
+          ? number("partner-ownership-share")
+          : 0,
+      });
+      const cards = byId("owner-outcome-cards");
+      cards.classList.toggle("single", !partnerEnabled);
+      byId("owner-outcome-partner-card").hidden = !partnerEnabled;
+
+      function renderOwner(prefix, name, owner) {
+        byId(`owner-outcome-${prefix}-name`).textContent = name;
+        byId(`owner-outcome-${prefix}-share`).textContent = `${oneDecimal.format(owner.share)}% legal share`;
+        const combinedLabel = byId(`owner-outcome-${prefix}-combined-label`);
+        const combinedOutput = byId(`owner-outcome-${prefix}-combined`);
+        combinedLabel.textContent = owner.combinedValue < -0.001
+          ? "Net sale deficit · legal-share split"
+          : "Combined value retained · legal-share split";
+        combinedOutput.textContent = owner.combinedValue >= 0
+          ? money(owner.combinedValue)
+          : `${money(Math.abs(owner.combinedValue))} deficit`;
+        setSignedClass(combinedOutput, owner.combinedValue);
+
+        const cashLabel = byId(`owner-outcome-${prefix}-cash-label`);
+        const cashOutput = byId(`owner-outcome-${prefix}-cash`);
+        if (owner.signedCash == null) {
+          cashLabel.textContent = "Cash after own CPF routing";
+          cashOutput.textContent = "Split unavailable";
+          cashOutput.classList.remove("positive", "negative");
+        } else if (owner.equalisationGap > 0.001) {
+          cashLabel.textContent = "Illustrative owner equalisation gap";
+          cashOutput.textContent = money(owner.equalisationGap);
+          setSignedClass(cashOutput, -owner.equalisationGap);
+        } else {
+          cashLabel.textContent = "Cash remaining after own CPF";
+          cashOutput.textContent = money(owner.cashReleased);
+          setSignedClass(cashOutput, owner.cashReleased);
+        }
+
+        const cpfOutput = byId(`owner-outcome-${prefix}-cpf`);
+        if (owner.cpfAvailable == null) {
+          cpfOutput.textContent = "Split unavailable";
+          cpfOutput.classList.remove("positive", "negative");
+        } else {
+          cpfOutput.textContent = money(owner.cpfAvailable);
+          setSignedClass(cpfOutput, owner.cpfAvailable);
+        }
+        byId(`owner-outcome-${prefix}-bank-interest`).textContent = money(owner.bankInterest);
+        byId(`owner-outcome-${prefix}-costs`).textContent = money(owner.genuineCosts);
+        const profitOutput = byId(`owner-outcome-${prefix}-profit`);
+        const profitLabel = byId(`owner-outcome-${prefix}-profit-label`);
+        profitLabel.textContent = owner.economicProfit >= 0
+          ? "Illustrative economic profit share"
+          : "Illustrative economic loss share";
+        profitOutput.textContent = signedMoney(owner.economicProfit);
+        setSignedClass(profitOutput, owner.economicProfit);
+      }
+
+      renderOwner("primary", names.primary, outcome.primary);
+      if (partnerEnabled) renderOwner("partner", names.partner, outcome.partner);
+      const householdCash = byId("owner-outcome-household-cash");
+      householdCash.textContent = outcome.household.cashReleased >= 0
+        ? money(outcome.household.cashReleased)
+        : `${money(Math.abs(outcome.household.cashReleased))} top-up`;
+      setSignedClass(householdCash, outcome.household.cashReleased);
+      byId("owner-outcome-household-cpf").textContent = money(
+        outcome.household.cpfAvailable
+      );
+      const householdCombined = byId("owner-outcome-household-combined");
+      householdCombined.textContent = outcome.household.combinedValue >= 0
+        ? money(outcome.household.combinedValue)
+        : `${money(Math.abs(outcome.household.combinedValue))} deficit`;
+      setSignedClass(householdCombined, outcome.household.combinedValue);
+
+      if (cpfEstimateStale) {
+        byId("owner-outcome-status").textContent = "The applied CPF estimate is out of date. The legal-share value remains visible, but each owner’s CPF and resulting cash are hidden until you re-apply the current estimate; household cash still reflects the previously applied amount.";
+      } else if (!outcome.cpfAllocationKnown) {
+        byId("owner-outcome-status").textContent = `The legal-share value is shown, but the ${money(outcome.household.cpfRequired)} household CPF refund and resulting owner cash cannot be split until the couple ledger is current, reconciled and provides an individual CPF basis.`;
+      } else if (
+        outcome.household.cpfRequired <= EPSILON
+        && cpfEstimate.household.refundRequired > EPSILON
+      ) {
+        byId("owner-outcome-status").textContent = `No CPF refund is currently applied to the sale waterfall. Apply the ${money(cpfEstimate.household.refundRequired)} estimate above, or enter the exact household amount, to include it in this owner outcome.`;
+      } else if (partnerEnabled && outcome.household.cpfRequired > EPSILON) {
+        byId("owner-outcome-status").textContent = `Combined value is split ${oneDecimal.format(outcome.primary.share)}% / ${oneDecimal.format(outcome.partner.share)}% first. The active ${money(outcome.household.cpfRequired)} household CPF refund is then apportioned using each owner’s current estimated principal plus accrued-interest ratio and routed from that owner’s share.`;
+      } else {
+        byId("owner-outcome-status").textContent = `The combined value is allocated by legal share first, then the active ${money(outcome.household.cpfRequired)} CPF refund is routed from the owner’s share. Household and owner totals reconcile to the current sale waterfall.`;
+      }
+    }
+
+    function renderCpfUnavailable(message) {
+      latestCpfEstimate = null;
+      [
+        "cpf-primary-principal", "cpf-primary-interest", "cpf-primary-refund",
+        "cpf-primary-available", "cpf-partner-principal", "cpf-partner-interest",
+        "cpf-partner-refund", "cpf-partner-available", "cpf-household-principal",
+        "cpf-household-interest", "cpf-estimated-refund", "cpf-estimated-available",
+        "cpf-estimated-shortfall", "cpf-applied-refund", "cpf-applied-available",
+      ].forEach(id => { byId(id).textContent = "—"; });
+      byId("apply-cpf-estimate").disabled = true;
+      byId("apply-cpf-estimate").textContent = "Apply estimate to projection";
+      byId("cpf-refund-status").textContent = message;
+      renderOwnerOutcomeUnavailable(`Owner outcome unavailable: ${message}`);
+    }
+
+    function renderCpfEstimate(
+      projection,
+      ledgerRows,
+      { cpfWeightsReliable = true } = {}
+    ) {
+      const partnerEnabled = enabledInput.checked;
+      const names = ownerNames();
+      byId("cpf-single-acquisition-field").hidden = partnerEnabled;
+      byId("cpf-partner-monthly-field").hidden = !partnerEnabled;
+      byId("cpf-partner-row").hidden = !partnerEnabled;
+      byId("cpf-primary-monthly-label").textContent = partnerEnabled
+        ? `${names.primary} CPF used per monthly instalment`
+        : "CPF used per monthly instalment";
+      byId("cpf-partner-monthly-label").textContent = `${names.partner} CPF used per monthly instalment`;
+      byId("cpf-acquisition-mode").textContent = partnerEnabled
+        ? (coupleSetupComplete
+          ? "Purchase CPF is read from each dated acquisition-ledger row; rows after the planned sale are excluded."
+          : "Complete the couple funding setup to estimate purchase CPF from the acquisition ledger.")
+        : "Single-owner purchase CPF is assumed to be used on the legal acquisition date.";
+
+      const estimate = buildCpfRefundEstimate({
+        projection,
+        ledgerRows,
+        partnerEnabled,
+        primaryAcquisitionCpf: currency("cpf-primary-acquisition"),
+        primaryMonthlyCpf: currency("cpf-primary-monthly"),
+        partnerMonthlyCpf: currency("cpf-partner-monthly"),
+        annualRatePct: number("cpf-oa-rate"),
+      });
+      latestCpfEstimate = estimate;
+      const currentEstimateSignature = cpfEstimateSignature(projection, estimate);
+      const cpfEstimateStale = cpfRefundProvenance.source === "applied_estimate"
+        && cpfRefundProvenance.estimateSignature !== currentEstimateSignature;
+      const availableTotal = Math.min(
+        estimate.household.refundRequired,
+        projection.base.cpfRefundProceedsBase
+      );
+      const shortfall = Math.max(0, estimate.household.refundRequired - availableTotal);
+      const primaryAvailable = estimate.household.refundRequired > EPSILON
+        ? availableTotal * estimate.primary.refundRequired / estimate.household.refundRequired
+        : 0;
+      const partnerAvailable = availableTotal - primaryAvailable;
+
+      byId("cpf-primary-name").textContent = names.primary;
+      byId("cpf-partner-name").textContent = names.partner;
+      byId("cpf-primary-principal").textContent = money(estimate.primary.principal);
+      byId("cpf-primary-interest").textContent = money(estimate.primary.accruedInterest);
+      byId("cpf-primary-refund").textContent = money(estimate.primary.refundRequired);
+      byId("cpf-primary-available").textContent = money(primaryAvailable);
+      byId("cpf-partner-principal").textContent = money(estimate.partner.principal);
+      byId("cpf-partner-interest").textContent = money(estimate.partner.accruedInterest);
+      byId("cpf-partner-refund").textContent = money(estimate.partner.refundRequired);
+      byId("cpf-partner-available").textContent = money(partnerAvailable);
+      byId("cpf-household-principal").textContent = money(estimate.household.principal);
+      byId("cpf-household-interest").textContent = money(estimate.household.accruedInterest);
+      byId("cpf-estimated-refund").textContent = money(estimate.household.refundRequired);
+      byId("cpf-estimated-available").textContent = money(availableTotal);
+      byId("cpf-estimated-shortfall").textContent = money(shortfall);
+      setSignedClass(byId("cpf-estimated-shortfall"), -shortfall);
+      byId("cpf-applied-refund").textContent = money(projection.cpfRefund);
+      byId("cpf-applied-available").textContent = money(projection.base.cpfRefundAvailable);
+      const applyButton = byId("apply-cpf-estimate");
+      applyButton.disabled = partnerEnabled && !cpfWeightsReliable;
+      applyButton.textContent = cpfEstimateStale
+        ? "Re-apply current estimate"
+        : "Apply estimate to projection";
+
+      const cappedCopy = estimate.cappedMonths
+        ? ` In ${estimate.cappedMonths} month${estimate.cappedMonths === 1 ? "" : "s"}, combined CPF inputs exceeded the modelled instalment and were capped at that instalment.`
+        : "";
+      const belowEnteredMarketValue = projection.saleMarketValue != null
+        && projection.base.salePrice + EPSILON < projection.saleMarketValue;
+      const shortfallGuidance = belowEnteredMarketValue
+        ? " The projected sale is below your entered market value, so do not assume CPF's market-value no-cash-top-up treatment applies."
+        : " If the property is sold at market value and proceeds are insufficient, CPF generally does not require a cash top-up for the CPF shortfall; a below-market disposal can be treated differently.";
+      byId("cpf-refund-status").textContent = shortfall > 0.01
+        ? `Projected proceeds after lender redemption can refund about ${money(availableTotal)} of the estimated ${money(estimate.household.refundRequired)} CPF amount. The ${money(shortfall)} difference is shown as a CPF refund shortfall.${shortfallGuidance}${cappedCopy}`
+        : `Projected proceeds after lender redemption cover the estimated CPF refund. The exact CPF Home ownership dashboard remains authoritative; this constant-rate estimate includes ${estimate.mortgageMonths} modelled mortgage month${estimate.mortgageMonths === 1 ? "" : "s"}.${cappedCopy}`;
+      if (cpfEstimateStale) {
+        byId("cpf-refund-status").textContent = `The applied ${money(projection.cpfRefund)} CPF estimate is out of date because the sale or CPF assumptions changed. The current estimate is ${money(estimate.household.refundRequired)}; re-apply it before relying on the owner split.`;
+      } else if (partnerEnabled && !cpfWeightsReliable) {
+        byId("cpf-refund-status").textContent = "The individual CPF estimate is provisional because the couple funding ledger is incomplete, stale or not reconciled. Reconcile the ledger before applying it.";
+      }
+      renderOwnerSaleOutcome(
+        projection,
+        estimate,
+        cpfWeightsReliable,
+        cpfEstimateStale
+      );
+    }
+
     function reconciliationText(target, actual) {
       const difference = actual - target;
       if (Math.abs(difference) <= 0.01) return `${money(target)} · reconciled`;
@@ -1373,10 +1951,10 @@
       byId("ledger-primary-cpf-heading").textContent = `${names.primary} CPF`;
       byId("ledger-partner-cash-heading").textContent = `${names.partner} cash`;
       byId("ledger-partner-cpf-heading").textContent = `${names.partner} CPF`;
-      byId("ledger-owner-outcome").textContent = `${names.primary} ${oneDecimal.format(ownership.primaryShare)}% · ${money(Math.abs(ownership.primaryCashReleased))}`;
-      byId("ledger-partner-outcome").textContent = `${names.partner} ${oneDecimal.format(ownership.partnerShare)}% · ${money(Math.abs(ownership.partnerCashReleased))}`;
-      setSignedClass(byId("ledger-owner-outcome"), projection.base.cashReleased);
-      setSignedClass(byId("ledger-partner-outcome"), projection.base.cashReleased);
+      byId("ledger-owner-outcome").textContent = `${names.primary} ${oneDecimal.format(ownership.primaryShare)}% · ${money(Math.abs(ownership.primaryPreCpfValue))}`;
+      byId("ledger-partner-outcome").textContent = `${names.partner} ${oneDecimal.format(ownership.partnerShare)}% · ${money(Math.abs(ownership.partnerPreCpfValue))}`;
+      setSignedClass(byId("ledger-owner-outcome"), ownership.primaryPreCpfValue);
+      setSignedClass(byId("ledger-partner-outcome"), ownership.partnerPreCpfValue);
       byId("ledger-overall-status").textContent = validation.balanced
         ? "All rows and totals reconcile"
         : "Ledger needs reconciliation";
@@ -1384,6 +1962,11 @@
         ? "ledger-badge ledger-badge-ok"
         : "ledger-badge ledger-badge-warning";
       byId("ledger-stale").hidden = !state.stale;
+      byId("funding-ledger-editor-summary").textContent = validation.balanced
+        ? `${validation.rows.length} rows · all reconciled`
+        : `${validation.rows.length} rows · review differences`;
+      const reviewButton = byId("review-funding-ledger");
+      reviewButton.hidden = validation.balanced && !state.stale;
       byId("ledger-route-copy").textContent = projection.route === "buc"
         ? "BUC funding ledger · purchase payments, acquisition costs and timeline-only actions"
         : "Completed-property funding ledger · one completion payment plus acquisition costs and timeline actions";
@@ -1426,22 +2009,49 @@
       enabledInput.setAttribute("aria-expanded", String(enabled));
       updateOwnershipPreview();
       updateCouplePlanStatus();
+      let projection;
+      try {
+        projection = collectProjection();
+      } catch (error) {
+        renderCpfUnavailable(`CPF estimate unavailable until the main plan is valid: ${error.message}`);
+        showError(enabled && coupleSetupComplete
+          ? `Funding ledger unavailable until the main plan is valid: ${error.message}`
+          : "");
+        return;
+      }
       if (!enabled) {
+        byId("funding-ledger-editor").open = false;
         showError("");
+        try {
+          renderCpfEstimate(projection, []);
+        } catch (error) {
+          renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
+        }
         return;
       }
       if (!coupleSetupComplete || !coupleFundingPlan) {
         showError("");
+        try {
+          renderCpfEstimate(projection, [], { cpfWeightsReliable: false });
+        } catch (error) {
+          renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
+        }
         return;
       }
       try {
-        const projection = collectProjection();
         const state = currentLedger(projection, { regenerate });
         const validation = validateFundingLedger(state.rows, projection);
         showError("");
         renderSummary(validation, projection, state);
         renderRows(validation, projection);
         renderFooter(validation);
+        try {
+          renderCpfEstimate(projection, state.rows, {
+            cpfWeightsReliable: validation.balanced && !state.stale,
+          });
+        } catch (error) {
+          renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
+        }
       } catch (error) {
         showError(`Funding ledger unavailable until the main plan is valid: ${error.message}`);
       }
@@ -1482,6 +2092,66 @@
     byId("regenerate-funding-ledger").addEventListener("click", () => {
       render({ regenerate: true });
       scheduleSave();
+    });
+    byId("review-funding-ledger").addEventListener("click", () => {
+      const editor = byId("funding-ledger-editor");
+      editor.open = true;
+      const target = document.querySelector(
+        ".ledger-row-warning .ledger-input, #funding-ledger-body .ledger-input"
+      );
+      if (target) target.focus();
+    });
+    byId("funding-ledger-editor").addEventListener("toggle", () => {
+      byId("review-funding-ledger").setAttribute(
+        "aria-expanded",
+        String(byId("funding-ledger-editor").open)
+      );
+    });
+    byId("apply-cpf-estimate").addEventListener("click", () => {
+      let ledgerRows = [];
+      let cpfWeightsReliable = true;
+      let appliedEstimateSignature = null;
+      try {
+        const projection = collectProjection();
+        if (enabledInput.checked && (!coupleSetupComplete || !coupleFundingPlan)) {
+          renderCpfUnavailable("Complete the couple funding setup before applying a CPF estimate.");
+          return;
+        }
+        if (enabledInput.checked) {
+          const state = currentLedger(projection);
+          ledgerRows = state.rows;
+          cpfWeightsReliable = validateFundingLedger(state.rows, projection).balanced
+            && !state.stale;
+        }
+        renderCpfEstimate(projection, ledgerRows, { cpfWeightsReliable });
+        appliedEstimateSignature = cpfEstimateSignature(
+          projection,
+          latestCpfEstimate
+        );
+      } catch (error) {
+        renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
+        return;
+      }
+      if (!latestCpfEstimate) return;
+      const input = byId("cpf-refund");
+      input.value = moneyInput(roundMoney(latestCpfEstimate.household.refundRequired));
+      applyingCpfEstimate = true;
+      try {
+        input.dispatchEvent(new view.Event("input", { bubbles: true }));
+      } finally {
+        applyingCpfEstimate = false;
+      }
+      cpfRefundProvenance = {
+        source: "applied_estimate",
+        estimateSignature: appliedEstimateSignature,
+      };
+      try {
+        renderCpfEstimate(collectProjection(), ledgerRows, { cpfWeightsReliable });
+      } catch (error) {
+        renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
+        return;
+      }
+      byId("cpf-refund-status").textContent = "Estimated CPF refund applied to the sale waterfall. Replace it with the exact CPF Home ownership dashboard figure when available.";
     });
     byId("edit-couple-funding").addEventListener("click", () => {
       openCoupleFundingDialog({ confirmEnable: false });
@@ -1538,7 +2208,13 @@
           category: "note",
         }));
         state.dirty = true;
+        byId("funding-ledger-editor").open = true;
         render();
+        view.requestAnimationFrame(() => {
+          byId("funding-ledger-body").querySelector(
+            `[data-row-key="custom-${customCounter}"][data-field="action"]`
+          )?.focus();
+        });
         scheduleSave();
       } catch (error) {
         showError(`Cannot add a row: ${error.message}`);
@@ -1582,6 +2258,9 @@
       }
     });
     form.addEventListener("input", event => {
+      if (event.target.id === "cpf-refund" && !applyingCpfEstimate) {
+        cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
+      }
       scheduleSave();
       if (event.target.closest("#partner-settings")) return;
       scheduleRender();
@@ -1602,10 +2281,14 @@
       coupleDialogDraft = null;
       coupleDialogDraftActive = false;
       dialogRequiresEnableConfirmation = false;
+      cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
       const dialog = byId("couple-funding-dialog");
       if (dialog.open && typeof dialog.close === "function") dialog.close();
       else dialog.removeAttribute("open");
-      ["property-loan-details", "partner-settings", "advanced-cost-details"].forEach(id => {
+      [
+        "property-loan-details", "partner-settings", "advanced-cost-details",
+        "cpf-assumptions-details", "funding-ledger-editor",
+      ].forEach(id => {
         byId(id).open = false;
       });
       // Hidden inputs use the browser's default-value mode, so assigning to
@@ -1637,6 +2320,8 @@
     STORAGE_KEY,
     allocationTotal,
     applyFundingPlan,
+    buildCpfRefundEstimate,
+    buildOwnerSaleOutcome,
     buildStandardFundingLedger,
     init,
     makeRow,
