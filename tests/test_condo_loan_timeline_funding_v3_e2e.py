@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import json
 from pathlib import Path
 import re
 import shutil
@@ -14,7 +15,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "condo_loan_timeline_planner.html"
-STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1"
+STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v2"
+LEGACY_STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1"
+VERSION_DATABASE = "housing-estate-framework.condo-loan-timeline-planner-v3"
+VERSION_STORE = "planVersions"
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
@@ -76,7 +80,25 @@ def _load_clean(page, url: str) -> None:
     page.goto(url, wait_until="load")
     page.locator("#reset-plan").click()
     page.wait_for_function(
-        "key => localStorage.getItem(key) === null", arg=STORAGE_KEY
+        "({ key, legacyKey }) => localStorage.getItem(key) === null"
+        " && localStorage.getItem(legacyKey) === null",
+        arg={"key": STORAGE_KEY, "legacyKey": LEGACY_STORAGE_KEY},
+    )
+    page.evaluate(
+        """
+        ({ databaseName, storeName }) => new Promise((resolve, reject) => {
+          const request = indexedDB.open(databaseName, 1);
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            const database = request.result;
+            const transaction = database.transaction(storeName, 'readwrite');
+            transaction.objectStore(storeName).clear();
+            transaction.oncomplete = () => { database.close(); resolve(); };
+            transaction.onerror = () => reject(transaction.error);
+          };
+        })
+        """,
+        {"databaseName": VERSION_DATABASE, "storeName": VERSION_STORE},
     )
     page.reload(wait_until="load")
 
@@ -621,7 +643,7 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     _fill_and_blur(page.locator("#cpf-primary-acquisition"), "12345.67")
     _fill_and_blur(page.locator("#cpf-primary-monthly"), "321.45")
     page.locator("#cpf-oa-rate").fill("2.60")
-    _fill_and_blur(page.locator("#cpf-refund"), "45678.90")
+    _fill_and_blur(page.locator("#cpf-refund-exact"), "45678.90")
 
     page.locator("#partner-enabled").check()
     seeded_primary_cash = _money_number(page.locator("#couple-primary-cash"))
@@ -689,7 +711,8 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#cpf-primary-monthly").input_value() == "321.45"
     assert page.locator("#cpf-partner-monthly").input_value() == "123.45"
     assert page.locator("#cpf-oa-rate").input_value() == "2.60"
-    assert page.locator("#cpf-refund").input_value() == "45,678.90"
+    assert page.locator("#cpf-refund-exact").input_value() == "45,678.90"
+    assert page.locator("#cpf-refund").input_value() == "45,678.9"
     assert page.locator("#primary-owner-name").input_value() == "Evan"
     assert page.locator("#partner-owner-name").input_value() == "Mandy"
     assert page.locator("#partner-ownership-share").input_value() == "40"
@@ -746,6 +769,7 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#cpf-primary-monthly").input_value() == "0"
     assert page.locator("#cpf-partner-monthly").input_value() == "0"
     assert page.locator("#cpf-oa-rate").input_value() == "2.50"
+    assert page.locator("#cpf-refund-exact").input_value() == ""
     assert page.locator("#cpf-refund").input_value() == "0"
     playwright_api.expect(page.locator("#partner-enabled")).not_to_be_checked()
     assert page.locator("#primary-owner-name").input_value() == "Owner 1"
@@ -769,7 +793,7 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#project-name").input_value() == "My condominium"
 
 
-def test_financing_card_estimates_then_explicitly_applies_cpf_refund(
+def test_financing_card_automatically_routes_cpf_and_honours_exact_override(
     chromium_page,
 ) -> None:
     playwright_api = pytest.importorskip("playwright.sync_api")
@@ -778,6 +802,7 @@ def test_financing_card_estimates_then_explicitly_applies_cpf_refund(
 
     playwright_api.expect(page.locator("#financing-interest-card")).to_be_visible()
     original_bank_interest = page.locator("#bank-interest-total").inner_text()
+    assert page.locator("#cpf-refund-exact").input_value() == ""
     assert page.locator("#cpf-refund").input_value() == "0"
 
     _open_details(page, "#cpf-assumptions-details")
@@ -788,23 +813,20 @@ def test_financing_card_estimates_then_explicitly_applies_cpf_refund(
     assert page.locator("#cpf-primary-interest").inner_text() != "S$0"
     estimate = page.locator("#cpf-estimated-refund").inner_text()
     assert estimate != "S$100,000"
-    assert page.locator("#cpf-refund").input_value() == "0"
+    page.wait_for_function(
+        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 100000"
+    )
     playwright_api.expect(page.locator("#owner-sale-outcome")).to_be_visible()
     playwright_api.expect(page.locator("#owner-outcome-partner-card")).to_be_hidden()
     playwright_api.expect(page.locator("#owner-outcome-status")).to_contain_text(
-        "No CPF refund is currently applied"
+        "automatic CPF refund"
+    )
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "Automatic mode has synchronised"
     )
 
-    # Applying immediately after an edit must recompute synchronously instead of
-    # copying the estimate left behind by the debounced render.
+    # Automatic mode must recompute before the base dashboard's input debounce.
     page.locator("#cpf-primary-acquisition").fill("125000")
-    page.locator("#apply-cpf-estimate").click()
-    page.wait_for_function(
-        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 125000"
-    )
-
-    page.locator("#cpf-refund").fill("0")
-    page.locator("#apply-cpf-estimate").click()
     page.wait_for_function(
         "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 125000"
     )
@@ -822,62 +844,68 @@ def test_financing_card_estimates_then_explicitly_applies_cpf_refund(
         abs=1,
     )
     page.wait_for_function(
-        "key => JSON.parse(localStorage.getItem(key)).cpfRefundProvenance.source"
-        " === 'applied_estimate'",
+        "key => { const raw=localStorage.getItem(key); return raw"
+        " && JSON.parse(raw).cpfRefundState.mode === 'auto'; }",
         arg=STORAGE_KEY,
     )
+    automatic_before_sale_change = _money_number(page.locator("#cpf-refund"))
     page.reload(wait_until="load")
     assert _money_number(page.locator("#cpf-refund")) > 125_000
-    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
-        "out of date"
-    )
+    assert page.locator("#cpf-refund-exact").input_value() == ""
 
     page.locator("#sale-date").fill("2031-08-19")
     playwright_api.expect(page.locator("#bank-interest-total")).not_to_have_text(
         original_bank_interest
     )
     assert page.locator("#bank-interest-accrued").inner_text() != "S$0"
+    page.wait_for_function(
+        "before => Math.abs(Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) - before) > 0.01",
+        arg=automatic_before_sale_change,
+    )
     playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
-        "out of date"
-    )
-    playwright_api.expect(page.locator("#owner-outcome-status")).to_contain_text(
-        "out of date"
-    )
-    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
-        "Split unavailable"
-    )
-    playwright_api.expect(page.locator("#owner-outcome-primary-cash")).to_have_text(
-        "Split unavailable"
-    )
-    playwright_api.expect(
-        page.locator("#owner-outcome-primary-combined")
-    ).not_to_have_text("—")
-    playwright_api.expect(page.locator("#apply-cpf-estimate")).to_have_text(
-        "Re-apply current estimate"
-    )
-
-    page.locator("#apply-cpf-estimate").click()
-    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
-        "out of date"
+        "Automatic mode has synchronised"
     )
     playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).not_to_have_text(
         "Split unavailable"
     )
 
     _open_details(page, "#cpf-assumptions-details")
-    _fill_and_blur(page.locator("#cpf-refund"), "150000")
+    _fill_and_blur(page.locator("#cpf-refund-exact"), "150000")
     page.wait_for_function(
-        "key => JSON.parse(localStorage.getItem(key)).cpfRefundProvenance.source"
-        " === 'manual_exact'",
+        "document.querySelector('#cpf-refund').value.replace(/,/g,'') === '150000'"
+    )
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "Exact override active"
+    )
+    page.wait_for_function(
+        "key => { const state=JSON.parse(localStorage.getItem(key)).cpfRefundState;"
+        " return state.mode === 'exact' && state.exactCents === 15000000; }",
         arg=STORAGE_KEY,
     )
     page.locator("#sale-date").fill("2031-08-29")
-    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
-        "out of date"
+    assert _money_number(page.locator("#cpf-refund")) == 150_000
+
+    _fill_and_blur(page.locator("#cpf-refund-exact"), "9999999")
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "active exact"
     )
-    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).not_to_have_text(
-        "Split unavailable"
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "CPF refund shortfall"
     )
+
+    # An entered zero is an intentional exact override, not automatic mode.
+    _fill_and_blur(page.locator("#cpf-refund-exact"), "0")
+    page.wait_for_function(
+        "document.querySelector('#cpf-refund').value === '0'"
+    )
+    assert _display_money_number(page.locator("#owner-outcome-primary-cpf")) == 0
+    playwright_api.expect(page.locator("#use-automatic-cpf")).to_be_visible()
+    page.locator("#use-automatic-cpf").click()
+    assert page.locator("#cpf-refund-exact").input_value() == ""
+    page.wait_for_function(
+        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 125000"
+    )
+    playwright_api.expect(page.locator("#use-automatic-cpf")).to_be_hidden()
 
 
 def test_couple_owner_outcome_separates_legal_share_and_individual_cpf(
@@ -903,7 +931,6 @@ def test_couple_owner_outcome_separates_legal_share_and_individual_cpf(
     _open_details(page, "#partner-settings")
     _fill_and_blur(page.locator("#partner-ownership-share"), "40")
     _open_details(page, "#cpf-assumptions-details")
-    page.locator("#apply-cpf-estimate").click()
 
     playwright_api.expect(page.locator("#owner-outcome-partner-card")).to_be_visible()
     playwright_api.expect(page.locator("#owner-outcome-primary-name")).to_have_text("Evan")
@@ -962,6 +989,296 @@ def test_couple_owner_outcome_separates_legal_share_and_individual_cpf(
     assert _display_money_number(
         page.locator("#owner-outcome-primary-bank-interest")
     ) > primary_interest
+
+
+def test_unreconciled_couple_ledger_retains_household_cpf_and_hides_owner_split(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    page.locator("#partner-enabled").check()
+    seeded_primary_cash = _money_number(page.locator("#couple-primary-cash"))
+    seeded_partner_cash = _money_number(page.locator("#couple-partner-cash"))
+    _apply_couple_setup(
+        page,
+        amounts={
+            "primary_cash": seeded_primary_cash - 20_000,
+            "primary_cpf": 20_000,
+            "partner_cash": seeded_partner_cash - 5_000,
+            "partner_cpf": 5_000,
+        },
+    )
+    page.wait_for_function(
+        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 25000"
+    )
+    reliable_household = _money_number(page.locator("#cpf-refund"))
+    stage_cash = _money_number(
+        page.locator(
+            "#funding-ledger-body [data-row-key='stage-0']"
+            "[data-field='primaryCash']"
+        )
+    )
+
+    _set_ledger_amount(page, "stage-0", "primaryCash", str(stage_cash - 100))
+    playwright_api.expect(page.locator("#ledger-overall-status")).to_contain_text(
+        "needs reconciliation"
+    )
+    assert _money_number(page.locator("#cpf-refund")) == reliable_household
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "retaining the last reliable"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
+        "Split unavailable"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cash")).to_have_text(
+        "Split unavailable"
+    )
+
+    _set_ledger_amount(page, "stage-0", "primaryCash", str(stage_cash))
+    playwright_api.expect(page.locator("#ledger-overall-status")).to_have_text(
+        "All rows and totals reconcile"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).not_to_have_text(
+        "Split unavailable"
+    )
+
+
+def test_named_versions_are_immutable_and_reset_does_not_delete_them(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _open_details(page, "#plan-versions-details")
+
+    page.locator("#version-name").fill("Base 3% plan")
+    page.locator("#save-plan-version").click()
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "Saved immutable version"
+    )
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(1)
+
+    page.locator("#annual-growth").fill("4.5")
+    page.locator("#version-name").fill("Upside 4.5% plan")
+    page.locator("#save-plan-version").click()
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(2)
+
+    base_option = page.locator(
+        "#saved-version-select option", has_text=re.compile(r"^Base 3% plan")
+    )
+    base_id = base_option.get_attribute("value")
+    assert base_id
+    page.locator("#saved-version-select").select_option(base_id)
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.locator("#load-plan-version").click()
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "Loaded “Base 3% plan”"
+    )
+    assert page.locator("#annual-growth").input_value() == "3.0"
+    # Loading creates a recovery snapshot but never mutates either named version.
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(3)
+    assert page.locator(
+        "#saved-version-select option", has_text="Upside 4.5% plan"
+    ).count() == 1
+
+    upside_option = page.locator(
+        "#saved-version-select option", has_text=re.compile(r"^Upside 4\.5% plan")
+    )
+    upside_id = upside_option.get_attribute("value")
+    assert upside_id
+    page.locator("#saved-version-select").select_option(upside_id)
+    page.once("dialog", lambda dialog: dialog.dismiss())
+    page.locator("#delete-plan-version").click()
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(3)
+    page.locator("#saved-version-select").select_option(upside_id)
+    page.wait_for_timeout(50)
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.locator("#delete-plan-version").click()
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "Deleted saved version"
+    )
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(2)
+
+    page.locator("#reset-plan").click()
+    assert page.locator("#annual-growth").input_value() == "3.0"
+    _open_details(page, "#plan-versions-details")
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(2)
+    assert page.locator(
+        "#saved-version-select option", has_text=re.compile(r"^Base 3% plan")
+    ).count() == 1
+    page.reload(wait_until="load")
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(2)
+    assert page.locator(
+        "#saved-version-select option", has_text=re.compile(r"^Upside 4\.5% plan")
+    ).count() == 0
+
+
+def test_export_import_transfers_full_couple_draft_between_origins(
+    chromium_page,
+    tmp_path,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _open_details(page, "#property-loan-details")
+    page.locator("#project-name").fill("Portable couple plan")
+    page.locator("#annual-growth").fill("4.2")
+    page.locator("#partner-enabled").check()
+    _apply_couple_setup(
+        page,
+        borrower="partner",
+        primary_name="Evan",
+        partner_name="Mandy",
+    )
+    _open_details(page, "#funding-ledger-editor")
+    page.locator("#add-funding-row").click()
+    action = page.locator(
+        "#funding-ledger-body [data-row-key='custom-1'][data-field='action']"
+    )
+    action.fill("Option-fee reimbursement note")
+    action.blur()
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-refund-exact"), "154286.29")
+    _open_details(page, "#plan-versions-details")
+    page.locator("#version-name").fill("Portable 4.2% couple plan")
+
+    with page.expect_download() as download_info:
+        page.locator("#export-plan-draft").click()
+    download = download_info.value
+    exported_path = tmp_path / "portable-couple-plan.json"
+    download.save_as(exported_path)
+    assert exported_path.exists()
+
+    other_origin_url = url.replace("127.0.0.1", "localhost")
+    _load_clean(page, other_origin_url)
+    assert page.locator("#project-name").input_value() == "My condominium"
+    _open_details(page, "#plan-versions-details")
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.locator("#import-plan-file").set_input_files(str(exported_path))
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "Imported “Portable 4.2% couple plan”"
+    )
+
+    assert page.locator("#project-name").input_value() == "Portable couple plan"
+    assert page.locator("#annual-growth").input_value() == "4.2"
+    playwright_api.expect(page.locator("#partner-enabled")).to_be_checked()
+    assert page.locator("#primary-owner-name").input_value() == "Evan"
+    assert page.locator("#partner-owner-name").input_value() == "Mandy"
+    assert page.locator("#cpf-refund-exact").input_value() == "154,286.29"
+    assert page.locator("#cpf-refund").input_value() == "154,286.29"
+    assert page.locator(
+        "#funding-ledger-body [data-row-key='custom-1'][data-field='action']"
+    ).input_value() == "Option-fee reimbursement note"
+    assert page.locator(
+        "#saved-version-select option",
+        has_text=re.compile(r"^Portable 4\.2% couple plan"),
+    ).count() == 1
+
+    page.reload(wait_until="load")
+    assert page.locator("#project-name").input_value() == "Portable couple plan"
+    playwright_api.expect(page.locator("#partner-enabled")).to_be_checked()
+    assert page.locator("#cpf-refund-exact").input_value() == "154,286.29"
+    assert page.locator(
+        "#funding-ledger-body [data-row-key='custom-1'][data-field='action']"
+    ).input_value() == "Option-fee reimbursement note"
+    playwright_api.expect(page.locator("#saved-version-select option")).to_have_count(2)
+
+    # A future envelope is rejected without changing the imported working draft.
+    invalid_envelope = json.loads(Path(exported_path).read_text(encoding="utf-8"))
+    saved_version_count = page.locator("#saved-version-select option").count()
+    saved_working_copy = page.evaluate(
+        "key => localStorage.getItem(key)", STORAGE_KEY
+    )
+    invalid_envelope["formatVersion"] = 999
+    invalid_path = tmp_path / "future-condo-plan.json"
+    invalid_path.write_text(json.dumps(invalid_envelope), encoding="utf-8")
+    page.locator("#import-plan-file").set_input_files(str(invalid_path))
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "cannot import that draft format version"
+    )
+    assert page.locator("#project-name").input_value() == "Portable couple plan"
+    assert page.locator("#saved-version-select option").count() == saved_version_count
+    assert page.evaluate("key => localStorage.getItem(key)", STORAGE_KEY) == (
+        saved_working_copy
+    )
+
+    invalid_envelope["formatVersion"] = 1
+    invalid_envelope["draft"]["form"]["values"]["sale-date"] = "2024-01-01"
+    invalid_path.write_text(json.dumps(invalid_envelope), encoding="utf-8")
+    page.locator("#import-plan-file").set_input_files(str(invalid_path))
+    playwright_api.expect(page.locator("#version-manager-status")).to_contain_text(
+        "Draft not imported"
+    )
+    assert page.locator("#project-name").input_value() == "Portable couple plan"
+    assert page.locator("#saved-version-select option").count() == saved_version_count
+    assert page.evaluate("key => localStorage.getItem(key)", STORAGE_KEY) == (
+        saved_working_copy
+    )
+
+    page.goto(url, wait_until="load")
+    assert page.locator("#project-name").input_value() == "Portable couple plan"
+    playwright_api.expect(page.locator("#partner-enabled")).to_be_checked()
+    assert page.locator("#cpf-refund-exact").input_value() == "154,286.29"
+    assert page.locator(
+        "#funding-ledger-body [data-row-key='custom-1'][data-field='action']"
+    ).input_value() == "Option-fee reimbursement note"
+
+
+def test_legacy_v1_cpf_drafts_migrate_to_auto_or_exact_mode(chromium_page) -> None:
+    page, url = chromium_page
+    _load_clean(page, url)
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-primary-acquisition"), "100000")
+    page.wait_for_function(
+        "key => { const raw=localStorage.getItem(key);"
+        " return raw && JSON.parse(raw).schemaVersion === 2; }",
+        arg=STORAGE_KEY,
+    )
+    page.evaluate(
+        """
+        ({ key, legacyKey }) => {
+          const draft = JSON.parse(localStorage.getItem(key));
+          const active = document.querySelector('#cpf-refund').value;
+          draft.schemaVersion = 1;
+          draft.form.values['cpf-refund'] = active;
+          delete draft.form.values['cpf-refund-exact'];
+          delete draft.cpfRefundState;
+          draft.cpfRefundProvenance = {
+            source: 'applied_estimate',
+            estimateSignature: 'legacy-signature'
+          };
+          localStorage.setItem(legacyKey, JSON.stringify(draft));
+          localStorage.removeItem(key);
+        }
+        """,
+        {"key": STORAGE_KEY, "legacyKey": LEGACY_STORAGE_KEY},
+    )
+    page.reload(wait_until="load")
+    assert page.locator("#cpf-refund-exact").input_value() == ""
+    assert _money_number(page.locator("#cpf-refund")) > 100_000
+    assert page.evaluate("key => localStorage.getItem(key) !== null", STORAGE_KEY)
+    assert page.evaluate(
+        "key => localStorage.getItem(key) !== null", LEGACY_STORAGE_KEY
+    )
+    page.evaluate(
+        """
+        ({ key, legacyKey }) => {
+          const draft = JSON.parse(localStorage.getItem(key));
+          draft.schemaVersion = 1;
+          draft.form.values['cpf-refund'] = '123,456.78';
+          delete draft.form.values['cpf-refund-exact'];
+          delete draft.cpfRefundState;
+          draft.cpfRefundProvenance = { source: 'manual_exact', estimateSignature: null };
+          localStorage.setItem(legacyKey, JSON.stringify(draft));
+          localStorage.removeItem(key);
+        }
+        """,
+        {"key": STORAGE_KEY, "legacyKey": LEGACY_STORAGE_KEY},
+    )
+    page.reload(wait_until="load")
+    assert page.locator("#cpf-refund-exact").input_value() == "123,456.78"
+    assert page.locator("#cpf-refund").input_value() == "123,456.78"
 
 
 def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:

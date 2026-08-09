@@ -175,6 +175,21 @@
     font-size:10px; line-height:1.45; }
   .draft-note::before { content:""; flex:0 0 auto; width:7px; height:7px; border-radius:50%;
     background:var(--accent); }
+  .version-manager { margin-top:15px !important; }
+  .version-name-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px;
+    align-items:end; }
+  .version-name-row .field { margin:0; }
+  .version-manager button { min-height:41px; padding:8px 12px; border:1px solid #aebfb8;
+    border-radius:5px; background:white; color:var(--ink); font-size:11px; font-weight:820; }
+  .version-manager button:hover { border-color:var(--accent); color:var(--accent-dark); }
+  .version-manager button:disabled { border-color:#d3dcd8; color:#89958f; cursor:not-allowed; }
+  .version-list-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px;
+    margin-top:13px; align-items:center; }
+  .version-list-row select { min-height:41px; font-size:12px; }
+  .version-transfer-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; padding-top:13px;
+    border-top:1px solid #dce5e1; }
+  .version-status { margin:11px 0 0; color:#52685f; font-size:10px; line-height:1.45; }
+  .version-privacy { margin:6px 0 0; color:#788780; font-size:9px; line-height:1.5; }
 
   /* Couple funding setup dialog. The [open] rules also provide a readable non-modal fallback. */
   .couple-funding-dialog { position:fixed; inset:0; width:min(760px,calc(100vw - 32px));
@@ -536,6 +551,8 @@
     .ssd-banner,.definitions { margin-left:18px; margin-right:18px; }
     .actions { flex-direction:column; }
     .secondary { order:2; }
+    .version-name-row,.version-list-row { grid-template-columns:1fr; }
+    .version-manager button { width:100%; }
     .disclaimer,.sources { margin-left:18px; margin-right:18px; text-align:left; }
   }
   @media(max-width:390px) {
@@ -549,7 +566,7 @@
   @media print {
     .research-shell-nav,.research-shell-skip,.hero-icon,.local-note,.actions,
     .dashboard-heading button,.ledger-editor-toolbar,.ledger-remove,.cpf-actions button,
-    .couple-funding-dialog { display:none !important; }
+    .couple-funding-dialog,.version-manager { display:none !important; }
     body { background:white; }
     main { max-width:none; padding:0; }
     .planner-grid { display:block; }
@@ -682,13 +699,36 @@
             </div>
             <div class="field-row">
               <div class="field"><label for="cpf-oa-rate">CPF OA rate for this estimate</label><div class="unit-input"><input id="cpf-oa-rate" type="number" min="0" max="20" step="0.01" value="2.50" inputmode="decimal"><span>% p.a.</span></div><p class="help">Constant-rate planning estimate; CPF uses prevailing rates and its own account calculation.</p></div>
-              <div class="field"><label for="cpf-refund">Exact CPF refund from Home ownership dashboard <span aria-hidden="true">(optional)</span></label><div class="money-input"><span>S$</span><input id="cpf-refund" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">This entered amount drives the sale waterfall but not economic profit. You can apply the estimate below, then replace it with CPF’s exact figure.</p></div>
+              <div class="field"><label for="cpf-refund-exact">Exact CPF refund from Home ownership dashboard <span aria-hidden="true">(optional)</span></label><div class="money-input"><span>S$</span><input id="cpf-refund-exact" type="text" value="" placeholder="Automatic estimate" inputmode="decimal" data-currency-input></div><p class="help">Leave blank to keep the projection synchronised with the estimate below. Enter CPF’s exact figure—even S$0—to override the estimate.</p><input id="cpf-refund" type="hidden" value="0"></div>
             </div>
           </div>
         </details>
 
         <div class="actions"><button class="primary" type="submit">Update projection</button><button class="secondary" id="reset-plan" type="reset">Reset draft</button></div>
-        <p class="draft-note"><span id="draft-save-status" role="status" aria-live="polite">Draft saves automatically in this browser. Reset clears it.</span></p>
+        <p class="draft-note"><span id="draft-save-status" role="status" aria-live="polite">The working draft saves automatically. Reset clears only it; named versions stay.</span></p>
+
+        <details class="compact-details version-manager" id="plan-versions-details">
+          <summary>Plan versions <span>Save named snapshots or transfer the entire scenario between browsers</span></summary>
+          <div class="compact-details-body">
+            <div class="version-name-row">
+              <div class="field"><label for="version-name">Version name</label><input id="version-name" type="text" maxlength="80" placeholder="e.g. 3% growth · sell Aug 2031" autocomplete="off"></div>
+              <button id="save-plan-version" type="button">Save as new version</button>
+            </div>
+            <div class="version-list-row">
+              <label class="sr-only" for="saved-version-select">Saved plan version</label>
+              <select id="saved-version-select"><option value="">No saved versions yet</option></select>
+              <button id="load-plan-version" type="button" disabled>Load</button>
+              <button id="delete-plan-version" type="button" disabled>Delete</button>
+            </div>
+            <div class="version-transfer-row">
+              <button id="export-plan-draft" type="button">Export current draft</button>
+              <button id="import-plan-draft" type="button">Import draft</button>
+              <input class="sr-only" id="import-plan-file" type="file" accept="application/json,.json">
+            </div>
+            <p class="version-status" id="version-manager-status" role="status" aria-live="polite">Checking saved versions in this browser…</p>
+            <p class="version-privacy">Named versions stay only in this browser and device; localhost and GitHub Pages use separate stores, and clearing site data deletes them. Use export/import to transfer a plan. Exported JSON is unencrypted and can contain owner names, prices, loan, cash and CPF details; importing reads the selected file locally and does not upload it.</p>
+          </div>
+        </details>
       </form>
     </section>
 
@@ -808,10 +848,10 @@
         </div>
         <div class="cpf-summary" aria-label="CPF estimate reconciliation">
           <div><span>Estimated refund shortfall</span><output id="cpf-estimated-shortfall">—</output></div>
-          <div><span>Exact / entered refund in projection</span><output id="cpf-applied-refund">—</output></div>
-          <div><span>Entered refund available from proceeds</span><output id="cpf-applied-available">—</output></div>
+          <div><span>Active refund used in projection</span><output id="cpf-applied-refund">—</output></div>
+          <div><span>Active refund available from proceeds</span><output id="cpf-applied-available">—</output></div>
         </div>
-        <div class="cpf-actions"><p id="cpf-refund-status" role="status" aria-live="polite">Calculating the CPF estimate…</p><button id="apply-cpf-estimate" type="button">Apply estimate to projection</button></div>
+        <div class="cpf-actions"><p id="cpf-refund-status" role="status" aria-live="polite">Calculating the CPF estimate…</p><button id="use-automatic-cpf" type="button" hidden>Use automatic estimate</button></div>
       </section>
     </div>
     <section class="owner-outcome-section" id="owner-sale-outcome" aria-labelledby="owner-sale-outcome-title">
@@ -990,8 +1030,8 @@
   </form>
 </dialog>
 
-<script src="assets/condo-loan-timeline-planner.js?v=20260808-3"></script>
-<script src="assets/condo-loan-timeline-funding-v3.js?v=20260809-3"></script>
+<script src="assets/condo-loan-timeline-planner.js?v=20260809-4"></script>
+<script src="assets/condo-loan-timeline-funding-v3.js?v=20260809-4"></script>
 <script src="assets/research-shell.js"></script>
 </body>
 </html>

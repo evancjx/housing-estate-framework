@@ -21,8 +21,19 @@
 
   const EPSILON = 1e-8;
   const MONEY_SCALE = 100;
-  const STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1";
-  const STORAGE_VERSION = 1;
+  const STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v2";
+  const LEGACY_STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1";
+  const STORAGE_VERSION = 2;
+  const VERSION_DATABASE = "housing-estate-framework.condo-loan-timeline-planner-v3";
+  const VERSION_DATABASE_VERSION = 1;
+  const VERSION_STORE = "planVersions";
+  const VERSION_RECORD_SCHEMA = 1;
+  const EXPORT_FORMAT = "housing-estate-framework.condo-loan-timeline";
+  const EXPORT_FORMAT_VERSION = 1;
+  const CALCULATOR_VERSION = "3.2.0";
+  const MAX_DRAFT_CHARACTERS = 250000;
+  const MAX_IMPORT_BYTES = 1000000;
+  const CPF_AUTO_CONTEXTS = ["buc:single", "buc:couple", "resale:single", "resale:couple"];
   const FORM_VALUE_IDS = [
     "project-name", "area-sqft", "acquisition-date", "purchase-price", "loan-amount",
     "loan-rate", "loan-years", "buc-top-date", "resale-completion-date",
@@ -31,7 +42,7 @@
     "selling-cost-percent", "purchase-market-value", "absd-paid", "purchase-legal",
     "purchase-other", "sale-market-value", "sale-legal", "sale-other", "holding-costs",
     "net-rent", "cpf-primary-acquisition", "cpf-primary-monthly",
-    "cpf-partner-monthly", "cpf-oa-rate", "cpf-refund",
+    "cpf-partner-monthly", "cpf-oa-rate", "cpf-refund-exact",
   ];
   const FORM_CHECK_IDS = ["route-buc", "route-resale", "partner-enabled"];
   const ALLOCATION_FIELDS = [
@@ -87,6 +98,105 @@
     const cents = Math.round(number * MONEY_SCALE);
     if (!Number.isSafeInteger(cents)) throw new RangeError("amount is too large");
     return fromCents(cents);
+  }
+
+  function validateVersionName(value) {
+    const name = String(value == null ? "" : value).trim();
+    if (!name || name.length > 80 || /[\u0000-\u001f\u007f]/.test(name)) {
+      throw new RangeError("Version name must be 1 to 80 characters without control characters");
+    }
+    return name;
+  }
+
+  function resolveCpfRefundAmount(options) {
+    if (!options || typeof options !== "object" || Array.isArray(options)) {
+      throw new TypeError("CPF refund resolution options are required");
+    }
+    const exact = options.exactRefund == null
+      ? null
+      : fromCents(toCents(options.exactRefund, "exactRefund"));
+    const estimate = roundMoney(nonNegative(
+      options.estimatedRefund || 0,
+      "estimatedRefund"
+    ));
+    const lastReliable = options.lastReliableAutoRefund == null
+      ? null
+      : fromCents(toCents(options.lastReliableAutoRefund, "lastReliableAutoRefund"));
+    if (exact != null) {
+      return {
+        mode: "exact",
+        activeRefund: exact,
+        lastReliableAutoRefund: lastReliable,
+        automaticReliable: Boolean(options.automaticReliable),
+      };
+    }
+    if (options.automaticReliable) {
+      return {
+        mode: "auto",
+        activeRefund: estimate,
+        lastReliableAutoRefund: estimate,
+        automaticReliable: true,
+      };
+    }
+    return {
+      mode: "auto",
+      activeRefund: lastReliable == null ? 0 : lastReliable,
+      lastReliableAutoRefund: lastReliable,
+      automaticReliable: false,
+    };
+  }
+
+  function createDraftExport(draft, name, exportedAt) {
+    if (!draft || typeof draft !== "object" || Array.isArray(draft)) {
+      throw new TypeError("A valid draft is required for export");
+    }
+    const timestamp = exportedAt == null ? new Date().toISOString() : String(exportedAt);
+    if (!Number.isFinite(Date.parse(timestamp))) {
+      throw new RangeError("Export timestamp is invalid");
+    }
+    return {
+      format: EXPORT_FORMAT,
+      formatVersion: EXPORT_FORMAT_VERSION,
+      exportedAt: timestamp,
+      calculatorVersion: CALCULATOR_VERSION,
+      kind: "draft",
+      name: validateVersionName(name),
+      draft,
+    };
+  }
+
+  function parseDraftExport(raw) {
+    if (typeof raw !== "string" || !raw || raw.length > MAX_IMPORT_BYTES) {
+      throw new RangeError("Import file is empty or too large");
+    }
+    const envelope = JSON.parse(raw);
+    if (!envelope || typeof envelope !== "object" || Array.isArray(envelope)) {
+      throw new TypeError("Import file must contain one planner draft object");
+    }
+    const allowed = new Set([
+      "format", "formatVersion", "exportedAt", "calculatorVersion", "kind", "name", "draft",
+    ]);
+    if (Object.keys(envelope).some(key => !allowed.has(key))) {
+      throw new RangeError("Import file contains unsupported fields");
+    }
+    if (envelope.format !== EXPORT_FORMAT || envelope.kind !== "draft") {
+      throw new RangeError("This file is not a condo timeline planner draft");
+    }
+    if (envelope.formatVersion !== EXPORT_FORMAT_VERSION) {
+      throw new RangeError("This planner cannot import that draft format version");
+    }
+    if (!Number.isFinite(Date.parse(String(envelope.exportedAt || "")))) {
+      throw new RangeError("Import timestamp is invalid");
+    }
+    if (typeof envelope.calculatorVersion !== "string"
+        || envelope.calculatorVersion.length > 40) {
+      throw new RangeError("Import calculator version is invalid");
+    }
+    validateVersionName(envelope.name);
+    if (!envelope.draft || typeof envelope.draft !== "object" || Array.isArray(envelope.draft)) {
+      throw new TypeError("Import file does not contain a valid draft");
+    }
+    return envelope;
   }
 
   function normalizeShare(value, name) {
@@ -620,9 +730,7 @@
 
     let primaryCpfWeight = 1;
     let partnerCpfWeight = 0;
-    let cpfAllocationKnown = !(
-      Boolean(options.suppressCpfAllocation) && activeCpfRequired > EPSILON
-    );
+    let cpfAllocationKnown = !Boolean(options.suppressCpfAllocation);
     let cpfAllocationBasis = partnerEnabled ? "none-required" : "single-owner";
     if (!cpfAllocationKnown) {
       cpfAllocationBasis = "unavailable";
@@ -840,9 +948,8 @@
     let coupleDialogDraft = null;
     let coupleDialogDraftActive = false;
     let dialogRequiresEnableConfirmation = false;
-    let latestCpfEstimate = null;
-    let cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
-    let applyingCpfEstimate = false;
+    const reliableAutoCpfByContext = new Map();
+    let versionDatabasePromise = null;
     const precise = new Intl.NumberFormat("en-SG", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -887,6 +994,197 @@
       }
     }
 
+    function versionStatus(message) {
+      const output = byId("version-manager-status");
+      if (output) output.textContent = message;
+    }
+
+    function openVersionDatabase() {
+      if (versionDatabasePromise) return versionDatabasePromise;
+      versionDatabasePromise = new Promise((resolve, reject) => {
+        if (!view.indexedDB) {
+          reject(new Error("IndexedDB is unavailable"));
+          return;
+        }
+        const request = view.indexedDB.open(VERSION_DATABASE, VERSION_DATABASE_VERSION);
+        request.onupgradeneeded = () => {
+          const database = request.result;
+          if (!database.objectStoreNames.contains(VERSION_STORE)) {
+            const store = database.createObjectStore(VERSION_STORE, { keyPath: "id" });
+            store.createIndex("createdAt", "createdAt", { unique: false });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Cannot open plan versions"));
+        request.onblocked = () => reject(new Error("Plan version storage is blocked"));
+      }).catch(error => {
+        versionDatabasePromise = null;
+        throw error;
+      });
+      return versionDatabasePromise;
+    }
+
+    async function versionStoreRequest(mode, method, argument) {
+      const database = await openVersionDatabase();
+      return new Promise((resolve, reject) => {
+        const transaction = database.transaction(VERSION_STORE, mode);
+        const store = transaction.objectStore(VERSION_STORE);
+        const request = argument === undefined
+          ? store[method]()
+          : store[method](argument);
+        let result;
+        request.onsuccess = () => { result = request.result; };
+        request.onerror = () => reject(request.error || new Error("Plan version operation failed"));
+        transaction.oncomplete = () => resolve(result);
+        transaction.onabort = () => reject(transaction.error || new Error("Plan version operation was cancelled"));
+        transaction.onerror = () => reject(transaction.error || new Error("Plan version operation failed"));
+      });
+    }
+
+    function versionId() {
+      if (view.crypto && typeof view.crypto.randomUUID === "function") {
+        return view.crypto.randomUUID();
+      }
+      return `plan-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+    }
+
+    function validateVersionRecord(source, { validateDraft = false } = {}) {
+      if (!source || typeof source !== "object" || Array.isArray(source)) {
+        throw new TypeError("Saved plan version is invalid");
+      }
+      const allowed = new Set([
+        "recordSchemaVersion", "id", "name", "createdAt", "updatedAt", "source",
+        "calculatorVersion", "sourceCalculatorVersion", "draft",
+      ]);
+      if (Object.keys(source).some(key => !allowed.has(key))) {
+        throw new RangeError("Saved plan version contains unsupported fields");
+      }
+      if (source.recordSchemaVersion !== VERSION_RECORD_SCHEMA) {
+        throw new RangeError("Saved plan version format is unsupported");
+      }
+      if (typeof source.id !== "string" || !source.id || source.id.length > 120) {
+        throw new RangeError("Saved plan version identifier is invalid");
+      }
+      const name = validateVersionName(source.name);
+      const createdAt = String(source.createdAt || "");
+      const updatedAt = String(source.updatedAt || "");
+      if (!Number.isFinite(Date.parse(createdAt)) || !Number.isFinite(Date.parse(updatedAt))) {
+        throw new RangeError("Saved plan version timestamp is invalid");
+      }
+      if (!["user", "import", "recovery"].includes(source.source)) {
+        throw new RangeError("Saved plan version source is invalid");
+      }
+      if (typeof source.calculatorVersion !== "string"
+          || source.calculatorVersion.length > 40) {
+        throw new RangeError("Saved plan calculator version is invalid");
+      }
+      const sourceCalculatorVersion = source.sourceCalculatorVersion == null
+        ? source.calculatorVersion
+        : source.sourceCalculatorVersion;
+      if (typeof sourceCalculatorVersion !== "string"
+          || sourceCalculatorVersion.length > 40) {
+        throw new RangeError("Saved plan source calculator version is invalid");
+      }
+      if (!source.draft || typeof source.draft !== "object" || Array.isArray(source.draft)) {
+        throw new TypeError("Saved plan version draft is invalid");
+      }
+      if (validateDraft) prepareSavedDraft(source.draft);
+      return { ...source, name, createdAt, updatedAt, sourceCalculatorVersion };
+    }
+
+    async function saveVersionSnapshot(
+      name,
+      draft,
+      source = "user",
+      sourceCalculatorVersion = CALCULATOR_VERSION
+    ) {
+      const checkedName = validateVersionName(name);
+      const serialized = JSON.stringify(draft);
+      if (serialized.length > MAX_DRAFT_CHARACTERS) {
+        throw new RangeError("This draft is too large to save as a version");
+      }
+      prepareSavedDraft(draft);
+      const timestamp = new Date().toISOString();
+      const record = {
+        recordSchemaVersion: VERSION_RECORD_SCHEMA,
+        id: versionId(),
+        name: checkedName,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        source,
+        calculatorVersion: CALCULATOR_VERSION,
+        sourceCalculatorVersion,
+        draft,
+      };
+      validateVersionRecord(record, { validateDraft: true });
+      await versionStoreRequest("readwrite", "add", record);
+      return record;
+    }
+
+    function versionDateLabel(value) {
+      return new Intl.DateTimeFormat("en-SG", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value));
+    }
+
+    async function refreshVersionManager(selectedId) {
+      const select = byId("saved-version-select");
+      const previous = selectedId || select.value;
+      try {
+        const records = [];
+        let invalidCount = 0;
+        (await versionStoreRequest("readonly", "getAll")).forEach(record => {
+          try {
+            records.push(validateVersionRecord(record));
+          } catch {
+            invalidCount += 1;
+          }
+        });
+        records.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+        select.replaceChildren();
+        if (!records.length) {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "No saved versions yet";
+          select.append(option);
+        } else {
+          records.forEach(record => {
+            const option = document.createElement("option");
+            option.value = record.id;
+            const sourceVersion = record.sourceCalculatorVersion !== CALCULATOR_VERSION
+              ? ` · source ${record.sourceCalculatorVersion}`
+              : "";
+            option.textContent = `${record.source === "recovery" ? "Recovery · " : ""}${record.name} · ${versionDateLabel(record.createdAt)}${sourceVersion}`;
+            select.append(option);
+          });
+          select.value = records.some(record => record.id === previous)
+            ? previous
+            : records[0].id;
+        }
+        const hasSelection = Boolean(select.value);
+        byId("load-plan-version").disabled = !hasSelection;
+        byId("delete-plan-version").disabled = !hasSelection;
+        const planCount = records.filter(record => record.source !== "recovery").length;
+        const recoveryCount = records.length - planCount;
+        versionStatus(records.length
+          ? `${planCount} saved plan version${planCount === 1 ? "" : "s"}${recoveryCount ? ` · ${recoveryCount} recovery cop${recoveryCount === 1 ? "y" : "ies"}` : ""} in this browser.${invalidCount ? ` ${invalidCount} unreadable record${invalidCount === 1 ? " was" : "s were"} ignored.` : ""}`
+          : `No named versions yet. Your working draft still saves automatically.${invalidCount ? ` ${invalidCount} unreadable record${invalidCount === 1 ? " was" : "s were"} ignored.` : ""}`);
+        return records;
+      } catch {
+        select.replaceChildren();
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Named versions unavailable";
+        select.append(option);
+        byId("save-plan-version").disabled = true;
+        byId("load-plan-version").disabled = true;
+        byId("delete-plan-version").disabled = true;
+        versionStatus("Named versions are unavailable in this browser. Export and import still work.");
+        return [];
+      }
+    }
+
     function cpfEstimateSignature(projection, estimate) {
       return JSON.stringify({
         route: projection.route,
@@ -911,46 +1209,144 @@
       });
     }
 
-    function encodeCpfRefundProvenance() {
-      if (cpfRefundProvenance.source === "manual_exact") {
-        return { source: "manual_exact", estimateSignature: null };
+    function cpfAutoContext(projection, partnerEnabled) {
+      const key = `${projection.route}:${partnerEnabled ? "couple" : "single"}`;
+      if (!CPF_AUTO_CONTEXTS.includes(key)) {
+        throw new RangeError("CPF automatic-estimate context is invalid");
       }
-      if (
-        cpfRefundProvenance.source !== "applied_estimate"
-        || typeof cpfRefundProvenance.estimateSignature !== "string"
-        || !cpfRefundProvenance.estimateSignature
-      ) {
-        throw new TypeError("CPF refund provenance is invalid");
-      }
+      return key;
+    }
+
+    function encodeCpfRefundState() {
+      const exactRefund = currency("cpf-refund-exact", true);
       return {
-        source: "applied_estimate",
-        estimateSignature: cpfRefundProvenance.estimateSignature,
+        mode: exactRefund == null ? "auto" : "exact",
+        exactCents: exactRefund == null ? null : toCents(exactRefund, "exact CPF refund"),
+        reliableAutoByContext: Object.fromEntries(
+          [...reliableAutoCpfByContext.entries()].map(([context, entry]) => [context, {
+            cents: entry.cents,
+            estimateSignature: entry.estimateSignature,
+          }])
+        ),
       };
     }
 
-    function decodeCpfRefundProvenance(source) {
-      if (source == null) {
-        // Older saved drafts cannot distinguish a manually entered household
-        // figure from an applied estimate, so preserve it as authoritative.
-        return { source: "manual_exact", estimateSignature: null };
-      }
+    function decodeCpfRefundState(source, exactRawValue) {
       if (!source || typeof source !== "object" || Array.isArray(source)) {
-        throw new TypeError("Saved CPF refund provenance is invalid");
+        throw new TypeError("Saved CPF refund state is invalid");
       }
-      if (source.source === "manual_exact") {
-        return { source: "manual_exact", estimateSignature: null };
+      const allowed = new Set([
+        "mode", "exactCents", "reliableAutoByContext",
+      ]);
+      if (Object.keys(source).some(key => !allowed.has(key))) {
+        throw new RangeError("Saved CPF refund state contains an unknown field");
       }
-      if (
-        source.source !== "applied_estimate"
-        || typeof source.estimateSignature !== "string"
-        || !source.estimateSignature
-        || source.estimateSignature.length > 5000
-      ) {
-        throw new RangeError("Saved CPF estimate signature is invalid");
+      if (!["auto", "exact"].includes(source.mode)) {
+        throw new RangeError("Saved CPF refund mode is invalid");
+      }
+      const exactCents = source.exactCents == null ? null : Number(source.exactCents);
+      if (exactCents != null && (!Number.isSafeInteger(exactCents) || exactCents < 0)) {
+        throw new RangeError("Saved CPF refund amount is invalid");
+      }
+      if (!source.reliableAutoByContext
+          || typeof source.reliableAutoByContext !== "object"
+          || Array.isArray(source.reliableAutoByContext)
+          || Object.keys(source.reliableAutoByContext).some(
+            context => !CPF_AUTO_CONTEXTS.includes(context)
+          )) {
+        throw new RangeError("Saved automatic CPF contexts are invalid");
+      }
+      const reliableAutoByContext = new Map();
+      Object.entries(source.reliableAutoByContext).forEach(([context, entry]) => {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)
+            || Object.keys(entry).some(key => !["cents", "estimateSignature"].includes(key))
+            || !Number.isSafeInteger(Number(entry.cents))
+            || Number(entry.cents) < 0
+            || typeof entry.estimateSignature !== "string"
+            || !entry.estimateSignature
+            || entry.estimateSignature.length > 5000) {
+          throw new RangeError("Saved automatic CPF estimate is invalid");
+        }
+        reliableAutoByContext.set(context, {
+          cents: Number(entry.cents),
+          estimateSignature: entry.estimateSignature,
+        });
+      });
+      const exactValue = planner.parseCurrency(exactRawValue, { allowBlank: true });
+      if (source.mode === "auto") {
+        if (exactValue != null || exactCents != null) {
+          throw new RangeError("Automatic CPF mode cannot contain an exact override");
+        }
+      } else if (exactValue == null || exactCents !== toCents(exactValue, "exact CPF refund")) {
+        throw new RangeError("Saved exact CPF refund does not match its form value");
       }
       return {
-        source: "applied_estimate",
-        estimateSignature: source.estimateSignature,
+        mode: source.mode,
+        exactCents,
+        reliableAutoByContext,
+      };
+    }
+
+    function normalizeSavedDraft(source) {
+      if (!source || typeof source !== "object" || Array.isArray(source)) {
+        throw new TypeError("Saved draft is invalid");
+      }
+      if (source.schemaVersion === STORAGE_VERSION) return source;
+      if (source.schemaVersion !== 1) {
+        throw new RangeError("Saved draft version is unsupported");
+      }
+      const allowedLegacy = new Set([
+        "schemaVersion", "savedAt", "form", "coupleFunding", "coupleDialogDraft",
+        "cpfRefundProvenance", "ledgers",
+      ]);
+      if (Object.keys(source).some(key => !allowedLegacy.has(key))) {
+        throw new RangeError("Legacy draft contains an unknown section");
+      }
+      if (!source.form || typeof source.form !== "object"
+          || !source.form.values || typeof source.form.values !== "object") {
+        throw new TypeError("Saved form is missing");
+      }
+      const values = { ...source.form.values };
+      const oldRaw = typeof values["cpf-refund"] === "string" ? values["cpf-refund"] : "0";
+      const oldRefund = planner.parseCurrency(oldRaw, { allowBlank: false });
+      const provenance = source.cpfRefundProvenance;
+      if (provenance != null && (
+        !provenance
+        || typeof provenance !== "object"
+        || Array.isArray(provenance)
+        || Object.keys(provenance).some(key => !["source", "estimateSignature"].includes(key))
+        || !["manual_exact", "applied_estimate"].includes(provenance.source)
+      )) {
+        throw new RangeError("Legacy CPF refund provenance is invalid");
+      }
+      const wasAppliedEstimate = provenance && provenance.source === "applied_estimate";
+      const exactOverride = !wasAppliedEstimate && oldRefund > 0 ? oldRaw : "";
+      const legacyChecks = source.form.checks || {};
+      const legacyRoute = legacyChecks["route-resale"] ? "resale" : "buc";
+      const legacyContext = `${legacyRoute}:${legacyChecks["partner-enabled"] ? "couple" : "single"}`;
+      const reliableAutoByContext = wasAppliedEstimate ? {
+        [legacyContext]: {
+          cents: toCents(oldRefund, "legacy automatic CPF refund"),
+          estimateSignature: typeof provenance.estimateSignature === "string"
+            && provenance.estimateSignature
+            ? provenance.estimateSignature
+            : "legacy-applied-estimate",
+        },
+      } : {};
+      delete values["cpf-refund"];
+      values["cpf-refund-exact"] = exactOverride;
+      return {
+        schemaVersion: STORAGE_VERSION,
+        savedAt: source.savedAt,
+        form: { values, checks: source.form.checks || {} },
+        coupleFunding: source.coupleFunding,
+        coupleDialogDraft: source.coupleDialogDraft,
+        cpfRefundState: {
+          mode: exactOverride ? "exact" : "auto",
+          exactCents: exactOverride ? toCents(oldRefund, "legacy exact CPF refund") : null,
+          reliableAutoByContext,
+        },
+        ledgers: source.ledgers || {},
       };
     }
 
@@ -978,6 +1374,13 @@
 
     function decodeLedgerRow(source, seenKeys) {
       if (!source || typeof source !== "object") throw new TypeError("Saved row is invalid");
+      const allowed = new Set([
+        "key", "sequence", "date", "action", "category", "paymentAmountCents",
+        "allocationCents",
+      ]);
+      if (Object.keys(source).some(key => !allowed.has(key))) {
+        throw new RangeError("Saved row contains an unknown field");
+      }
       const key = String(source.key || "");
       const sequence = Number(source.sequence);
       const date = String(source.date || "");
@@ -994,6 +1397,9 @@
       if (action.length > 300) throw new RangeError("Saved row action is too long");
       if (!source.allocationCents || typeof source.allocationCents !== "object") {
         throw new TypeError("Saved row allocations are invalid");
+      }
+      if (Object.keys(source.allocationCents).some(field => !ALLOCATION_FIELDS.includes(field))) {
+        throw new RangeError("Saved row allocations contain an unknown field");
       }
       const paymentAmountCents = Number(source.paymentAmountCents);
       if (!Number.isSafeInteger(paymentAmountCents) || paymentAmountCents < 0) {
@@ -1036,9 +1442,15 @@
       if (!source || typeof source !== "object" || typeof source.complete !== "boolean") {
         throw new TypeError("Saved couple funding setup is invalid");
       }
+      if (Object.keys(source).some(key => !["complete", "borrower", "amountCents"].includes(key))) {
+        throw new RangeError("Saved couple funding setup contains an unknown field");
+      }
       if (!source.complete) return { complete: false, plan: null };
       if (!source.amountCents || typeof source.amountCents !== "object") {
         throw new TypeError("Saved couple funding amounts are invalid");
+      }
+      if (Object.keys(source.amountCents).some(field => !OWNER_FUNDING_FIELDS.includes(field))) {
+        throw new RangeError("Saved couple funding amounts contain an unknown field");
       }
       const plan = { borrower: source.borrower };
       OWNER_FUNDING_FIELDS.forEach(field => {
@@ -1064,6 +1476,9 @@
       if (source == null) return null;
       if (!source || typeof source !== "object" || Array.isArray(source)) {
         throw new TypeError("Saved couple setup draft is invalid");
+      }
+      if (Object.keys(source).some(key => !["borrower", "open", "values"].includes(key))) {
+        throw new RangeError("Saved couple setup draft contains an unknown field");
       }
       if (!FUNDING_PLAN_BORROWERS.includes(source.borrower)) {
         throw new RangeError("Saved couple setup borrower is invalid");
@@ -1115,7 +1530,7 @@
         form: { values, checks },
         coupleFunding: encodeCoupleFunding(),
         coupleDialogDraft: encodeCoupleDialogDraft(),
-        cpfRefundProvenance: encodeCpfRefundProvenance(),
+        cpfRefundState: encodeCpfRefundState(),
         ledgers: savedLedgers,
       };
     }
@@ -1130,9 +1545,13 @@
         return false;
       }
       try {
-        storage.setItem(STORAGE_KEY, JSON.stringify(captureDraft()));
+        const serialized = JSON.stringify(captureDraft());
+        if (serialized.length > MAX_DRAFT_CHARACTERS) {
+          throw new RangeError("Draft is too large for automatic saving");
+        }
+        storage.setItem(STORAGE_KEY, serialized);
         pendingDraftSave = false;
-        draftStatus("Saved automatically in this browser. Reset clears the saved draft.");
+        draftStatus("Saved automatically as the working draft. Reset clears only it; named versions stay.");
         return true;
       } catch (error) {
         if (error instanceof RangeError || error instanceof TypeError) {
@@ -1161,16 +1580,100 @@
       if (storage) {
         try {
           storage.removeItem(STORAGE_KEY);
+          storage.removeItem(LEGACY_STORAGE_KEY);
         } catch {
           // Reset still clears in-memory state when browser storage is unavailable.
         }
       }
-      draftStatus("Saved draft cleared. New edits will be saved automatically.");
+      draftStatus("Working draft cleared. Named versions were kept; new edits will save automatically.");
     }
 
-    function restoreDraft() {
-      const storage = localStorageAccess();
-      if (!storage) return false;
+    function prepareSavedDraft(source) {
+      const saved = normalizeSavedDraft(source);
+      const allowedTopLevel = new Set([
+        "schemaVersion", "savedAt", "form", "coupleFunding", "coupleDialogDraft",
+        "cpfRefundState", "ledgers",
+      ]);
+      if (Object.keys(saved).some(key => !allowedTopLevel.has(key))) {
+        throw new RangeError("Saved draft contains an unknown section");
+      }
+      if (!saved.savedAt || !Number.isFinite(Date.parse(String(saved.savedAt)))) {
+        throw new RangeError("Saved draft timestamp is invalid");
+      }
+      if (!saved.form || typeof saved.form !== "object" || Array.isArray(saved.form)) {
+        throw new TypeError("Saved form is missing");
+      }
+      if (Object.keys(saved.form).some(key => !["values", "checks"].includes(key))) {
+        throw new RangeError("Saved form contains an unknown section");
+      }
+      const values = saved.form.values || {};
+      const checks = saved.form.checks || {};
+      if (Object.keys(values).some(id => !FORM_VALUE_IDS.includes(id))) {
+        throw new RangeError("Saved form contains an unknown field");
+      }
+      if (Object.keys(checks).some(id => !FORM_CHECK_IDS.includes(id))) {
+        throw new RangeError("Saved form contains an unknown control");
+      }
+      FORM_VALUE_IDS.forEach(id => {
+        if (typeof values[id] !== "string" || values[id].length > 1000) {
+          throw new RangeError(`Saved ${id} value is invalid`);
+        }
+      });
+      FORM_CHECK_IDS.forEach(id => {
+        if (typeof checks[id] !== "boolean") {
+          throw new RangeError(`Saved ${id} state is invalid`);
+        }
+      });
+
+      const restoredCoupleFunding = decodeCoupleFunding(saved.coupleFunding);
+      const restoredCoupleDialogDraft = validateCoupleDialogDraft(
+        saved.coupleDialogDraft == null ? null : saved.coupleDialogDraft
+      );
+      const restoredCpfRefundState = decodeCpfRefundState(
+        saved.cpfRefundState,
+        values["cpf-refund-exact"]
+      );
+      const restoredLedgers = new Map();
+      const savedLedgers = saved.ledgers || {};
+      if (!savedLedgers || typeof savedLedgers !== "object" || Array.isArray(savedLedgers)) {
+        throw new TypeError("Saved ledgers are invalid");
+      }
+      if (Object.keys(savedLedgers).some(route => !["buc", "resale"].includes(route))) {
+        throw new RangeError("Saved draft contains an unknown property route");
+      }
+      Object.entries(savedLedgers).forEach(([route, state]) => {
+        if (!state || typeof state !== "object" || !Array.isArray(state.rows)) {
+          throw new TypeError("Saved ledger is invalid");
+        }
+        if (Object.keys(state).some(key => !["signature", "dirty", "rows"].includes(key))) {
+          throw new RangeError("Saved ledger contains an unknown field");
+        }
+        if (state.rows.length > 250 || typeof state.signature !== "string"
+          || state.signature.length > 20000 || typeof state.dirty !== "boolean") {
+          throw new RangeError("Saved ledger exceeds its limits");
+        }
+        const seenKeys = new Set();
+        const rows = state.rows.map(row => decodeLedgerRow(row, seenKeys));
+        restoredLedgers.set(route, {
+          rows,
+          signature: state.signature,
+          dirty: state.dirty,
+          stale: false,
+        });
+      });
+      return {
+        saved,
+        values,
+        checks,
+        restoredCoupleFunding,
+        restoredCoupleDialogDraft,
+        restoredCpfRefundState,
+        restoredLedgers,
+      };
+    }
+
+    function validateDraftBeforeActivation(source) {
+      const prepared = prepareSavedDraft(source);
       const snapshots = {};
       [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
         const input = byId(id);
@@ -1179,82 +1682,64 @@
           : input.value;
       });
       try {
-        const raw = storage.getItem(STORAGE_KEY);
-        if (!raw) return false;
-        if (raw.length > 250000) throw new RangeError("Saved draft is too large");
-        const saved = JSON.parse(raw);
-        if (!saved || saved.schemaVersion !== STORAGE_VERSION) {
-          throw new RangeError("Saved draft version is unsupported");
+        FORM_VALUE_IDS.forEach(id => { byId(id).value = prepared.values[id]; });
+        FORM_CHECK_IDS.forEach(id => { byId(id).checked = prepared.checks[id]; });
+        if (byId("route-buc").checked === byId("route-resale").checked) {
+          throw new RangeError("Saved property route is invalid");
         }
-        if (!saved.form || typeof saved.form !== "object") {
-          throw new TypeError("Saved form is missing");
-        }
-        const values = saved.form.values || {};
-        const checks = saved.form.checks || {};
-        if (Object.keys(values).some(id => !FORM_VALUE_IDS.includes(id))) {
-          throw new RangeError("Saved form contains an unknown field");
-        }
-        if (Object.keys(checks).some(id => !FORM_CHECK_IDS.includes(id))) {
-          throw new RangeError("Saved form contains an unknown control");
-        }
-        FORM_VALUE_IDS.forEach(id => {
-          if (!(id in values)) return;
-          if (typeof values[id] !== "string" || values[id].length > 1000) {
-            throw new RangeError(`Saved ${id} value is invalid`);
+        validateCurrentDraftInputs();
+        return prepared;
+      } finally {
+        [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
+          const input = byId(id);
+          if (input.type === "checkbox" || input.type === "radio") {
+            input.checked = snapshots[id];
+          } else {
+            input.value = snapshots[id];
           }
-          byId(id).value = values[id];
+        });
+      }
+    }
+
+    function applySavedDraft(source) {
+      const prepared = prepareSavedDraft(source);
+      const snapshots = {};
+      [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
+        const input = byId(id);
+        snapshots[id] = input.type === "checkbox" || input.type === "radio"
+          ? input.checked
+          : input.value;
+      });
+      try {
+        FORM_VALUE_IDS.forEach(id => {
+          byId(id).value = prepared.values[id];
         });
         FORM_CHECK_IDS.forEach(id => {
-          if (!(id in checks)) return;
-          if (typeof checks[id] !== "boolean") {
-            throw new RangeError(`Saved ${id} state is invalid`);
-          }
-          byId(id).checked = checks[id];
+          byId(id).checked = prepared.checks[id];
         });
         if (byId("route-buc").checked === byId("route-resale").checked) {
           throw new RangeError("Saved property route is invalid");
         }
         validateCurrentDraftInputs();
-
-        const restoredCoupleFunding = decodeCoupleFunding(saved.coupleFunding);
-        const restoredCoupleDialogDraft = validateCoupleDialogDraft(
-          saved.coupleDialogDraft == null ? null : saved.coupleDialogDraft
-        );
-        const restoredCpfRefundProvenance = decodeCpfRefundProvenance(
-          saved.cpfRefundProvenance
-        );
-        const restoredLedgers = new Map();
-        const savedLedgers = saved.ledgers || {};
-        if (!savedLedgers || typeof savedLedgers !== "object") {
-          throw new TypeError("Saved ledgers are invalid");
-        }
-        if (Object.keys(savedLedgers).some(route => !["buc", "resale"].includes(route))) {
-          throw new RangeError("Saved draft contains an unknown property route");
-        }
-        Object.entries(savedLedgers).forEach(([route, state]) => {
-          if (!state || typeof state !== "object" || !Array.isArray(state.rows)) {
-            throw new TypeError("Saved ledger is invalid");
-          }
-          if (state.rows.length > 250 || typeof state.signature !== "string"
-            || state.signature.length > 20000 || typeof state.dirty !== "boolean") {
-            throw new RangeError("Saved ledger exceeds its limits");
-          }
-          const seenKeys = new Set();
-          const rows = state.rows.map(row => decodeLedgerRow(row, seenKeys));
-          restoredLedgers.set(route, {
-            rows,
-            signature: state.signature,
-            dirty: state.dirty,
-            stale: false,
-          });
-        });
         ledgers.clear();
-        restoredLedgers.forEach((state, route) => { ledgers.set(route, state); });
-        coupleSetupComplete = restoredCoupleFunding.complete;
-        coupleFundingPlan = restoredCoupleFunding.plan;
-        coupleDialogDraft = restoredCoupleDialogDraft;
-        coupleDialogDraftActive = Boolean(restoredCoupleDialogDraft);
-        cpfRefundProvenance = restoredCpfRefundProvenance;
+        prepared.restoredLedgers.forEach((state, route) => { ledgers.set(route, state); });
+        coupleSetupComplete = prepared.restoredCoupleFunding.complete;
+        coupleFundingPlan = prepared.restoredCoupleFunding.plan;
+        coupleDialogDraft = prepared.restoredCoupleDialogDraft;
+        coupleDialogDraftActive = Boolean(prepared.restoredCoupleDialogDraft);
+        reliableAutoCpfByContext.clear();
+        prepared.restoredCpfRefundState.reliableAutoByContext.forEach((entry, context) => {
+          reliableAutoCpfByContext.set(context, entry);
+        });
+        const restoredContext = cpfAutoContext(
+          { route: routeValue() },
+          enabledInput.checked
+        );
+        const restoredAuto = reliableAutoCpfByContext.get(restoredContext);
+        const effectiveCents = prepared.restoredCpfRefundState.mode === "exact"
+          ? prepared.restoredCpfRefundState.exactCents
+          : restoredAuto?.cents;
+        byId("cpf-refund").value = moneyInput(fromCents(effectiveCents || 0));
         customCounter = 0;
         ledgers.forEach(state => {
           state.rows.forEach(row => {
@@ -1262,29 +1747,140 @@
             if (match) customCounter = Math.max(customCounter, Number(match[1]));
           });
         });
-        draftStatus("Restored your last saved draft from this browser.");
-        return true;
-      } catch {
+        return prepared.saved;
+      } catch (error) {
         [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
           const input = byId(id);
           if (input.type === "checkbox" || input.type === "radio") input.checked = snapshots[id];
           else input.value = snapshots[id];
         });
-        ledgers.clear();
-        coupleSetupComplete = false;
-        coupleFundingPlan = null;
-        coupleDialogDraft = null;
-        coupleDialogDraftActive = false;
-        cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
-        customCounter = 0;
-        try {
-          storage.removeItem(STORAGE_KEY);
-        } catch {
-          // Ignore storage cleanup failures and continue with safe HTML defaults.
-        }
-        draftStatus("The saved draft was invalid and was cleared; defaults were restored.");
-        return false;
+        throw error;
       }
+    }
+
+    function restoreDraft() {
+      const storage = localStorageAccess();
+      if (!storage) return false;
+      let invalidDraftFound = false;
+      for (const key of [STORAGE_KEY, LEGACY_STORAGE_KEY]) {
+        try {
+          const raw = storage.getItem(key);
+          if (!raw) continue;
+          if (raw.length > MAX_DRAFT_CHARACTERS) {
+            throw new RangeError("Saved draft is too large");
+          }
+          applySavedDraft(JSON.parse(raw));
+          if (key === LEGACY_STORAGE_KEY) {
+            try {
+              const migrated = JSON.stringify(captureDraft());
+              if (migrated.length <= MAX_DRAFT_CHARACTERS) {
+                storage.setItem(STORAGE_KEY, migrated);
+              }
+            } catch {
+              // Keep the untouched legacy copy; the in-memory plan is still usable.
+            }
+            draftStatus("Restored and migrated your earlier browser draft.");
+          } else {
+            draftStatus("Restored your last saved draft from this browser.");
+          }
+          return true;
+        } catch {
+          invalidDraftFound = true;
+          if (key === STORAGE_KEY) {
+            try {
+              storage.removeItem(STORAGE_KEY);
+            } catch {
+              // A corrupt current draft must not prevent a legacy fallback attempt.
+            }
+          }
+        }
+      }
+      ledgers.clear();
+      coupleSetupComplete = false;
+      coupleFundingPlan = null;
+      coupleDialogDraft = null;
+      coupleDialogDraftActive = false;
+      reliableAutoCpfByContext.clear();
+      byId("cpf-refund").value = "0";
+      customCounter = 0;
+      if (invalidDraftFound) {
+        draftStatus("A saved draft could not be read; defaults were restored and any legacy copy was preserved.");
+      }
+      return false;
+    }
+
+    function activateDraft(source) {
+      const saved = applySavedDraft(source);
+      const dialog = byId("couple-funding-dialog");
+      if (dialog.open && typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+      dialogRequiresEnableConfirmation = false;
+      const route = form.querySelector("input[name='property-route']:checked");
+      route.dispatchEvent(new view.Event("change", { bubbles: true }));
+      render();
+      suppressSaveUntilUserEdit = false;
+      const persisted = saveDraft();
+      if (enabledInput.checked && (
+        !coupleSetupComplete || (coupleDialogDraftActive && coupleDialogDraft?.open)
+      )) {
+        openCoupleFundingDialog({ confirmEnable: !coupleSetupComplete });
+      }
+      return { saved, persisted };
+    }
+
+    async function saveRecoverySnapshot(label) {
+      try {
+        const suffix = validateVersionName(label).slice(0, 58);
+        const record = await saveVersionSnapshot(
+          `Before ${suffix}`.slice(0, 80),
+          captureDraft(),
+          "recovery"
+        );
+        try {
+          const recoveries = (await versionStoreRequest("readonly", "getAll"))
+            .filter(candidate => candidate && candidate.source === "recovery")
+            .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+          for (const stale of recoveries.slice(5)) {
+            await versionStoreRequest("readwrite", "delete", stale.id);
+          }
+        } catch {
+          // Retention cleanup is best-effort; the newly committed recovery remains valid.
+        }
+        return record;
+      } catch {
+        return null;
+      }
+    }
+
+    function exportFileName(name) {
+      const stem = String(name || "condo-plan")
+        .normalize("NFKD")
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 60)
+        .toLowerCase();
+      return `${stem || "condo-plan"}.json`;
+    }
+
+    function downloadCurrentDraft() {
+      const fallbackName = byId("project-name").value.trim() || "Condo plan";
+      const name = validateVersionName(byId("version-name").value || fallbackName);
+      const envelope = createDraftExport(captureDraft(), name);
+      const serialized = JSON.stringify(envelope, null, 2);
+      if (serialized.length > MAX_IMPORT_BYTES) {
+        throw new RangeError("This draft is too large to export");
+      }
+      const blob = new view.Blob([serialized], { type: "application/json" });
+      const url = view.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = exportFileName(name);
+      link.hidden = true;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      view.setTimeout(() => view.URL.revokeObjectURL(url), 0);
+      versionStatus(`Exported “${name}”. Keep the JSON file private; it is not encrypted.`);
     }
 
     function collectProjection() {
@@ -1627,15 +2223,17 @@
       projection,
       cpfEstimate,
       cpfWeightsReliable,
-      cpfEstimateStale
+      cpfMode,
+      automaticRetained,
+      suppressCpfAllocation
     ) {
       const partnerEnabled = enabledInput.checked;
       const names = ownerNames();
       const outcome = buildOwnerSaleOutcome({
         projection,
         cpfEstimate,
-        cpfWeightsReliable: cpfWeightsReliable && !cpfEstimateStale,
-        suppressCpfAllocation: cpfEstimateStale,
+        cpfWeightsReliable,
+        suppressCpfAllocation,
         partnerEnabled,
         partnerOwnershipPct: partnerEnabled
           ? number("partner-ownership-share")
@@ -1709,24 +2307,18 @@
         : `${money(Math.abs(outcome.household.combinedValue))} deficit`;
       setSignedClass(householdCombined, outcome.household.combinedValue);
 
-      if (cpfEstimateStale) {
-        byId("owner-outcome-status").textContent = "The applied CPF estimate is out of date. The legal-share value remains visible, but each owner’s CPF and resulting cash are hidden until you re-apply the current estimate; household cash still reflects the previously applied amount.";
+      if (automaticRetained) {
+        byId("owner-outcome-status").textContent = "The household waterfall retains the last reliable automatic CPF estimate while the couple ledger needs reconciliation. Individual CPF and cash routing will refresh once that ledger is current.";
       } else if (!outcome.cpfAllocationKnown) {
         byId("owner-outcome-status").textContent = `The legal-share value is shown, but the ${money(outcome.household.cpfRequired)} household CPF refund and resulting owner cash cannot be split until the couple ledger is current, reconciled and provides an individual CPF basis.`;
-      } else if (
-        outcome.household.cpfRequired <= EPSILON
-        && cpfEstimate.household.refundRequired > EPSILON
-      ) {
-        byId("owner-outcome-status").textContent = `No CPF refund is currently applied to the sale waterfall. Apply the ${money(cpfEstimate.household.refundRequired)} estimate above, or enter the exact household amount, to include it in this owner outcome.`;
       } else if (partnerEnabled && outcome.household.cpfRequired > EPSILON) {
-        byId("owner-outcome-status").textContent = `Combined value is split ${oneDecimal.format(outcome.primary.share)}% / ${oneDecimal.format(outcome.partner.share)}% first. The active ${money(outcome.household.cpfRequired)} household CPF refund is then apportioned using each owner’s current estimated principal plus accrued-interest ratio and routed from that owner’s share.`;
+        byId("owner-outcome-status").textContent = `Combined value is split ${oneDecimal.format(outcome.primary.share)}% / ${oneDecimal.format(outcome.partner.share)}% first. The active ${money(outcome.household.cpfRequired)} ${cpfMode === "exact" ? "exact" : "automatic"} household CPF refund is then apportioned using each owner’s current estimated principal plus accrued-interest ratio and routed from that owner’s share.`;
       } else {
-        byId("owner-outcome-status").textContent = `The combined value is allocated by legal share first, then the active ${money(outcome.household.cpfRequired)} CPF refund is routed from the owner’s share. Household and owner totals reconcile to the current sale waterfall.`;
+        byId("owner-outcome-status").textContent = `The combined value is allocated by legal share first, then the active ${money(outcome.household.cpfRequired)} ${cpfMode === "exact" ? "exact" : "automatic"} CPF refund is routed from the owner’s share. Household and owner totals reconcile to the current sale waterfall.`;
       }
     }
 
     function renderCpfUnavailable(message) {
-      latestCpfEstimate = null;
       [
         "cpf-primary-principal", "cpf-primary-interest", "cpf-primary-refund",
         "cpf-primary-available", "cpf-partner-principal", "cpf-partner-interest",
@@ -1734,10 +2326,27 @@
         "cpf-household-interest", "cpf-estimated-refund", "cpf-estimated-available",
         "cpf-estimated-shortfall", "cpf-applied-refund", "cpf-applied-available",
       ].forEach(id => { byId(id).textContent = "—"; });
-      byId("apply-cpf-estimate").disabled = true;
-      byId("apply-cpf-estimate").textContent = "Apply estimate to projection";
+      byId("use-automatic-cpf").hidden = !byId("cpf-refund-exact").value.trim();
       byId("cpf-refund-status").textContent = message;
       renderOwnerOutcomeUnavailable(`Owner outcome unavailable: ${message}`);
+    }
+
+    function setEffectiveCpfRefund(value) {
+      const input = byId("cpf-refund");
+      const nextCents = toCents(roundMoney(value), "effective CPF refund");
+      let currentCents = -1;
+      try {
+        currentCents = toCents(planner.parseCurrency(input.value), "effective CPF refund");
+      } catch {
+        // Replace an invalid derived value with the newly resolved amount.
+      }
+      input.value = moneyInput(fromCents(nextCents));
+      if (currentCents !== nextCents) {
+        form.dispatchEvent(new view.CustomEvent("cpf-effective-change", {
+          detail: { cents: nextCents },
+        }));
+      }
+      return currentCents !== nextCents;
     }
 
     function renderCpfEstimate(
@@ -1769,19 +2378,47 @@
         partnerMonthlyCpf: currency("cpf-partner-monthly"),
         annualRatePct: number("cpf-oa-rate"),
       });
-      latestCpfEstimate = estimate;
       const currentEstimateSignature = cpfEstimateSignature(projection, estimate);
-      const cpfEstimateStale = cpfRefundProvenance.source === "applied_estimate"
-        && cpfRefundProvenance.estimateSignature !== currentEstimateSignature;
-      const availableTotal = Math.min(
-        estimate.household.refundRequired,
+      const exactRefund = currency("cpf-refund-exact", true);
+      const automaticReliable = !partnerEnabled || cpfWeightsReliable;
+      const automaticContext = cpfAutoContext(projection, partnerEnabled);
+      if (automaticReliable) {
+        reliableAutoCpfByContext.set(automaticContext, {
+          cents: toCents(
+            roundMoney(estimate.household.refundRequired),
+            "automatic CPF refund"
+          ),
+          estimateSignature: currentEstimateSignature,
+        });
+      }
+      const reliableAutomatic = reliableAutoCpfByContext.get(automaticContext);
+      const resolved = resolveCpfRefundAmount({
+        exactRefund,
+        estimatedRefund: estimate.household.refundRequired,
+        automaticReliable,
+        lastReliableAutoRefund: reliableAutomatic == null
+          ? null
+          : fromCents(reliableAutomatic.cents),
+      });
+      const automaticRetained = resolved.mode === "auto"
+        && !automaticReliable
+        && reliableAutomatic != null;
+      const effectiveChanged = setEffectiveCpfRefund(resolved.activeRefund);
+      if (effectiveChanged) projection = collectProjection();
+
+      const estimatedRequired = roundMoney(estimate.household.refundRequired);
+      const availableTotal = roundMoney(Math.min(
+        estimatedRequired,
         projection.base.cpfRefundProceedsBase
-      );
-      const shortfall = Math.max(0, estimate.household.refundRequired - availableTotal);
-      const primaryAvailable = estimate.household.refundRequired > EPSILON
-        ? availableTotal * estimate.primary.refundRequired / estimate.household.refundRequired
-        : 0;
-      const partnerAvailable = availableTotal - primaryAvailable;
+      ));
+      const shortfall = roundMoney(Math.max(0, estimatedRequired - availableTotal));
+      const ownerAvailable = splitNonNegativeByWeights(
+        availableTotal,
+        estimate.primary.refundRequired,
+        estimate.partner.refundRequired
+      ) || { primary: 0, partner: 0 };
+      const primaryAvailable = ownerAvailable.primary;
+      const partnerAvailable = ownerAvailable.partner;
 
       byId("cpf-primary-name").textContent = names.primary;
       byId("cpf-partner-name").textContent = names.partner;
@@ -1795,17 +2432,13 @@
       byId("cpf-partner-available").textContent = money(partnerAvailable);
       byId("cpf-household-principal").textContent = money(estimate.household.principal);
       byId("cpf-household-interest").textContent = money(estimate.household.accruedInterest);
-      byId("cpf-estimated-refund").textContent = money(estimate.household.refundRequired);
+      byId("cpf-estimated-refund").textContent = money(estimatedRequired);
       byId("cpf-estimated-available").textContent = money(availableTotal);
       byId("cpf-estimated-shortfall").textContent = money(shortfall);
       setSignedClass(byId("cpf-estimated-shortfall"), -shortfall);
       byId("cpf-applied-refund").textContent = money(projection.cpfRefund);
       byId("cpf-applied-available").textContent = money(projection.base.cpfRefundAvailable);
-      const applyButton = byId("apply-cpf-estimate");
-      applyButton.disabled = partnerEnabled && !cpfWeightsReliable;
-      applyButton.textContent = cpfEstimateStale
-        ? "Re-apply current estimate"
-        : "Apply estimate to projection";
+      byId("use-automatic-cpf").hidden = resolved.mode !== "exact";
 
       const cappedCopy = estimate.cappedMonths
         ? ` In ${estimate.cappedMonths} month${estimate.cappedMonths === 1 ? "" : "s"}, combined CPF inputs exceeded the modelled instalment and were capped at that instalment.`
@@ -1815,19 +2448,35 @@
       const shortfallGuidance = belowEnteredMarketValue
         ? " The projected sale is below your entered market value, so do not assume CPF's market-value no-cash-top-up treatment applies."
         : " If the property is sold at market value and proceeds are insufficient, CPF generally does not require a cash top-up for the CPF shortfall; a below-market disposal can be treated differently.";
-      byId("cpf-refund-status").textContent = shortfall > 0.01
-        ? `Projected proceeds after lender redemption can refund about ${money(availableTotal)} of the estimated ${money(estimate.household.refundRequired)} CPF amount. The ${money(shortfall)} difference is shown as a CPF refund shortfall.${shortfallGuidance}${cappedCopy}`
-        : `Projected proceeds after lender redemption cover the estimated CPF refund. The exact CPF Home ownership dashboard remains authoritative; this constant-rate estimate includes ${estimate.mortgageMonths} modelled mortgage month${estimate.mortgageMonths === 1 ? "" : "s"}.${cappedCopy}`;
-      if (cpfEstimateStale) {
-        byId("cpf-refund-status").textContent = `The applied ${money(projection.cpfRefund)} CPF estimate is out of date because the sale or CPF assumptions changed. The current estimate is ${money(estimate.household.refundRequired)}; re-apply it before relying on the owner split.`;
-      } else if (partnerEnabled && !cpfWeightsReliable) {
-        byId("cpf-refund-status").textContent = "The individual CPF estimate is provisional because the couple funding ledger is incomplete, stale or not reconciled. Reconcile the ledger before applying it.";
+      const activeCoverageRequired = roundMoney(resolved.mode === "exact"
+        ? projection.cpfRefund
+        : estimatedRequired);
+      const activeCoverageAvailable = roundMoney(resolved.mode === "exact"
+        ? projection.base.cpfRefundAvailable
+        : availableTotal);
+      const activeCoverageShortfall = roundMoney(Math.max(
+        0,
+        activeCoverageRequired - activeCoverageAvailable
+      ));
+      const coverageCopy = activeCoverageShortfall > 0.01
+        ? ` Projected proceeds after lender redemption can refund about ${money(activeCoverageAvailable)} of the ${resolved.mode === "exact" ? "active exact" : "estimated"} ${money(activeCoverageRequired)} amount; the ${money(activeCoverageShortfall)} difference is a CPF refund shortfall.${shortfallGuidance}`
+        : ` Projected proceeds after lender redemption cover the ${resolved.mode === "exact" ? "active exact" : "estimated"} CPF refund.`;
+      if (resolved.mode === "exact") {
+        byId("cpf-refund-status").textContent = `Exact override active: ${money(projection.cpfRefund)} drives the sale waterfall. Clear the override to resume automatic updates. The CPF Home ownership dashboard remains authoritative.${coverageCopy}${cappedCopy}`;
+      } else if (!automaticReliable && automaticRetained) {
+        byId("cpf-refund-status").textContent = `Automatic mode is retaining the last reliable ${money(projection.cpfRefund)} household estimate. The current individual estimate is provisional because the couple ledger is incomplete, stale or not reconciled; reconcile it to refresh the household amount and owner split.${cappedCopy}`;
+      } else if (!automaticReliable) {
+        byId("cpf-refund-status").textContent = `Automatic mode will start once the couple funding ledger is complete and reconciled. The temporary household amount is ${money(projection.cpfRefund)}, and the individual estimate is provisional.${cappedCopy}`;
+      } else {
+        byId("cpf-refund-status").textContent = `Automatic mode has synchronised ${money(projection.cpfRefund)} to the sale waterfall from ${estimate.mortgageMonths} modelled mortgage month${estimate.mortgageMonths === 1 ? "" : "s"}. Enter the exact CPF Home ownership dashboard figure above when available.${coverageCopy}${cappedCopy}`;
       }
       renderOwnerSaleOutcome(
         projection,
         estimate,
         cpfWeightsReliable,
-        cpfEstimateStale
+        resolved.mode,
+        automaticRetained,
+        resolved.mode === "auto" && !automaticReliable && estimatedRequired > EPSILON
       );
     }
 
@@ -2059,7 +2708,7 @@
 
     function scheduleRender() {
       view.clearTimeout(refreshTimer);
-      refreshTimer = view.setTimeout(() => render(), 130);
+      refreshTimer = view.setTimeout(() => render(), 0);
     }
 
     const restoredDraft = restoreDraft();
@@ -2068,6 +2717,123 @@
         new view.Event("change", { bubbles: true })
       );
     }
+
+    byId("saved-version-select").addEventListener("change", event => {
+      const hasSelection = Boolean(event.target.value);
+      byId("load-plan-version").disabled = !hasSelection;
+      byId("delete-plan-version").disabled = !hasSelection;
+    });
+    byId("save-plan-version").addEventListener("click", async () => {
+      const button = byId("save-plan-version");
+      button.disabled = true;
+      try {
+        const record = await saveVersionSnapshot(
+          byId("version-name").value,
+          captureDraft(),
+          "user"
+        );
+        await refreshVersionManager(record.id);
+        versionStatus(`Saved immutable version “${record.name}”. Later edits stay in the working draft until you save another version.`);
+      } catch (error) {
+        versionStatus(`Version not saved: ${error.message}`);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    byId("load-plan-version").addEventListener("click", async () => {
+      const id = byId("saved-version-select").value;
+      if (!id) return;
+      try {
+        const record = validateVersionRecord(
+          await versionStoreRequest("readonly", "get", id),
+          { validateDraft: true }
+        );
+        if (!view.confirm(`Load “${record.name}”? Your current working draft will be saved as a recovery version first.`)) return;
+        const recovery = await saveRecoverySnapshot(record.name);
+        if (!recovery && !view.confirm("A recovery copy could not be saved. Continue loading without one?")) return;
+        const activation = activateDraft(record.draft);
+        await refreshVersionManager(record.id);
+        const sourceCopy = record.sourceCalculatorVersion === CALCULATOR_VERSION
+          ? ""
+          : ` Its inputs originated in calculator ${record.sourceCalculatorVersion} and are recalculated using ${CALCULATOR_VERSION}.`;
+        versionStatus(activation.persisted
+          ? `Loaded “${record.name}”. It is now the working draft; the named snapshot remains unchanged.${sourceCopy}`
+          : `Loaded “${record.name}” for this session, but the working draft could not be saved for refresh. The named snapshot remains available.${sourceCopy}`);
+      } catch (error) {
+        versionStatus(`Version not loaded: ${error.message}`);
+      }
+    });
+    byId("delete-plan-version").addEventListener("click", async () => {
+      const id = byId("saved-version-select").value;
+      if (!id) return;
+      try {
+        const record = validateVersionRecord(
+          await versionStoreRequest("readonly", "get", id)
+        );
+        if (!view.confirm(`Delete the saved version “${record.name}”? This cannot be undone.`)) return;
+        await versionStoreRequest("readwrite", "delete", id);
+        await refreshVersionManager();
+        versionStatus(`Deleted saved version “${record.name}”. The current working draft was not changed.`);
+      } catch (error) {
+        versionStatus(`Version not deleted: ${error.message}`);
+      }
+    });
+    byId("export-plan-draft").addEventListener("click", () => {
+      try {
+        downloadCurrentDraft();
+      } catch (error) {
+        versionStatus(`Draft not exported: ${error.message}`);
+      }
+    });
+    byId("import-plan-draft").addEventListener("click", () => {
+      byId("import-plan-file").click();
+    });
+    byId("import-plan-file").addEventListener("change", async event => {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) return;
+      try {
+        if (file.size > MAX_IMPORT_BYTES) {
+          throw new RangeError("Import file exceeds the 1 MB limit");
+        }
+        const envelope = parseDraftExport(await file.text());
+        const prepared = validateDraftBeforeActivation(envelope.draft);
+        if (!view.confirm(`Import “${envelope.name}” and replace the working draft? A recovery version will be saved first.`)) return;
+        let imported = null;
+        try {
+          imported = await saveVersionSnapshot(
+            envelope.name,
+            prepared.saved,
+            "import",
+            envelope.calculatorVersion
+          );
+        } catch (versionError) {
+          if (!view.confirm(`A named imported version could not be saved (${versionError.message}). Continue as an unsaved working draft without a recovery copy?`)) return;
+        }
+        if (imported) {
+          const recovery = await saveRecoverySnapshot(envelope.name);
+          if (!recovery && !view.confirm("A recovery copy could not be saved. Continue importing without one?")) {
+            await versionStoreRequest("readwrite", "delete", imported.id);
+            await refreshVersionManager();
+            return;
+          }
+        }
+        const activation = activateDraft(prepared.saved);
+        await refreshVersionManager(imported?.id);
+        const versionCopy = imported ? " and a named version" : "";
+        const recalculationCopy = envelope.calculatorVersion === CALCULATOR_VERSION
+          ? ""
+          : ` Inputs came from calculator ${envelope.calculatorVersion} and were recalculated with ${CALCULATOR_VERSION}.`;
+        versionStatus(activation.persisted
+          ? `Imported “${envelope.name}” as the working draft${versionCopy}.${recalculationCopy}`
+          : `Imported “${envelope.name}” for this session${versionCopy}, but the working draft could not be saved for refresh.${recalculationCopy}`);
+      } catch (error) {
+        versionStatus(`Draft not imported: ${error.message}`);
+      } finally {
+        input.value = "";
+      }
+    });
+    refreshVersionManager();
 
     enabledInput.addEventListener("change", () => {
       render();
@@ -2107,51 +2873,12 @@
         String(byId("funding-ledger-editor").open)
       );
     });
-    byId("apply-cpf-estimate").addEventListener("click", () => {
-      let ledgerRows = [];
-      let cpfWeightsReliable = true;
-      let appliedEstimateSignature = null;
-      try {
-        const projection = collectProjection();
-        if (enabledInput.checked && (!coupleSetupComplete || !coupleFundingPlan)) {
-          renderCpfUnavailable("Complete the couple funding setup before applying a CPF estimate.");
-          return;
-        }
-        if (enabledInput.checked) {
-          const state = currentLedger(projection);
-          ledgerRows = state.rows;
-          cpfWeightsReliable = validateFundingLedger(state.rows, projection).balanced
-            && !state.stale;
-        }
-        renderCpfEstimate(projection, ledgerRows, { cpfWeightsReliable });
-        appliedEstimateSignature = cpfEstimateSignature(
-          projection,
-          latestCpfEstimate
-        );
-      } catch (error) {
-        renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
-        return;
-      }
-      if (!latestCpfEstimate) return;
-      const input = byId("cpf-refund");
-      input.value = moneyInput(roundMoney(latestCpfEstimate.household.refundRequired));
-      applyingCpfEstimate = true;
-      try {
-        input.dispatchEvent(new view.Event("input", { bubbles: true }));
-      } finally {
-        applyingCpfEstimate = false;
-      }
-      cpfRefundProvenance = {
-        source: "applied_estimate",
-        estimateSignature: appliedEstimateSignature,
-      };
-      try {
-        renderCpfEstimate(collectProjection(), ledgerRows, { cpfWeightsReliable });
-      } catch (error) {
-        renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
-        return;
-      }
-      byId("cpf-refund-status").textContent = "Estimated CPF refund applied to the sale waterfall. Replace it with the exact CPF Home ownership dashboard figure when available.";
+    byId("use-automatic-cpf").addEventListener("click", () => {
+      const input = byId("cpf-refund-exact");
+      input.value = "";
+      input.dispatchEvent(new view.Event("input", { bubbles: true }));
+      render();
+      input.focus();
     });
     byId("edit-couple-funding").addEventListener("click", () => {
       openCoupleFundingDialog({ confirmEnable: false });
@@ -2258,14 +2985,13 @@
       }
     });
     form.addEventListener("input", event => {
-      if (event.target.id === "cpf-refund" && !applyingCpfEstimate) {
-        cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
-      }
+      if (event.target.closest("#plan-versions-details, #funding-ledger-editor")) return;
       scheduleSave();
       if (event.target.closest("#partner-settings")) return;
       scheduleRender();
     });
     form.addEventListener("change", event => {
+      if (event.target.closest("#plan-versions-details, #funding-ledger-editor")) return;
       scheduleSave();
       if (event.target === enabledInput) return;
       scheduleRender();
@@ -2281,13 +3007,13 @@
       coupleDialogDraft = null;
       coupleDialogDraftActive = false;
       dialogRequiresEnableConfirmation = false;
-      cpfRefundProvenance = { source: "manual_exact", estimateSignature: null };
+      reliableAutoCpfByContext.clear();
       const dialog = byId("couple-funding-dialog");
       if (dialog.open && typeof dialog.close === "function") dialog.close();
       else dialog.removeAttribute("open");
       [
         "property-loan-details", "partner-settings", "advanced-cost-details",
-        "cpf-assumptions-details", "funding-ledger-editor",
+        "cpf-assumptions-details", "plan-versions-details", "funding-ledger-editor",
       ].forEach(id => {
         byId(id).open = false;
       });
@@ -2301,6 +3027,7 @@
       byId("couple-primary-name").value = "Owner 1";
       byId("couple-partner-name").value = "Partner";
       byId("loan-borrower-joint").checked = true;
+      byId("cpf-refund").value = "0";
       view.setTimeout(() => render(), 0);
     });
     view.addEventListener("pagehide", () => {
@@ -2316,20 +3043,30 @@
 
   return {
     ALLOCATION_FIELDS,
+    CALCULATOR_VERSION,
+    EXPORT_FORMAT,
+    EXPORT_FORMAT_VERSION,
     FUNDING_PLAN_SOURCE_ORDER,
+    LEGACY_STORAGE_KEY,
     STORAGE_KEY,
+    STORAGE_VERSION,
+    VERSION_DATABASE,
     allocationTotal,
     applyFundingPlan,
     buildCpfRefundEstimate,
     buildOwnerSaleOutcome,
     buildStandardFundingLedger,
+    createDraftExport,
     init,
     makeRow,
     normalizeShare,
     ownerFundingAllocation,
+    parseDraftExport,
+    resolveCpfRefundAmount,
     splitOutcome,
     toCents,
     fromCents,
+    validateVersionName,
     validateFundingPlan,
     validateFundingLedger,
   };
