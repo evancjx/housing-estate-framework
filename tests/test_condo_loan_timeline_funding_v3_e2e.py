@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import re
 import shutil
 import threading
 
@@ -62,6 +63,7 @@ def _fill_and_blur(locator, value: str) -> None:
 
 
 def _set_ledger_amount(page, row_key: str, field: str, value: str) -> None:
+    _open_details(page, "#funding-ledger-editor")
     _fill_and_blur(
         page.locator(
             f"#funding-ledger-body [data-row-key='{row_key}'][data-field='{field}']"
@@ -87,6 +89,15 @@ def _open_details(page, selector: str) -> None:
 
 def _money_number(locator) -> float:
     return float(locator.input_value().replace(",", ""))
+
+
+def _display_money_number(locator) -> float:
+    text = locator.inner_text().strip()
+    match = re.search(r"S\$([\d,]+(?:\.\d+)?)", text)
+    if not match:
+        raise AssertionError(f"No money value found in {text!r}")
+    value = float(match.group(1).replace(",", ""))
+    return -value if text.startswith("−") or "top-up" in text else value
 
 
 def _apply_couple_setup(
@@ -169,14 +180,18 @@ def test_default_form_uses_progressive_disclosure(chromium_page) -> None:
     property_details = page.locator("#property-loan-details")
     partner_details = page.locator("#partner-settings")
     advanced_details = page.locator("#advanced-cost-details")
+    cpf_details = page.locator("#cpf-assumptions-details")
     assert property_details.evaluate("element => !element.open")
     assert advanced_details.evaluate("element => !element.open")
+    assert cpf_details.evaluate("element => !element.open")
     assert partner_details.is_hidden()
     assert page.locator("#project-name").is_hidden()
     assert page.locator("#area-sqft").is_hidden()
     assert page.locator("#loan-rate").is_hidden()
     assert page.locator("#purchase-legal").is_hidden()
     assert page.locator("#selling-cost-percent").is_hidden()
+    playwright_api.expect(page.locator("#financing-interest-card")).to_be_visible()
+    playwright_api.expect(page.locator("#bank-interest-total")).not_to_have_text("—")
 
     _open_details(page, "#property-loan-details")
     playwright_api.expect(page.locator("#project-name")).to_be_visible()
@@ -192,6 +207,9 @@ def test_default_form_uses_progressive_disclosure(chromium_page) -> None:
     )
     assert page.locator("#couple-funding-difference").inner_text() == "S$0 · matched"
     _apply_couple_setup(page)
+    assert page.locator("#funding-ledger-editor").evaluate("element => !element.open")
+    playwright_api.expect(page.locator("#ledger-purchase-reconciliation")).to_be_visible()
+    assert page.locator("#funding-ledger-body .ledger-input").first.is_hidden()
     _open_details(page, "#partner-settings")
     playwright_api.expect(page.locator("#partner-ownership-share")).to_be_visible()
     playwright_api.expect(page.locator("#edit-couple-funding")).to_be_visible()
@@ -405,7 +423,7 @@ def test_sample_allocations_reconcile_and_variance_is_visible(chromium_page) -> 
         },
     )
     assert page.locator("#ledger-loan-heading").inner_text() == "Evan bank loan"
-    assert page.locator("#ledger-loan-column-heading").inner_text() == "Evan bank loan"
+    assert page.locator("#ledger-loan-column-heading").text_content() == "Evan bank loan"
     playwright_api.expect(page.locator("#ledger-overall-status")).to_have_text(
         "All rows and totals reconcile"
     )
@@ -421,6 +439,8 @@ def test_sample_allocations_reconcile_and_variance_is_visible(chromium_page) -> 
     assert page.locator("#ledger-cost-reconciliation").inner_text() == (
         "S$53,400 · reconciled"
     )
+    assert page.locator("#funding-ledger-editor").evaluate("element => !element.open")
+    playwright_api.expect(page.locator("#review-funding-ledger")).to_be_hidden()
 
     foundation = page.locator(
         "#funding-ledger-body [data-row-key='stage-2'][data-field='action']"
@@ -461,6 +481,14 @@ def test_sample_allocations_reconcile_and_variance_is_visible(chromium_page) -> 
     assert page.locator("#ledger-allocated-footer").inner_text() == "S$1,662,900"
     assert page.locator("#ledger-difference-footer").inner_text() == "S$0"
     assert page.locator("#funding-ledger-body .ledger-status-bad").count() == 0
+    page.locator("#funding-ledger-editor > summary").click()
+    assert page.locator("#funding-ledger-editor").evaluate("element => !element.open")
+    playwright_api.expect(page.locator("#review-funding-ledger")).to_be_visible()
+    page.locator("#review-funding-ledger").click()
+    assert page.locator("#funding-ledger-editor").evaluate("element => element.open")
+    assert page.evaluate(
+        "document.querySelector('#funding-ledger-body').contains(document.activeElement)"
+    )
 
     _set_ledger_amount(page, "stage-0", "partnerCash", "80400")
     playwright_api.expect(page.locator("#ledger-overall-status")).to_have_text(
@@ -557,7 +585,7 @@ def test_modal_shortage_and_excess_remain_visible_after_apply(chromium_page) -> 
         partner_name="Jamie",
     )
     assert page.locator("#ledger-loan-heading").inner_text() == "Jamie bank loan"
-    assert page.locator("#ledger-loan-column-heading").inner_text() == "Jamie bank loan"
+    assert page.locator("#ledger-loan-column-heading").text_content() == "Jamie bank loan"
     playwright_api.expect(page.locator("#couple-plan-status")).to_contain_text(
         "Saved setup: S$100 remains unallocated"
     )
@@ -589,6 +617,11 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     _open_details(page, "#advanced-cost-details")
     _fill_and_blur(page.locator("#purchase-legal"), "2800")
     page.locator("#selling-cost-percent").fill("1.75")
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-primary-acquisition"), "12345.67")
+    _fill_and_blur(page.locator("#cpf-primary-monthly"), "321.45")
+    page.locator("#cpf-oa-rate").fill("2.60")
+    _fill_and_blur(page.locator("#cpf-refund"), "45678.90")
 
     page.locator("#partner-enabled").check()
     seeded_primary_cash = _money_number(page.locator("#couple-primary-cash"))
@@ -607,6 +640,7 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     )
     _open_details(page, "#partner-settings")
     page.locator("#partner-ownership-share").fill("40")
+    _fill_and_blur(page.locator("#cpf-partner-monthly"), "123.45")
 
     partner_cash = page.locator(
         "#funding-ledger-body [data-row-key='resale-completion']"
@@ -651,6 +685,11 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#loan-amount").input_value().replace(",", "") == "1207404"
     assert page.locator("#purchase-legal").input_value().replace(",", "") == "2800"
     assert page.locator("#selling-cost-percent").input_value() == "1.75"
+    assert page.locator("#cpf-primary-acquisition").input_value() == "12,345.67"
+    assert page.locator("#cpf-primary-monthly").input_value() == "321.45"
+    assert page.locator("#cpf-partner-monthly").input_value() == "123.45"
+    assert page.locator("#cpf-oa-rate").input_value() == "2.60"
+    assert page.locator("#cpf-refund").input_value() == "45,678.90"
     assert page.locator("#primary-owner-name").input_value() == "Evan"
     assert page.locator("#partner-owner-name").input_value() == "Mandy"
     assert page.locator("#partner-ownership-share").input_value() == "40"
@@ -703,6 +742,11 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#loan-amount").input_value() == "1,200,000"
     assert page.locator("#purchase-legal").input_value() == "3,000"
     assert page.locator("#selling-cost-percent").input_value() == "2.18"
+    assert page.locator("#cpf-primary-acquisition").input_value() == "0"
+    assert page.locator("#cpf-primary-monthly").input_value() == "0"
+    assert page.locator("#cpf-partner-monthly").input_value() == "0"
+    assert page.locator("#cpf-oa-rate").input_value() == "2.50"
+    assert page.locator("#cpf-refund").input_value() == "0"
     playwright_api.expect(page.locator("#partner-enabled")).not_to_be_checked()
     assert page.locator("#primary-owner-name").input_value() == "Owner 1"
     assert page.locator("#partner-owner-name").input_value() == "Partner"
@@ -714,6 +758,8 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     assert page.locator("#property-loan-details").evaluate("element => !element.open")
     assert page.locator("#partner-settings").evaluate("element => !element.open")
     assert page.locator("#advanced-cost-details").evaluate("element => !element.open")
+    assert page.locator("#cpf-assumptions-details").evaluate("element => !element.open")
+    assert page.locator("#funding-ledger-editor").evaluate("element => !element.open")
 
     page.reload(wait_until="load")
     assert page.evaluate("key => localStorage.getItem(key)", STORAGE_KEY) is None
@@ -721,6 +767,201 @@ def test_browser_draft_survives_reload_and_reset_restores_html_defaults(
     playwright_api.expect(page.locator("#partner-enabled")).not_to_be_checked()
     assert page.locator("#purchase-price").input_value() == "1,600,000"
     assert page.locator("#project-name").input_value() == "My condominium"
+
+
+def test_financing_card_estimates_then_explicitly_applies_cpf_refund(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+
+    playwright_api.expect(page.locator("#financing-interest-card")).to_be_visible()
+    original_bank_interest = page.locator("#bank-interest-total").inner_text()
+    assert page.locator("#cpf-refund").input_value() == "0"
+
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-primary-acquisition"), "100000")
+    playwright_api.expect(page.locator("#cpf-primary-principal")).to_have_text(
+        "S$100,000"
+    )
+    assert page.locator("#cpf-primary-interest").inner_text() != "S$0"
+    estimate = page.locator("#cpf-estimated-refund").inner_text()
+    assert estimate != "S$100,000"
+    assert page.locator("#cpf-refund").input_value() == "0"
+    playwright_api.expect(page.locator("#owner-sale-outcome")).to_be_visible()
+    playwright_api.expect(page.locator("#owner-outcome-partner-card")).to_be_hidden()
+    playwright_api.expect(page.locator("#owner-outcome-status")).to_contain_text(
+        "No CPF refund is currently applied"
+    )
+
+    # Applying immediately after an edit must recompute synchronously instead of
+    # copying the estimate left behind by the debounced render.
+    page.locator("#cpf-primary-acquisition").fill("125000")
+    page.locator("#apply-cpf-estimate").click()
+    page.wait_for_function(
+        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 125000"
+    )
+
+    page.locator("#cpf-refund").fill("0")
+    page.locator("#apply-cpf-estimate").click()
+    page.wait_for_function(
+        "Number(document.querySelector('#cpf-refund').value.replace(/,/g,'')) > 125000"
+    )
+    playwright_api.expect(page.locator("#waterfall-cpf")).not_to_have_text("−S$0")
+    assert _display_money_number(page.locator("#owner-outcome-primary-cpf")) == (
+        _display_money_number(page.locator("#owner-outcome-household-cpf"))
+    )
+    assert _display_money_number(page.locator("#owner-outcome-primary-combined")) == (
+        _display_money_number(page.locator("#owner-outcome-household-combined"))
+    )
+    assert _display_money_number(
+        page.locator("#owner-outcome-primary-bank-interest")
+    ) == pytest.approx(
+        _display_money_number(page.locator("#bank-interest-total")),
+        abs=1,
+    )
+    page.wait_for_function(
+        "key => JSON.parse(localStorage.getItem(key)).cpfRefundProvenance.source"
+        " === 'applied_estimate'",
+        arg=STORAGE_KEY,
+    )
+    page.reload(wait_until="load")
+    assert _money_number(page.locator("#cpf-refund")) > 125_000
+    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
+        "out of date"
+    )
+
+    page.locator("#sale-date").fill("2031-08-19")
+    playwright_api.expect(page.locator("#bank-interest-total")).not_to_have_text(
+        original_bank_interest
+    )
+    assert page.locator("#bank-interest-accrued").inner_text() != "S$0"
+    playwright_api.expect(page.locator("#cpf-refund-status")).to_contain_text(
+        "out of date"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-status")).to_contain_text(
+        "out of date"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
+        "Split unavailable"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cash")).to_have_text(
+        "Split unavailable"
+    )
+    playwright_api.expect(
+        page.locator("#owner-outcome-primary-combined")
+    ).not_to_have_text("—")
+    playwright_api.expect(page.locator("#apply-cpf-estimate")).to_have_text(
+        "Re-apply current estimate"
+    )
+
+    page.locator("#apply-cpf-estimate").click()
+    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
+        "out of date"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).not_to_have_text(
+        "Split unavailable"
+    )
+
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-refund"), "150000")
+    page.wait_for_function(
+        "key => JSON.parse(localStorage.getItem(key)).cpfRefundProvenance.source"
+        " === 'manual_exact'",
+        arg=STORAGE_KEY,
+    )
+    page.locator("#sale-date").fill("2031-08-29")
+    playwright_api.expect(page.locator("#cpf-refund-status")).not_to_contain_text(
+        "out of date"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).not_to_have_text(
+        "Split unavailable"
+    )
+
+
+def test_couple_owner_outcome_separates_legal_share_and_individual_cpf(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    page.locator("#partner-enabled").check()
+    seeded_primary_cash = _money_number(page.locator("#couple-primary-cash"))
+    seeded_partner_cash = _money_number(page.locator("#couple-partner-cash"))
+    _apply_couple_setup(
+        page,
+        primary_name="Evan",
+        partner_name="Mandy",
+        amounts={
+            "primary_cash": seeded_primary_cash - 20_000,
+            "primary_cpf": 20_000,
+            "partner_cash": seeded_partner_cash - 5_000,
+            "partner_cpf": 5_000,
+        },
+    )
+    _open_details(page, "#partner-settings")
+    _fill_and_blur(page.locator("#partner-ownership-share"), "40")
+    _open_details(page, "#cpf-assumptions-details")
+    page.locator("#apply-cpf-estimate").click()
+
+    playwright_api.expect(page.locator("#owner-outcome-partner-card")).to_be_visible()
+    playwright_api.expect(page.locator("#owner-outcome-primary-name")).to_have_text("Evan")
+    playwright_api.expect(page.locator("#owner-outcome-partner-name")).to_have_text("Mandy")
+    playwright_api.expect(page.locator("#owner-outcome-primary-share")).to_have_text(
+        "60% legal share"
+    )
+    playwright_api.expect(page.locator("#owner-outcome-status")).to_contain_text(
+        "apportioned using each owner’s current estimated"
+    )
+
+    primary_cpf = _display_money_number(page.locator("#owner-outcome-primary-cpf"))
+    partner_cpf = _display_money_number(page.locator("#owner-outcome-partner-cpf"))
+    assert primary_cpf > partner_cpf > 0
+    household_cpf = _display_money_number(page.locator("#owner-outcome-household-cpf"))
+    assert primary_cpf + partner_cpf == pytest.approx(household_cpf, abs=1)
+    primary_cash = _display_money_number(page.locator("#owner-outcome-primary-cash"))
+    partner_cash = _display_money_number(page.locator("#owner-outcome-partner-cash"))
+    primary_combined = _display_money_number(
+        page.locator("#owner-outcome-primary-combined")
+    )
+    partner_combined = _display_money_number(
+        page.locator("#owner-outcome-partner-combined")
+    )
+    household_combined = _display_money_number(
+        page.locator("#owner-outcome-household-combined")
+    )
+    assert primary_combined / partner_combined == pytest.approx(1.5, rel=0.01)
+    assert primary_combined + partner_combined == pytest.approx(
+        household_combined,
+        abs=1,
+    )
+    assert primary_cash + primary_cpf == pytest.approx(primary_combined, abs=1)
+    assert partner_cash + partner_cpf == pytest.approx(partner_combined, abs=1)
+    primary_interest = _display_money_number(
+        page.locator("#owner-outcome-primary-bank-interest")
+    )
+    partner_interest = _display_money_number(
+        page.locator("#owner-outcome-partner-bank-interest")
+    )
+    assert primary_interest / partner_interest == pytest.approx(1.5, rel=0.01)
+
+    _fill_and_blur(page.locator("#partner-ownership-share"), "30")
+    playwright_api.expect(page.locator("#owner-outcome-primary-share")).to_have_text(
+        "70% legal share"
+    )
+    assert _display_money_number(page.locator("#owner-outcome-primary-cpf")) == (
+        primary_cpf
+    )
+    assert _display_money_number(page.locator("#owner-outcome-partner-cpf")) == (
+        partner_cpf
+    )
+    assert _display_money_number(
+        page.locator("#owner-outcome-primary-combined")
+    ) > primary_combined
+    assert _display_money_number(
+        page.locator("#owner-outcome-primary-bank-interest")
+    ) > primary_interest
 
 
 def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
@@ -731,6 +972,7 @@ def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
     page.locator("#partner-enabled").check()
     _apply_couple_setup(page)
 
+    _open_details(page, "#funding-ledger-editor")
     initial_count = page.locator("#funding-ledger-body tr").count()
     page.locator("#add-funding-row").click()
     playwright_api.expect(page.locator("#funding-ledger-body tr")).to_have_count(
@@ -739,6 +981,10 @@ def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
     assert page.locator(
         "#funding-ledger-body [data-row-key='custom-1'][data-field='action']"
     ).input_value() == "New payment or timeline action"
+    assert page.evaluate(
+        "document.activeElement.dataset.rowKey === 'custom-1'"
+        " && document.activeElement.dataset.field === 'action'"
+    )
 
     page.locator("#route-resale").check()
     playwright_api.expect(page.locator("#ledger-route-copy")).to_contain_text(
@@ -758,6 +1004,16 @@ def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
     assert page.evaluate(
         "document.documentElement.scrollWidth === document.documentElement.clientWidth"
     )
+    playwright_api.expect(page.locator("#funding-ledger-scroll-hint")).to_be_visible()
+    assert page.locator("#funding-ledger-card thead th:nth-child(1)").evaluate(
+        "element => getComputedStyle(element).position === 'sticky'"
+    )
+    assert page.locator("#funding-ledger-card thead th:nth-child(2)").evaluate(
+        "element => getComputedStyle(element).position === 'static'"
+    )
     assert page.locator("#funding-ledger-card .ledger-table-wrap").evaluate(
+        "element => element.scrollWidth > element.clientWidth"
+    )
+    assert page.locator(".cpf-table").evaluate(
         "element => element.scrollWidth > element.clientWidth"
     )

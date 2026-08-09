@@ -279,6 +279,8 @@
   .outcome-tile output { display:block; margin-top:5px; font-size:13px; font-weight:820; }
   .ledger-table-wrap { margin-top:16px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
     overflow-x:auto; overscroll-behavior-inline:contain; }
+  .ledger-scroll-hint { display:none; margin:14px 18px 0; color:var(--muted); font-size:10px;
+    font-weight:750; line-height:1.4; }
   #funding-ledger-card table { min-width:2110px; table-layout:fixed; font-size:11px; }
   #funding-ledger-card col:nth-child(1) { width:135px; }
   #funding-ledger-card col:nth-child(2) { width:235px; }
@@ -314,6 +316,91 @@
     background:white; color:var(--danger); font-size:19px; line-height:1; }
   .ledger-remove:hover { background:var(--danger-soft); }
   .ledger-footnote { margin:13px 20px 18px; color:#63756e; font-size:10px; line-height:1.55; }
+  .ledger-editor { margin-top:16px; border-top:1px solid var(--line); }
+  .ledger-editor > summary { display:flex; align-items:center; gap:12px; padding:15px 20px;
+    list-style:none; cursor:pointer; color:var(--ink); font-size:12px; font-weight:850; }
+  .ledger-editor > summary::-webkit-details-marker { display:none; }
+  .ledger-editor > summary::before { content:"+"; display:inline-grid; flex:0 0 auto; width:22px;
+    height:22px; place-items:center; border:1px solid #8fa29a; border-radius:4px; }
+  .ledger-editor[open] > summary::before { content:"−"; }
+  .ledger-editor > summary span { margin-left:auto; color:var(--muted); font-size:10px;
+    font-weight:650; }
+  .ledger-editor-body { padding-top:1px; border-top:1px solid #dce5e1; }
+  .ledger-editor-toolbar { display:flex; justify-content:flex-end; padding:13px 20px 0; }
+  .ledger-editor-toolbar button { min-height:36px; padding:7px 11px; border:1px solid #b9c7c1;
+    border-radius:4px; background:white; color:var(--ink); font-size:11px; font-weight:800; }
+
+  /* Financing and CPF refund */
+  .finance-panels { display:grid; grid-template-columns:1fr 1fr; }
+  .finance-panel { min-width:0; padding:21px 24px 23px; }
+  .finance-panel + .finance-panel { border-left:1px solid var(--line); }
+  .finance-panel h3 { margin:0 0 5px; font-size:16px; }
+  .finance-panel > p { margin:0 0 15px; color:var(--muted); font-size:11px; line-height:1.5; }
+  .finance-metrics { display:grid; grid-template-columns:repeat(2,1fr); border:1px solid var(--line);
+    border-radius:6px; overflow:hidden; }
+  .finance-metric { min-width:0; padding:13px 14px; border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line); background:#fbfcfc; }
+  .finance-metric:nth-child(2n) { border-right:0; }
+  .finance-metric:nth-last-child(-n+2) { border-bottom:0; }
+  .finance-metric:last-child:nth-child(odd) { grid-column:1/-1; border-right:0; }
+  .finance-metric span { display:block; color:var(--muted); font-size:10px; line-height:1.35; }
+  .finance-metric output { display:block; margin-top:5px; font-size:16px; font-weight:850; }
+  .finance-note { margin:13px 0 0 !important; padding:10px 11px; border-radius:5px;
+    background:#f3f7f5; color:#52685f !important; }
+  .cpf-table { width:100%; min-width:0; border:1px solid var(--line); border-radius:6px;
+    overflow-x:auto; overscroll-behavior-inline:contain; }
+  .cpf-table table { width:100%; min-width:650px; font-size:10px; }
+  .cpf-table th,.cpf-table td { padding:10px 11px; }
+  .cpf-table tfoot th,.cpf-table tfoot td { background:#f3f7f5; font-weight:850; }
+  .cpf-summary { display:grid; grid-template-columns:repeat(3,1fr); margin-top:13px;
+    border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .cpf-summary div { min-width:0; padding:12px 13px; border-right:1px solid var(--line); }
+  .cpf-summary div:last-child { border-right:0; }
+  .cpf-summary span { display:block; color:var(--muted); font-size:9px; line-height:1.35; }
+  .cpf-summary output { display:block; margin-top:5px; font-size:14px; font-weight:850; }
+  .cpf-actions { display:flex; align-items:center; justify-content:space-between; gap:14px;
+    margin-top:13px; }
+  .cpf-actions p { margin:0; color:#52685f; font-size:10px; line-height:1.5; }
+  .cpf-actions button { flex:0 0 auto; min-height:38px; padding:8px 11px; border:1px solid var(--accent);
+    border-radius:5px; background:white; color:var(--accent-dark); font-size:11px; font-weight:850; }
+  .cpf-actions button:disabled { border-color:#c7d1cd; color:#89958f; cursor:not-allowed; }
+  .owner-outcome-section { padding:0 24px 24px; border-top:1px solid var(--line); }
+  .owner-outcome-heading { display:flex; align-items:end; justify-content:space-between; gap:18px;
+    padding:20px 0 15px; }
+  .owner-outcome-heading h3 { margin:0 0 5px; font-size:17px; }
+  .owner-outcome-heading p { max-width:760px; margin:0; color:var(--muted); font-size:11px;
+    line-height:1.5; }
+  .owner-outcome-badge { flex:0 0 auto; padding:5px 8px; border:1px solid #a8bab2;
+    border-radius:999px; background:#f6f9f7; color:#496158; font-size:9px; font-weight:850;
+    letter-spacing:.05em; text-transform:uppercase; }
+  .owner-outcome-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .owner-outcome-cards.single { grid-template-columns:minmax(0,1fr); }
+  .owner-outcome-card { min-width:0; border:1px solid var(--line); border-radius:7px;
+    background:#fbfcfc; overflow:hidden; }
+  .owner-outcome-card header { display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:13px 15px; border-bottom:1px solid var(--line); background:#f5f8f6; }
+  .owner-outcome-card h4 { min-width:0; margin:0; font-size:13px; overflow-wrap:anywhere; }
+  .owner-outcome-card header span { flex:0 0 auto; color:var(--muted); font-size:10px;
+    font-weight:750; }
+  .owner-outcome-card dl { display:grid; grid-template-columns:1fr 1fr; margin:0; }
+  .owner-outcome-card dl div { min-width:0; padding:12px 14px; border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line); }
+  .owner-outcome-card dl .owner-cpf,.owner-outcome-card dl .owner-costs { border-right:0; }
+  .owner-outcome-card dl .owner-combined { grid-column:1/-1; border-right:0;
+    background:#edf6f2; }
+  .owner-outcome-card dl .owner-profit { grid-column:1/-1; border-right:0; border-bottom:0; }
+  .owner-outcome-card dt { color:var(--muted); font-size:9px; line-height:1.35; }
+  .owner-outcome-card dd { margin:5px 0 0; font-size:14px; font-weight:850;
+    overflow-wrap:anywhere; }
+  .owner-outcome-card .owner-combined dd { color:var(--accent-dark); font-size:17px; }
+  .owner-outcome-household { display:grid; grid-template-columns:repeat(3,1fr); margin-top:12px;
+    border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .owner-outcome-household div { min-width:0; padding:11px 13px; border-right:1px solid var(--line); }
+  .owner-outcome-household div:last-child { border-right:0; background:#f3f7f5; }
+  .owner-outcome-household span { display:block; color:var(--muted); font-size:9px; }
+  .owner-outcome-household output { display:block; margin-top:4px; font-size:14px; font-weight:850; }
+  .owner-outcome-status { margin:12px 0 0; color:#52685f; font-size:10px; line-height:1.5; }
+  .owner-outcome-note { margin:7px 0 0; color:var(--muted); font-size:9px; line-height:1.5; }
 
   .timeline-wrap { padding:22px 24px 25px; overflow-x:auto; }
   .timeline { position:relative; display:flex; gap:0; min-width:max-content; padding:12px 5px 5px; }
@@ -379,6 +466,8 @@
     .result-card { grid-row:auto; position:static; max-height:none; overflow:hidden; box-shadow:none; }
     .chart-grid { grid-template-columns:1fr; }
     .chart-panel { border-right:0; border-bottom:1px solid var(--line); }
+    .finance-panels { grid-template-columns:1fr; }
+    .finance-panel + .finance-panel { border-left:0; border-top:1px solid var(--line); }
     .reconciliation-grid { grid-template-columns:1fr 1fr; }
     .reconciliation-tile:nth-child(2) { border-right:0; }
     .reconciliation-tile:nth-child(n+3) { border-top:1px solid var(--line); }
@@ -414,6 +503,18 @@
     .outcome-summary { grid-template-columns:1fr; }
     .outcome-tile { border-right:0; }
     .outcome-tile + .outcome-tile { border-top:1px solid var(--line); }
+    .finance-panel { padding-left:18px; padding-right:18px; }
+    .cpf-summary { grid-template-columns:1fr; }
+    .cpf-summary div { border-right:0; border-bottom:1px solid var(--line); }
+    .cpf-summary div:last-child { border-bottom:0; }
+    .cpf-actions { align-items:stretch; flex-direction:column; }
+    .cpf-actions button { width:100%; }
+    .owner-outcome-section { padding-left:18px; padding-right:18px; }
+    .owner-outcome-heading { align-items:start; flex-direction:column; gap:9px; }
+    .owner-outcome-cards { grid-template-columns:1fr; }
+    .owner-outcome-household { grid-template-columns:1fr; }
+    .owner-outcome-household div { border-right:0; border-bottom:1px solid var(--line); }
+    .owner-outcome-household div:last-child { border-bottom:0; }
     .couple-funding-dialog { width:calc(100vw - 16px); max-height:calc(100dvh - 16px);
       border-radius:9px; }
     .couple-funding-form { max-height:calc(100dvh - 16px); }
@@ -427,7 +528,9 @@
     .couple-reconciliation div:last-child { border-bottom:0; }
     .couple-dialog-actions { flex-wrap:wrap; padding:12px 18px; }
     .couple-dialog-actions small { flex:1 0 100%; margin:0 0 2px; }
-    #funding-ledger-card th:nth-child(2),#funding-ledger-card td:nth-child(2) { position:static; }
+    .ledger-scroll-hint { display:block; }
+    #funding-ledger-card th:nth-child(2),#funding-ledger-card td:nth-child(2) {
+      position:static; left:auto; z-index:auto; box-shadow:none; }
     .timeline-wrap,.chart-panel,.waterfall,.method { padding-left:18px; padding-right:18px; }
     .event { width:145px; }
     .ssd-banner,.definitions { margin-left:18px; margin-right:18px; }
@@ -445,14 +548,16 @@
   @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
   @media print {
     .research-shell-nav,.research-shell-skip,.hero-icon,.local-note,.actions,
-    .dashboard-heading button,.ledger-remove,.couple-funding-dialog { display:none !important; }
+    .dashboard-heading button,.ledger-editor-toolbar,.ledger-remove,.cpf-actions button,
+    .couple-funding-dialog { display:none !important; }
     body { background:white; }
     main { max-width:none; padding:0; }
     .planner-grid { display:block; }
     .input-card,.result-card { position:static; max-height:none; overflow:visible; box-shadow:none; }
     .input-card { margin-bottom:15px; }
     details.advanced:not([open]) .advanced-fields,
-    details.compact-details:not([open]) .compact-details-body { display:block; }
+    details.compact-details:not([open]) .compact-details-body,
+    details.ledger-editor:not([open]) .ledger-editor-body { display:block; }
     .dashboard-card,.input-card,.result-card { break-inside:avoid; }
   }
 </style>
@@ -563,7 +668,22 @@
               <div class="field"><label for="holding-costs">Total holding costs to sale</label><div class="money-input"><span>S$</span><input id="holding-costs" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
               <div class="field"><label for="net-rent">Net rent received to sale</label><div class="money-input"><span>S$</span><input id="net-rent" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
             </div>
-            <div class="field"><label for="cpf-refund">CPF principal plus accrued interest to refund</label><div class="money-input"><span>S$</span><input id="cpf-refund" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">This changes cash released, not economic profit.</p></div>
+          </div>
+        </details>
+
+        <details class="compact-details" id="cpf-assumptions-details">
+          <summary>CPF refund estimate <span>Optional purchase use, monthly servicing and exact dashboard override</span></summary>
+          <div class="compact-details-body">
+            <p class="help" id="cpf-acquisition-mode">Single-owner purchase CPF is assumed to be used on the legal acquisition date.</p>
+            <div class="field" id="cpf-single-acquisition-field"><label for="cpf-primary-acquisition">CPF used at acquisition</label><div class="money-input"><span>S$</span><input id="cpf-primary-acquisition" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">For couple ownership, dated CPF allocations come from the acquisition ledger instead.</p></div>
+            <div class="field-row">
+              <div class="field"><label id="cpf-primary-monthly-label" for="cpf-primary-monthly">CPF used per monthly instalment</label><div class="money-input"><span>S$</span><input id="cpf-primary-monthly" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+              <div class="field" id="cpf-partner-monthly-field" hidden><label id="cpf-partner-monthly-label" for="cpf-partner-monthly">Partner CPF used per monthly instalment</label><div class="money-input"><span>S$</span><input id="cpf-partner-monthly" type="text" value="0" inputmode="decimal" data-currency-input></div></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="cpf-oa-rate">CPF OA rate for this estimate</label><div class="unit-input"><input id="cpf-oa-rate" type="number" min="0" max="20" step="0.01" value="2.50" inputmode="decimal"><span>% p.a.</span></div><p class="help">Constant-rate planning estimate; CPF uses prevailing rates and its own account calculation.</p></div>
+              <div class="field"><label for="cpf-refund">Exact CPF refund from Home ownership dashboard <span aria-hidden="true">(optional)</span></label><div class="money-input"><span>S$</span><input id="cpf-refund" type="text" value="0" inputmode="decimal" data-currency-input></div><p class="help">This entered amount drives the sale waterfall but not economic profit. You can apply the estimate below, then replace it with CPF’s exact figure.</p></div>
+            </div>
           </div>
         </details>
 
@@ -601,16 +721,10 @@
   <section class="dashboard-card" id="funding-ledger-card" aria-labelledby="funding-ledger-title" hidden>
     <div class="dashboard-heading">
       <div><h2 id="funding-ledger-title">Acquisition funding ledger</h2><p id="ledger-route-copy">BUC funding ledger · purchase payments, acquisition costs and timeline-only actions</p></div>
-      <div class="ledger-heading-actions"><span class="ledger-badge ledger-badge-ok" id="ledger-overall-status" role="status">All rows and totals reconcile</span><button id="add-funding-row" type="button">+ Add row</button></div>
+      <div class="ledger-heading-actions"><span class="ledger-badge ledger-badge-ok" id="ledger-overall-status" role="status">All rows and totals reconcile</span><button id="review-funding-ledger" type="button" aria-controls="funding-ledger-editor" aria-expanded="false" hidden>Review rows</button></div>
     </div>
     <div class="ledger-stale" id="ledger-stale" role="status" hidden><span><strong>The generated plan has changed.</strong> Your exact-dollar edits were kept, so the ledger may no longer match the property inputs.</span><span>Review it or use “Regenerate ledger” above.</span></div>
     <p class="ledger-errors" id="funding-ledger-errors" role="alert" aria-live="polite" hidden></p>
-
-    <div class="ledger-guide" aria-label="Ledger row type definitions">
-      <div><b>Property payment</b><span>Purchase consideration. Counts toward the price and can include a bank-loan draw.</span></div>
-      <div><b>Acquisition cost</b><span>BSD, legal fees and other costs. Included in owner outlay, never in the purchase price.</span></div>
-      <div><b>Timeline note</b><span>A dated action such as receiving or exercising the S&amp;P. No amount or funding.</span></div>
-    </div>
 
     <div class="reconciliation-grid" aria-label="Ledger reconciliation">
       <div class="reconciliation-tile"><span>Purchase consideration</span><output id="ledger-purchase-reconciliation">—</output></div>
@@ -628,27 +742,115 @@
     </div>
 
     <div class="outcome-summary" aria-label="Illustrative ownership outcome">
-      <div class="outcome-tile"><span>Primary owner · projected cash released by legal ownership</span><output id="ledger-owner-outcome">—</output></div>
-      <div class="outcome-tile"><span>Partner · projected cash released by legal ownership</span><output id="ledger-partner-outcome">—</output></div>
+      <div class="outcome-tile"><span>Primary owner · net sale share before own CPF</span><output id="ledger-owner-outcome">—</output></div>
+      <div class="outcome-tile"><span>Partner · net sale share before own CPF</span><output id="ledger-partner-outcome">—</output></div>
     </div>
 
-    <div class="ledger-table-wrap table-scroll" role="region" aria-label="Scrollable exact-dollar acquisition funding ledger" tabindex="0">
-      <table>
-        <colgroup><col><col><col><col><col><col><col><col><col><col><col><col><col><col></colgroup>
-        <thead><tr>
-          <th scope="col">Date</th><th scope="col">Action</th><th scope="col">Type</th><th scope="col">Payment amount</th><th scope="col">% of price</th>
-          <th scope="col">Owner cash</th><th scope="col">Owner CPF</th><th id="ledger-loan-column-heading" scope="col">Joint loan</th><th scope="col">Partner cash</th><th scope="col">Partner CPF</th>
-          <th scope="col">Allocated</th><th scope="col">Difference</th><th scope="col">Check</th><th scope="col">Remove</th>
-        </tr></thead>
-        <tbody id="funding-ledger-body"></tbody>
-        <tfoot><tr>
-          <th colspan="3" scope="row">Full acquisition ledger</th><td id="ledger-payment-total">—</td><td>—</td>
-          <td id="ledger-primary-cash-footer">—</td><td id="ledger-primary-cpf-footer">—</td><td id="ledger-loan-footer">—</td><td id="ledger-partner-cash-footer">—</td><td id="ledger-partner-cpf-footer">—</td>
-          <td id="ledger-allocated-footer">—</td><td id="ledger-difference-footer">—</td><td>—</td><td aria-label="No action">—</td>
-        </tr></tfoot>
-      </table>
+    <details class="ledger-editor" id="funding-ledger-editor">
+      <summary>Edit exact-dollar funding rows <span id="funding-ledger-editor-summary">Detailed rows are collapsed</span></summary>
+      <div class="ledger-editor-body">
+        <div class="ledger-editor-toolbar"><button id="add-funding-row" type="button">+ Add row</button></div>
+        <div class="ledger-guide" aria-label="Ledger row type definitions">
+          <div><b>Property payment</b><span>Purchase consideration. Counts toward the price and can include a bank-loan draw.</span></div>
+          <div><b>Acquisition cost</b><span>BSD, legal fees and other costs. Included in owner outlay, never in the purchase price.</span></div>
+          <div><b>Timeline note</b><span>A dated action such as receiving or exercising the S&amp;P. No amount or funding.</span></div>
+        </div>
+        <p class="ledger-scroll-hint" id="funding-ledger-scroll-hint">Swipe horizontally to review payment amounts and every funding source.</p>
+        <div class="ledger-table-wrap table-scroll" role="region" aria-label="Scrollable exact-dollar acquisition funding ledger" tabindex="0">
+          <table>
+            <colgroup><col><col><col><col><col><col><col><col><col><col><col><col><col><col></colgroup>
+            <thead><tr>
+              <th scope="col">Date</th><th scope="col">Action</th><th scope="col">Type</th><th scope="col">Payment amount</th><th scope="col">% of price</th>
+              <th scope="col">Owner cash</th><th scope="col">Owner CPF</th><th id="ledger-loan-column-heading" scope="col">Joint loan</th><th scope="col">Partner cash</th><th scope="col">Partner CPF</th>
+              <th scope="col">Allocated</th><th scope="col">Difference</th><th scope="col">Check</th><th scope="col">Remove</th>
+            </tr></thead>
+            <tbody id="funding-ledger-body"></tbody>
+            <tfoot><tr>
+              <th colspan="3" scope="row">Full acquisition ledger</th><td id="ledger-payment-total">—</td><td>—</td>
+              <td id="ledger-primary-cash-footer">—</td><td id="ledger-primary-cpf-footer">—</td><td id="ledger-loan-footer">—</td><td id="ledger-partner-cash-footer">—</td><td id="ledger-partner-cpf-footer">—</td>
+              <td id="ledger-allocated-footer">—</td><td id="ledger-difference-footer">—</td><td>—</td><td aria-label="No action">—</td>
+            </tr></tfoot>
+          </table>
+        </div>
+        <p class="ledger-footnote">Enter the sample dates and exact amounts directly in the rows above. Each monetary row balances only when its five funding sources equal its payment amount. Ledger-edited dates and amounts are planning allocations: they do not rewrite the base loan-interest schedule unless you change the main property inputs and regenerate the ledger. Purchase-price, loan, owner-equity and acquisition-cost checks remain independent.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="dashboard-card" id="financing-interest-card" aria-labelledby="financing-interest-title">
+    <div class="dashboard-heading"><div><h2 id="financing-interest-title">Financing interest &amp; CPF refund</h2><p>Separates financing cost from principal repayment and estimates what must be returned to CPF at the planned sale.</p></div></div>
+    <div class="finance-panels">
+      <section class="finance-panel" aria-labelledby="bank-interest-title">
+        <h3 id="bank-interest-title">Bank loan at planned sale</h3>
+        <p>Based on the main generated loan schedule. Exact lender redemption statements, lock-in charges and bank fees are not inferred.</p>
+        <div class="finance-metrics">
+          <div class="finance-metric"><span>Scheduled interest paid</span><output id="bank-interest-paid">—</output></div>
+          <div class="finance-metric"><span>Estimated accrued interest to sale</span><output id="bank-interest-accrued">—</output></div>
+          <div class="finance-metric"><span>Total bank interest to redemption</span><output id="bank-interest-total">—</output></div>
+          <div class="finance-metric"><span>Outstanding principal</span><output id="bank-principal-outstanding">—</output></div>
+          <div class="finance-metric"><span>Estimated redemption amount</span><output id="bank-redemption-total">—</output></div>
+        </div>
+        <p class="finance-note" id="bank-interest-note">Calculating the bank position at the planned sale…</p>
+      </section>
+
+      <section class="finance-panel" aria-labelledby="cpf-refund-title">
+        <h3 id="cpf-refund-title">CPF savings and accrued interest</h3>
+        <p>Illustrative constant-rate estimate. For a couple, purchase CPF comes from each owner’s dated ledger allocations—not the legal ownership split.</p>
+        <div class="cpf-table table-scroll" role="region" aria-label="CPF refund estimate by owner" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">Owner</th><th scope="col">Principal used</th><th scope="col">Accrued interest</th><th scope="col">Refund required</th><th scope="col">Available from proceeds</th></tr></thead>
+            <tbody>
+              <tr><th id="cpf-primary-name" scope="row">Owner 1</th><td id="cpf-primary-principal">—</td><td id="cpf-primary-interest">—</td><td id="cpf-primary-refund">—</td><td id="cpf-primary-available">—</td></tr>
+              <tr id="cpf-partner-row" hidden><th id="cpf-partner-name" scope="row">Partner</th><td id="cpf-partner-principal">—</td><td id="cpf-partner-interest">—</td><td id="cpf-partner-refund">—</td><td id="cpf-partner-available">—</td></tr>
+            </tbody>
+            <tfoot><tr><th scope="row">Household estimate</th><td id="cpf-household-principal">—</td><td id="cpf-household-interest">—</td><td id="cpf-estimated-refund">—</td><td id="cpf-estimated-available">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="cpf-summary" aria-label="CPF estimate reconciliation">
+          <div><span>Estimated refund shortfall</span><output id="cpf-estimated-shortfall">—</output></div>
+          <div><span>Exact / entered refund in projection</span><output id="cpf-applied-refund">—</output></div>
+          <div><span>Entered refund available from proceeds</span><output id="cpf-applied-available">—</output></div>
+        </div>
+        <div class="cpf-actions"><p id="cpf-refund-status" role="status" aria-live="polite">Calculating the CPF estimate…</p><button id="apply-cpf-estimate" type="button">Apply estimate to projection</button></div>
+      </section>
     </div>
-    <p class="ledger-footnote">Enter the sample dates and exact amounts directly in the rows above. Each monetary row balances only when its five funding sources equal its payment amount. Ledger-edited dates and amounts are planning allocations: they do not rewrite the base loan-interest schedule unless you change the main property inputs and regenerate the ledger. Purchase-price, loan, owner-equity and acquisition-cost checks remain independent.</p>
+    <section class="owner-outcome-section" id="owner-sale-outcome" aria-labelledby="owner-sale-outcome-title">
+      <div class="owner-outcome-heading">
+        <div><h3 id="owner-sale-outcome-title">Illustrative sale allocation by owner</h3><p>Splits the combined value by legal ownership first, then routes each owner’s own CPF refund from that share. CPF returned to an owner remains that person’s wealth; it is not a property loss.</p></div>
+        <span class="owner-outcome-badge">Legal-share scenario</span>
+      </div>
+      <div class="owner-outcome-cards single" id="owner-outcome-cards">
+        <article class="owner-outcome-card" id="owner-outcome-primary-card">
+          <header><h4 id="owner-outcome-primary-name">Owner 1</h4><span id="owner-outcome-primary-share">100% legal share</span></header>
+          <dl>
+            <div class="owner-combined"><dt id="owner-outcome-primary-combined-label">Combined value retained · legal-share split</dt><dd id="owner-outcome-primary-combined">—</dd></div>
+            <div class="owner-cash"><dt id="owner-outcome-primary-cash-label">Cash remaining after own CPF</dt><dd id="owner-outcome-primary-cash">—</dd></div>
+            <div class="owner-cpf"><dt>Own CPF refund routed from this share</dt><dd id="owner-outcome-primary-cpf">—</dd></div>
+            <div class="owner-bank"><dt>Bank interest share · included in costs</dt><dd id="owner-outcome-primary-bank-interest">—</dd></div>
+            <div class="owner-costs"><dt>Modelled non-principal cost share</dt><dd id="owner-outcome-primary-costs">—</dd></div>
+            <div class="owner-profit"><dt id="owner-outcome-primary-profit-label">Illustrative economic profit share</dt><dd id="owner-outcome-primary-profit">—</dd></div>
+          </dl>
+        </article>
+        <article class="owner-outcome-card" id="owner-outcome-partner-card" hidden>
+          <header><h4 id="owner-outcome-partner-name">Partner</h4><span id="owner-outcome-partner-share">50% legal share</span></header>
+          <dl>
+            <div class="owner-combined"><dt id="owner-outcome-partner-combined-label">Combined value retained · legal-share split</dt><dd id="owner-outcome-partner-combined">—</dd></div>
+            <div class="owner-cash"><dt id="owner-outcome-partner-cash-label">Cash remaining after own CPF</dt><dd id="owner-outcome-partner-cash">—</dd></div>
+            <div class="owner-cpf"><dt>Own CPF refund routed from this share</dt><dd id="owner-outcome-partner-cpf">—</dd></div>
+            <div class="owner-bank"><dt>Bank interest share · included in costs</dt><dd id="owner-outcome-partner-bank-interest">—</dd></div>
+            <div class="owner-costs"><dt>Modelled non-principal cost share</dt><dd id="owner-outcome-partner-costs">—</dd></div>
+            <div class="owner-profit"><dt id="owner-outcome-partner-profit-label">Illustrative economic profit share</dt><dd id="owner-outcome-partner-profit">—</dd></div>
+          </dl>
+        </article>
+      </div>
+      <div class="owner-outcome-household" aria-label="Household sale outcome reconciliation">
+        <div><span>Household combined value retained</span><output id="owner-outcome-household-combined">—</output></div>
+        <div><span>CPF routed to owners’ accounts</span><output id="owner-outcome-household-cpf">—</output></div>
+        <div><span>Household cash remaining</span><output id="owner-outcome-household-cash">—</output></div>
+      </div>
+      <p class="owner-outcome-status" id="owner-outcome-status" role="status">Calculating the owner outcome…</p>
+      <p class="owner-outcome-note"><strong>Owner cash = that owner’s legal-share portion of combined value − CPF routed to that owner.</strong> CPF routing follows the household CPF estimate and each owner’s estimated principal plus accrued interest; it is not capped by legal share. A negative owner result is an illustrative equalisation gap, not an automatic cash top-up. This is not a conveyancing distribution, bank-liability decision or private equalisation agreement. Modelled costs, bank interest and economic profit are legal-share illustrations, not each person’s actual servicing history or return.</p>
+    </section>
   </section>
 
   <section class="dashboard-card" aria-labelledby="timeline-title">
@@ -673,14 +875,15 @@
         <dl>
           <div><dt>Projected sale price</dt><dd id="waterfall-sale">—</dd></div>
           <div><dt>Uncalled developer payments</dt><dd id="waterfall-uncalled">—</dd></div>
-          <div><dt>Outstanding bank loan</dt><dd id="waterfall-loan">—</dd></div>
+          <div><dt>Outstanding bank principal</dt><dd id="waterfall-loan">—</dd></div>
+          <div><dt>Accrued bank interest to sale</dt><dd id="waterfall-bank-accrued">—</dd></div>
           <div><dt>Selling allowance</dt><dd id="waterfall-selling">—</dd></div>
           <div><dt>Seller’s Stamp Duty</dt><dd id="waterfall-ssd">—</dd></div>
           <div><dt>Sale legal / other costs</dt><dd id="waterfall-fixed">—</dd></div>
-          <div><dt>CPF refund entered</dt><dd id="waterfall-cpf">—</dd></div>
+          <div><dt>CPF refund available from proceeds</dt><dd id="waterfall-cpf">—</dd></div>
           <div class="total"><dt id="waterfall-total-label">Estimated cash released</dt><dd id="waterfall-total">—</dd></div>
         </dl>
-        <p class="waterfall-note">Cash released is not investment profit. Loan principal repayment and CPF refund move owner equity; they are not additional property losses.</p>
+        <p class="waterfall-note">Cash released is not investment profit. Loan principal repayment and CPF refund move owner equity; they are not additional property losses. If a property is sold at market value and the proceeds are insufficient, CPF generally does not require a cash top-up for the CPF refund shortfall; a below-market disposal can be treated differently.</p>
       </aside>
     </div>
   </section>
@@ -697,16 +900,16 @@
     <details class="method">
       <summary>How this planner calculates the result</summary>
       <div class="method-grid">
-        <div><h3>Return definitions</h3><p class="formula">projected sale = purchase price × (1 + annual growth)<sup>holding years</sup></p><p class="formula">economic profit = sale − purchase − acquisition costs − sale costs − SSD − mortgage interest − holding costs + net rent</p><p>Mortgage principal is not subtracted again: it either reduces the loan balance or returns as owner equity.</p></div>
+        <div><h3>Return definitions</h3><p class="formula">projected sale = purchase price × (1 + annual growth)<sup>holding years</sup></p><p class="formula">economic profit = sale − purchase − acquisition costs − sale costs − SSD − bank interest to redemption − holding costs + net rent</p><p>Mortgage principal is not subtracted again: it either reduces the loan balance or returns as owner equity.</p></div>
         <div><h3>Ledger reconciliation</h3><p class="formula">row difference = payment amount − cash − CPF − bank loan</p><p>Property-payment rows reconcile to the purchase price. Acquisition costs reconcile separately, while timeline notes have no financial value.</p></div>
         <div><h3>Duties included</h3><ul><li>BSD is estimated automatically on the higher entered purchase price or market value.</li><li>ABSD is included only when you enter an amount.</li><li>Mortgage duty is estimated at 0.4% of the loan, capped at S$500.</li><li>SSD is estimated from exact entered legal dates and the higher entered sale value.</li></ul></div>
-        <div><h3>Planning limits</h3><ul><li>The ledger is not evidence of beneficial ownership or debt liability.</li><li>CPF accrued interest is excluded unless entered in the refund field.</li><li>Developer-specific clauses, bank fees and exact lender accrual are not inferred.</li><li>Confirm every amount and payment date against signed documents.</li></ul></div>
+        <div><h3>Planning limits</h3><ul><li>The ledger is not evidence of beneficial ownership or debt liability.</li><li>CPF accrued interest uses a constant-rate estimate; CPF’s Home ownership dashboard is authoritative.</li><li>Developer-specific clauses, bank fees, lock-in charges and exact lender accrual are not inferred.</li><li>Confirm every amount and payment date against signed documents.</li></ul></div>
       </div>
     </details>
   </section>
 
   <p class="disclaimer">This is an educational scenario tool, not a valuation, forecast, offer of credit, tax opinion, ownership declaration or conveyancing advice. Confirm contractual payments, loan liability, CPF usage and refund, stamp duties, legal dates and exemptions with the relevant bank, developer, CPF Board, IRAS and your solicitor.</p>
-  <p class="sources">Method references, checked 8 August 2026: <a href="https://www.ura.gov.sg/-/media/Corporate/Property/Home-Buyers-Guide/Home-Buyers-Guide-Sep-2025-full.pdf" target="_blank" rel="noopener noreferrer">URA Home Buyers’ Guide</a> · <a href="https://www.moneysense.gov.sg/costs-of-borrowing-flat-rate-monthly-rest-and-effective-interest-rate/" target="_blank" rel="noopener noreferrer">MoneySense monthly-rest guidance</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer%27s-stamp-duty-%28bsd%29" target="_blank" rel="noopener noreferrer">IRAS BSD</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/selling-or-disposing-property/seller%27s-stamp-duty-%28ssd%29-for-residential-property" target="_blank" rel="noopener noreferrer">IRAS SSD</a></p>
+  <p class="sources">Method references, checked 8 August 2026: <a href="https://www.ura.gov.sg/-/media/Corporate/Property/Home-Buyers-Guide/Home-Buyers-Guide-Sep-2025-full.pdf" target="_blank" rel="noopener noreferrer">URA Home Buyers’ Guide</a> · <a href="https://www.moneysense.gov.sg/costs-of-borrowing-flat-rate-monthly-rest-and-effective-interest-rate/" target="_blank" rel="noopener noreferrer">MoneySense monthly-rest guidance</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer%27s-stamp-duty-%28bsd%29" target="_blank" rel="noopener noreferrer">IRAS BSD</a> · <a href="https://www.iras.gov.sg/taxes/stamp-duty/for-property/selling-or-disposing-property/seller%27s-stamp-duty-%28ssd%29-for-residential-property" target="_blank" rel="noopener noreferrer">IRAS SSD</a> · <a href="https://www.cpf.gov.sg/member/home-ownership/using-your-cpf-to-buy-a-home/cpf-refund-when-selling-or-transferring-property" target="_blank" rel="noopener noreferrer">CPF refund guidance</a> · <a href="https://www.cpf.gov.sg/service/article/how-is-my-cpf-interest-computed-and-credited-into-my-accounts" target="_blank" rel="noopener noreferrer">CPF interest computation</a></p>
   </div>
 </main>
 
@@ -787,8 +990,8 @@
   </form>
 </dialog>
 
-<script src="assets/condo-loan-timeline-planner.js?v=20260808-1"></script>
-<script src="assets/condo-loan-timeline-funding-v3.js?v=20260808-2"></script>
+<script src="assets/condo-loan-timeline-planner.js?v=20260808-3"></script>
+<script src="assets/condo-loan-timeline-funding-v3.js?v=20260809-3"></script>
 <script src="assets/research-shell.js"></script>
 </body>
 </html>
