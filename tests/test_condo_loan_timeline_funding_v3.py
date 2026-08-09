@@ -15,7 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE_SCRIPT = ROOT / "site" / "assets" / "condo-loan-timeline-planner.js"
 FUNDING_SCRIPT = ROOT / "site" / "assets" / "condo-loan-timeline-funding-v3.js"
 V3_PAGE = ROOT / "condo_loan_timeline_planner.html"
-STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1"
+STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v2"
+LEGACY_STORAGE_KEY = "housing-estate-framework.condo-loan-timeline-planner-v3.draft.v1"
 
 
 def _run_node(expression: str) -> dict | list:
@@ -352,6 +353,23 @@ def test_owner_sale_outcome_handles_shortfall_rounding_and_unknown_cpf_split() -
     )
 
 
+def test_unreliable_automatic_zero_suppresses_provisional_owner_routing() -> None:
+    result = _run_node(
+        "(() => {const projection={cpfRefund:0,acquisitionCosts:0,holdingCosts:0,"
+        "netRent:0,base:{cashReleased:400000,cpfRefundAvailable:0,saleCosts:0,"
+        "ssd:0,economicProfit:0},loanAtSale:{totalInterestToRedemption:0}};"
+        "return funding.buildOwnerSaleOutcome({projection,partnerEnabled:true,"
+        "partnerOwnershipPct:50,cpfWeightsReliable:false,suppressCpfAllocation:true,"
+        "cpfEstimate:{primary:{refundRequired:10000},"
+        "partner:{refundRequired:5000}}});})()"
+    )
+
+    assert result["cpfAllocationKnown"] is False
+    assert result["primary"]["cpfAvailable"] is None
+    assert result["primary"]["signedCash"] is None
+    assert result["partner"]["signedCash"] is None
+
+
 def test_exact_couple_plan_allocates_all_four_owner_sources_and_preserves_loan() -> None:
     result = _run_node(
         f"(() => {{const projection={SAMPLE_PROJECTION};"
@@ -422,9 +440,77 @@ def test_couple_plan_reports_shortage_and_excess_for_every_borrower_choice() -> 
 
 
 def test_v3_exports_a_versioned_browser_draft_key() -> None:
-    result = _run_node("({storageKey:funding.STORAGE_KEY})")
+    result = _run_node(
+        "({storageKey:funding.STORAGE_KEY,legacyStorageKey:funding.LEGACY_STORAGE_KEY,"
+        "storageVersion:funding.STORAGE_VERSION,"
+        "versionDatabase:funding.VERSION_DATABASE})"
+    )
 
-    assert result == {"storageKey": STORAGE_KEY}
+    assert result == {
+        "storageKey": STORAGE_KEY,
+        "legacyStorageKey": LEGACY_STORAGE_KEY,
+        "storageVersion": 2,
+        "versionDatabase": "housing-estate-framework.condo-loan-timeline-planner-v3",
+    }
+
+
+def test_cpf_refund_resolution_distinguishes_blank_auto_from_exact_zero() -> None:
+    result = _run_node(
+        "(() => ({"
+        "automatic:funding.resolveCpfRefundAmount({exactRefund:null,"
+        "estimatedRefund:154286.294,automaticReliable:true,"
+        "lastReliableAutoRefund:null}),"
+        "exactZero:funding.resolveCpfRefundAmount({exactRefund:0,"
+        "estimatedRefund:154286.29,automaticReliable:true,"
+        "lastReliableAutoRefund:120000}),"
+        "retained:funding.resolveCpfRefundAmount({exactRefund:null,"
+        "estimatedRefund:170000,automaticReliable:false,"
+        "lastReliableAutoRefund:154286.29}),"
+        "unavailable:funding.resolveCpfRefundAmount({exactRefund:null,"
+        "estimatedRefund:170000,automaticReliable:false,"
+        "lastReliableAutoRefund:null})}))()"
+    )
+
+    assert result["automatic"] == {
+        "mode": "auto",
+        "activeRefund": 154_286.29,
+        "lastReliableAutoRefund": 154_286.29,
+        "automaticReliable": True,
+    }
+    assert result["exactZero"]["mode"] == "exact"
+    assert result["exactZero"]["activeRefund"] == 0
+    assert result["retained"]["activeRefund"] == 154_286.29
+    assert result["retained"]["automaticReliable"] is False
+    assert result["unavailable"]["activeRefund"] == 0
+    assert result["unavailable"]["lastReliableAutoRefund"] is None
+
+
+def test_portable_draft_envelope_is_versioned_and_strict() -> None:
+    result = _run_node(
+        "(() => {const draft={schemaVersion:2,form:{values:{},checks:{}},"
+        "savedAt:'2026-08-09T01:02:03.000Z'};"
+        "const envelope=funding.createDraftExport(draft,'Base 3% plan',"
+        "'2026-08-09T02:03:04.000Z');"
+        "const parsed=funding.parseDraftExport(JSON.stringify(envelope));"
+        "let future='';try{funding.parseDraftExport(JSON.stringify({"
+        "...envelope,formatVersion:2}));}catch(error){future=error.message;}"
+        "let unknown='';try{funding.parseDraftExport(JSON.stringify({"
+        "...envelope,unexpected:true}));}catch(error){unknown=error.message;}"
+        "let oversized='';try{funding.parseDraftExport('x'.repeat(1000001));}"
+        "catch(error){oversized=error.message;}"
+        "return {envelope,parsedName:parsed.name,future,unknown,oversized};})()"
+    )
+
+    assert result["envelope"]["format"] == (
+        "housing-estate-framework.condo-loan-timeline"
+    )
+    assert result["envelope"]["formatVersion"] == 1
+    assert result["envelope"]["calculatorVersion"] == "3.2.0"
+    assert result["envelope"]["kind"] == "draft"
+    assert result["parsedName"] == "Base 3% plan"
+    assert "format version" in result["future"]
+    assert "unsupported fields" in result["unknown"]
+    assert "too large" in result["oversized"]
 
 
 def test_cpf_refund_estimate_uses_dated_owner_allocations_before_sale_only() -> None:
@@ -506,6 +592,7 @@ def test_planner_structure_and_script_dependencies_are_explicit() -> None:
         "partner-settings": False,
         "advanced-cost-details": False,
         "cpf-assumptions-details": False,
+        "plan-versions-details": False,
         "funding-ledger-editor": False,
     }
     assert {source.split("?", 1)[0] for source in parser.scripts} == {
@@ -565,7 +652,17 @@ def test_planner_structure_and_script_dependencies_are_explicit() -> None:
         "cpf-estimated-available",
         "cpf-estimated-shortfall",
         "cpf-applied-refund",
-        "apply-cpf-estimate",
+        "cpf-refund-exact",
+        "use-automatic-cpf",
+        "version-name",
+        "save-plan-version",
+        "saved-version-select",
+        "load-plan-version",
+        "delete-plan-version",
+        "export-plan-draft",
+        "import-plan-draft",
+        "import-plan-file",
+        "version-manager-status",
         "owner-sale-outcome",
         "owner-outcome-primary-card",
         "owner-outcome-partner-card",

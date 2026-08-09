@@ -848,6 +848,7 @@
       currencyValue("cpf-primary-monthly");
       currencyValue("cpf-partner-monthly");
       numberValue("cpf-oa-rate", { minimum: 0, maximum: 20 });
+      currencyValue("cpf-refund-exact", { optional: true });
 
       if (purchasePrice <= 0) addError("purchase-price", "Purchase price must be above zero.");
       if (loanAmount > purchasePrice) addError("loan-amount", "Loan amount cannot exceed the purchase price.");
@@ -1161,6 +1162,7 @@
       if (event.target.matches("input[name='property-route']")) updateRoutePanels();
       calculate();
     });
+    form.addEventListener("cpf-effective-change", () => calculate());
     form.querySelectorAll("[data-currency-input]").forEach(input => {
       input.addEventListener("blur", () => {
         try {
