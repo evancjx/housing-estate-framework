@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import shutil
 import threading
+from urllib.parse import urlencode
 
 import pytest
 
@@ -239,6 +240,76 @@ def test_default_form_uses_progressive_disclosure(chromium_page) -> None:
     _open_details(page, "#advanced-cost-details")
     playwright_api.expect(page.locator("#purchase-legal")).to_be_visible()
     playwright_api.expect(page.locator("#selling-cost-percent")).to_be_visible()
+
+
+def test_decision_lab_handoff_prefills_editable_planner_assumptions(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    query = urlencode({
+        "from": "project-exit",
+        "project": "THE POIZ RESIDENCES",
+        "purchasePrice": "1000000",
+        "purchaseDate": "2026-08-01",
+        "saleDate": "2031-08-01",
+        "datePrecision": "month",
+        "annualGrowth": "3",
+        "sellingRate": "2.18",
+        "saleCosts": "3000",
+        "areaSqft": "527",
+    })
+
+    page.goto(f"{url}?{query}", wait_until="load")
+
+    playwright_api.expect(page.locator("#planner-errors")).to_be_hidden()
+    assert page.locator("#project-name").input_value() == "THE POIZ RESIDENCES"
+    assert page.locator("#purchase-price").input_value() == "1,000,000"
+    assert page.locator("#loan-amount").input_value() == "750,000"
+    assert page.locator("#area-sqft").input_value() == "527"
+    assert page.locator("#acquisition-date").input_value() == "2026-08-01"
+    assert page.locator("#sale-date").input_value() == "2031-08-01"
+    assert page.locator("#annual-growth").input_value() == "3"
+    assert page.locator("#selling-cost-percent").input_value() == "2.18"
+    assert page.locator("#sale-legal").input_value() == "0"
+    assert page.locator("#sale-other").input_value() == "3,000"
+    playwright_api.expect(
+        page.locator("#decision-lab-handoff-notice")
+    ).to_be_visible()
+    playwright_api.expect(
+        page.locator("#decision-lab-handoff-notice")
+    ).to_contain_text("Replace both dates before relying on the Seller’s Stamp Duty estimate")
+    playwright_api.expect(page.locator("#draft-save-status")).to_contain_text(
+        "Saved automatically"
+    )
+    assert page.evaluate(
+        "key => JSON.parse(localStorage.getItem(key)).decisionLabDatePrecision",
+        STORAGE_KEY,
+    ) == "month"
+
+    page.goto(url, wait_until="load")
+    playwright_api.expect(
+        page.locator("#decision-lab-handoff-notice")
+    ).to_be_visible()
+    assert page.locator("#acquisition-date").input_value() == "2026-08-01"
+    assert page.locator("#sale-date").input_value() == "2031-08-01"
+
+    page.locator("#acquisition-date").fill("2026-08-08")
+    page.locator("#sale-date").fill("2031-08-08")
+    page.locator("#confirm-decision-lab-dates").click()
+    playwright_api.expect(
+        page.locator("#decision-lab-handoff-notice")
+    ).to_be_hidden()
+    playwright_api.expect(page.locator("#draft-save-status")).to_contain_text(
+        "Saved automatically"
+    )
+    page.reload(wait_until="load")
+    playwright_api.expect(
+        page.locator("#decision-lab-handoff-notice")
+    ).to_be_hidden()
+    assert page.locator("#acquisition-date").input_value() == "2026-08-08"
+    assert page.locator("#sale-date").input_value() == "2031-08-08"
 
 
 def test_holding_scenario_follows_desktop_scroll_only(chromium_page) -> None:

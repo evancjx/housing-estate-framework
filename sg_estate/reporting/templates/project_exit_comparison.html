@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Compare achieved same-size private-project transaction cohorts and inspect an explicit projected exit scenario without treating it as a forecast, layout comparison or liquidity estimate.">
+<title>Singapore private-project exit comparison</title>
+<link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
+<link rel="stylesheet" href="assets/project-exit-comparison.css">
+<script defer src="assets/research-shell.js" data-research-shell></script>
+<script defer src="assets/project-exit-comparison.js"></script>
+</head>
+<body>
+<main id="research-content">
+  <header class="page-hero">
+    <p class="eyebrow">Private-project evidence · achieved transactions</p>
+    <h1>Compare an exit scenario without pretending to forecast the market.</h1>
+    <p class="lede">Choose two to five projects, define one recorded-size cohort, then inspect achieved evidence and a transparent projected scenario. The page does not rank projects or infer unrecorded unit attributes.</p>
+    <div class="proof" aria-label="Evidence coverage">
+      <span>__PROJECT_COUNT__ named projects</span>
+      <span>2–5 unique selections</span>
+      <span>Transactions through __LATEST_PROJECT_MONTH__</span>
+    </div>
+    <p class="vintage"><b>Generated:</b> <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time></p>
+  </header>
+
+  <section class="boundary-grid" aria-labelledby="boundary-title">
+    <h2 id="boundary-title">What this comparison can—and cannot—say</h2>
+    <article>
+      <p class="eyebrow">Recorded cohort</p>
+      <h3>Same size is a filter, not a floor plan</h3>
+      <p>The cohort includes achieved transactions whose recorded area falls within your tolerance. Similar area does not establish the same layout, bedroom count, floor, facing, condition or stack.</p>
+    </article>
+    <article>
+      <p class="eyebrow">Explicit assumptions</p>
+      <h3>A projected scenario, not a forecast</h3>
+      <p>Growth and selling costs are user inputs. Outputs show scenario arithmetic around recorded evidence; they do not predict a future valuation or return.</p>
+    </article>
+    <article>
+      <p class="eyebrow">Market boundary</p>
+      <h3>No liquidity claim</h3>
+      <p>Transaction count describes recorded depth only. It does not estimate time to sell, buyer demand at your price, or whether a future sale will complete.</p>
+    </article>
+  </section>
+
+  <section id="decision-lab" aria-labelledby="decision-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Decision lab</p>
+        <h2 id="decision-title">Set one comparable cohort and one exit scenario.</h2>
+      </div>
+      <p>Every selected project uses the same area, tolerance and sale-state controls.</p>
+    </div>
+
+    <form id="decision-form" novalidate>
+      <fieldset class="project-fieldset">
+        <legend>Projects</legend>
+        <p class="field-help">Select two to five different project records. The letter order is preserved in results and copied views.</p>
+        <div id="project-slots" data-min-projects="2" data-max-projects="5">
+__DEFAULT_PROJECT_SLOTS__
+        </div>
+        <datalist id="project-options">
+__PROJECT_OPTIONS__
+        </datalist>
+        <button id="add-project" type="button">Add another project</button>
+      </fieldset>
+
+      <fieldset class="cohort-fieldset">
+        <legend>Recorded same-size cohort</legend>
+        <div class="input-grid">
+          <label for="target-area">
+            <span>Target recorded area</span>
+            <span class="input-with-unit"><input id="target-area" name="target_area" type="number" inputmode="decimal" min="200" max="10000" step="1" value="900" required><span>sqft</span></span>
+          </label>
+          <label for="area-tolerance">
+            <span>Area tolerance</span>
+            <span class="input-with-unit"><input id="area-tolerance" name="area_tolerance" type="number" inputmode="decimal" min="0" max="50" step="1" value="10" required><span>%</span></span>
+          </label>
+          <label for="sale-state">
+            <span>Recorded sale state</span>
+            <select id="sale-state" name="sale_state">
+              <option value="all">All sale states</option>
+              <option value="New Sale">New Sale</option>
+              <option value="Resale" selected>Resale</option>
+              <option value="Sub Sale">Sub Sale</option>
+            </select>
+          </label>
+        </div>
+        <p class="field-help">For example, 900 sqft with a 10% tolerance includes records from 810 to 990 sqft. Bedroom and layout labels are not used to manufacture comparability.</p>
+      </fieldset>
+
+      <fieldset class="scenario-fieldset">
+        <legend>Projected exit scenario</legend>
+        <div class="input-grid">
+          <label for="purchase-date">
+            <span>Scenario purchase month</span>
+            <input id="purchase-date" name="purchase_date" type="month" value="__PURCHASE_MONTH__" required>
+          </label>
+          <label for="planned-sale-date">
+            <span>Planned sale month</span>
+            <input id="planned-sale-date" name="planned_sale_date" type="month" value="__PLANNED_SALE_MONTH__" required>
+          </label>
+          <label for="annual-growth">
+            <span>Assumed annual price change</span>
+            <span class="input-with-unit"><input id="annual-growth" name="annual_growth" type="number" inputmode="decimal" min="-20" max="20" step="0.1" value="3" required><span>%</span></span>
+          </label>
+          <label for="selling-rate">
+            <span>Assumed percentage selling cost</span>
+            <span class="input-with-unit"><input id="selling-rate" name="selling_rate" type="number" inputmode="decimal" min="0" max="10" step="0.01" value="2.18" required><span>%</span></span>
+          </label>
+          <label for="sale-costs">
+            <span>Other assumed sale costs</span>
+            <span class="input-with-unit"><span>S$</span><input id="sale-costs" name="sale_costs" type="number" inputmode="decimal" min="0" max="1000000" step="100" value="3000" required></span>
+          </label>
+        </div>
+        <p class="field-help">The scenario does not include financing, purchase duties, Seller’s Stamp Duty (SSD), maintenance, property tax, renovation, CPF accrued interest or vacancy unless the rendered result explicitly states otherwise. The linked full planner can estimate SSD after you replace month-only dates with the exact legal dates.</p>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="primary-action" type="submit">Compare recorded cohorts</button>
+        <button id="copy-view" type="button">Copy view</button>
+        <button id="reset-view" type="reset">Reset example</button>
+      </div>
+      <p id="status-message" role="status" aria-live="polite"></p>
+      <p id="form-error" role="alert" hidden></p>
+    </form>
+
+    <section id="comparison-results" aria-label="Comparison results">
+      <div class="empty-state">
+        <p class="eyebrow">Comparison output</p>
+        <h2 id="results-title">Run the example to inspect the evidence.</h2>
+        <p>Results will keep achieved same-size observations, coverage caveats and projected scenario values visibly separate.</p>
+      </div>
+    </section>
+  </section>
+
+  <aside class="source-note" aria-labelledby="source-title">
+    <h2 id="source-title">Evidence and coverage</h2>
+    <p>Project identity, tenure, straight-line station diagnostics and primary-school radius evidence come from the committed comparison catalog. Transaction rows are fetched from the committed shard named for each project. Core metrics use canonical URA transactions from the latest 60 complete months. The incomplete historical backfill stays separately labelled and is not blended into those metrics; the known January–May 2021 gap is not filled.</p>
+    <p><b>Official transaction source:</b> Urban Redevelopment Authority (URA), <a href="https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch" target="_blank" rel="noopener noreferrer">Private Residential Property Transactions</a>, with the committed snapshot showing source records through __LATEST_PROJECT_MONTH__. This page was generated on <time datetime="__GENERATED_DATE_ISO__">__GENERATED_DATE_LABEL__</time>; publication and reuse remain subject to the <a href="https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence/" target="_blank" rel="noopener noreferrer">URA API Terms and Open Data Licence</a>. URA does not endorse this scenario tool, its calculations or its interpretations.</p>
+    <p><b>Location context:</b> project coordinates and station proximity are reviewed diagnostics derived with <a href="https://www.onemap.gov.sg/apidocs/" target="_blank" rel="noopener noreferrer">OneMap</a> and the committed rail layer; school names originate from the <a href="https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view" target="_blank" rel="noopener noreferrer">MOE school directory</a>. Straight-line project-coordinate screening is not a walking route, station-exit guarantee or official Primary 1 home–school-distance determination.</p>
+  </aside>
+</main>
+
+<script id="project-exit-data" type="application/json">__PROJECT_EXIT_DATA_JSON__</script>
+<noscript><p class="noscript-note">Enable JavaScript to validate project selections, load the committed transaction shards and calculate the scenario.</p></noscript>
+</body>
+</html>

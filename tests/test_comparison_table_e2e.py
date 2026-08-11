@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import json
 from pathlib import Path
+import re
 import shutil
 import threading
 
@@ -13,6 +15,16 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "comparison_table.html"
+
+
+def _embedded_rows() -> list[dict]:
+    match = re.search(
+        r'<script id="estate-comparison-data" type="application/json">(.*?)</script>',
+        PAGE.read_text(encoding="utf-8"),
+        flags=re.DOTALL,
+    )
+    assert match
+    return json.loads(match.group(1))
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
@@ -167,12 +179,14 @@ def test_sort_is_keyboard_operable_and_state_survives_reload(chromium_page) -> N
 
 def test_dead_band_and_non_residential_gate_are_visible(chromium_page) -> None:
     page, url = chromium_page
+    pasir_ris = next(row for row in _embedded_rows() if row["estate"] == "PASIR RIS")
+    expected_gap = f"{float(pasir_ris['gap_yf']):+.2f}"
     _load(page, url)
 
     page.locator("[data-view='liveability']").click()
     page.locator("#estate-search").fill("Pasir Ris")
     gap_text = page.locator("td[data-column-key='gap_yf']").inner_text()
-    assert "+0.22" in gap_text
+    assert expected_gap in gap_text
     assert "matched" in gap_text
     assert "punches above" not in gap_text
 

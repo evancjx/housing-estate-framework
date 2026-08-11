@@ -10,6 +10,19 @@ persona-relative Liveability, and tenure-segmented Value.
 - **[Framework map](docs/FRAMEWORK_MAP.md)** — model flow, criteria, and interpretation conditions.
 - **[Repository guide](AGENTS.md)** — development and framework invariants.
 
+### Current product direction
+
+- **[Project exit comparison is the active rights-light comparison feature.](docs/superpowers/specs/2026-08-10-project-exit-comparison-design.md)** It combines achieved, size-matched private-property transaction evidence with explicit user assumptions for purchase and sale timing, annual growth and selling costs. It is a scenario tool—not a valuation, forecast or substitute for professional advice.
+
+### Product backlog
+
+- **Floor-plan comparison is deferred.** The intended customer feature requires rights-cleared images and visual comparison; a metadata-only or bring-your-own-image substitute is not the approved MVP. See the [backlog decision](TODO.md#image-based-floor-plan-library-and-comparison).
+- **[Property comparison and floor-plan comparison design](docs/superpowers/specs/2026-08-10-property-comparison-floor-plan-design.md)** — retained research covering competitor and Stacked Homes findings, the proposed experience, data model and rights strategy.
+- **[Floor-plan comparison implementation plan](docs/superpowers/plans/2026-08-10-property-comparison-floor-plan.md)** — retained gated roadmap for resumption after a viable rights-cleared pilot is available.
+- **[Floor-plan publication policy](docs/FLOOR_PLAN_PUBLICATION_POLICY.md)** — fail-closed rules for source rights, permitted links, field provenance, immutable IDs, append-only events, calibrated renditions, expiry and takedown.
+- **[Floor-plan layout glossary](docs/FLOOR_PLAN_LAYOUT_GLOSSARY.md)** — controlled, evidence-based vocabulary for areas, rooms, service spaces, topology, openings and plan relationships, with subjective marketing terms explicitly excluded from facts.
+- **[Floor-plan safe-pilot plan](docs/superpowers/plans/2026-08-10-floor-plan-comparison-safe-pilot.md)** — retained PR-sized sequence; it is not scheduled and its metadata-only stages are supporting gates, not a releasable substitute for image comparison.
+
 ## 📁 frameworks/  (active specs, reference data, historical record)
 
 **Active specs:**
@@ -70,6 +83,7 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 - **[buyer_profile_table.html](buyer_profile_table.html)** — scenario-specific buyer screening with hard constraints, persona/horizon fit, tenure-separated Value and profile-local ranks. Refresh `data/outputs/buyer_profile_output.csv` with `python models/buyer_profile_model.py`, then rebuild the page with `python -m sg_estate.reporting.builders.buyer_profile`.
 - **[mrt_comparison_table.html](mrt_comparison_table.html)** — interactive official-source MRT/LRT code-line explorer with audited service status, a T5 planned overlay, derived representative-point diagnostics and gated estate context. Refresh the source layer with `python3 models/ingest_lta_rail.py`, cascade model outputs with `make pipeline-reuse AS_OF_YEAR=2026`, then re-run `python3 -m sg_estate.reporting.builders.mrt_comparison`.
 - **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project explorer with focused Overview, Access, Schools, Price, Transactions and Estate context views. Filters and sorting are shareable through the URL. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/outputs/private_project_locations.csv`, then `make private-project-table`.
+- **[project_exit_comparison.html](project_exit_comparison.html)** — interactive exit-scenario comparison for selected private projects, using achieved size-matched transactions and user-controlled purchase date, planned sale date, annual growth and selling-cost assumptions. Evidence coverage and scenario outputs stay separate rather than collapsing into one project score. Rebuild with `make project-exit-comparison`.
 - **[condo_framework_comparison.html](condo_framework_comparison.html)** — select any two named condominium records and compare achieved transactions, tenure, access and schools alongside the same estate-context Provision, Liveability, private Value, Employment, Risk and Life Path factors as `comparison_table.html`. Run `make condo-framework-comparison`.
 - **[multi_condo_framework_comparison.html](multi_condo_framework_comparison.html)** — build an ordered set of two to five named condominiums, keep project A as the reference, compare the latest five complete years or all safely mapped history, and inspect annual medians, detailed analysis and full filtered transaction ledgers before the separate estate-context framework. Run `make multi-condo-framework-comparison`; this also refreshes the compact on-demand shards in `site/assets/condo-transactions/`.
 - **[katong_condo_comparison.html](katong_condo_comparison.html)** — reviewed eight-project Katong comparison with sale-state, bedroom, floor, size, growth, liquidity and full-ledger controls. Run `make katong-comparison`; verified exact-unit analysis activates only when the authorised EdgeProp unit CSV documented in `scrapers/README.md` is present.

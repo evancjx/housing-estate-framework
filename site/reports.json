@@ -40,6 +40,16 @@
       "featured": true
     },
     {
+      "id": "project-exit-comparison",
+      "path": "project_exit_comparison.html",
+      "title": "Project exit comparison",
+      "category": "private-property",
+      "kind": "tool",
+      "summary": "Compare project-specific exit scenarios against achieved, size-matched private-property transactions while keeping assumptions, sample coverage and costs visible.",
+      "tags": ["condominium", "project", "exit", "transaction", "scenario", "selling costs"],
+      "featured": true
+    },
+    {
       "id": "mrt-comparison",
       "path": "mrt_comparison_table.html",
       "title": "MRT and LRT context explorer",
