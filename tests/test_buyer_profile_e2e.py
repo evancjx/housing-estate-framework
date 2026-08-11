@@ -117,6 +117,13 @@ def _load(page, url: str) -> None:
 def test_profile_status_views_and_reset_intersect_without_console_errors(chromium_page) -> None:
     playwright_api = pytest.importorskip("playwright.sync_api")
     page, url, _ = chromium_page
+    expected_default_count = sum(
+        1
+        for row in _embedded_rows()
+        if row["profile_id"] == "forming-family-hdb-balanced"
+        and row["tenure"] == "hdb"
+        and row["eligible"] is True
+    )
     page_errors: list[str] = []
     console_errors: list[str] = []
     page.on("pageerror", lambda error: page_errors.append(str(error)))
@@ -128,9 +135,13 @@ def test_profile_status_views_and_reset_intersect_without_console_errors(chromiu
     )
 
     _load(page, url)
-    playwright_api.expect(page.locator("#visible-count")).to_have_text("21")
-    assert page.locator("#buyer-profile-table-body tr").count() == 21
-    assert page.locator("#buyer-profile-table-body th[scope='row']").count() == 21
+    playwright_api.expect(page.locator("#visible-count")).to_have_text(
+        str(expected_default_count)
+    )
+    assert page.locator("#buyer-profile-table-body tr").count() == expected_default_count
+    assert page.locator("#buyer-profile-table-body th[scope='row']").count() == (
+        expected_default_count
+    )
     playwright_api.expect(page.locator(".research-shell-nav")).to_be_visible()
     assert "Forming family · HDB" in page.locator("#scenario-detail").inner_text()
 
@@ -161,7 +172,9 @@ def test_profile_status_views_and_reset_intersect_without_console_errors(chromiu
     playwright_api.expect(page.locator("#scenario-detail .scenario-copy")).to_have_attribute("data-stable", "yes")
 
     page.locator("#reset-view").click()
-    playwright_api.expect(page.locator("#visible-count")).to_have_text("21")
+    playwright_api.expect(page.locator("#visible-count")).to_have_text(
+        str(expected_default_count)
+    )
     playwright_api.expect(page.locator("[data-profile='forming-family-hdb-balanced']")).to_have_attribute("aria-pressed", "true")
     playwright_api.expect(page.locator("[data-view='overview']")).to_have_attribute("aria-pressed", "true")
     assert page.locator("#estate-search").input_value() == ""

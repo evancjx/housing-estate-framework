@@ -513,6 +513,54 @@ def test_portable_draft_envelope_is_versioned_and_strict() -> None:
     assert "too large" in result["oversized"]
 
 
+def test_decision_lab_handoff_is_explicit_versioned_and_strict() -> None:
+    result = _run_node(
+        "(() => {const valid=funding.parseDecisionLabHandoff("
+        "'?from=project-exit&project=The%20LakeGarden%20Residences'"
+        "+'&purchasePrice=1000000&purchaseDate=2023-08-08'"
+        "+'&saleDate=2026-09-08&datePrecision=month&annualGrowth=3&sellingRate=2.18'"
+        "+'&saleCosts=3000&areaSqft=527');"
+        "const legacy=funding.parseDecisionLabHandoff("
+        "'?from=project-exit&project=Legacy&purchasePrice=1000000'"
+        "+'&purchaseDate=2023-08-01&saleDate=2026-09-01&annualGrowth=3'"
+        "+'&sellingRate=2.18&saleCosts=3000&areaSqft=527');"
+        "const unrelated=funding.parseDecisionLabHandoff('?from=another-tool');"
+        "let badDate='';try{funding.parseDecisionLabHandoff("
+        "'?from=project-exit&project=Example&purchasePrice=1000000'"
+        "+'&purchaseDate=2026-02-30&saleDate=2030-01-01&annualGrowth=3'"
+        "+'&sellingRate=2.18&saleCosts=3000&areaSqft=527');}"
+        "catch(error){badDate=error.message;}"
+        "let badRate='';try{funding.parseDecisionLabHandoff("
+        "'?from=project-exit&project=Example&purchasePrice=1000000'"
+        "+'&purchaseDate=2026-01-01&saleDate=2030-01-01&annualGrowth=3'"
+        "+'&sellingRate=21&saleCosts=3000&areaSqft=527');}"
+        "catch(error){badRate=error.message;}"
+        "let badPrecision='';try{funding.parseDecisionLabHandoff("
+        "'?from=project-exit&project=Example&purchasePrice=1000000'"
+        "+'&purchaseDate=2026-01-01&saleDate=2030-01-01&datePrecision=guess'"
+        "+'&annualGrowth=3&sellingRate=2.18&saleCosts=3000&areaSqft=527');}"
+        "catch(error){badPrecision=error.message;}"
+        "return {valid,legacy,unrelated,badDate,badRate,badPrecision};})()"
+    )
+
+    assert result["valid"] == {
+        "project": "The LakeGarden Residences",
+        "purchasePrice": 1_000_000,
+        "purchaseDate": "2023-08-08",
+        "saleDate": "2026-09-08",
+        "datePrecision": "month",
+        "annualGrowth": 3,
+        "sellingRate": 2.18,
+        "saleCosts": 3_000,
+        "areaSqft": 527,
+    }
+    assert result["legacy"]["datePrecision"] == "month"
+    assert result["unrelated"] is None
+    assert "purchaseDate date is invalid" in result["badDate"]
+    assert "sellingRate value is invalid" in result["badRate"]
+    assert "datePrecision value is invalid" in result["badPrecision"]
+
+
 def test_cpf_refund_estimate_uses_dated_owner_allocations_before_sale_only() -> None:
     result = _run_node(
         f"(() => {{const projection={SAMPLE_PROJECTION};"

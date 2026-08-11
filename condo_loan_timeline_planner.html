@@ -105,6 +105,10 @@
   .errors strong { display:block; margin-bottom:5px; }
   .errors ul { margin:0; padding-left:20px; }
   .errors a { color:inherit; }
+  .handoff-notice { margin:0 0 18px; padding:13px 16px; border:1px solid #d9c79d;
+    border-radius:6px; background:#fff9ea; color:#665133; font-size:12px; line-height:1.5; }
+  .handoff-notice button { margin-top:9px; min-height:36px; padding:7px 11px; border:1px solid #9a7d43;
+    border-radius:4px; background:white; color:#5d4824; font-weight:800; }
   .result-card { grid-column:1; grid-row:1; position:sticky; top:12px; align-self:start;
     z-index:4; min-width:0;
     max-height:calc(100vh - 24px); overflow:auto; overscroll-behavior:contain;
@@ -597,6 +601,7 @@
       <div class="card-head"><h2 id="inputs-title">Build your holding plan</h2><p>Start with the essential figures. Open the optional sections only when you need more control.</p></div>
       <form id="timeline-form" novalidate>
         <div class="errors" id="planner-errors" role="alert" aria-live="polite" hidden></div>
+        <div class="handoff-notice" id="decision-lab-handoff-notice" role="note" hidden><strong>Confirm exact legal dates:</strong> the comparison supplied month-only dates, provisionally set here to the first day of each month. Replace both dates before relying on the Seller’s Stamp Duty estimate, then confirm below.<br><button id="confirm-decision-lab-dates" type="button">I’ve entered the exact legal dates</button></div>
 
         <fieldset>
           <legend>1. What are you buying?</legend>
@@ -1031,7 +1036,7 @@
 </dialog>
 
 <script src="assets/condo-loan-timeline-planner.js?v=20260809-4"></script>
-<script src="assets/condo-loan-timeline-funding-v3.js?v=20260809-4"></script>
+<script src="assets/condo-loan-timeline-funding-v3.js?v=20260811-1"></script>
 <script src="assets/research-shell.js"></script>
 </body>
 </html>

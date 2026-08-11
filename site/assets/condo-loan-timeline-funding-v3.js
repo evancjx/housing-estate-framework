@@ -108,6 +108,56 @@
     return name;
   }
 
+  function parseDecisionLabHandoff(search) {
+    const params = new URLSearchParams(String(search || ""));
+    if (params.get("from") !== "project-exit") return null;
+
+    const project = String(params.get("project") || "").trim();
+    if (!project || project.length > 160 || /[\u0000-\u001f\u007f]/.test(project)) {
+      throw new RangeError("The comparison project name is invalid");
+    }
+    const numeric = (key, minimum, maximum) => {
+      const raw = params.get(key);
+      const value = raw == null || raw.trim() === "" ? NaN : Number(raw);
+      if (!Number.isFinite(value) || value < minimum || value > maximum) {
+        throw new RangeError(`The comparison ${key} value is invalid`);
+      }
+      return value;
+    };
+    const isoDate = key => {
+      const value = String(params.get(key) || "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        throw new RangeError(`The comparison ${key} date is invalid`);
+      }
+      const parsed = new Date(`${value}T00:00:00Z`);
+      if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+        throw new RangeError(`The comparison ${key} date is invalid`);
+      }
+      return value;
+    };
+
+    const purchaseDate = isoDate("purchaseDate");
+    const saleDate = isoDate("saleDate");
+    const datePrecision = String(params.get("datePrecision") || "month");
+    if (datePrecision !== "day" && datePrecision !== "month") {
+      throw new RangeError("The comparison datePrecision value is invalid");
+    }
+    if (saleDate <= purchaseDate) {
+      throw new RangeError("The comparison sale date must be after the purchase date");
+    }
+    return {
+      project,
+      purchasePrice: numeric("purchasePrice", 1, 100_000_000),
+      purchaseDate,
+      saleDate,
+      datePrecision,
+      annualGrowth: numeric("annualGrowth", -99, 30),
+      sellingRate: numeric("sellingRate", 0, 20),
+      saleCosts: numeric("saleCosts", 0, 10_000_000),
+      areaSqft: numeric("areaSqft", 1, 100_000),
+    };
+  }
+
   function resolveCpfRefundAmount(options) {
     if (!options || typeof options !== "object" || Array.isArray(options)) {
       throw new TypeError("CPF refund resolution options are required");
@@ -943,6 +993,7 @@
     let saveTimer = null;
     let pendingDraftSave = false;
     let suppressSaveUntilUserEdit = false;
+    let decisionLabDatePrecision = null;
     let coupleFundingPlan = null;
     let coupleSetupComplete = false;
     let coupleDialogDraft = null;
@@ -984,6 +1035,10 @@
     function draftStatus(message) {
       const output = byId("draft-save-status");
       if (output) output.textContent = message;
+    }
+
+    function renderDecisionLabDateNotice() {
+      byId("decision-lab-handoff-notice").hidden = decisionLabDatePrecision !== "month";
     }
 
     function localStorageAccess() {
@@ -1527,6 +1582,7 @@
       return {
         schemaVersion: STORAGE_VERSION,
         savedAt: new Date().toISOString(),
+        ...(decisionLabDatePrecision ? { decisionLabDatePrecision } : {}),
         form: { values, checks },
         coupleFunding: encodeCoupleFunding(),
         coupleDialogDraft: encodeCoupleDialogDraft(),
@@ -1592,13 +1648,20 @@
       const saved = normalizeSavedDraft(source);
       const allowedTopLevel = new Set([
         "schemaVersion", "savedAt", "form", "coupleFunding", "coupleDialogDraft",
-        "cpfRefundState", "ledgers",
+        "cpfRefundState", "ledgers", "decisionLabDatePrecision",
       ]);
       if (Object.keys(saved).some(key => !allowedTopLevel.has(key))) {
         throw new RangeError("Saved draft contains an unknown section");
       }
       if (!saved.savedAt || !Number.isFinite(Date.parse(String(saved.savedAt)))) {
         throw new RangeError("Saved draft timestamp is invalid");
+      }
+      const restoredDecisionLabDatePrecision = saved.decisionLabDatePrecision == null
+        ? null
+        : String(saved.decisionLabDatePrecision);
+      if (restoredDecisionLabDatePrecision !== null
+          && restoredDecisionLabDatePrecision !== "month") {
+        throw new RangeError("Saved decision-lab date precision is invalid");
       }
       if (!saved.form || typeof saved.form !== "object" || Array.isArray(saved.form)) {
         throw new TypeError("Saved form is missing");
@@ -1669,6 +1732,7 @@
         restoredCoupleDialogDraft,
         restoredCpfRefundState,
         restoredLedgers,
+        restoredDecisionLabDatePrecision,
       };
     }
 
@@ -1703,6 +1767,7 @@
 
     function applySavedDraft(source) {
       const prepared = prepareSavedDraft(source);
+      const previousDecisionLabDatePrecision = decisionLabDatePrecision;
       const snapshots = {};
       [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
         const input = byId(id);
@@ -1740,6 +1805,8 @@
           ? prepared.restoredCpfRefundState.exactCents
           : restoredAuto?.cents;
         byId("cpf-refund").value = moneyInput(fromCents(effectiveCents || 0));
+        decisionLabDatePrecision = prepared.restoredDecisionLabDatePrecision;
+        renderDecisionLabDateNotice();
         customCounter = 0;
         ledgers.forEach(state => {
           state.rows.forEach(row => {
@@ -1749,6 +1816,8 @@
         });
         return prepared.saved;
       } catch (error) {
+        decisionLabDatePrecision = previousDecisionLabDatePrecision;
+        renderDecisionLabDateNotice();
         [...FORM_VALUE_IDS, ...FORM_CHECK_IDS].forEach(id => {
           const input = byId(id);
           if (input.type === "checkbox" || input.type === "radio") input.checked = snapshots[id];
@@ -1801,12 +1870,55 @@
       coupleDialogDraft = null;
       coupleDialogDraftActive = false;
       reliableAutoCpfByContext.clear();
+      decisionLabDatePrecision = null;
+      renderDecisionLabDateNotice();
       byId("cpf-refund").value = "0";
       customCounter = 0;
       if (invalidDraftFound) {
         draftStatus("A saved draft could not be read; defaults were restored and any legacy copy was preserved.");
       }
       return false;
+    }
+
+    function applyDecisionLabHandoff(restoredDraft) {
+      let handoff;
+      try {
+        handoff = parseDecisionLabHandoff(view.location.search);
+      } catch (error) {
+        draftStatus(`Comparison scenario not loaded: ${error.message}.`);
+        return false;
+      }
+      if (!handoff) return false;
+      if (restoredDraft && !view.confirm(
+        `Load the ${handoff.project} comparison scenario? This replaces selected values in your current working draft; named versions remain unchanged.`
+      )) {
+        draftStatus("Comparison scenario was not loaded; your working draft is unchanged.");
+        return false;
+      }
+
+      byId("project-name").value = handoff.project;
+      byId("area-sqft").value = String(handoff.areaSqft);
+      byId("acquisition-date").value = handoff.purchaseDate;
+      byId("purchase-price").value = moneyInput(handoff.purchasePrice);
+      byId("purchase-market-value").value = moneyInput(handoff.purchasePrice);
+      byId("loan-amount").value = moneyInput(roundMoney(handoff.purchasePrice * 0.75));
+      byId("annual-growth").value = String(handoff.annualGrowth);
+      byId("sale-date").value = handoff.saleDate;
+      byId("selling-cost-percent").value = String(handoff.sellingRate);
+      byId("sale-market-value").value = "";
+      byId("sale-legal").value = "0";
+      byId("sale-other").value = moneyInput(handoff.saleCosts);
+      decisionLabDatePrecision = handoff.datePrecision === "month" ? "month" : null;
+      renderDecisionLabDateNotice();
+      ledgers.clear();
+      reliableAutoCpfByContext.clear();
+      suppressSaveUntilUserEdit = false;
+      draftStatus(
+        `Loaded ${handoff.project} from the decision lab. The loan starts at an editable 75% of entry price; review the property route, financing, CPF and holding-cost assumptions before saving a named version.${handoff.datePrecision === "month" ? " Month-only dates were provisionally set to the first day; replace them with exact legal dates before relying on SSD." : ""}`
+      );
+      byId("project-name").dispatchEvent(new view.Event("input", { bubbles: true }));
+      scheduleSave();
+      return true;
     }
 
     function activateDraft(source) {
@@ -2712,7 +2824,13 @@
     }
 
     const restoredDraft = restoreDraft();
+    const handoffApplied = applyDecisionLabHandoff(restoredDraft);
     if (restoredDraft) {
+      form.querySelector("input[name='property-route']:checked").dispatchEvent(
+        new view.Event("change", { bubbles: true })
+      );
+    }
+    if (handoffApplied) {
       form.querySelector("input[name='property-route']:checked").dispatchEvent(
         new view.Event("change", { bubbles: true })
       );
@@ -2984,6 +3102,11 @@
         showError(`Cannot remove that row: ${error.message}`);
       }
     });
+    byId("confirm-decision-lab-dates").addEventListener("click", () => {
+      decisionLabDatePrecision = null;
+      renderDecisionLabDateNotice();
+      scheduleSave();
+    });
     form.addEventListener("input", event => {
       if (event.target.closest("#plan-versions-details, #funding-ledger-editor")) return;
       scheduleSave();
@@ -3008,6 +3131,8 @@
       coupleDialogDraftActive = false;
       dialogRequiresEnableConfirmation = false;
       reliableAutoCpfByContext.clear();
+      decisionLabDatePrecision = null;
+      renderDecisionLabDateNotice();
       const dialog = byId("couple-funding-dialog");
       if (dialog.open && typeof dialog.close === "function") dialog.close();
       else dialog.removeAttribute("open");
@@ -3062,6 +3187,7 @@
     normalizeShare,
     ownerFundingAllocation,
     parseDraftExport,
+    parseDecisionLabHandoff,
     resolveCpfRefundAmount,
     splitOutcome,
     toCents,

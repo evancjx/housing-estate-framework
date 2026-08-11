@@ -1,7 +1,7 @@
 PYTHON ?= python3
 AS_OF_YEAR ?= 2026
 
-.PHONY: smoke pages-check pages-build framework-diagram master private-project-locations private-project-school-metrics private-project-table condo-framework-comparison multi-condo-framework-comparison poiz-east-comparison poiz-east-unit-growth katong-comparison tampines-area-guide canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline pipeline-reuse
+.PHONY: smoke pages-check pages-build framework-diagram master private-project-locations private-project-school-metrics private-project-table project-exit-comparison condo-framework-comparison multi-condo-framework-comparison poiz-east-comparison poiz-east-unit-growth katong-comparison tampines-area-guide canberra-d27-analysis canberra-d27-strategies canberra-d27-reports private-bedrooms pipeline pipeline-reuse
 
 # Reproducibility + correctness gate: the full pytest suite.
 smoke:
@@ -38,6 +38,10 @@ private-project-school-metrics:
 # Generate the private project comparison table from committed transactions and optional geocodes.
 private-project-table:
 	$(PYTHON) models/gen_private_project_comparison_html.py
+
+# Generate the rights-light project exit scenario comparison.
+project-exit-comparison:
+	$(PYTHON) models/gen_project_exit_comparison_html.py
 
 # Generate the interactive two-condominium project and estate-context comparison.
 condo-framework-comparison:

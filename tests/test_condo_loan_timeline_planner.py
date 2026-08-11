@@ -262,7 +262,7 @@ def test_page_is_labelled_local_responsive_and_uses_official_sources() -> None:
     assert len(parser.ids) == len(set(parser.ids)), "HTML ids must be unique"
     assert set(parser.scripts) == {
         "assets/condo-loan-timeline-planner.js?v=20260809-4",
-        "assets/condo-loan-timeline-funding-v3.js?v=20260809-4",
+        "assets/condo-loan-timeline-funding-v3.js?v=20260811-1",
         "assets/research-shell.js",
     }
     for input_id in (
@@ -284,6 +284,7 @@ def test_page_is_labelled_local_responsive_and_uses_official_sources() -> None:
     ):
         assert input_id in parser.labels
     assert 'id="planner-errors" role="alert" aria-live="polite" hidden' in html
+    assert 'id="decision-lab-handoff-notice" role="note" hidden' in html
     assert 'class="table-scroll" role="region"' in html
     assert "uncalled developer payments" in html.lower()
     assert "cash released is not investment profit" in html.lower()
