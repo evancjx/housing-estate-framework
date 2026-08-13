@@ -101,7 +101,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     )
     assert (
         by_project["Canberra Crescent Residences"].captured_iso
-        == "2026-08-13T11:08:08+08:00"
+        == "2026-08-13T11:34:14+08:00"
     )
     assert (
         by_project["PARKTOWN Residence"].captured_iso
@@ -138,6 +138,7 @@ def test_tanah_merah_property_analysis_portfolio_is_complete():
         "2026-07-27-144a-lorong-sarina.md",
         "2026-08-03-canberra-crescent-residences.md",
         "2026-08-08-canberra-crescent-residences.md",
+        "2026-08-13-canberra-crescent-residences.md",
         "2026-08-03-the-lakegarden-residences.md",
         "2026-08-08-the-lakegarden-residences.md",
         "2026-08-08-parktown-residence.md",
@@ -262,6 +263,51 @@ def test_real_canberra_three_bedroom_exit_page_shows_cost_adjusted_result():
     assert "S$2.497m / S$2,522 psf" in page
     assert "-S$308k" in page
     assert "S$2.392m" in page
+
+
+def test_real_canberra_comprehensive_page_preserves_all_three_analyses():
+    analysis = parse_property_analysis(
+        ANALYSIS_DIR / "2026-08-13-canberra-crescent-residences.md"
+    )
+    entry = analysis.catalog_entry(is_latest=True)
+    card = build_pages_site._property_cards([analysis])
+    page = render_property_analysis_page(analysis)
+
+    assert entry["market_stage"] == "new launch"
+    assert "Property analysis · New Launch · 13 Aug 2026" in card
+
+    # The current publication is a synthesis, not a replacement for just the
+    # latest price-list study. Each dated analysis retains a decision-useful
+    # result in the rendered page.
+    assert "S$1,985,963" in page
+    assert "S$2,625,498" in page
+    assert "S$3,344,916" in page
+    assert "~748m" in page
+    assert "S$2.497m" in page
+    assert "-S$308k" in page
+    assert "S$2.392m" in page
+    assert "S$21,688" in page
+    assert "1.008%" in page
+    assert "2–5 November 2025" in page
+    assert "Transaction multiplicity" in page
+    assert "The two newer reported sales are not silently promoted" in page
+    assert 'id="frozen-repository-artefacts"' in page
+    assert "data/raw/ura/pmi_d27_2021-2026.csv" in page
+    assert "c55f3789d06609b21cc1a21caa3e8cee375be1b7a4e5fc744ada1e84b693fd8f" in page
+
+    assert 'id="changelog-and-analysis-method-changes"' in page
+    assert 'id="source-register-and-capture-notes"' in page
+    assert (
+        'href="https://evancjx.github.io/housing-estate-framework/'
+        'property-analysis-2026-08-03-canberra-crescent-residences.html"'
+        in page
+    )
+    assert (
+        'href="https://evancjx.github.io/housing-estate-framework/'
+        'property-analysis-2026-08-08-canberra-crescent-residences.html"'
+        in page
+    )
+    assert "data/runs" not in page
 
 
 def test_real_parktown_card_and_page_show_new_launch_quantum_analysis():
