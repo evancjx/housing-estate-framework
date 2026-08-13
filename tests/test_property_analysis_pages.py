@@ -291,9 +291,6 @@ def test_real_canberra_comprehensive_page_preserves_all_three_analyses():
     assert "2–5 November 2025" in page
     assert "Transaction multiplicity" in page
     assert "The two newer reported sales are not silently promoted" in page
-    assert 'id="frozen-repository-artefacts"' in page
-    assert "data/raw/ura/pmi_d27_2021-2026.csv" in page
-    assert "c55f3789d06609b21cc1a21caa3e8cee375be1b7a4e5fc744ada1e84b693fd8f" in page
 
     assert 'id="changelog-and-analysis-method-changes"' in page
     assert 'id="source-register-and-capture-notes"' in page

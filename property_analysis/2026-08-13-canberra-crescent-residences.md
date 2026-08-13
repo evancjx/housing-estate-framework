@@ -629,15 +629,6 @@ Distances are straight-line diagnostics based on the corrected reviewed Canberra
 10. [HDB rules on acquiring private property](https://www.hdb.gov.sg/managing-my-home/home-ownership/acquiring-private-property) and [Chencharu Close site annex](https://www.hdb.gov.sg/-/media/hdb-pulse/news/2024/hdb-launches-sale-site-at-chencharu-close/26092024-Annex1.pdf) — HDB MOP/ownership constraints and the separate 875-flat private pipeline.
 11. [LTA RTS Link page](https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/JB-Singapore_RTS_link.html) and [North-South Corridor page](https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/road_commuter_facilities/north_south_corridor.html) — current official delivery targets used in catalyst scenarios.
 
-### Frozen repository artefacts
-
-| Artefact | Identity and capture | Used for | Limitation |
-| --- | --- | --- | --- |
-| `data/raw/ura/pmi_d27_2021-2026.csv` | SHA-256 `c55f3789d06609b21cc1a21caa3e8cee375be1b7a4e5fc744ada1e84b693fd8f`; 2,884 D27 rows, including 340 exact-name subject rows through Jul 2026 | Official-source monthly sequence, prices, areas, floor bands, sale states, exact-area cohorts and matched D27 peers | Noncanonical raw snapshot rather than the promoted `ura_private.csv`; URA public fields omit exact unit and contract day, and later caveats or corrections can change the live service |
-| `data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv` | SHA-256 `b3efc66124fcede125bac92288b33ae2297c15e3167ab9d28c22e13e45570d47`; 336 subject rows through 15 Jun 2026 | Portal-published transaction dates, block and masked floor used as a secondary timing bridge | Explicitly `not_clean`; all subject unit stacks are masked and it must not be treated as official or complete URA evidence |
-
-The ignored research reconciliation used to audit the 13 August chart is not a published site asset and is deliberately not linked as public evidence. Its ambiguous assignments were left unforced. The controlled 95-unit price result is derived from the two linked PDFs below; the source schedules are public, but the transcription used for this report is not a canonical model input.
-
 ### Dated price schedules, inventory and secondary cross-checks
 
 1. [Huttons 13 September 2025 price list](https://portal.huttonsgroup.com/uploads/PriceList/697564dce09a4511a8d56e739ecdaabd/R070030E-20250913014538.pdf) and [12 November 2025 price list](https://portal.huttonsgroup.com/uploads/PriceList/697564dce09a4511a8d56e739ecdaabd/R070030E-20251112005006.pdf) — complete dated tower charts used for the controlled 95-unit comparison.
