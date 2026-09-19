@@ -326,6 +326,17 @@ def _occurrence(df: pd.DataFrame, key: list[str]) -> pd.Series:
     return df.groupby([source, *key], dropna=False).cumcount()
 
 
+def _latest_in_first_place(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+    """Keep the last copy of each key (newest source wins) at the key's first position.
+
+    Without the position, re-merging a refreshed export would move every one of
+    its rows to the end of the output and churn the whole file.
+    """
+    first = pd.Series(df.index, index=df.index).groupby([df[k] for k in keys], dropna=False).transform("min")
+    kept = df.drop_duplicates(subset=keys, keep="last")
+    return kept.assign(_first_pos=first.loc[kept.index])
+
+
 def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     """Drop transactions repeated across overlapping sources.
 
@@ -342,16 +353,17 @@ def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
             dedup_cols.append(extra)
     before = len(df)
 
+    helpers = ["_occurrence", "_first_pos", SOURCE_COL]
     if "type_of_area" not in df.columns:
         df = df.assign(_occurrence=_occurrence(df, dedup_cols))
-        df = df.drop_duplicates(subset=dedup_cols + ["_occurrence"], keep="last")
-        return df.drop(columns=["_occurrence", SOURCE_COL], errors="ignore"), before - len(df)
+        df = _latest_in_first_place(df, dedup_cols + ["_occurrence"]).sort_values("_first_pos", kind="stable")
+        return df.drop(columns=helpers, errors="ignore"), before - len(df)
 
     type_key = df["type_of_area"]
     has_type = type_key.notna() & type_key.astype(str).str.strip().ne("")
     typed = df[has_type]
     typed = typed.assign(_occurrence=_occurrence(typed, dedup_cols + ["type_of_area"]))
-    typed = typed.drop_duplicates(subset=dedup_cols + ["type_of_area", "_occurrence"], keep="last")
+    typed = _latest_in_first_place(typed, dedup_cols + ["type_of_area", "_occurrence"])
     legacy_blank = df[~has_type]
     legacy_blank = legacy_blank.assign(_occurrence=_occurrence(legacy_blank, dedup_cols))
 
@@ -368,9 +380,9 @@ def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
             legacy_blank["_occurrence"].to_numpy() >= blank_typed_count.to_numpy()
         ]
 
-    legacy_blank = legacy_blank.drop_duplicates(subset=dedup_cols + ["_occurrence"], keep="last")
-    df = pd.concat([legacy_blank, typed]).sort_index()
-    return df.drop(columns=["_occurrence", SOURCE_COL], errors="ignore"), before - len(df)
+    legacy_blank = _latest_in_first_place(legacy_blank, dedup_cols + ["_occurrence"])
+    df = pd.concat([legacy_blank, typed]).sort_values("_first_pos", kind="stable")
+    return df.drop(columns=helpers, errors="ignore"), before - len(df)
 
 
 def coverage_key(df: pd.DataFrame, other: pd.DataFrame) -> list[str]:
@@ -409,6 +421,23 @@ def write_csv_atomic(df: pd.DataFrame, out_path: Path) -> None:
         raise
 
 
+def zero_pad_districts(df: pd.DataFrame) -> pd.DataFrame:
+    """Write postal_district as two-digit text ("08"), leaving blanks alone.
+
+    Read with type inference, "08" becomes 8 and would be rewritten as "8",
+    churning every D01-D09 row on each --merge.
+    """
+    if "postal_district" not in df.columns:
+        return df
+    district = df["postal_district"]
+    present = district.notna() & district.astype(str).str.strip().ne("")
+    padded = (
+        district[present].astype(str).str.strip()
+        .str.replace(r"\.0$", "", regex=True).str.zfill(2)
+    )
+    return df.assign(postal_district=district.astype(object).where(~present, padded))
+
+
 def run(args):
     out_path = Path(args.out)
     frames = []
@@ -440,7 +469,7 @@ def run(args):
     combined = pd.concat(frames, ignore_index=True)
 
     if args.merge and out_path.exists():
-        existing = pd.read_csv(out_path)
+        existing = pd.read_csv(out_path, dtype={"postal_district": str}, low_memory=False)
         combined = pd.concat([existing, combined], ignore_index=True)
         combined, dropped = dedupe_transactions(combined)
         print(f"Merged with existing ({len(existing)} rows) → {len(combined)} rows total (deduped {dropped} rows)")
@@ -459,6 +488,7 @@ def run(args):
                     "Use --merge, add the missing raw files, or pass --allow-coverage-loss."
                 )
 
+    combined = zero_pad_districts(combined)
     write_csv_atomic(combined, out_path)
     print(f"\nWritten: {out_path}")
     print("\nRow counts by planning area:")

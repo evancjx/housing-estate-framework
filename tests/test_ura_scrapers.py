@@ -434,6 +434,98 @@ def test_run_keeps_identical_units_and_drops_overlapping_exports(tmp_path):
     assert not {"_source_file", "_occurrence"} & set(written.columns)
 
 
+def _pmi_export(path, district, price):
+    pd.DataFrame([{
+        "Project Name": f"PROJECT D{district}",
+        "Transacted Price ($)": f"{price:,}",
+        "Area (SQFT)": "1,076.39",
+        "Unit Price ($ PSF)": "1,500",
+        "Sale Date": "Aug-26",
+        "Street Name": "TEST ROAD",
+        "Type of Sale": "Resale",
+        "Type of Area": "Strata",
+        "Area (SQM)": "100",
+        "Property Type": "Condominium",
+        "Number of Units": "1",
+        "Tenure": "Freehold",
+        "Postal District": district,
+        "Market Segment": "Outside Central Region",
+        "Floor Level": "06 to 10",
+    }]).to_csv(path, index=False)
+
+
+def _ingest(files, out, merge):
+    ingest_ura_raw.run(argparse.Namespace(
+        files=[str(f) for f in files], raw_dir=None, out=str(out), merge=merge,
+        source_quality=None, allow_coverage_loss=False,
+    ))
+
+
+def test_merge_leaves_existing_rows_byte_identical_and_is_idempotent(tmp_path):
+    d08 = tmp_path / "pmi_d08_2021-2026.csv"
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d08, "08", 1_500_000)
+    _pmi_export(d27, "27", 1_200_000)
+    out = tmp_path / "ura_private.csv"
+
+    _ingest([d08], out, merge=False)
+    before = out.read_text()
+    _ingest([d27], out, merge=True)
+    after_first = out.read_text()
+    _ingest([d27], out, merge=True)
+
+    assert after_first.startswith(before)
+    assert out.read_text() == after_first
+    districts = pd.read_csv(out, dtype=str)["postal_district"].tolist()
+    assert districts == ["08", "27"]
+
+
+def test_remerging_an_ingested_export_keeps_rows_in_place(tmp_path):
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    d08 = tmp_path / "pmi_d08_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    _pmi_export(d08, "08", 1_500_000)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27, d08], out, merge=False)
+    before = out.read_text()
+
+    _ingest([d27], out, merge=True)
+
+    assert out.read_text() == before
+
+
+def test_merge_takes_revised_values_from_the_newer_export(tmp_path):
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    d08 = tmp_path / "pmi_d08_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    _pmi_export(d08, "08", 1_500_000)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27, d08], out, merge=False)
+    revised = pd.read_csv(d27, dtype=str).assign(Tenure="99 yrs lease commencing from 2020")
+    revised.to_csv(d27, index=False)
+
+    _ingest([d27], out, merge=True)
+
+    written = pd.read_csv(out, dtype=str)
+    assert written["postal_district"].tolist() == ["27", "08"]
+    assert written.loc[0, "tenure"] == "99 yrs lease commencing from 2020"
+
+
+def test_merge_zero_pads_unpadded_existing_districts(tmp_path):
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27], out, merge=False)
+    legacy = pd.read_csv(out, dtype=str, keep_default_na=False)
+    legacy = pd.concat([legacy.assign(postal_district="8", project_name="LEGACY"), legacy])
+    legacy.to_csv(out, index=False)
+
+    _ingest([d27], out, merge=True)
+
+    written = pd.read_csv(out, dtype=str)
+    assert sorted(written["postal_district"]) == ["08", "27"]
+
+
 def test_dedupe_keeps_distinct_exact_condo_units_apart():
     common = {
         "planning_area": "NOVENA",
