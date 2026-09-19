@@ -178,8 +178,27 @@ The URA Data Service API (`uraDataService/invokeUraDS`) is protected by an L7 WA
 that blocks non-browser HTTP clients. The Playwright scraper uses a real Chromium
 browser and bypasses this. The API client (`ura_pmi_api.py`) is included as a
 template; it may work if you have a pre-generated token or the WAF rules change.
+As of 2026-09-20 token generation and `invokeUraDS` calls succeeded with plain
+`requests` and a valid access key.
 
 Access key must be set as `URA_ACCESS_KEY` environment variable — **never hardcode it**.
+
+### Developer sales
+
+`--developer_sales START END` fetches `PMI_Resi_Developer_Sales` for each month
+in an inclusive `YYYY-MM` range and writes one row per project-month:
+
+```bash
+python scrapers/ura_pmi_api.py --developer_sales 2025-08 2026-08 --districts 27 \
+    --out_dir data/raw/ura/developer_sales
+```
+
+Columns: `ref_month`, project/street/district/segment/developer, `units_avail`,
+`launched_to_date`, `sold_to_date`, `launched_in_month`, `sold_in_month`, and
+`median_psf` / `lowest_psf` / `highest_psf` of units sold in the month. URA's
+cumulative `sold_to_date` can net out cancellations and revisions, so it does not
+always equal the running sum of `sold_in_month`; both are kept as reported. Keep
+the output outside `data/raw/ura/` itself so `ingest_ura_raw.py` does not glob it.
 
 ## EdgeProp condo/apartment zero-row re-scrape runbook
 

@@ -11,7 +11,7 @@ Summary: **A fresh URA District 27 export shows 347 New Sales (92.3%) and still 
 
 **The 13 August classification stands: moderate/selective potential quantum, not huge potential quantum.** Five weeks of new evidence tighten rather than loosen it.
 
-The official-source ledger has advanced from 340 to **347 New Sales** (92.3% of 376), with **no Sub Sale or Resale**. All seven caveats added since the last capture are **1,216 sq ft four-bedroom Standard homes** at **S$2.38m–S$2.488m / S$1,957–S$2,046 psf**. The 990 sq ft three-bedroom Premium format, which the previous report named the safer liquidity screen, has recorded **no caveat since June 2026** and has the largest residual count. Buyers who are still arriving are choosing the larger format at a slightly lower PSF.
+The official-source ledger has advanced from 340 to **347 New Sales** (92.3% of 376), with **no Sub Sale or Resale**. URA's own monthly developer-sales return confirms **346 sold to end-August 2026**, matching the caveat ledger exactly. All seven caveats added since the last capture are **1,216 sq ft four-bedroom Standard homes** at **S$2.38m–S$2.488m / S$1,957–S$2,046 psf**. The 990 sq ft three-bedroom Premium format, which the previous report named the safer liquidity screen, has recorded **no caveat since June 2026** and has the largest residual count. Buyers who are still arriving are choosing the larger format at a slightly lower PSF.
 
 The premium over completed substitutes has not narrowed. Size-matched 2026 evidence puts the subject's three-bedroom-sized homes at **S$2,028 psf** against **S$1,731 psf** for The Watergardens at Canberra sub-sales and **S$1,661 psf** for The Commodore's first resales. Watergardens' annual sub-sale median has slipped from **S$1,771 (2024) to S$1,745 (2025) to S$1,720 psf (2026)**.
 
@@ -51,6 +51,7 @@ The methodology is unchanged from the 13 August report. It keeps every official 
 | Tenure | 99 years from 4 November 2024 |
 | Brochure expected vacant possession | 30 April 2030; legal completion 30 April 2033. The executed agreement controls; portal dates of 2028–2029 are not substituted |
 | URA-source project rows | **347 New Sale; 0 Sub Sale; 0 Resale** |
+| URA developer sales, sold to date | **346 at end-August 2026** (official monthly return) |
 | Caveat sell-through | 347 / 376 = **92.3%** |
 | 2026 subject sales | 49 caveats; median **S$2,018 psf**; range S$1,883–S$2,092 psf |
 | Monthly pace, 2026 | Jan 8, Feb 9, Mar 7, Apr 8, May 8, **Jun 1, Jul 2, Aug 5, Sep 1 (partial)** |
@@ -101,6 +102,30 @@ The two-home gap is consistent with options granted but not yet lodged as caveat
 | July 2026 | 2 | 1,216 sq ft | S$2.469m–S$2.482m | S$2,030–S$2,041 |
 | August 2026 | 5 | 1,216 sq ft | S$2.38m–S$2.488m | S$1,957–S$2,046 |
 | September 2026 (partial) | 1 | 1,216 sq ft | S$2.464m | S$2,026 |
+
+### Official URA developer sales
+
+URA's monthly developer-sales return (`PMI_Resi_Developer_Sales`, fetched through the URA Data Service API on 20 September 2026) is the official month-by-month record. Prices are URA's median, lowest and highest PSF of units sold in the month.
+
+| Month | Sold in month | Sold to date | Median PSF | Lowest–highest PSF |
+| --- | ---: | ---: | ---: | ---: |
+| Aug 2025 (launch) | 211 | 211 | S$1,991 | S$1,851–S$2,151 |
+| Sep 2025 | 28 | 238 | S$2,001 | S$1,912–S$2,051 |
+| Oct 2025 | 36 | 274 | S$1,995 | S$1,902–S$2,057 |
+| Nov 2025 | 9 | 283 | S$2,005 | S$1,941–S$2,082 |
+| Dec 2025 | 8 | 297 | S$2,008 | S$1,962–S$2,088 |
+| Jan 2026 | 8 | 306 | S$1,984 | S$1,957–S$2,035 |
+| Feb 2026 | 7 | 313 | S$2,018 | S$1,980–S$2,092 |
+| Mar 2026 | 7 | 322 | S$1,956 | S$1,883–S$2,087 |
+| Apr 2026 | 8 | 330 | S$2,018 | S$1,936–S$2,076 |
+| May 2026 | 8 | 338 | S$2,038 | S$1,951–S$2,066 |
+| Jun 2026 | 1 | 339 | S$2,015 | S$2,015 |
+| Jul 2026 | 2 | 341 | S$2,036 | S$2,030–S$2,041 |
+| Aug 2026 | 5 | 346 | S$2,031 | S$1,957–S$2,046 |
+
+- **The cumulative total is the reliable figure.** URA's sold-to-date reaches 346 at end-August, the same as the caveat count. Monthly "sold in month" figures do not always sum to it; December 2025, for example, shows 8 sold but a 14-unit cumulative step. The table reports both exactly as published.
+- **The median PSF has barely moved.** For twelve months it has stayed within S$1,956–S$2,038 psf. The achieved record shows no developer price cuts and nothing beyond the small list-price steps already documented. Monthly medians also shift with the unit mix, so they are not a like-for-like price index.
+- **Sales since June are the slowest of the project's life:** 1, 2 and 5 units a month. The official return confirms the slowdown the caveats showed.
 
 The August S$2.38m caveat on floors 01–05 is within about 0.5% of the S$2.367m ground-floor PES asking price that the previous report named its best-arithmetic screen. That unit has very probably been taken, although URA's month-level, unit-less record cannot confirm it.
 
@@ -266,6 +291,7 @@ The project remains a credible own-stay product: new, fully facilitated, near Ca
 - Peer cells: January–September 2026, size bands 930–1,060 and 1,130–1,350 sq ft, sale states kept separate.
 - BSD uses current residential brackets; a S$5,000 acquisition allowance; exit proceeds are 97.5% of gross.
 - Gross yield = 12 × monthly rent ÷ purchase price.
+- Official developer sales: `python scrapers/ura_pmi_api.py --developer_sales 2025-08 2026-08 --districts 27 --out_dir data/raw/ura/developer_sales` (requires `URA_ACCESS_KEY`), saved as `data/raw/ura/developer_sales/pmi_api_developer_sales_2025-08_2026-08_d27.csv`.
 - The regenerated `canberra_crescent_d27_deep_analysis.html` and the six strategy workbooks use the same export, with headline windows through August 2026.
 
 ## Source register
@@ -275,6 +301,7 @@ Captured 20 September 2026, 01:22:57 SGT. The URA export was downloaded on 19 Se
 ### Official and primary
 
 1. [URA residential transaction search](https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch) and [REALIS coverage/methodology](https://eservice.ura.gov.sg/reis/coverageandMethodology) — achieved caveats and their limits.
+2. [URA Data Service API](https://eservice.ura.gov.sg/maps/api/), `PMI_Resi_Developer_Sales`, August 2025–August 2026 — official monthly developer sales, fetched 20 September 2026.
 2. [Official brochure](https://www.canberra-crescent.com/assets/pdf/Canberra%20Crescent%20Residences%20eBrochure.pdf) — tenure, expected possession, mix and layouts.
 3. [URA tender award](https://www.ura.gov.sg/news/media/pr24-40/) — S$279.0m, about S$793 psf ppr.
 4. [URA Q2 2026 statistics](https://www.ura.gov.sg/news/media/pr26-57/) (24 Jul 2026) and [2H2026 GLS programme](https://www.ura.gov.sg/news/media/pr26-41/) (3 Jun 2026).
