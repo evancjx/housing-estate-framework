@@ -26,6 +26,9 @@
     emptyReset: document.getElementById("empty-reset"),
     renderedCopy: document.getElementById("rendered-copy"),
     showMore: document.getElementById("show-more"),
+    dataStatus: document.getElementById("project-data-status"),
+    dataStatusCopy: document.getElementById("project-data-status-copy"),
+    dataRetry: document.getElementById("project-data-retry"),
   };
 
   let rows;
@@ -33,7 +36,13 @@
   try {
     rows = JSON.parse(dataElement.textContent || "[]");
     config = JSON.parse(configElement.textContent || "{}");
-    if (!Array.isArray(rows) || !config || typeof config !== "object" || Array.isArray(config)) {
+    if (
+      !Array.isArray(rows)
+      || !rows.length
+      || !config
+      || typeof config !== "object"
+      || Array.isArray(config)
+    ) {
       throw new TypeError("The embedded project payload has an unexpected shape.");
     }
   } catch (error) {
@@ -41,6 +50,16 @@
       elements.caveat.textContent = `The project evidence could not be loaded: ${error.message}`;
     }
     if (elements.tableWrap) elements.tableWrap.hidden = true;
+    if (elements.tableWrap) elements.tableWrap.setAttribute("aria-busy", "false");
+    if (elements.dataStatus) {
+      elements.dataStatus.dataset.state = "error";
+      elements.dataStatus.setAttribute("role", "alert");
+      elements.dataStatus.setAttribute("aria-live", "assertive");
+    }
+    if (elements.dataStatusCopy) {
+      elements.dataStatusCopy.textContent = "The starter project evidence is unreadable. Reload this page or regenerate the explorer.";
+    }
+    if (elements.dataRetry) elements.dataRetry.hidden = true;
     if (elements.empty) {
       elements.empty.hidden = false;
       const heading = elements.empty.querySelector("h3");
@@ -50,6 +69,164 @@
       if (elements.emptyReset) elements.emptyReset.hidden = true;
     }
     return;
+  }
+
+  const bootstrapRows = rows;
+  const bootstrapFields = Array.isArray(config.explorer_fields)
+    && config.explorer_fields.length
+    && config.explorer_fields.every(field => typeof field === "string" && field)
+    && new Set(config.explorer_fields).size === config.explorer_fields.length
+    ? config.explorer_fields.slice().sort()
+    : Object.keys(bootstrapRows[0]).sort();
+  let fullCatalogReady = false;
+  const CATALOG_SCHEMA = "private-project-catalog.v1";
+  const CATALOG_KEYS = [
+    "catalog_revision",
+    "contexts",
+    "counts",
+    "latest_project_month",
+    "projects",
+    "schema",
+    "transaction_dataset_revision",
+  ];
+  const CAPABILITY_KEYS = [
+    "framework_comparison",
+    "private_explorer",
+    "project_exit",
+    "transactions",
+  ];
+  const COUNT_KEYS = ["all", "comparison", "transaction"];
+  const TRANSACTION_FIELDS = [
+    "transaction_complete_through",
+    "transaction_count",
+    "transaction_first_month",
+    "transaction_last_month",
+    "transaction_shard",
+  ];
+
+  function isRecord(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function isSha256(value) {
+    return typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+  }
+
+  function sameKeys(value, expected) {
+    return isRecord(value)
+      && Object.keys(value).sort().join("\u0000") === expected.slice().sort().join("\u0000");
+  }
+
+  function hasBootstrapFields(project) {
+    return isRecord(project) && bootstrapFields.every(field => Object.hasOwn(project, field));
+  }
+
+  function privateExplorerProjects(payload) {
+    return payload.projects.filter(project => project.capabilities.private_explorer === true);
+  }
+
+  function validateProjectCatalog(payload) {
+    if (!sameKeys(payload, CATALOG_KEYS) || payload.schema !== CATALOG_SCHEMA) {
+      return "The shared project catalog has an unexpected schema.";
+    }
+    if (
+      !isSha256(payload.catalog_revision)
+      || payload.catalog_revision !== config.catalog_revision
+      || !isSha256(payload.transaction_dataset_revision)
+      || payload.transaction_dataset_revision !== config.transaction_dataset_revision
+    ) {
+      return "The shared project catalog revision does not match this page.";
+    }
+    if (
+      payload.latest_project_month !== config.latest_month
+      || !isRecord(payload.counts)
+      || !sameKeys(payload.counts, COUNT_KEYS)
+      || !Array.isArray(payload.projects)
+      || !isRecord(payload.contexts)
+    ) {
+      return "The shared project catalog metadata is incomplete.";
+    }
+
+    const ids = new Set();
+    const usedContexts = new Set();
+    let comparisonCount = 0;
+    let transactionCount = 0;
+    for (const project of payload.projects) {
+      if (
+        !isRecord(project)
+        || typeof project.id !== "string"
+        || !project.id.trim()
+        || ids.has(project.id)
+        || typeof project.selection_label !== "string"
+        || !project.selection_label.trim()
+        || !isRecord(project.capabilities)
+        || !sameKeys(project.capabilities, CAPABILITY_KEYS)
+        || CAPABILITY_KEYS.some(key => typeof project.capabilities[key] !== "boolean")
+        || project.capabilities.private_explorer !== true
+        || project.capabilities.transactions !== project.capabilities.project_exit
+        || (project.capabilities.transactions && !project.capabilities.framework_comparison)
+        || TRANSACTION_FIELDS.some(field => !Object.hasOwn(project, field))
+      ) {
+        return "The shared project catalog contains an invalid project record.";
+      }
+      if (project.capabilities.framework_comparison) {
+        if (
+          typeof project.context_key !== "string"
+          || !Object.hasOwn(payload.contexts, project.context_key)
+        ) {
+          return "The shared project catalog is missing a framework context.";
+        }
+        usedContexts.add(project.context_key);
+      } else if (project.context_key !== null) {
+        return "An explorer-only project claims framework context.";
+      }
+      const transactionValues = TRANSACTION_FIELDS.map(field => project[field]);
+      if (project.capabilities.transactions) {
+        const expectedShardPrefix = `assets/condo-transactions/${config.transaction_dataset_revision}/shard-`;
+        if (
+          typeof project.transaction_shard !== "string"
+          || !project.transaction_shard.startsWith(expectedShardPrefix)
+          || !project.transaction_shard.endsWith(".json")
+          || !Number.isInteger(project.transaction_count)
+          || project.transaction_count < 0
+          || !/^\d{4}-(0[1-9]|1[0-2])$/.test(project.transaction_first_month || "")
+          || !/^\d{4}-(0[1-9]|1[0-2])$/.test(project.transaction_last_month || "")
+          || !/^\d{4}-(0[1-9]|1[0-2])$/.test(project.transaction_complete_through || "")
+        ) {
+          return "The shared project catalog contains invalid transaction metadata.";
+        }
+      } else if (transactionValues.some(value => value !== null)) {
+        return "The shared project catalog exposes transaction metadata without capability.";
+      }
+      ids.add(project.id);
+      if (project.capabilities.framework_comparison) comparisonCount += 1;
+      if (project.capabilities.transactions) transactionCount += 1;
+    }
+
+    const explorerRows = privateExplorerProjects(payload);
+    if (
+      Number(payload.counts.all) !== payload.projects.length
+      || Number(payload.counts.comparison) !== comparisonCount
+      || Number(payload.counts.transaction) !== transactionCount
+      || usedContexts.size !== Object.keys(payload.contexts).length
+      || explorerRows.length !== Number(config.counts?.projects)
+      || explorerRows.some(project => !hasBootstrapFields(project))
+    ) {
+      return "The shared project catalog does not contain the complete private explorer dataset.";
+    }
+    return true;
+  }
+
+  function setCatalogState(state, copy) {
+    if (elements.dataStatus) elements.dataStatus.dataset.state = state;
+    if (elements.dataStatusCopy) elements.dataStatusCopy.textContent = copy;
+    if (elements.dataRetry) {
+      elements.dataRetry.hidden = state !== "error";
+      elements.dataRetry.disabled = state === "loading";
+    }
+    if (elements.tableWrap) {
+      elements.tableWrap.setAttribute("aria-busy", String(state === "loading"));
+    }
   }
 
   const configuredPageSize = Number(config.page_size);
@@ -659,7 +836,10 @@
 
     if (elements.count) elements.count.textContent = matchingRows.length.toLocaleString("en-SG");
     if (elements.countCopy) {
-      elements.countCopy.textContent = `of ${rows.length.toLocaleString("en-SG")} projects match`;
+      const total = Number(config.counts?.projects);
+      elements.countCopy.textContent = fullCatalogReady || !Number.isFinite(total)
+        ? `of ${rows.length.toLocaleString("en-SG")} projects match`
+        : `of ${total.toLocaleString("en-SG")} projects · starter set active`;
     }
     if (elements.sortStatus) elements.sortStatus.textContent = sortLabel();
     if (elements.caveat) elements.caveat.textContent = VIEW_CAVEATS[state.view] || VIEW_CAVEATS.overview;
@@ -689,6 +869,69 @@
     });
     render({ resetBatch: true });
     if (focusSearch) elements.search?.focus();
+  }
+
+  function validateCatalogConfiguration() {
+    if (!isSha256(config.catalog_revision)) {
+      throw new TypeError("The catalog revision embedded in this page is invalid.");
+    }
+    if (!isSha256(config.transaction_dataset_revision)) {
+      throw new TypeError("The transaction revision embedded in this page is invalid.");
+    }
+    const expectedPath = `assets/project-catalog/${config.catalog_revision}/catalog.json`;
+    if (config.catalog_path !== expectedPath) {
+      throw new TypeError("The catalog path embedded in this page is invalid.");
+    }
+  }
+
+  async function loadFullCatalog({ retry = false } = {}) {
+    const total = Number(config.counts?.projects);
+    const totalCopy = Number.isFinite(total)
+      ? total.toLocaleString("en-SG")
+      : "full";
+    setCatalogState(
+      "loading",
+      retry
+        ? `Retrying the full ${totalCopy}-project catalog…`
+        : `Showing ${bootstrapRows.length.toLocaleString("en-SG")} starter projects while the full ${totalCopy}-project catalog loads…`
+    );
+
+    try {
+      validateCatalogConfiguration();
+      if (window.location.protocol === "file:") {
+        throw new TypeError("Local file pages cannot request the external catalog.");
+      }
+      const loader = globalThis.SGEstateData;
+      if (!loader || typeof loader.loadJSON !== "function") {
+        throw new TypeError("The shared browser data loader is unavailable.");
+      }
+      if (retry) {
+        loader.invalidate(config.catalog_path, { revision: config.catalog_revision });
+      }
+      const payload = await loader.loadJSON(config.catalog_path, {
+        revision: config.catalog_revision,
+        timeoutMs: 12_000,
+        validate: validateProjectCatalog,
+      });
+      rows = privateExplorerProjects(payload);
+      fullCatalogReady = true;
+      setCatalogState(
+        "ready",
+        `Full project catalog ready · ${rows.length.toLocaleString("en-SG")} projects.`
+      );
+      render({ updateURL: false, resetBatch: true });
+    } catch (error) {
+      rows = bootstrapRows;
+      fullCatalogReady = false;
+      const fileGuidance = window.location.protocol === "file:"
+        ? " Serve this folder over HTTP to load the complete catalog; local file pages keep the starter set."
+        : " Check the connection, then retry.";
+      setCatalogState(
+        "error",
+        `Full project catalog unavailable. ${bootstrapRows.length.toLocaleString("en-SG")} starter projects remain usable.${fileGuidance}`
+      );
+      render({ updateURL: false, resetBatch: true });
+    }
   }
 
   elements.views?.addEventListener("click", event => {
@@ -731,6 +974,7 @@
   });
   elements.reset?.addEventListener("click", () => reset());
   elements.emptyReset?.addEventListener("click", () => reset());
+  elements.dataRetry?.addEventListener("click", () => void loadFullCatalog({ retry: true }));
   window.addEventListener("popstate", () => {
     readURL();
     render({ updateURL: true, resetBatch: true });
@@ -738,4 +982,5 @@
 
   readURL();
   render({ resetBatch: true });
+  void loadFullCatalog();
 })();

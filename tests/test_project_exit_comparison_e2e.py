@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import threading
+import time
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -33,11 +34,44 @@ DISAMBIGUATED_PROJECT_LABEL = "EASTERN LAGOON · D15 / UPPER EAST COAST ROAD"
 SECOND_DISAMBIGUATED_PROJECT_ID = "eastern-lagoon-d16-upper-east-coast-road"
 SECOND_DISAMBIGUATED_PROJECT_LABEL = "EASTERN LAGOON · D16 / UPPER EAST COAST ROAD"
 FUNDING_SCRIPT = ROOT / "site" / "assets" / "condo-loan-timeline-funding-v3.js"
+TRANSACTION_MANIFEST = json.loads(
+    (ROOT / "site" / "assets" / "condo-transactions" / "manifest.json").read_text(
+        encoding="utf-8"
+    )
+)
+DATASET_REVISION = TRANSACTION_MANIFEST["dataset_revision"]
+DEFAULT_SHARD_PATHS = tuple(
+    TRANSACTION_MANIFEST["projects"][project_id]["transaction_shard"]
+    for project_id in DEFAULT_PROJECTS
+)
+SHARD_URL_RE = re.compile(
+    r"/assets/condo-transactions/(?:[^/?]+/)*shard-\d+\.json(?:\?.*)?$"
+)
+CATALOG_URL_RE = re.compile(
+    r"/assets/project-catalog/[0-9a-f]{64}/catalog\.json(?:\?.*)?$"
+)
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
+    delay_path = ""
+    delay_seconds = 0.0
+    delay_hits = 0
+    delay_lock = threading.Lock()
+
     def log_message(self, format: str, *args) -> None:  # noqa: A002
         return
+
+    def do_GET(self) -> None:  # noqa: N802
+        request_path = urlparse(self.path).path.lstrip("/")
+        should_delay = False
+        handler_type = type(self)
+        with handler_type.delay_lock:
+            if request_path == handler_type.delay_path and handler_type.delay_hits == 0:
+                handler_type.delay_hits += 1
+                should_delay = True
+        if should_delay:
+            time.sleep(handler_type.delay_seconds)
+        super().do_GET()
 
 
 @pytest.fixture(scope="module")
@@ -54,6 +88,7 @@ def chromium_page(tmp_path_factory):
         assets.mkdir()
         shutil.copy2(PAGE, preview / PAGE.name)
         for name in (
+            "data-loader.js",
             "project-exit-comparison.css",
             "project-exit-comparison.js",
             "research-shell.css",
@@ -64,6 +99,10 @@ def chromium_page(tmp_path_factory):
             ROOT / "site" / "assets" / "condo-transactions",
             assets / "condo-transactions",
         )
+        shutil.copytree(
+            ROOT / "site" / "assets" / "project-catalog",
+            assets / "project-catalog",
+        )
 
         handler = partial(_QuietHandler, directory=str(preview))
         server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -72,7 +111,7 @@ def chromium_page(tmp_path_factory):
         page = browser.new_page(viewport={"width": 1440, "height": 1000})
         url = f"http://127.0.0.1:{server.server_port}/{PAGE.name}"
         try:
-            yield page, url
+            yield page, url, preview
         finally:
             page.close()
             server.shutdown()
@@ -168,7 +207,7 @@ def test_default_comparison_uses_preferred_projects_percent_band_and_resale_acti
     chromium_page,
 ) -> None:
     playwright_api = pytest.importorskip("playwright.sync_api")
-    page, url = chromium_page
+    page, url, _ = chromium_page
     page_errors: list[str] = []
     console_errors: list[str] = []
     page.on("pageerror", lambda error: page_errors.append(str(error)))
@@ -220,11 +259,293 @@ def test_default_comparison_uses_preferred_projects_percent_band_and_resale_acti
     assert console_errors == []
 
 
+def test_catalog_failure_keeps_defaults_usable_and_retry_hydrates_full_picker(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url, _ = chromium_page
+    requested_urls: list[str] = []
+
+    def fail_catalog(route, request) -> None:
+        requested_urls.append(request.url)
+        route.fulfill(
+            status=503,
+            content_type="application/json",
+            body='{"error":"catalog unavailable"}',
+        )
+
+    page.route(CATALOG_URL_RE, fail_catalog)
+    try:
+        _load(page, url)
+        playwright_api.expect(page.locator("#project-catalog-status")).to_contain_text(
+            "example projects remain usable"
+        )
+        playwright_api.expect(page.locator("#retry-project-catalog")).to_be_visible()
+        playwright_api.expect(page.locator("#add-project")).to_be_disabled()
+        assert page.locator("#comparison-results .evidence-card").count() == 3
+        assert requested_urls
+        catalog_revision = _committed_catalog_revision()
+        assert parse_qs(urlparse(requested_urls[-1]).query).get("v") == [
+            catalog_revision
+        ]
+    finally:
+        page.unroute(CATALOG_URL_RE, fail_catalog)
+
+    page.locator("#retry-project-catalog").click()
+    playwright_api.expect(page.locator("#project-catalog-status")).to_contain_text(
+        "projects ready", timeout=20_000
+    )
+    playwright_api.expect(page.locator("#retry-project-catalog")).to_be_hidden()
+    playwright_api.expect(page.locator("#add-project")).to_be_enabled()
+
+
+def test_failed_transaction_source_keeps_successes_visible_and_manual_retry_recovers(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url, _ = chromium_page
+    target_path = f"/{DEFAULT_SHARD_PATHS[0]}"
+    attempts = 0
+
+    def fail_once(route, request) -> None:
+        nonlocal attempts
+        if urlparse(request.url).path == target_path:
+            attempts += 1
+            if attempts == 1:
+                route.fulfill(
+                    status=503,
+                    content_type="application/json",
+                    body='{"error":"temporary source failure"}',
+                )
+                return
+        route.continue_()
+
+    page.route(SHARD_URL_RE, fail_once)
+    try:
+        _load(page, url)
+        playwright_api.expect(page.locator("#decision-lab")).to_have_attribute(
+            "aria-busy", "false"
+        )
+        failed = page.locator("#comparison-results .evidence-card-error")
+        assert failed.count() == 1
+        assert page.locator(
+            "#comparison-results .evidence-card:not(.evidence-card-error)"
+        ).count() == 2
+        playwright_api.expect(failed).to_contain_text("Transaction evidence could not load")
+        playwright_api.expect(
+            failed.locator("[data-retry-transaction-data]")
+        ).to_be_visible()
+        assert "n=0" not in failed.inner_text()
+        assert "S$0" not in failed.inner_text()
+        source_error_cells = page.locator(
+            ".comparison-matrix tbody tr td:nth-child(2) .unknown-value"
+        )
+        assert source_error_cells.count() > 0
+        assert set(source_error_cells.all_inner_texts()) == {"Source error"}
+
+        failed.locator("[data-retry-transaction-data]").click()
+        playwright_api.expect(page.locator("#status-message")).to_contain_text(
+            "Comparison updated for 3 candidates", timeout=20_000
+        )
+        playwright_api.expect(page.locator("#decision-lab")).to_have_attribute(
+            "aria-busy", "false"
+        )
+        assert page.locator("#comparison-results .evidence-card-error").count() == 0
+        assert page.locator("[data-retry-transaction-data]").count() == 0
+        assert attempts == 2
+    finally:
+        page.unroute(SHARD_URL_RE, fail_once)
+        page.goto("about:blank")
+
+
+def test_corrupt_embedded_json_fails_accessibly_without_uncaught_error(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url, _ = chromium_page
+    source = PAGE.read_text(encoding="utf-8")
+    corrupted, replacements = re.subn(
+        r'(<script id="project-exit-data" type="application/json">).*?(</script>)',
+        r"\1{not-valid-json\2",
+        source,
+        count=1,
+        flags=re.DOTALL,
+    )
+    assert replacements == 1
+    page_errors: list[str] = []
+    console_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    page.on(
+        "console",
+        lambda message: console_errors.append(message.text)
+        if message.type == "error"
+        else None,
+    )
+
+    def serve_corrupted_page(route) -> None:
+        route.fulfill(status=200, content_type="text/html", body=corrupted)
+
+    page.route(url, serve_corrupted_page)
+    try:
+        page.goto(url, wait_until="load")
+        playwright_api.expect(page.locator("#decision-lab")).to_have_attribute(
+            "aria-busy", "false"
+        )
+        playwright_api.expect(page.locator("#status-message")).to_have_attribute(
+            "role", "alert"
+        )
+        playwright_api.expect(page.locator("#status-message")).to_contain_text(
+            "could not be read"
+        )
+        playwright_api.expect(page.locator("#status-message")).to_contain_text(
+            "Reload this page"
+        )
+        playwright_api.expect(
+            page.get_by_role("heading", name="Decision lab unavailable")
+        ).to_be_visible()
+        assert page_errors == []
+        assert console_errors == []
+    finally:
+        page.unroute(url, serve_corrupted_page)
+        page.goto("about:blank")
+
+
+def test_delayed_stale_refresh_cannot_overwrite_latest_scenario(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url, _ = chromium_page
+    page_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    _QuietHandler.delay_path = DEFAULT_SHARD_PATHS[0]
+    _QuietHandler.delay_seconds = 0.8
+    _QuietHandler.delay_hits = 0
+    page.route(SHARD_URL_RE, lambda route: route.continue_())
+    try:
+        page.goto(url, wait_until="load")
+        playwright_api.expect(page.locator("#decision-lab")).to_have_attribute(
+            "aria-busy", "true"
+        )
+        page.locator("#planned-sale-date").fill("2032-08")
+        page.locator("#decision-form button[type='submit']").click()
+        page.wait_for_function(
+            """() => new URL(location.href).searchParams.get('saleDate') === '2032-08'
+              && document.querySelector('#decision-lab').getAttribute('aria-busy') === 'false'""",
+            timeout=20_000,
+        )
+        playwright_api.expect(
+            page.locator("#comparison-results .result-heading > p").first
+        ).to_contain_text("6.0 years modeled hold")
+        assert "5.0 years modeled hold" not in page.locator(
+            "#comparison-results"
+        ).inner_text()
+        assert _QuietHandler.delay_hits == 1
+        assert page_errors == []
+    finally:
+        page.unroute(SHARD_URL_RE)
+        _QuietHandler.delay_path = ""
+        _QuietHandler.delay_seconds = 0.0
+        _QuietHandler.delay_hits = 0
+        page.goto("about:blank")
+
+
+def test_file_protocol_explains_local_server_and_never_renders_unavailable_as_zero(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, _, preview = chromium_page
+    page_errors: list[str] = []
+    console_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    page.on(
+        "console",
+        lambda message: console_errors.append(message.text)
+        if message.type == "error"
+        else None,
+    )
+
+    page.goto((preview / PAGE.name).as_uri(), wait_until="load")
+    page.wait_for_timeout(500)
+    assert "Open this report through a local web server" in page.locator(
+        "#project-catalog-status"
+    ).inner_text(), (page_errors, console_errors, page.url)
+    playwright_api.expect(page.locator("#project-catalog-status")).to_contain_text(
+        "Open this report through a local web server", timeout=20_000
+    )
+    playwright_api.expect(page.locator("#retry-project-catalog")).to_be_visible()
+    playwright_api.expect(page.locator("#decision-lab")).to_have_attribute(
+        "aria-busy", "false", timeout=20_000
+    )
+    playwright_api.expect(
+        page.locator("[data-retry-transaction-data]").first
+    ).to_be_visible()
+    results_text = page.locator("#comparison-results").inner_text()
+    assert "n=0" not in results_text
+    assert "S$0" not in results_text
+    assert page_errors == []
+    page.goto("about:blank")
+
+
+def _committed_catalog_revision() -> str:
+    return json.loads(
+        (ROOT / "site" / "assets" / "project-catalog" / "manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )["catalog_revision"]
+
+
+def test_revision_mismatch_withholds_all_results_and_requires_reload(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url, _ = chromium_page
+    requested_urls: list[str] = []
+    replacement_revision = "0" * 64 if DATASET_REVISION != "0" * 64 else "1" * 64
+
+    def serve_mismatched_shard(route, request) -> None:
+        requested_urls.append(request.url)
+        response = route.fetch()
+        shard = json.loads(response.body())
+        shard["dataset_revision"] = replacement_revision
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(shard, separators=(",", ":")),
+        )
+
+    page.route(SHARD_URL_RE, serve_mismatched_shard)
+    try:
+        page.goto(url, wait_until="load")
+        page.wait_for_function(
+            "document.querySelector('#decision-lab').getAttribute('aria-busy') === 'false'"
+        )
+        playwright_api.expect(page.locator("#status-message")).to_contain_text(
+            "Reload this page before using transaction evidence"
+        )
+        playwright_api.expect(
+            page.locator("#comparison-results [data-reload-transaction-data]")
+        ).to_be_visible()
+        assert page.locator("#comparison-results .evidence-card").count() == 0
+        assert page.locator("#comparison-results .comparison-matrix").count() == 0
+        assert page.locator("#comparison-results .ledger-card").count() == 0
+        assert "No cohort, zero-row statistic, or modeled outcome is shown" in (
+            page.locator("#comparison-results").inner_text()
+        )
+        assert requested_urls
+        assert all(
+            parse_qs(urlparse(request_url).query).get("v") == [DATASET_REVISION]
+            for request_url in requested_urls
+        )
+    finally:
+        page.unroute(SHARD_URL_RE, serve_mismatched_shard)
+        page.goto("about:blank")
+
+
 def test_scenario_math_and_per_project_entry_round_trip_through_url(
     chromium_page,
 ) -> None:
     playwright_api = pytest.importorskip("playwright.sync_api")
-    page, url = chromium_page
+    page, url, _ = chromium_page
     _load(page, url)
 
     _set_project(page, 0, DISAMBIGUATED_PROJECT_LABEL)
@@ -330,7 +651,7 @@ def test_invalid_bounds_and_project_inputs_fail_visibly_without_non_finite_outpu
     chromium_page,
 ) -> None:
     playwright_api = pytest.importorskip("playwright.sync_api")
-    page, url = chromium_page
+    page, url, _ = chromium_page
     _load(page, url)
     error = page.locator("#form-error")
 
@@ -390,7 +711,7 @@ def test_invalid_bounds_and_project_inputs_fail_visibly_without_non_finite_outpu
 def test_mobile_contains_wide_matrices_and_ledgers_inside_scroll_regions(
     chromium_page,
 ) -> None:
-    page, url = chromium_page
+    page, url, _ = chromium_page
     page.set_viewport_size({"width": 390, "height": 844})
     try:
         _load(page, url)

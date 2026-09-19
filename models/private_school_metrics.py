@@ -29,6 +29,13 @@ import pandas as pd
 
 
 ROOT = Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
 
 DEFAULT_LOCATIONS = ROOT / "data/outputs/private_project_locations.csv"
 DEFAULT_SCHOOLS = ROOT / "data/inputs/schools.csv"
@@ -123,23 +130,25 @@ def load_locations(
     path: Path,
     eligible_match_statuses: set[str] | None = None,
 ) -> pd.DataFrame:
-    locations = pd.read_csv(path)
+    try:
+        locations = load_usable_project_locations(path)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
     required = {"project_name", "street_name", "postal_district", "planning_area", "lat", "lon"}
     missing = sorted(required - set(locations.columns))
     if missing:
         raise SystemExit(f"{path} missing required columns: {missing}")
 
-    locations = locations.copy()
-    locations["lat"] = pd.to_numeric(locations["lat"], errors="coerce")
-    locations["lon"] = pd.to_numeric(locations["lon"], errors="coerce")
-    locations = locations[locations["lat"].notna() & locations["lon"].notna()].copy()
-
-    if "match_status" in locations.columns:
-        eligible = eligible_match_statuses or DEFAULT_ELIGIBLE_MATCH_STATUSES
-        normalized = {status.strip().lower() for status in eligible}
-        locations = locations[
-            locations["match_status"].fillna("").astype(str).str.strip().str.lower().isin(normalized)
-        ].copy()
+    eligible = eligible_match_statuses or DEFAULT_ELIGIBLE_MATCH_STATUSES
+    normalized = {status.strip().lower() for status in eligible}
+    locations = locations[
+        locations["match_status"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .isin(normalized)
+    ].copy()
 
     return locations.reset_index(drop=True)
 

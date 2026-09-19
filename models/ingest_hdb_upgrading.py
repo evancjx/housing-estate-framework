@@ -44,19 +44,31 @@ RUN:
 import argparse
 import json
 import math
+import os
 import re
 import sys
+import tempfile
 import urllib.request
 from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
 
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
 from aliases import PIPELINE_NAME_ALIAS as ALIAS_MAP
+from sg_estate.adapters.http import get_json
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
 
 NRP_DATASET = "d_156a38dc024d2b20a6c1d0c0179e797c"
 LUP_DATASET = "d_9b5886a025c8db1192a8fada42bd4330"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
+_ACTIVE_CACHE_DIR: Path | None = None
+_LAST_FETCH_MODES: dict[str, str] = {}
 
 PROPOSED_HORIZON_YEAR = 2030   # placeholder horizon for "2999" entries
 
@@ -166,14 +178,56 @@ _UA = "housing-estate-framework/1.4 (provision §2a HDB upgrading ingester)"
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": _UA, "Accept": "application/json"})
-    return json.load(urllib.request.urlopen(req, timeout=timeout))
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": _UA, "Accept": "application/json"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def fetch_geojson(dataset_id: str) -> dict:
     """data.gov.sg async download flow: poll-download → presigned S3 URL."""
+    cache_path = (
+        _ACTIVE_CACHE_DIR / f"{dataset_id}.geojson"
+        if _ACTIVE_CACHE_DIR is not None
+        else None
+    )
+    if cache_path is not None and cache_path.is_file():
+        try:
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"invalid cached HDB upgrading payload {cache_path}: {exc}") from exc
+        if not isinstance(cached, dict) or not isinstance(cached.get("features"), list):
+            raise ValueError(f"cached HDB upgrading payload has no features array: {cache_path}")
+        _LAST_FETCH_MODES[dataset_id] = "cached"
+        return cached
+
     poll = _http_json(POLL_URL.format(ds=dataset_id), timeout=30)
-    return _http_json(poll["data"]["url"], timeout=60)
+    payload = _http_json(poll["data"]["url"], timeout=60)
+    if not isinstance(payload, dict) or not isinstance(payload.get("features"), list):
+        raise ValueError(f"HDB upgrading payload has no features array: {dataset_id}")
+    _LAST_FETCH_MODES[dataset_id] = "fresh"
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f".{cache_path.name}.",
+            suffix=".tmp",
+            dir=cache_path.parent,
+            text=True,
+        )
+        temporary = Path(temporary_name)
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+                json.dump(payload, handle, ensure_ascii=False)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, cache_path)
+        except Exception:
+            temporary.unlink(missing_ok=True)
+            raise
+    return payload
 
 
 def centroid(geometry: dict) -> tuple[float, float] | None:
@@ -303,12 +357,17 @@ def merge_into_pipeline(pipeline_path: str, new_items: list[dict], out_path: str
 
 
 def main():
+    global _ACTIVE_CACHE_DIR
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--estates", required=True, help="estates.csv with estate,lat,lon")
     ap.add_argument("--pipeline", required=True, help="pipeline_data.json to merge into")
     ap.add_argument("--out", required=True, help="output JSON (can be same as --pipeline)")
     ap.add_argument("--cache-dir", help="optional dir to cache fetched GeoJSONs")
     args = ap.parse_args()
+
+    _ACTIVE_CACHE_DIR = Path(args.cache_dir) if args.cache_dir else None
+    _LAST_FETCH_MODES.clear()
 
     estates = pd.read_csv(args.estates)
     assert {"estate", "lat", "lon"} <= set(estates.columns)
@@ -319,12 +378,54 @@ def main():
     print("Fetching LUP …", file=sys.stderr)
     lup = fetch_geojson(LUP_DATASET)
     print(f"  {len(lup['features'])} block-clusters", file=sys.stderr)
+    external_modes = {
+        _LAST_FETCH_MODES.get(NRP_DATASET, "fresh"),
+        _LAST_FETCH_MODES.get(LUP_DATASET, "fresh"),
+    }
+    retrieved_at = (
+        datetime.now(timezone.utc) if "fresh" in external_modes else None
+    )
 
     nrp_items = aggregate(nrp["features"], "NRP", estates)
     lup_items = aggregate(lup["features"], "LUP", estates)
     print(f"Emitted {len(nrp_items)} NRP + {len(lup_items)} LUP pipeline items", file=sys.stderr)
 
     merge_into_pipeline(args.pipeline, nrp_items + lup_items, args.out)
+    with open(args.out) as f:
+        output = json.load(f)
+    pipeline_items = output.get("pipeline_items")
+    if not isinstance(pipeline_items, list):
+        raise ValueError("output pipeline_data.json must contain a pipeline_items list")
+    expected_years = [
+        item.get("expected_year")
+        for item in pipeline_items
+        if isinstance(item, dict)
+        and isinstance(item.get("expected_year"), int)
+        and not isinstance(item.get("expected_year"), bool)
+    ]
+    poll_urls = [
+        POLL_URL.format(ds=NRP_DATASET),
+        POLL_URL.format(ds=LUP_DATASET),
+    ]
+    receipt = build_source_receipt(
+        args.out,
+        dataset_id="pipeline_data.json",
+        authority="reviewed public announcements",
+        source_url=poll_urls[0],
+        source_urls=poll_urls,
+        source_identity=(
+            "reviewed pipeline_data base + HDB NRP/LUP refresh:"
+            f"{NRP_DATASET},{LUP_DATASET}"
+        ),
+        retrieved_at=retrieved_at,
+        coverage_start=str(min(expected_years)) if expected_years else None,
+        coverage_end=str(max(expected_years)) if expected_years else None,
+        row_count=len(pipeline_items),
+        cache_state=("cached" if external_modes == {"cached"} else "mixed"),
+        fallback_state="not_used",
+        validation_status="passed",
+    )
+    write_source_receipt(args.out, receipt)
     print(f"Merged into {args.out}", file=sys.stderr)
 
     # Quick per-estate summary

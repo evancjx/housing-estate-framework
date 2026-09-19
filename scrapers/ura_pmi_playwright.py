@@ -55,9 +55,13 @@ INSTALL:
 
 import argparse
 import asyncio
+import csv
+from datetime import datetime, timezone
+import hashlib
 import json
-import sys
 import os
+import tempfile
+import sys
 from pathlib import Path
 
 # District value → display label (from URA PMI portal)
@@ -137,6 +141,190 @@ SALE_TYPE_MAP = {
     "3": "Resale",
 }
 
+ATTEMPT_MANIFEST_SCHEMA_VERSION = 1
+ATTEMPT_STATUSES = {"succeeded", "confirmed_empty", "failed"}
+
+
+def utc_now() -> str:
+    """Return a timezone-aware UTC timestamp for acquisition evidence."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+def partition_id(district: str, prop_type: str) -> str:
+    """Return the stable identifier for one district/property-type request."""
+    return f"d{str(district).zfill(2)}-p{normalize_prop_type(prop_type)}"
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def artifact_metadata(path: Path, *, relative_to: Path) -> dict[str, object]:
+    """Describe exact downloaded CSV bytes without exposing an absolute path."""
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError("downloaded CSV has no header")
+        row_count = sum(1 for _row in reader)
+    relative_path = Path(os.path.relpath(path, relative_to))
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        raise ValueError("artifact path escapes the attempt-manifest generation")
+    return {
+        "relative_path": relative_path.as_posix(),
+        "sha256": sha256_file(path),
+        "byte_count": path.stat().st_size,
+        "row_count": row_count,
+    }
+
+
+def atomic_write_json(path: Path, payload: dict[str, object]) -> Path:
+    """Write one attempt manifest without exposing partially serialized JSON."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent, text=True
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+    return path
+
+
+def attempt_manifest_path(
+    out_dir: Path,
+    requested: str | None,
+    *,
+    method: str,
+) -> Path:
+    path = Path(requested) if requested else out_dir / f"ura_pmi_{method}_attempts.json"
+    try:
+        out_dir.resolve().relative_to(path.parent.resolve())
+    except ValueError as exc:
+        raise ValueError(
+            "--out_dir must be the attempt manifest directory or one of its "
+            "descendants so artifact paths cannot escape the generation"
+        ) from exc
+    return path
+
+
+def normalize_month_scope(
+    year_from: object,
+    month_from: object,
+    year_to: object,
+    month_to: object,
+) -> tuple[str, str, str, str]:
+    """Validate and normalize an inclusive year/month acquisition scope."""
+    try:
+        start_year = int(str(year_from))
+        start_month = int(str(month_from))
+        end_year = int(str(year_to))
+        end_month = int(str(month_to))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("URA date scope must contain numeric years and months") from exc
+    if not 1 <= start_month <= 12 or not 1 <= end_month <= 12:
+        raise ValueError("URA date-scope months must be between 1 and 12")
+    if (start_year, start_month) > (end_year, end_month):
+        raise ValueError("URA date scope must not be reversed")
+    return (
+        str(start_year),
+        str(start_month),
+        str(end_year),
+        str(end_month),
+    )
+
+
+def manifest_sale_types(sale_types: list[str]) -> list[str]:
+    """Represent an empty portal selection as its explicit all-types scope."""
+    return list(sale_types) if sale_types else list(sorted(SALE_TYPE_MAP))
+
+
+def new_attempt(
+    *,
+    district: str,
+    prop_type: str,
+    method: str,
+    status: str,
+    started_at: str,
+    completed_at: str,
+    artifact: dict[str, object] | None = None,
+    observations: dict[str, object] | None = None,
+    error_code: str | None = None,
+    error_message: str | None = None,
+) -> dict[str, object]:
+    if status not in ATTEMPT_STATUSES:
+        raise ValueError(f"invalid attempt status: {status}")
+    prop_type = normalize_prop_type(prop_type)
+    return {
+        "partition_id": partition_id(district, prop_type),
+        "district": str(district).zfill(2),
+        "property_type": prop_type,
+        "property_type_label": PROP_TYPE_MAP[prop_type],
+        "method": method,
+        "status": status,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "artifact": artifact,
+        "observations": observations,
+        "error_code": error_code,
+        "error_message": error_message,
+    }
+
+
+def build_attempt_manifest(
+    *,
+    method: str,
+    started_at: str,
+    completed_at: str,
+    districts: list[str],
+    prop_types: list[str],
+    year_from: str | None,
+    month_from: str | None,
+    year_to: str | None,
+    month_to: str | None,
+    sale_types: list[str],
+    attempts: list[dict[str, object]],
+    source_requests: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    failed = [attempt for attempt in attempts if attempt["status"] == "failed"]
+    return {
+        "schema_version": ATTEMPT_MANIFEST_SCHEMA_VERSION,
+        "source": "URA PMI",
+        "method": method,
+        "status": "failed" if failed else "succeeded",
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "requested_scope": {
+            "districts": [str(value).zfill(2) for value in districts],
+            "property_types": [normalize_prop_type(value) for value in prop_types],
+            "sale_types": list(sale_types),
+            "year_from": year_from,
+            "month_from": month_from,
+            "year_to": year_to,
+            "month_to": month_to,
+        },
+        "source_requests": source_requests or [],
+        "attempts": attempts,
+        "summary": {
+            "requested": len(attempts),
+            "succeeded": sum(a["status"] == "succeeded" for a in attempts),
+            "confirmed_empty": sum(
+                a["status"] == "confirmed_empty" for a in attempts
+            ),
+            "failed": len(failed),
+        },
+    }
+
 
 def normalize_prop_type(value: str) -> str:
     """Return the URA property type code for a CLI value or alias."""
@@ -180,6 +368,28 @@ def raw_filename(district: str, year_from: str, year_to: str, prop_type: str) ->
     return f"pmi_d{district}_{prop_type_slug(prop_type)}_{year_from}-{year_to}.csv"
 
 
+def scoped_raw_filename(
+    district: str,
+    year_from: str,
+    month_from: str,
+    year_to: str,
+    month_to: str,
+    prop_type: str,
+    sale_types: list[str],
+) -> str:
+    """Keep the legacy name only for a full-year, all-sale-types request."""
+    name = raw_filename(district, year_from, year_to, prop_type)
+    suffixes: list[str] = []
+    if int(month_from) != 1 or int(month_to) != 12:
+        suffixes.append(f"m{int(month_from):02d}-{int(month_to):02d}")
+    normalized_sale_types = sorted(set(sale_types))
+    if normalized_sale_types and normalized_sale_types != sorted(SALE_TYPE_MAP):
+        suffixes.append("sale-" + "-".join(normalized_sale_types))
+    if not suffixes:
+        return name
+    return name.removesuffix(".csv") + "_" + "_".join(suffixes) + ".csv"
+
+
 async def download_district(
     page,
     district: str,
@@ -190,15 +400,30 @@ async def download_district(
     prop_type: str,
     sale_types: list,
     out_dir: Path,
+    artifact_root: Path | None = None,
     timeout_ms: int = 60000,
-) -> Path | None:
+) -> dict[str, object]:
     """
-    Download CSV for one district. Returns the saved file path, or None on failure.
+    Download CSV for one partition and return a structured terminal attempt.
+
+    Only a portal-confirmed no-data response is ``confirmed_empty``. Timeouts,
+    malformed/empty downloads, and browser errors remain failed and cannot be
+    mistaken for completed work by callers.
     """
+    started_at = utc_now()
     label = DISTRICT_LABELS.get(district)
     if not label:
         print(f"  [ERROR] Unknown district '{district}' — skipping", file=sys.stderr)
-        return None
+        return new_attempt(
+            district=district,
+            prop_type=prop_type,
+            method="playwright",
+            status="failed",
+            started_at=started_at,
+            completed_at=utc_now(),
+            error_code="invalid_district",
+            error_message=f"Unknown district {district}",
+        )
 
     prop_label = PROP_TYPE_MAP.get(prop_type, prop_type)
     print(f"  District {district}: {label[:50]}... / {prop_label}")
@@ -255,15 +480,32 @@ async def download_district(
 
     # 6. Wait for results to load into #searchResult
     try:
-        await page.wait_for_selector("#searchResult form.resultForm", state="attached", timeout=timeout_ms)
+        await page.wait_for_selector(
+            "#searchResult form.resultForm, #searchResult #noDataError, "
+            "#searchResult .no-result",
+            state="attached",
+            timeout=timeout_ms,
+        )
         print("results loaded.")
     except Exception:
         print("TIMEOUT — no results loaded")
-        html_snippet = await page.evaluate(
-            "document.getElementById('searchResult').innerHTML.slice(0, 200)"
-        )
+        try:
+            html_snippet = await page.evaluate(
+                "document.getElementById('searchResult').innerHTML.slice(0, 200)"
+            )
+        except Exception:
+            html_snippet = "unavailable"
         print(f"    searchResult snippet: {html_snippet}", file=sys.stderr)
-        return None
+        return new_attempt(
+            district=district,
+            prop_type=prop_type,
+            method="playwright",
+            status="failed",
+            started_at=started_at,
+            completed_at=utc_now(),
+            error_code="results_timeout",
+            error_message="Search results did not load before the configured timeout",
+        )
 
     # 7. Check how many results
     result_count_text = await page.evaluate("""
@@ -287,113 +529,222 @@ async def download_district(
     """)
     if no_data:
         print(f"    No transactions found for district {district} in this date range.")
-        return None
+        return new_attempt(
+            district=district,
+            prop_type=prop_type,
+            method="playwright",
+            status="confirmed_empty",
+            started_at=started_at,
+            completed_at=utc_now(),
+            observations={"row_count": 0},
+        )
 
     # 9. Trigger CSV download via the resultForm submit
-    out_file = out_dir / raw_filename(district, year_from, year_to, prop_type)
+    out_file = out_dir / scoped_raw_filename(
+        district,
+        year_from,
+        month_from,
+        year_to,
+        month_to,
+        prop_type,
+        sale_types,
+    )
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{out_file.name}.", suffix=".download", dir=out_dir
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        async with page.expect_download(timeout=60000) as dl_info:
+            submit_result = await page.evaluate("""
+                (function() {
+                    var form = document.querySelector('#searchResult form.resultForm');
+                    if (!form) return 'no-form';
+                    var gotoPage = form.querySelector('input[name=gotoPage]');
+                    var dlType   = form.querySelector('input[name=downloadType]');
+                    var csvLink  = document.querySelector('#searchResult a.downloadCSV');
+                    var dlPage   = csvLink ? csvLink.getAttribute('data-page-dlpage') : '1';
+                    if (gotoPage) gotoPage.value = dlPage;
+                    if (dlType)   dlType.value   = 'downloadCSV';
+                    // Some resultForms don't have downloadType — add it
+                    if (!dlType) {
+                        var inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'downloadType';
+                        inp.value = 'downloadCSV';
+                        form.appendChild(inp);
+                    }
+                    form.submit();
+                    return 'submitted';
+                })()
+            """)
+            if submit_result != "submitted":
+                raise RuntimeError("download form was not present")
 
-    async with page.expect_download(timeout=60000) as dl_info:
-        await page.evaluate("""
-            (function() {
-                var form = document.querySelector('#searchResult form.resultForm');
-                if (!form) return 'no-form';
-                var gotoPage = form.querySelector('input[name=gotoPage]');
-                var dlType   = form.querySelector('input[name=downloadType]');
-                var csvLink  = document.querySelector('#searchResult a.downloadCSV');
-                var dlPage   = csvLink ? csvLink.getAttribute('data-page-dlpage') : '1';
-                if (gotoPage) gotoPage.value = dlPage;
-                if (dlType)   dlType.value   = 'downloadCSV';
-                // Some resultForms don't have downloadType — add it
-                if (!dlType) {
-                    var inp = document.createElement('input');
-                    inp.type = 'hidden';
-                    inp.name = 'downloadType';
-                    inp.value = 'downloadCSV';
-                    form.appendChild(inp);
-                }
-                form.submit();
-                return 'submitted';
-            })()
-        """)
+        dl = await dl_info.value
+        await dl.save_as(str(temporary))
+        metadata = artifact_metadata(temporary, relative_to=artifact_root or out_dir)
+        if metadata["byte_count"] <= 0 or metadata["row_count"] <= 0:
+            raise ValueError("downloaded CSV did not contain any transaction rows")
+        os.replace(temporary, out_file)
+        metadata = artifact_metadata(out_file, relative_to=artifact_root or out_dir)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
 
-    dl = await dl_info.value
-    await dl.save_as(str(out_file))
     print(f"    Saved: {out_file.name} ({out_file.stat().st_size // 1024} KB)")
-    return out_file
+    return new_attempt(
+        district=district,
+        prop_type=prop_type,
+        method="playwright",
+        status="succeeded",
+        started_at=started_at,
+        completed_at=utc_now(),
+        artifact=metadata,
+        observations={"row_count": metadata["row_count"]},
+    )
 
 
-async def run(args):
-    from playwright.async_api import async_playwright
+async def run(args, *, playwright_factory=None) -> dict[str, object]:
+    if playwright_factory is None:
+        from playwright.async_api import async_playwright
+
+        playwright_factory = async_playwright
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = attempt_manifest_path(
+        out_dir,
+        getattr(args, "attempt_manifest", None),
+        method="playwright",
+    )
+    started_at = utc_now()
 
     districts = [d.zfill(2) for d in args.districts]
-    invalid = [d for d in districts if d not in DISTRICT_LABELS]
-    if invalid:
-        print(f"[ERROR] Unknown district(s): {invalid}. Valid: 01–28", file=sys.stderr)
-        sys.exit(1)
-
     sale_types = args.sale_type if args.sale_type else []
     prop_types = normalize_prop_types(getattr(args, "prop_types", None) or [args.prop_type])
+    year_from, month_from, year_to, month_to = normalize_month_scope(
+        args.year_from,
+        args.month_from,
+        args.year_to,
+        args.month_to,
+    )
 
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=not args.headed)
-        ctx = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
-            accept_downloads=True,
-        )
-        page = await ctx.new_page()
+    attempts: list[dict[str, object]] = []
+    total = len(districts) * len(prop_types)
+    browser_error: Exception | None = None
+    try:
+        async with playwright_factory() as pw:
+            browser = await pw.chromium.launch(headless=not args.headed)
+            ctx = await browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/124.0.0.0 Safari/537.36"
+                ),
+                accept_downloads=True,
+            )
+            page = await ctx.new_page()
 
-        results = {}
-        total = len(districts) * len(prop_types)
-        n = 0
-        for district in districts:
-            for prop_type in prop_types:
-                n += 1
-                prop_label = PROP_TYPE_MAP[prop_type]
-                print(f"\n[{n}/{total}] Downloading district {district} / {prop_label}...")
-                try:
-                    saved = await download_district(
-                        page=page,
-                        district=district,
-                        year_from=args.year_from,
-                        month_from=args.month_from,
-                        year_to=args.year_to,
-                        month_to=args.month_to,
-                        prop_type=prop_type,
-                        sale_types=sale_types,
-                        out_dir=out_dir,
-                        timeout_ms=args.timeout * 1000,
-                    )
-                    results[(district, prop_type)] = str(saved) if saved else None
-                except Exception as e:
-                    print(f"  [ERROR] District {district} / {prop_label} failed: {e}", file=sys.stderr)
-                    results[(district, prop_type)] = None
+            n = 0
+            for district in districts:
+                for prop_type in prop_types:
+                    n += 1
+                    prop_label = PROP_TYPE_MAP[prop_type]
+                    print(f"\n[{n}/{total}] Downloading district {district} / {prop_label}...")
+                    attempt_started_at = utc_now()
+                    try:
+                        attempt = await download_district(
+                            page=page,
+                            district=district,
+                            year_from=year_from,
+                            month_from=month_from,
+                            year_to=year_to,
+                            month_to=month_to,
+                            prop_type=prop_type,
+                            sale_types=sale_types,
+                            out_dir=out_dir,
+                            artifact_root=manifest_path.parent,
+                            timeout_ms=args.timeout * 1000,
+                        )
+                    except Exception as exc:
+                        print(
+                            f"  [ERROR] District {district} / {prop_label} failed: {exc}",
+                            file=sys.stderr,
+                        )
+                        attempt = new_attempt(
+                            district=district,
+                            prop_type=prop_type,
+                            method="playwright",
+                            status="failed",
+                            started_at=attempt_started_at,
+                            completed_at=utc_now(),
+                            error_code="browser_or_download_error",
+                            error_message=str(exc),
+                        )
+                    attempts.append(attempt)
 
-                # Brief pause between searches to avoid rate limiting
-                if n < total:
-                    await asyncio.sleep(3)
+                    if n < total:
+                        await asyncio.sleep(3)
 
-        await browser.close()
+            await browser.close()
+    except Exception as exc:
+        browser_error = exc
+        print(f"[ERROR] Playwright setup failed: {exc}", file=sys.stderr)
+
+    completed_partitions = {str(attempt["partition_id"]) for attempt in attempts}
+    for district in districts:
+        for prop_type in prop_types:
+            if partition_id(district, prop_type) in completed_partitions:
+                continue
+            attempts.append(
+                new_attempt(
+                    district=district,
+                    prop_type=prop_type,
+                    method="playwright",
+                    status="failed",
+                    started_at=started_at,
+                    completed_at=utc_now(),
+                    error_code="browser_setup_error",
+                    error_message=str(browser_error or "partition was not attempted"),
+                )
+            )
+
+    manifest = build_attempt_manifest(
+        method="playwright",
+        started_at=started_at,
+        completed_at=utc_now(),
+        districts=districts,
+        prop_types=prop_types,
+        year_from=year_from,
+        month_from=month_from,
+        year_to=year_to,
+        month_to=month_to,
+        sale_types=manifest_sale_types(sale_types),
+        attempts=attempts,
+    )
+    atomic_write_json(manifest_path, manifest)
 
     print("\n=== SUMMARY ===")
-    ok = [k for k, f in results.items() if f]
-    fail = [k for k, f in results.items() if not f]
-    for district, prop_type in ok:
-        print(f"  D{district} / {PROP_TYPE_MAP[prop_type]}: {results[(district, prop_type)]}")
-    for district, prop_type in fail:
-        print(f"  D{district} / {PROP_TYPE_MAP[prop_type]}: FAILED")
-    print(f"\n{len(ok)}/{len(results)} downloads completed successfully.")
+    ok = [attempt for attempt in attempts if attempt["status"] == "succeeded"]
+    empty = [attempt for attempt in attempts if attempt["status"] == "confirmed_empty"]
+    fail = [attempt for attempt in attempts if attempt["status"] == "failed"]
+    for attempt in attempts:
+        print(
+            f"  D{attempt['district']} / {attempt['property_type_label']}: "
+            f"{str(attempt['status']).upper()}"
+        )
+    print(
+        f"\n{len(ok)} downloaded, {len(empty)} confirmed empty, "
+        f"{len(fail)} failed of {len(attempts)} requested partitions."
+    )
+    print(f"Attempt manifest: {manifest_path}")
     if ok:
         print(f"Files in: {out_dir}")
+    return manifest
 
 
-def main():
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         description="Download URA PMI private residential transaction CSVs via Playwright"
     )
@@ -425,16 +776,21 @@ def main():
         help="Sale type(s): 1=New Sale, 2=Sub Sale, 3=Resale. Default: all.",
     )
     ap.add_argument("--out_dir", default="data/raw/ura", help="Output directory (default: data/raw/ura)")
+    ap.add_argument(
+        "--attempt-manifest",
+        help="Structured attempt JSON (default: <out_dir>/ura_pmi_playwright_attempts.json)",
+    )
     ap.add_argument("--headed", action="store_true", help="Run in headed mode (shows browser window)")
     ap.add_argument("--timeout", type=int, default=60, help="Results load timeout in seconds (default: 60)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     try:
         args.prop_types = normalize_prop_types(args.prop_types or [args.prop_type])
     except ValueError as e:
         ap.error(str(e))
 
-    asyncio.run(run(args))
+    manifest = asyncio.run(run(args))
+    return 0 if manifest["status"] == "succeeded" else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="assets/research-shell.css" data-research-shell>
 <link rel="stylesheet" href="assets/project-exit-comparison.css">
 <script defer src="assets/research-shell.js" data-research-shell></script>
+<script defer src="assets/data-loader.js"></script>
 <script defer src="assets/project-exit-comparison.js"></script>
 </head>
 <body>
@@ -63,6 +64,10 @@ __DEFAULT_PROJECT_SLOTS__
 __PROJECT_OPTIONS__
         </datalist>
         <button id="add-project" type="button">Add another project</button>
+        <div class="catalog-state" id="project-catalog-state" role="status" aria-live="polite">
+          <span id="project-catalog-status">Loading the full project catalog… The example projects are ready now.</span>
+          <button id="retry-project-catalog" type="button" hidden>Retry project catalog</button>
+        </div>
       </fieldset>
 
       <fieldset class="cohort-fieldset">

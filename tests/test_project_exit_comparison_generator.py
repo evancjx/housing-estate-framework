@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS = ROOT / "models"
@@ -45,13 +47,27 @@ def _committed_payload() -> dict:
 def test_committed_payload_reconciles_to_transaction_manifest() -> None:
     payload = _committed_payload()
     manifest = report.load_transaction_manifest()
+    catalog = report.private_project_catalog.load_project_catalog(
+        report.DEFAULT_PROJECT_CATALOG,
+        transaction_manifest=manifest,
+    )
     project_ids = [project["id"] for project in payload["projects"]]
 
     assert payload["schema"] == "project-exit-comparison.v1"
+    assert payload["dataset_revision"] == manifest["dataset_revision"]
     assert payload["limits"] == {"min_projects": 2, "max_projects": 5}
-    assert len(project_ids) > 2_000
+    assert project_ids == payload["defaults"]
+    assert len(project_ids) == 3
     assert len(project_ids) == len(set(project_ids))
+    assert len(catalog["projects"]) > 2_000
     assert set(project_ids) <= set(manifest["projects"])
+    assert payload["catalog"] == {
+        "path": report.private_project_catalog.catalog_asset_path(
+            catalog["catalog_revision"]
+        ),
+        "revision": catalog["catalog_revision"],
+        "schema": catalog["schema"],
+    }
     assert set(payload["defaults"]) <= set(project_ids)
     assert payload["source_metadata"] == manifest["source_metadata"]
     assert payload["transaction_schema"] == manifest["schema"]
@@ -65,6 +81,26 @@ def test_committed_payload_reconciles_to_transaction_manifest() -> None:
         assert project["transaction_complete_through"] == transaction[
             "transaction_complete_through"
         ]
+        assert project["capabilities"]["project_exit"] is True
+
+
+@pytest.mark.parametrize("revision", [None, "", "A" * 64, "a" * 63, "g" * 64])
+def test_manifest_rejects_missing_or_non_sha256_dataset_revision(
+    tmp_path: Path, revision: str | None
+) -> None:
+    manifest = {
+        "schema": {},
+        "enumerations": {},
+        "source_metadata": {},
+        "projects": {},
+    }
+    if revision is not None:
+        manifest["dataset_revision"] = revision
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(SystemExit, match="dataset_revision"):
+        report.load_transaction_manifest(path)
 
 
 def test_committed_page_matches_fresh_generation_without_rewriting_shards(
@@ -72,14 +108,18 @@ def test_committed_page_matches_fresh_generation_without_rewriting_shards(
 ) -> None:
     payload = _committed_payload()
     manifest_before = report.DEFAULT_MANIFEST.read_bytes()
-    shard_before = (report.DEFAULT_MANIFEST.parent / "shard-00.json").read_bytes()
+    manifest = report.load_transaction_manifest()
+    sample_shard = ROOT / "site" / next(iter(manifest["projects"].values()))[
+        "transaction_shard"
+    ]
+    shard_before = sample_shard.read_bytes()
     output = tmp_path / "project_exit_comparison.html"
 
     report.generate(output, as_of=payload["generated_as_of"])
 
     assert output.read_bytes() == report.DEFAULT_OUT.read_bytes()
     assert report.DEFAULT_MANIFEST.read_bytes() == manifest_before
-    assert (report.DEFAULT_MANIFEST.parent / "shard-00.json").read_bytes() == shard_before
+    assert sample_shard.read_bytes() == shard_before
 
 
 def test_script_safe_json_cannot_close_its_data_element() -> None:

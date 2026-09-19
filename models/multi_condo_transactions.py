@@ -17,8 +17,11 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import pathlib
 import re
+import shutil
+import tempfile
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -69,6 +72,33 @@ _BEDROOM_SOURCE_ORDER = [
     "research_unit_mix",
 ]
 _DATA_SOURCE_ORDER = ["ura_private", "edgeprop_backfill"]
+_DATASET_REVISION_RE = re.compile(r"^[0-9a-f]{64}$")
+_MANIFEST_KEYS = {
+    "dataset_revision",
+    "schema",
+    "enumerations",
+    "source_metadata",
+    "shard_count",
+    "shards",
+    "projects",
+}
+_SHARD_KEYS = {
+    "dataset_revision",
+    "schema",
+    "enumerations",
+    "source_metadata",
+    "shard_metadata",
+    "projects",
+}
+_PROJECT_MANIFEST_KEYS = {
+    "transaction_shard",
+    "transaction_count",
+    "canonical_transaction_count",
+    "backfill_transaction_count",
+    "transaction_first_month",
+    "transaction_last_month",
+    "transaction_complete_through",
+}
 
 
 def _is_missing(value: Any) -> bool:
@@ -179,8 +209,13 @@ def shard_index(project_id: str) -> int:
     return int.from_bytes(digest[:8], "big") % SHARD_COUNT
 
 
-def shard_path(project_id: str) -> str:
-    return f"{ASSET_PREFIX}/shard-{shard_index(project_id):02d}.json"
+def _shard_asset_path(index: int, dataset_revision: str | None = None) -> str:
+    revision_segment = f"/{dataset_revision}" if dataset_revision else ""
+    return f"{ASSET_PREFIX}{revision_segment}/shard-{index:02d}.json"
+
+
+def shard_path(project_id: str, dataset_revision: str | None = None) -> str:
+    return _shard_asset_path(shard_index(project_id), dataset_revision)
 
 
 def _previous_month(month: str | None) -> str | None:
@@ -351,6 +386,252 @@ def _encode_record(
             value = indexes[enum_name][value]
         encoded.append(value)
     return encoded
+
+
+def _canonical_json(payload: Any) -> str:
+    """Return the one canonical JSON representation used for hashes and files."""
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _logical_revision_payload(
+    shards: Mapping[int, Mapping[str, Any]], manifest: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Remove publication-derived fields while preserving all logical content."""
+    logical_manifest = copy.deepcopy(dict(manifest))
+    logical_manifest.pop("dataset_revision", None)
+    manifest_projects = logical_manifest.get("projects")
+    if isinstance(manifest_projects, Mapping):
+        for project_id, metadata in manifest_projects.items():
+            if isinstance(metadata, dict):
+                metadata["transaction_shard"] = shard_path(str(project_id))
+    inventory = logical_manifest.get("shards")
+    if isinstance(inventory, list):
+        for entry in inventory:
+            if isinstance(entry, dict) and type(entry.get("index")) is int:
+                entry["path"] = _shard_asset_path(entry["index"])
+
+    logical_shards = []
+    for index in range(SHARD_COUNT):
+        shard = copy.deepcopy(dict(shards[index]))
+        shard.pop("dataset_revision", None)
+        logical_shards.append(shard)
+    return {"manifest": logical_manifest, "shards": logical_shards}
+
+
+def compute_dataset_revision(
+    shards: Mapping[int, Mapping[str, Any]], manifest: Mapping[str, Any]
+) -> str:
+    """Hash normalized logical manifest and ordered shard content.
+
+    The revision and revision-derived asset paths are excluded to avoid a
+    self-referential digest. Dictionary keys are sorted and shards are ordered
+    by their fixed numeric index before hashing.
+    """
+    normalized = _canonical_json(_logical_revision_payload(shards, manifest))
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _require_revision(value: Any, label: str) -> str:
+    if not isinstance(value, str) or _DATASET_REVISION_RE.fullmatch(value) is None:
+        raise ValueError(f"{label} must be a lowercase SHA-256 hex string")
+    return value
+
+
+def validate_transaction_bundle(
+    shards: Mapping[int, Mapping[str, Any]], manifest: Mapping[str, Any]
+) -> None:
+    """Validate the exact 64-shard publication contract and its revision."""
+    if set(shards) != set(range(SHARD_COUNT)):
+        raise ValueError(f"expected exactly shard indexes 0..{SHARD_COUNT - 1}")
+    if not isinstance(manifest, Mapping) or set(manifest) != _MANIFEST_KEYS:
+        raise ValueError(f"manifest keys must be exactly {sorted(_MANIFEST_KEYS)}")
+
+    revision = _require_revision(
+        manifest.get("dataset_revision"), "manifest dataset_revision"
+    )
+    if manifest.get("schema") != SCHEMA:
+        raise ValueError("manifest schema does not match the transaction schema")
+    if manifest.get("shard_count") != SHARD_COUNT:
+        raise ValueError(f"manifest shard_count must be {SHARD_COUNT}")
+
+    enumerations = manifest.get("enumerations")
+    expected_enumerations = set(ENUMERATED_FIELDS.values())
+    if not isinstance(enumerations, Mapping) or set(enumerations) != expected_enumerations:
+        raise ValueError(
+            f"manifest enumerations must be exactly {sorted(expected_enumerations)}"
+        )
+    for name, values in enumerations.items():
+        if (
+            not isinstance(values, list)
+            or any(not isinstance(value, str) for value in values)
+            or len(values) != len(set(values))
+        ):
+            raise ValueError(f"manifest enumeration {name!r} must contain unique strings")
+
+    source_metadata = manifest.get("source_metadata")
+    if not isinstance(source_metadata, Mapping):
+        raise ValueError("manifest source_metadata must be an object")
+    manifest_projects = manifest.get("projects")
+    if not isinstance(manifest_projects, Mapping):
+        raise ValueError("manifest projects must be an object")
+    if any(not isinstance(project_id, str) or not project_id for project_id in manifest_projects):
+        raise ValueError("manifest project IDs must be non-empty strings")
+
+    inventory = manifest.get("shards")
+    if not isinstance(inventory, list) or len(inventory) != SHARD_COUNT:
+        raise ValueError(f"manifest shards must contain exactly {SHARD_COUNT} entries")
+
+    source_positions = {
+        field: RECORD_FIELDS.index(field) for field in ENUMERATED_FIELDS
+    }
+    month_position = RECORD_FIELDS.index("sale_month")
+    data_source_position = RECORD_FIELDS.index("data_source")
+    data_source_values = enumerations[ENUMERATED_FIELDS["data_source"]]
+    total_transactions = 0
+    total_canonical = 0
+    total_backfill = 0
+    expected_inventory = []
+
+    complete_through = None
+    canonical_metadata = source_metadata.get("canonical")
+    if isinstance(canonical_metadata, Mapping):
+        complete_through = canonical_metadata.get("complete_through")
+
+    for index in range(SHARD_COUNT):
+        shard = shards[index]
+        if not isinstance(shard, Mapping) or set(shard) != _SHARD_KEYS:
+            raise ValueError(
+                f"shard {index:02d} keys must be exactly {sorted(_SHARD_KEYS)}"
+            )
+        if shard.get("dataset_revision") != revision:
+            raise ValueError(f"shard {index:02d} dataset_revision does not match manifest")
+        if shard.get("schema") != SCHEMA:
+            raise ValueError(f"shard {index:02d} schema does not match manifest")
+        if shard.get("enumerations") != enumerations:
+            raise ValueError(f"shard {index:02d} enumerations do not match manifest")
+        if shard.get("source_metadata") != source_metadata:
+            raise ValueError(f"shard {index:02d} source_metadata does not match manifest")
+
+        shard_projects = shard.get("projects")
+        if not isinstance(shard_projects, Mapping):
+            raise ValueError(f"shard {index:02d} projects must be an object")
+        expected_project_ids = sorted(
+            project_id
+            for project_id in manifest_projects
+            if shard_index(project_id) == index
+        )
+        if set(shard_projects) != set(expected_project_ids):
+            raise ValueError(f"shard {index:02d} project membership does not match manifest")
+
+        shard_transaction_count = 0
+        for project_id in expected_project_ids:
+            records = shard_projects[project_id]
+            if not isinstance(records, list):
+                raise ValueError(f"project {project_id!r} records must be a list")
+
+            months = []
+            canonical_count = 0
+            backfill_count = 0
+            for record in records:
+                if not isinstance(record, list) or len(record) != len(RECORD_FIELDS):
+                    raise ValueError(
+                        f"project {project_id!r} record does not match positional schema"
+                    )
+                for field, enum_name in ENUMERATED_FIELDS.items():
+                    enum_index = record[source_positions[field]]
+                    if enum_index is None:
+                        continue
+                    if (
+                        type(enum_index) is not int
+                        or not 0 <= enum_index < len(enumerations[enum_name])
+                    ):
+                        raise ValueError(
+                            f"project {project_id!r} has invalid {field} enumeration"
+                        )
+                month = record[month_position]
+                if _month(month) != month:
+                    raise ValueError(f"project {project_id!r} has an invalid sale_month")
+                months.append(month)
+                source_index = record[data_source_position]
+                if type(source_index) is not int or not 0 <= source_index < len(data_source_values):
+                    raise ValueError(f"project {project_id!r} has no valid data_source")
+                data_source = data_source_values[source_index]
+                if data_source == "ura_private":
+                    canonical_count += 1
+                elif data_source == "edgeprop_backfill":
+                    backfill_count += 1
+                else:
+                    raise ValueError(
+                        f"project {project_id!r} has unsupported data_source {data_source!r}"
+                    )
+
+            expected_project_metadata = {
+                "transaction_shard": shard_path(project_id, revision),
+                "transaction_count": len(records),
+                "canonical_transaction_count": canonical_count,
+                "backfill_transaction_count": backfill_count,
+                "transaction_first_month": min(months, default=None),
+                "transaction_last_month": max(months, default=None),
+                "transaction_complete_through": complete_through,
+            }
+            metadata = manifest_projects[project_id]
+            if (
+                not isinstance(metadata, Mapping)
+                or set(metadata) != _PROJECT_MANIFEST_KEYS
+                or dict(metadata) != expected_project_metadata
+            ):
+                raise ValueError(f"project {project_id!r} manifest metadata is inconsistent")
+
+            shard_transaction_count += len(records)
+            total_canonical += canonical_count
+            total_backfill += backfill_count
+
+        expected_shard_metadata = {
+            "index": index,
+            "project_count": len(expected_project_ids),
+            "transaction_count": shard_transaction_count,
+        }
+        if shard.get("shard_metadata") != expected_shard_metadata:
+            raise ValueError(f"shard {index:02d} metadata is inconsistent")
+        expected_inventory.append(
+            {
+                "index": index,
+                "path": _shard_asset_path(index, revision),
+                "project_count": len(expected_project_ids),
+                "transaction_count": shard_transaction_count,
+            }
+        )
+        total_transactions += shard_transaction_count
+
+    if inventory != expected_inventory:
+        raise ValueError("manifest shard inventory is inconsistent")
+
+    expected_reconciliation = {
+        "project_transaction_count": total_transactions,
+        "shard_transaction_count": total_transactions,
+        "matches": True,
+    }
+    if source_metadata.get("reconciliation") != expected_reconciliation:
+        raise ValueError("manifest transaction reconciliation is inconsistent")
+    counts = source_metadata.get("counts")
+    if not isinstance(counts, Mapping):
+        raise ValueError("manifest source counts must be an object")
+    if counts.get("canonical_included_rows") != total_canonical:
+        raise ValueError("canonical included count does not match shard records")
+    if counts.get("backfill_included_rows") != total_backfill:
+        raise ValueError("backfill included count does not match shard records")
+
+    calculated_revision = compute_dataset_revision(shards, manifest)
+    if calculated_revision != revision:
+        raise ValueError(
+            "dataset_revision does not match normalized manifest and shard contents"
+        )
 
 
 def build_transaction_shards(
@@ -627,8 +908,32 @@ def build_transaction_shards(
         "schema": copy.deepcopy(SCHEMA),
         "enumerations": copy.deepcopy(enumerations),
         "source_metadata": copy.deepcopy(source_metadata),
+        "shard_count": SHARD_COUNT,
+        "shards": [
+            {
+                "index": index,
+                "path": _shard_asset_path(index),
+                "project_count": shards[index]["shard_metadata"]["project_count"],
+                "transaction_count": shards[index]["shard_metadata"][
+                    "transaction_count"
+                ],
+            }
+            for index in range(SHARD_COUNT)
+        ],
         "projects": project_manifest,
     }
+    revision = compute_dataset_revision(shards, manifest)
+    manifest["dataset_revision"] = revision
+    for entry in manifest["shards"]:
+        entry["path"] = _shard_asset_path(entry["index"], revision)
+    for project in copied_projects:
+        path = shard_path(project["id"], revision)
+        project["transaction_shard"] = path
+        manifest["projects"][project["id"]]["transaction_shard"] = path
+    for shard in shards.values():
+        shard["dataset_revision"] = revision
+
+    validate_transaction_bundle(shards, manifest)
     return copied_projects, shards, manifest
 
 
@@ -637,23 +942,122 @@ def write_shards(
     shards: Mapping[int, Mapping[str, Any]],
     manifest: Mapping[str, Any],
 ) -> list[pathlib.Path]:
-    """Overwrite exactly shard-00..63 plus manifest; leave other files alone."""
-    if set(shards) != set(range(SHARD_COUNT)):
-        raise ValueError(f"expected exactly shard indexes 0..{SHARD_COUNT - 1}")
+    """Atomically publish one immutable revision and switch the root manifest.
+
+    A complete bundle is written and reread from a staging directory first.
+    Promotion renames that directory to ``<output_dir>/<dataset_revision>``.
+    The unversioned root manifest is atomically replaced only after the bundle
+    is durable, so an interrupted publication leaves its previous revision
+    usable. Existing revision directories, legacy root shards, and unrelated
+    files are retained.
+
+    The returned paths are the 64 immutable shards, their bundle manifest, and
+    the root manifest, in that order.
+    """
+    validate_transaction_bundle(shards, manifest)
     directory = pathlib.Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
-    written = []
+    revision = str(manifest["dataset_revision"])
+    target = directory / revision
+    staging = pathlib.Path(
+        tempfile.mkdtemp(prefix=f".{revision}.staging-", dir=directory)
+    )
+    root_temporary: pathlib.Path | None = None
+
+    try:
+        for index in range(SHARD_COUNT):
+            _write_json_file(staging / f"shard-{index:02d}.json", shards[index])
+        _write_json_file(staging / "manifest.json", manifest)
+        _validate_bundle_directory(staging, shards, manifest)
+        _fsync_directory(staging)
+
+        if target.exists():
+            if target.is_symlink() or not target.is_dir():
+                raise ValueError(
+                    f"revision target exists but is not a directory: {target}"
+                )
+            _validate_bundle_directory(target, shards, manifest)
+            shutil.rmtree(staging)
+            staging = target
+        else:
+            try:
+                os.replace(staging, target)
+                staging = target
+            except OSError:
+                # A concurrent publisher of identical content may win the
+                # target name between the existence check and rename.
+                if target.is_dir() and not target.is_symlink():
+                    _validate_bundle_directory(target, shards, manifest)
+                    shutil.rmtree(staging)
+                    staging = target
+                else:
+                    raise
+
+        _fsync_directory(directory)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=".manifest-", suffix=".json.tmp", dir=directory
+        )
+        os.close(descriptor)
+        root_temporary = pathlib.Path(temporary_name)
+        _write_json_file(root_temporary, manifest)
+        if json.loads(root_temporary.read_text(encoding="utf-8")) != dict(manifest):
+            raise ValueError("staged root manifest does not match generated manifest")
+        os.replace(root_temporary, directory / "manifest.json")
+        root_temporary = None
+        _fsync_directory(directory)
+    finally:
+        if root_temporary is not None:
+            root_temporary.unlink(missing_ok=True)
+        if staging != target and staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
+
+    return [
+        *(target / f"shard-{index:02d}.json" for index in range(SHARD_COUNT)),
+        target / "manifest.json",
+        directory / "manifest.json",
+    ]
+
+
+def _write_json_file(path: pathlib.Path, payload: Mapping[str, Any]) -> None:
+    serialized = _canonical_json(payload)
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        stream.write(serialized)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def _validate_bundle_directory(
+    directory: pathlib.Path,
+    shards: Mapping[int, Mapping[str, Any]],
+    manifest: Mapping[str, Any],
+) -> None:
+    expected_names = {
+        *(f"shard-{index:02d}.json" for index in range(SHARD_COUNT)),
+        "manifest.json",
+    }
+    actual_names = {path.name for path in directory.iterdir()}
+    if actual_names != expected_names:
+        raise ValueError(
+            f"staged transaction bundle membership mismatch in {directory}"
+        )
+
+    loaded_shards = {}
     for index in range(SHARD_COUNT):
         path = directory / f"shard-{index:02d}.json"
-        path.write_text(
-            json.dumps(shards[index], ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
-        )
-        written.append(path)
-    manifest_path = directory / "manifest.json"
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, separators=(",", ":")),
-        encoding="utf-8",
+        loaded_shards[index] = json.loads(path.read_text(encoding="utf-8"))
+    loaded_manifest = json.loads(
+        (directory / "manifest.json").read_text(encoding="utf-8")
     )
-    written.append(manifest_path)
-    return written
+    validate_transaction_bundle(loaded_shards, loaded_manifest)
+    if _canonical_json(loaded_shards) != _canonical_json(dict(shards)):
+        raise ValueError("staged shard payloads do not match generated shards")
+    if _canonical_json(loaded_manifest) != _canonical_json(dict(manifest)):
+        raise ValueError("staged manifest does not match generated manifest")
+
+
+def _fsync_directory(directory: pathlib.Path) -> None:
+    descriptor = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)

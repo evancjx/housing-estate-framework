@@ -1,6 +1,12 @@
 import pandas as pd
+import pytest
 
 import private_school_metrics as psm
+from sg_estate.project_locations import (
+    CURRENT_LOCATION_COLUMNS,
+    LEGACY_LOCATION_COLUMNS,
+    canonical_project_location_match_sha256,
+)
 
 
 def test_school_levels_expands_mixed_level_schools():
@@ -31,11 +37,76 @@ def test_load_locations_uses_only_matched_geocodes_by_default(tmp_path):
             "lon": 103.0,
             "match_status": "needs_review",
         },
-    ]).to_csv(locations_path, index=False)
+    ], columns=LEGACY_LOCATION_COLUMNS).to_csv(locations_path, index=False)
 
     out = psm.load_locations(locations_path)
 
     assert list(out["project_name"]) == ["MATCHED CONDO"]
+
+
+def test_load_locations_withholds_pending_and_unbound_approved_rows(tmp_path):
+    locations_path = tmp_path / "locations.csv"
+    common: dict[str, object] = {
+        "street_name": "TEST ROAD",
+        "postal_district": "10",
+        "planning_area": "BISHAN",
+        "lat": 1.0,
+        "lon": 103.0,
+        "match_status": "matched",
+        "match_sha256": "a" * 64,
+        "reviewed_match_sha256": "a" * 64,
+        "reviewed_at": "2026-08-13T00:00:00Z",
+        "retrieved_at": "2026-08-13T00:00:00Z",
+        "response_sha256": "b" * 64,
+        "retry_state": "complete",
+        "attempt_count": 1,
+        "last_error": "",
+        "review_decision_note": "fixture",
+        "match_score": 105,
+        "query_used": "TEST CONDO TEST ROAD",
+        "onemap_building": "TEST CONDO",
+        "onemap_road": "TEST ROAD",
+        "onemap_address": "1 TEST ROAD",
+        "onemap_postal": "238800",
+        "review_note": "project,street",
+    }
+    rows = [
+            {**common, "project_name": "APPROVED", "review_status": "approved"},
+            {
+                **common,
+                "project_name": "PENDING",
+                "review_status": "pending_changed",
+            },
+            {
+                **common,
+                "project_name": "UNBOUND",
+                "review_status": "approved",
+                "reviewed_match_sha256": "b" * 64,
+            },
+            {
+                **common,
+                "project_name": "WEAK",
+                "match_status": "needs_review",
+                "review_status": "approved_legacy",
+            },
+        ]
+    for row in rows:
+        if row["project_name"] == "APPROVED":
+            row["match_sha256"] = canonical_project_location_match_sha256(row)
+            row["reviewed_match_sha256"] = row["match_sha256"]
+    pd.DataFrame(rows, columns=CURRENT_LOCATION_COLUMNS).to_csv(
+        locations_path, index=False
+    )
+
+    with pytest.raises(SystemExit, match="invalid review/hash binding"):
+        psm.load_locations(locations_path, {"matched", "needs_review"})
+
+    approved_path = tmp_path / "approved-locations.csv"
+    pd.DataFrame([rows[0]], columns=CURRENT_LOCATION_COLUMNS).to_csv(
+        approved_path, index=False
+    )
+    out = psm.load_locations(approved_path, {"matched", "needs_review"})
+    assert list(out["project_name"]) == ["APPROVED"]
 
 
 def test_build_project_school_metrics_uses_level_specific_radii():

@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 import gen_landed_growth_dashboard_html as dashboard
 
@@ -92,4 +93,99 @@ def test_render_html_contains_dashboard_controls():
     assert 'id="topMovers"' in html
     assert "Mostly freehold transactions" in html
     assert "const DATA =" in html
+    assert "const PAGE_SIZE = 100" in html
+    assert 'id="showMoreRows"' in html
+    assert 'id="downloadRows"' in html
+    assert "lastFilteredRows.map" in html
+    assert "rows.slice(0, state.visibleLimit)" in html
+    assert 'role="status" aria-live="polite"' in html
+    assert 'window.addEventListener("beforeprint"' in html
     assert '""": "&quot;"' not in html
+
+
+def test_landed_table_pages_and_exports_the_full_filtered_set(tmp_path):
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    base = {
+        "level": "project",
+        "district": "10",
+        "planning_area": "BUKIT TIMAH",
+        "project": "",
+        "total_n": 20,
+        "recent_n": 3,
+        "active_years": 5,
+        "baseline_year": 2019,
+        "baseline_psf": 1000,
+        "recent_psf": 1300,
+        "recent_growth_pct": 30.0,
+        "projection_rate_pct": 4.0,
+        "projection_source": "own trend",
+        "projection_years": [
+            {"year": 2027, "psf": 1352},
+            {"year": 2029, "psf": 1463},
+            {"year": 2031, "psf": 1581},
+        ],
+        "confidence": "High",
+        "trend_delta_pp": 1.0,
+        "first_sale": "2019-01-01",
+        "last_sale": "2026-01-01",
+        "main_type": "Terrace House",
+        "main_tenure": "Freehold",
+        "annual": [],
+        "why": ["Reviewed fixture evidence."],
+    }
+    rows = [
+        {
+            **base,
+            "key": f"P{index:03d}",
+            "label": f"PROJECT {index:03d}",
+            "project": f"PROJECT {index:03d}",
+        }
+        for index in range(250)
+    ]
+    metadata = {
+        "generated_on": "2026-07-05",
+        "source_quality": "not_clean",
+        "trend_start_year": 2019,
+        "trend_end_year": 2025,
+        "partial_year_note": "2026 is partial.",
+        "row_count_2019_plus": 5000,
+        "project_count": 250,
+        "district_count": 1,
+        "market_recent_psf": 1300,
+        "market_projection_rate_pct": 4.0,
+        "projection_years": [2027, 2029, 2031],
+    }
+    page_path = tmp_path / "landed.html"
+    page_path.write_text(dashboard.render_html(rows, metadata), encoding="utf-8")
+
+    with playwright_api.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except playwright_api.Error as error:
+            pytest.skip(f"Chromium cannot launch in this environment: {error}")
+        page = browser.new_page()
+        try:
+            page.goto(page_path.as_uri())
+            page.locator("#projectMode").click()
+            assert page.locator("#tableBody tr").count() == 100
+            playwright_api.expect(page.locator("#tableCount")).to_have_text(
+                "100 of 250 filtered rows shown"
+            )
+            page.locator("#showMoreRows").click()
+            assert page.locator("#tableBody tr").count() == 200
+            playwright_api.expect(page.locator("#tableBody tr").nth(100)).to_be_focused()
+
+            page.locator("#searchBox").fill("PROJECT 24")
+            assert page.locator("#tableBody tr").count() == 10
+            playwright_api.expect(page.locator("#tableCount")).to_have_text(
+                "10 of 10 filtered rows shown"
+            )
+            with page.expect_download() as download_info:
+                page.locator("#downloadRows").click()
+            exported = download_info.value.path().read_text(encoding="utf-8")
+            assert len(exported.splitlines()) == 11
+            assert "PROJECT 240" in exported
+            assert "PROJECT 249" in exported
+        finally:
+            page.close()
+            browser.close()

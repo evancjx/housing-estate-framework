@@ -30,9 +30,9 @@ import re
 import sys
 import tempfile
 import unicodedata
-import urllib.request
 import zipfile
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -41,6 +41,13 @@ import shapefile
 from pyproj import Transformer
 from shapely.geometry import shape as shapely_shape
 from shapely.ops import unary_union
+
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_bytes
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -210,12 +217,11 @@ def _read_local_bytes(path: Path) -> bytes:
 def download_bytes(url: str, *, timeout: int = 90) -> bytes:
     """Download one source to memory; no partially downloaded file is retained."""
 
-    request = urllib.request.Request(
+    return get_bytes(
         url,
+        timeout=timeout,
         headers={"User-Agent": "sg-estate-framework/rail-ingester"},
     )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        return response.read()
 
 
 def load_registry(path: Path | str = DEFAULT_REGISTRY) -> dict[str, Any]:
@@ -782,6 +788,56 @@ def _local_or_download(local: str | None, registry: Mapping[str, Any], key: str)
     return verify_source_bytes(payload, registry, key)
 
 
+def _receipt_source_urls(
+    registry: Mapping[str, Any],
+    keys: Iterable[str],
+) -> list[str]:
+    """Return stable reviewed source URLs in deterministic registry order."""
+
+    urls: list[str] = []
+    for key in keys:
+        source = registry["sources"][key]
+        url = clean_text(
+            source.get("download_url")
+            or source.get("poll_url")
+            or source.get("url")
+            or source.get("dataset_url")
+            or source.get("catalog_url")
+        )
+        if url and url not in urls:
+            urls.append(url)
+    return urls
+
+
+def _write_output_receipt(
+    output: Path | str,
+    *,
+    dataset_id: str,
+    authority: str,
+    source_urls: list[str],
+    source_identity: str,
+    cache_state: str,
+    retrieved_at: datetime | None,
+    row_count: int,
+) -> None:
+    receipt = build_source_receipt(
+        output,
+        dataset_id=dataset_id,
+        authority=authority,
+        source_url=source_urls[0],
+        source_urls=source_urls,
+        source_identity=source_identity,
+        retrieved_at=retrieved_at,
+        coverage_start=None,
+        coverage_end=STATUS_AS_OF,
+        row_count=row_count,
+        cache_state=cache_state,
+        fallback_state="not_used",
+        validation_status="passed",
+    )
+    write_source_receipt(output, receipt)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build the verified MRT layer from official LTA/URA datasets.",
@@ -795,6 +851,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--names-output", default=str(DEFAULT_NAMES_OUTPUT))
     parser.add_argument(
+        "--offline",
+        action="store_true",
+        help=(
+            "perform no HTTP; requires --codes-archive, --station-archive, "
+            "--exit-archive, and --ura-geojson"
+        ),
+    )
+    parser.add_argument(
         "--validate-only",
         action="store_true",
         help="Build and validate without replacing either canonical CSV",
@@ -804,6 +868,30 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    local_flags = [
+        bool(args.codes_archive),
+        bool(args.station_archive),
+        bool(args.exit_archive),
+        bool(args.ura_geojson),
+    ]
+    if args.offline and not all(local_flags):
+        missing = [
+            option
+            for option, present in zip(
+                (
+                    "--codes-archive",
+                    "--station-archive",
+                    "--exit-archive",
+                    "--ura-geojson",
+                ),
+                local_flags,
+            )
+            if not present
+        ]
+        raise RailDataError(
+            "--offline requires all four local archive inputs; missing "
+            + ", ".join(missing)
+        )
     registry = load_registry(args.registry)
     codes = _local_or_download(args.codes_archive, registry, SOURCE_CODES)
     polygons = _local_or_download(args.station_archive, registry, SOURCE_POLYGONS)
@@ -814,6 +902,11 @@ def main(argv: list[str] | None = None) -> int:
         else download_ura_geojson(registry)
     )
     ura = verify_source_bytes(ura_payload, registry, SOURCE_URA)
+    acquired_at = (
+        datetime.now(timezone.utc)
+        if not all(local_flags)
+        else None
+    )
     layer = build_layer(
         codes,
         polygons,
@@ -824,8 +917,57 @@ def main(argv: list[str] | None = None) -> int:
     if args.validate_only:
         print(f"Validated {len(layer)} code-line memberships; canonical files unchanged.")
         return 0
+    layer_cache_state = (
+        "offline"
+        if all(local_flags)
+        else "mixed"
+    )
+    layer_retrieved_at = acquired_at
+    names_cache_state = "offline" if args.codes_archive else "mixed"
+    names_retrieved_at = None if args.codes_archive else acquired_at
     atomic_write_csv(layer, args.output)
-    atomic_write_csv(names_frame(layer), args.names_output)
+    names = names_frame(layer)
+    atomic_write_csv(names, args.names_output)
+    layer_source_urls = _receipt_source_urls(
+        registry,
+        (
+            SOURCE_CODES,
+            SOURCE_POLYGONS,
+            SOURCE_EXITS,
+            SOURCE_URA,
+            *sorted(STATUS_SOURCE_KEYS),
+        ),
+    )
+    names_source_urls = _receipt_source_urls(
+        registry,
+        (SOURCE_CODES, *sorted(STATUS_SOURCE_KEYS)),
+    )
+    _write_output_receipt(
+        args.output,
+        dataset_id="mrt_layer.csv",
+        authority="LTA DataMall + reviewed LTA status + URA planned geometry",
+        source_urls=layer_source_urls,
+        source_identity=(
+            "SHA-256-pinned LTA/URA geometry and station-code inputs + "
+            f"reviewed mrt_network_status.csv as of {STATUS_AS_OF}"
+        ),
+        cache_state=layer_cache_state,
+        retrieved_at=layer_retrieved_at,
+        row_count=len(layer),
+    )
+    _write_output_receipt(
+        args.names_output,
+        dataset_id="mrt_layer_names.csv",
+        authority="LTA DataMall + reviewed LTA status",
+        source_urls=names_source_urls,
+        source_identity=(
+            "SHA-256-pinned LTA station-code input + reviewed "
+            f"mrt_network_status.csv as of {STATUS_AS_OF}"
+        ),
+        cache_state=names_cache_state,
+        retrieved_at=names_retrieved_at,
+        row_count=len(names),
+    )
     print(f"Wrote {len(layer)} code-line memberships to {args.output}")
     print(f"Wrote normalized membership names to {args.names_output}")
     return 0

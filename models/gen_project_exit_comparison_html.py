@@ -26,13 +26,16 @@ from datetime import date
 import html
 import json
 import pathlib
+import re
 from typing import Any
 
 import gen_condo_framework_comparison_html as project_comparison
+import private_project_catalog
 
 
 ROOT = pathlib.Path(__file__).parent.parent
 DEFAULT_MANIFEST = ROOT / "site/assets/condo-transactions/manifest.json"
+DEFAULT_PROJECT_CATALOG = ROOT / "site/assets/project-catalog/manifest.json"
 DEFAULT_TEMPLATE = (
     ROOT / "sg_estate/reporting/templates/project_exit_comparison.html"
 )
@@ -40,6 +43,7 @@ DEFAULT_OUT = ROOT / "project_exit_comparison.html"
 
 MIN_PROJECTS = 2
 MAX_PROJECTS = 5
+DATASET_REVISION_RE = re.compile(r"^[0-9a-f]{64}$")
 PREFERRED_DEFAULT_IDS = (
     "the-poiz-residences",
     "parc-esta",
@@ -79,13 +83,30 @@ def load_transaction_manifest(path: pathlib.Path = DEFAULT_MANIFEST) -> dict[str
     except json.JSONDecodeError as exc:
         raise SystemExit(f"invalid transaction manifest JSON: {path}: {exc}") from exc
 
-    required = {"schema", "enumerations", "source_metadata", "projects"}
+    required = {
+        "dataset_revision",
+        "schema",
+        "enumerations",
+        "source_metadata",
+        "projects",
+    }
     missing = sorted(required - set(manifest))
     if missing:
         raise SystemExit(f"transaction manifest missing required keys: {missing}")
     if not isinstance(manifest["projects"], dict):
         raise SystemExit("transaction manifest projects must be an object keyed by project id")
+    _dataset_revision(manifest)
     return manifest
+
+
+def _dataset_revision(manifest: dict[str, Any]) -> str:
+    revision = manifest.get("dataset_revision")
+    if not isinstance(revision, str) or not DATASET_REVISION_RE.fullmatch(revision):
+        raise SystemExit(
+            "transaction manifest dataset_revision must be a lowercase 64-character "
+            "SHA-256 hex string"
+        )
+    return revision
 
 
 def _default_ids(projects: list[dict[str, Any]]) -> list[str]:
@@ -100,6 +121,7 @@ def _default_ids(projects: list[dict[str, Any]]) -> list[str]:
 def build_payload(
     projects: list[dict[str, Any]],
     manifest: dict[str, Any],
+    catalog: dict[str, Any],
     *,
     latest_project_month: str | None,
     as_of: date | str | None = None,
@@ -107,6 +129,16 @@ def build_payload(
     """Join project identity and spatial evidence to committed shard metadata."""
 
     generated_on = _as_of_date(as_of)
+    dataset_revision = _dataset_revision(manifest)
+    catalog_revision = str(catalog.get("catalog_revision", ""))
+    if not DATASET_REVISION_RE.fullmatch(catalog_revision):
+        raise SystemExit("project catalog revision must be a lowercase SHA-256 hex string")
+    if catalog.get("schema") != private_project_catalog.CATALOG_SCHEMA:
+        raise SystemExit(
+            f"project catalog schema must be {private_project_catalog.CATALOG_SCHEMA}"
+        )
+    if catalog.get("transaction_dataset_revision") != dataset_revision:
+        raise SystemExit("project catalog transaction revision does not match the manifest")
     if len(projects) < MIN_PROJECTS:
         raise SystemExit(
             f"project exit comparison needs at least {MIN_PROJECTS} project records"
@@ -168,12 +200,36 @@ def build_payload(
             }
         )
 
+    default_ids = _default_ids(projects)
+    default_id_set = set(default_ids)
+    bootstrap_projects = [
+        project
+        for project in catalog.get("projects", [])
+        if project.get("id") in default_id_set
+    ]
+    if {project.get("id") for project in bootstrap_projects} != default_id_set:
+        raise SystemExit("project catalog is missing one or more exit-tool defaults")
+    bootstrap_projects.sort(key=lambda project: default_ids.index(project["id"]))
+    default_context_keys = {
+        project.get("context_key") for project in bootstrap_projects
+    }
+    bootstrap_contexts = {
+        key: value
+        for key, value in catalog.get("contexts", {}).items()
+        if key in default_context_keys
+    }
     return {
         "schema": "project-exit-comparison.v1",
+        "dataset_revision": dataset_revision,
+        "catalog": {
+            "path": private_project_catalog.catalog_asset_path(catalog_revision),
+            "revision": catalog_revision,
+            "schema": catalog["schema"],
+        },
         "generated_as_of": generated_on.isoformat(),
         "latest_project_month": latest_project_month,
         "limits": {"min_projects": MIN_PROJECTS, "max_projects": MAX_PROJECTS},
-        "defaults": _default_ids(projects),
+        "defaults": default_ids,
         "transaction_schema": manifest["schema"],
         "transaction_enumerations": manifest["enumerations"],
         "source_metadata": manifest["source_metadata"],
@@ -183,7 +239,8 @@ def build_payload(
             "school_metrics": "data/outputs/private_project_school_metrics.csv",
             "transaction_manifest": "site/assets/condo-transactions/manifest.json",
         },
-        "projects": output_projects,
+        "projects": bootstrap_projects,
+        "contexts": bootstrap_contexts,
     }
 
 
@@ -262,6 +319,7 @@ def generate(
     out_path: pathlib.Path = DEFAULT_OUT,
     *,
     manifest_path: pathlib.Path = DEFAULT_MANIFEST,
+    catalog_path: pathlib.Path = DEFAULT_PROJECT_CATALOG,
     private_path: pathlib.Path = project_comparison.DEFAULT_PRIVATE,
     as_of: date | str | None = None,
 ) -> tuple[pathlib.Path, int]:
@@ -272,9 +330,14 @@ def generate(
         private_path=private_path
     )
     manifest = load_transaction_manifest(manifest_path)
+    catalog = private_project_catalog.load_project_catalog(
+        catalog_path,
+        transaction_manifest=manifest,
+    )
     payload = build_payload(
         projects,
         manifest,
+        catalog,
         latest_project_month=latest_project_month,
         as_of=generated_on,
     )
@@ -288,6 +351,7 @@ def main() -> None:
     )
     parser.add_argument("--private", default=str(project_comparison.DEFAULT_PRIVATE))
     parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
+    parser.add_argument("--project-catalog", default=str(DEFAULT_PROJECT_CATALOG))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     parser.add_argument(
         "--as-of",
@@ -297,6 +361,7 @@ def main() -> None:
     output, count = generate(
         pathlib.Path(args.out),
         manifest_path=pathlib.Path(args.manifest),
+        catalog_path=pathlib.Path(args.project_catalog),
         private_path=pathlib.Path(args.private),
         as_of=args.as_of,
     )

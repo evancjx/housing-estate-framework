@@ -5,10 +5,79 @@ import os
 import sys
 
 import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models"))
 
 import gen_canberra_crescent_d27_html as canberra  # noqa: E402
+
+
+def _many_transaction_report(count=250):
+    projects = (
+        canberra.SUBJECT,
+        "THE WATERGARDENS AT CANBERRA",
+        "THE COMMODORE",
+        "NORTH PARK RESIDENCES",
+    )
+    project_counts = (125, 50, 40, count - 215)
+    rows = []
+    index = 0
+    for project, project_count in zip(projects, project_counts):
+        for _ in range(project_count):
+            price = 1_000_000 + index * 1_000
+            area_sqm = 50 + index % 3
+            sqft = area_sqm * canberra.SQM_TO_SQFT
+            rows.append(
+                {
+                    "project_name": project,
+                    "sale_period": pd.Period("2026-06", freq="M"),
+                    "type_of_sale": "New Sale" if project == canberra.SUBJECT else "Resale",
+                    "price": price,
+                    "area_sqm": area_sqm,
+                    "sqft": sqft,
+                    "psf": price / sqft,
+                    "unit_key": "2",
+                    "bedrooms": 2,
+                    "year": 2026,
+                    "size_band_low": int(sqft // 100 * 100),
+                    "floor_level": "06 to 10",
+                    "bedroom_source": "edgeprop_exact",
+                    "tenure": "99 yrs lease commencing from 2024",
+                }
+            )
+            index += 1
+    txns = canberra.add_transaction_diagnostics(pd.DataFrame(rows))
+    window = {
+        "current_start": pd.Period("2025-01", freq="M"),
+        "full_end": pd.Period("2026-06", freq="M"),
+        "partial": None,
+    }
+    locations = {
+        project: {"lat": 1.44 + offset * 0.001, "lon": 103.829}
+        for offset, project in enumerate(projects)
+    }
+    mrt = pd.DataFrame(
+        [
+            {
+                "lat": 1.4432,
+                "lon": 103.8296,
+                "name": "Canberra",
+                "stn_code": "NS12",
+                "operational": 1,
+            }
+        ]
+    )
+    project_rows = canberra.build_project_rows(txns, window, locations, {}, mrt)
+    matched_rows = canberra.build_matched_rows(txns, window, project_rows)
+    subject = canberra.build_subject(txns, window)
+    return canberra.render_html(
+        txns,
+        window,
+        project_rows,
+        matched_rows,
+        subject,
+        date(2026, 7, 25),
+    )
 
 
 def _raw(tmp_path):
@@ -147,3 +216,61 @@ def test_canberra_mrt_uses_reviewed_ns12_coordinate_not_bad_legacy_point():
     assert 740 <= subject["station_distance_m"] <= 755
     assert 290 <= commodore["station_distance_m"] <= 305
     assert commodore["station_distance_m"] < subject["station_distance_m"]
+
+
+def test_transaction_ledger_uses_bounded_live_rows_and_full_filtered_actions():
+    page = _many_transaction_report()
+
+    assert "<tbody id='ledger-body'></tbody>" in page
+    assert "id='ledger-row-template'" in page
+    assert "id='ledger-show-more'" in page
+    assert "id='ledger-export'" in page
+    assert "role='status' aria-live='polite'" in page
+    assert "filteredLedgerRows.map" in page
+    assert 'window.addEventListener("beforeprint"' in page
+    assert "The transaction ledger needs JavaScript" in page
+
+
+def test_transaction_ledger_pages_filters_exports_and_restores_print(tmp_path):
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    report = tmp_path / "canberra-many.html"
+    report.write_text(_many_transaction_report(), encoding="utf-8")
+
+    with playwright_api.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except playwright_api.Error as error:
+            pytest.skip(f"Chromium cannot launch in this environment: {error}")
+        page = browser.new_page()
+        try:
+            page.goto(report.as_uri())
+            assert page.locator("#ledger-body tr").count() == 100
+            playwright_api.expect(page.locator("#ledger-count")).to_have_text(
+                "100 of 250 filtered transactions shown"
+            )
+
+            page.locator("#ledger-show-more").click()
+            assert page.locator("#ledger-body tr").count() == 200
+            playwright_api.expect(page.locator("#ledger-body tr").nth(100)).to_be_focused()
+
+            page.locator("#ledger-project").select_option(
+                canberra.slugify(canberra.SUBJECT)
+            )
+            assert page.locator("#ledger-body tr").count() == 100
+            playwright_api.expect(page.locator("#ledger-count")).to_have_text(
+                "100 of 125 filtered transactions shown"
+            )
+            with page.expect_download() as download_info:
+                page.locator("#ledger-export").click()
+            exported = download_info.value.path().read_text(encoding="utf-8")
+            assert len(exported.splitlines()) == 126
+            assert "CANBERRA CRESCENT RESIDENCES" in exported
+            assert "THE COMMODORE" not in exported
+
+            page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+            assert page.locator("#ledger-body tr").count() == 125
+            page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+            assert page.locator("#ledger-body tr").count() == 100
+        finally:
+            page.close()
+            browser.close()

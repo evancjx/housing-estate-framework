@@ -6,12 +6,30 @@
   const tableBody = document.getElementById("estate-table-body");
   if (!dataElement || !tableHead || !tableBody) return;
 
+  function failEmbeddedData() {
+    const caveat = document.getElementById("view-caveat");
+    const tableWrap = document.querySelector(".tbl-wrap");
+    const empty = document.getElementById("empty-state");
+    if (caveat) {
+      caveat.textContent = "Estate evidence is unavailable. Reload this page or regenerate the report.";
+      caveat.setAttribute("role", "alert");
+      caveat.setAttribute("aria-live", "assertive");
+    }
+    if (tableWrap) {
+      tableWrap.hidden = true;
+      tableWrap.setAttribute("aria-busy", "false");
+    }
+    if (empty) empty.hidden = true;
+  }
+
   let estates;
   try {
     estates = JSON.parse(dataElement.textContent || "[]");
+    if (!Array.isArray(estates) || !estates.length) {
+      throw new TypeError("The embedded estate payload has an unexpected shape.");
+    }
   } catch (error) {
-    document.getElementById("view-caveat").textContent =
-      `The estate data could not be loaded: ${error.message}`;
+    failEmbeddedData();
     return;
   }
 
@@ -513,6 +531,7 @@
     visibleCount.textContent = rows.length.toLocaleString("en-SG");
     visibleCopy.textContent = rows.length === 1 ? "estate context shown" : "estate contexts shown";
     tableWrapper.hidden = rows.length === 0;
+    tableWrapper.setAttribute("aria-busy", "false");
     emptyState.hidden = rows.length !== 0;
     applyColumnVisibility();
     renderHeaderState();

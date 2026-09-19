@@ -14,6 +14,7 @@ from urllib.parse import quote, unquote, urlsplit
 from markdown import Markdown
 
 from sg_estate.reporting.common import html_json
+from sg_estate.reporting.catalog import validate_data_families
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -120,13 +121,14 @@ class PropertyAnalysis:
     def catalog_entry(self, *, is_latest: bool) -> dict:
         """Return the public report-catalog representation."""
 
-        return {
+        entry = {
             "id": self.report_id,
             "path": self.output_path,
             "title": self.title,
             "category": "property-analysis",
             "kind": "property-analysis",
             "summary": self.summary,
+            "data_families": ["market_research"],
             "tags": [
                 "private property",
                 "property analysis",
@@ -143,6 +145,11 @@ class PropertyAnalysis:
             "source_path": self.source_relative_path,
             "is_latest": is_latest,
         }
+        validate_data_families(
+            entry["data_families"],
+            source=f"generated report {self.report_id!r}.data_families",
+        )
+        return entry
 
 
 class _RenderedFragmentParser(HTMLParser):

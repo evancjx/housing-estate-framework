@@ -30,6 +30,8 @@ OUTPUT (data/inputs/hospitals.csv):
 INPUT CONTRACT:
   --out        output CSV path (default: data/inputs/hospitals.csv)
   --cache-dir  optional directory for fetched data.gov.sg payload bytes
+  --max-cache-age-hours  refresh online caches older than this (default: 24)
+  --offline    perform no HTTP; require a valid cache (stale is warned and used)
 
 RUN:
   python3 models/ingest_moh_hospitals.py --out data/inputs/hospitals.csv
@@ -41,15 +43,23 @@ import csv
 import html
 import io
 import json
+import math
 import os
+from pathlib import Path
 import re
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
-import urllib.request
 
 import pandas as pd
+
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_bytes, get_json
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "inputs")
 OUT = os.path.join(DATA_DIR, "hospitals.csv")
@@ -67,6 +77,8 @@ ONEMAP_SEARCH = "https://www.onemap.gov.sg/api/common/elastic/search"
 _UA = "sg-estate-ingest/1.0 (moh-hospitals)"
 
 MIN_EXPECTED_ACUTE = 8
+DEFAULT_MAX_CACHE_AGE_HOURS = 24.0
+_LAST_CACHE_STATE = "unknown"
 
 # Alias/name inventory for public acute and community hospitals. The source
 # dataset is still authoritative: these aliases only decide which source rows
@@ -161,18 +173,15 @@ def classify_hospital(name: str) -> tuple[str, str] | None:
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(
+    return get_json(
         url,
+        timeout=timeout,
         headers={"User-Agent": _UA, "Accept": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
 
 
 def _http_bytes(url: str, timeout: int = 60) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": _UA})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+    return get_bytes(url, timeout=timeout, headers={"User-Agent": _UA})
 
 
 def _extract_dataset_ids(node) -> list[str]:
@@ -366,9 +375,139 @@ def parse_health_facility_rows(raw: bytes) -> list[dict]:
     return rows
 
 
-def fetch_health_facility_rows(cache_dir: str | None = None) -> list[dict]:
-    if cache_dir:
-        os.makedirs(cache_dir, exist_ok=True)
+def _validated_health_facility_rows(raw: bytes, source: str) -> list[dict]:
+    try:
+        rows = parse_health_facility_rows(raw)
+    except (
+        UnicodeError,
+        json.JSONDecodeError,
+        pd.errors.ParserError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        raise ValueError(f"invalid MOH health-facilities cache {source}: {exc}") from exc
+    retained = [row for row in rows if classify_hospital(row.get("name", ""))]
+    if not retained:
+        raise ValueError(
+            f"invalid MOH health-facilities cache {source}: "
+            "no retained public hospital rows"
+        )
+    return retained
+
+
+def _validated_max_cache_age(value: float) -> float:
+    try:
+        maximum = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("max cache age must be a positive number of hours") from exc
+    if not math.isfinite(maximum) or maximum <= 0:
+        raise ValueError("max cache age must be a positive number of hours")
+    return maximum
+
+
+def _cache_age_hours(path: Path) -> float:
+    return max(0.0, (time.time() - path.stat().st_mtime) / 3600.0)
+
+
+def _write_staged_cache(path: Path, raw: bytes) -> None:
+    with path.open("wb") as handle:
+        handle.write(raw)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    try:
+        descriptor = os.open(path, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _atomic_write_validated_cache(path: Path, raw: bytes, source: str) -> None:
+    _validated_health_facility_rows(raw, source)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        _write_staged_cache(temporary, raw)
+        staged = temporary.read_bytes()
+        if staged != raw:
+            raise ValueError(f"staged MOH cache bytes differ for {source}")
+        _validated_health_facility_rows(staged, source)
+        os.replace(temporary, path)
+        _fsync_directory(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _offline_health_facility_rows(
+    cache_root: Path,
+    *,
+    max_cache_age_hours: float,
+) -> list[dict]:
+    global _LAST_CACHE_STATE
+
+    candidates = sorted(cache_root.glob("*.raw")) if cache_root.is_dir() else []
+    if not candidates:
+        raise RuntimeError(
+            f"offline MOH cache is missing in {cache_root}; "
+            "run once online with --cache-dir"
+        )
+    failures: list[str] = []
+    for path in candidates:
+        try:
+            retained = _validated_health_facility_rows(
+                path.read_bytes(), str(path)
+            )
+        except (OSError, ValueError) as exc:
+            failures.append(str(exc))
+            continue
+        age_hours = _cache_age_hours(path)
+        stale = age_hours > max_cache_age_hours
+        _LAST_CACHE_STATE = "offline_stale" if stale else "offline"
+        if stale:
+            print(
+                f"WARNING: offline MOH cache {path} is stale "
+                f"({age_hours:.1f}h > {max_cache_age_hours:.1f}h); "
+                "using it because --offline was requested",
+                file=sys.stderr,
+            )
+        else:
+            print(f"Using offline MOH cache {path}", file=sys.stderr)
+        return retained
+    preview = "; ".join(failures[:3])
+    raise RuntimeError(
+        f"offline MOH cache in {cache_root} has no valid hospital payload"
+        + (f": {preview}" if preview else "")
+    )
+
+
+def fetch_health_facility_rows(
+    cache_dir: str | None = None,
+    *,
+    max_cache_age_hours: float = DEFAULT_MAX_CACHE_AGE_HOURS,
+    offline: bool = False,
+) -> list[dict]:
+    global _LAST_CACHE_STATE
+
+    _LAST_CACHE_STATE = "unknown"
+    maximum_age = _validated_max_cache_age(max_cache_age_hours)
+    cache_root = Path(cache_dir) if cache_dir else None
+    if offline:
+        if cache_root is None:
+            raise RuntimeError("--offline requires --cache-dir for MOH hospitals")
+        return _offline_health_facility_rows(
+            cache_root, max_cache_age_hours=maximum_age
+        )
+    if cache_root is not None:
+        cache_root.mkdir(parents=True, exist_ok=True)
 
     dataset_ids = discover_collection_dataset_ids()
     if not dataset_ids:
@@ -381,29 +520,52 @@ def fetch_health_facility_rows(cache_dir: str | None = None) -> list[dict]:
 
     print(f"Trying {len(dataset_ids)} data.gov.sg candidate dataset(s)", file=sys.stderr)
     for dataset_id in dataset_ids:
-        cache_path = os.path.join(cache_dir, f"{dataset_id}.raw") if cache_dir else None
-        try:
-            if cache_path and os.path.exists(cache_path):
-                with open(cache_path, "rb") as f:
-                    raw = f.read()
+        cache_path = cache_root / f"{dataset_id}.raw" if cache_root else None
+        cached_retained: list[dict] | None = None
+        if cache_path is not None and cache_path.is_file():
+            try:
+                cached_retained = _validated_health_facility_rows(
+                    cache_path.read_bytes(), str(cache_path)
+                )
+            except (OSError, ValueError) as exc:
+                print(f"  ignoring invalid cache {cache_path}: {exc}", file=sys.stderr)
             else:
-                raw = poll_download(dataset_id)
-                if cache_path:
-                    with open(cache_path, "wb") as f:
-                        f.write(raw)
+                age_hours = _cache_age_hours(cache_path)
+                if age_hours <= maximum_age:
+                    _LAST_CACHE_STATE = "cached"
+                    print(
+                        f"  {dataset_id}: using validated cache "
+                        f"({age_hours:.1f}h old)",
+                        file=sys.stderr,
+                    )
+                    return cached_retained
+                _LAST_CACHE_STATE = "stale_refreshing"
+                print(
+                    f"  {dataset_id}: cache is stale "
+                    f"({age_hours:.1f}h > {maximum_age:.1f}h); refreshing",
+                    file=sys.stderr,
+                )
+        try:
+            raw = poll_download(dataset_id)
         except RuntimeError as exc:
             print(f"  {exc}", file=sys.stderr)
             continue
 
+        try:
+            retained = _validated_health_facility_rows(raw, dataset_id)
+        except ValueError as exc:
+            print(f"  {exc}", file=sys.stderr)
+            continue
+        if cache_path is not None:
+            _atomic_write_validated_cache(cache_path, raw, dataset_id)
+        _LAST_CACHE_STATE = "fresh"
         rows = parse_health_facility_rows(raw)
-        retained = [r for r in rows if classify_hospital(r.get("name", ""))]
         print(
             f"  {dataset_id}: parsed {len(rows)} facility rows, "
             f"{len(retained)} retained public hospitals",
             file=sys.stderr,
         )
-        if retained:
-            return retained
+        return retained
 
     raise RuntimeError("no public hospital rows found in discovered MOH datasets")
 
@@ -485,12 +647,27 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--cache-dir", help="cache fetched data.gov.sg payload bytes")
+    ap.add_argument(
+        "--max-cache-age-hours",
+        type=float,
+        default=DEFAULT_MAX_CACHE_AGE_HOURS,
+        help="refresh online caches older than this many hours (default: 24)",
+    )
+    ap.add_argument(
+        "--offline",
+        action="store_true",
+        help="perform no HTTP and require a valid cache (stale caches are warned)",
+    )
     args = ap.parse_args()
 
     try:
-        source_rows = fetch_health_facility_rows(args.cache_dir)
+        source_rows = fetch_health_facility_rows(
+            args.cache_dir,
+            max_cache_age_hours=args.max_cache_age_hours,
+            offline=args.offline,
+        )
         rows = build_hospital_rows(source_rows)
-    except RuntimeError as exc:
+    except (RuntimeError, ValueError) as exc:
         sys.exit(f"ERROR: {exc}")
 
     require_min_acute(rows, args.out)

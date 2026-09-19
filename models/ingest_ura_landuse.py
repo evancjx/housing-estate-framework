@@ -31,6 +31,8 @@ INPUT CONTRACT:
   --out        output CSV path
   --buffer-km  estate buffer radius in kilometres (default: 2.0)
   --cache-dir  optional cache directory for fetched GeoJSON bytes
+  --max-cache-age-hours  refresh online caches older than this (default: 24)
+  --offline    perform no HTTP; require a valid cache (stale is warned and used)
 
 RUN:
   python3 models/ingest_ura_landuse.py \\
@@ -44,15 +46,22 @@ import html
 import json
 import math
 import os
+from pathlib import Path
 import re
 import sys
+import tempfile
 import time
 import urllib.error
-import urllib.request
 
 import pandas as pd
 from shapely.geometry import Point, shape
 from shapely.ops import transform, unary_union
+
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_bytes, get_json
 
 DATASET_ID = "d_90d86daa5bfaa371668b84fa5f01424f"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
@@ -65,6 +74,8 @@ DEFAULT_OUT = os.path.join(DATA_DIR, "mixed_use.csv")
 
 EARTH_RADIUS_M = 6_371_000.0
 DEFAULT_BUFFER_KM = 2.0
+DEFAULT_MAX_CACHE_AGE_HOURS = 24.0
+_LAST_CACHE_STATE = "unknown"
 
 LANDUSE_ATTR_CANDIDATES = [
     "LU_DESC",
@@ -84,28 +95,143 @@ _DESC_RE = re.compile(r"<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>", re.S | re.I)
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(
+    return get_json(
         url,
+        timeout=timeout,
         headers={"User-Agent": _UA, "Accept": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
 
 
 def _http_bytes(url: str, timeout: int = 120) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": _UA})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+    return get_bytes(url, timeout=timeout, headers={"User-Agent": _UA})
 
 
-def poll_download_geojson(cache_dir: str | None = None) -> dict:
-    cache_path = None
-    if cache_dir:
-        os.makedirs(cache_dir, exist_ok=True)
-        cache_path = os.path.join(cache_dir, f"{DATASET_ID}.geojson")
-        if os.path.exists(cache_path):
-            with open(cache_path, "rb") as f:
-                return json.loads(f.read().decode("utf-8"))
+def _validated_geojson(raw: bytes, source: str) -> dict:
+    try:
+        payload = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid URA land-use cache {source}: {exc}") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("features"), list):
+        raise ValueError(
+            f"invalid URA land-use cache {source}: missing features array"
+        )
+    if not payload["features"]:
+        raise ValueError(f"invalid URA land-use cache {source}: zero features")
+    return payload
+
+
+def _validated_max_cache_age(value: float) -> float:
+    try:
+        maximum = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("max cache age must be a positive number of hours") from exc
+    if not math.isfinite(maximum) or maximum <= 0:
+        raise ValueError("max cache age must be a positive number of hours")
+    return maximum
+
+
+def _cache_age_hours(path: Path) -> float:
+    return max(0.0, (time.time() - path.stat().st_mtime) / 3600.0)
+
+
+def _write_staged_cache(path: Path, raw: bytes) -> None:
+    with path.open("wb") as handle:
+        handle.write(raw)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    try:
+        descriptor = os.open(path, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _atomic_write_validated_cache(path: Path, raw: bytes, source: str) -> None:
+    _validated_geojson(raw, source)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        _write_staged_cache(temporary, raw)
+        staged = temporary.read_bytes()
+        if staged != raw:
+            raise ValueError(f"staged URA land-use cache bytes differ for {source}")
+        _validated_geojson(staged, source)
+        os.replace(temporary, path)
+        _fsync_directory(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def poll_download_geojson(
+    cache_dir: str | None = None,
+    *,
+    max_cache_age_hours: float = DEFAULT_MAX_CACHE_AGE_HOURS,
+    offline: bool = False,
+) -> dict:
+    global _LAST_CACHE_STATE
+
+    _LAST_CACHE_STATE = "unknown"
+    maximum_age = _validated_max_cache_age(max_cache_age_hours)
+    cache_path = (
+        Path(cache_dir) / f"{DATASET_ID}.geojson" if cache_dir else None
+    )
+    if offline and cache_path is None:
+        sys.exit("ERROR: --offline requires --cache-dir for URA land use")
+
+    if cache_path is not None and cache_path.is_file():
+        try:
+            cached = _validated_geojson(cache_path.read_bytes(), str(cache_path))
+        except (OSError, ValueError) as exc:
+            if offline:
+                sys.exit(f"ERROR: offline URA land-use cache is invalid: {exc}")
+            print(f"WARNING: ignoring invalid cache {cache_path}: {exc}", file=sys.stderr)
+        else:
+            age_hours = _cache_age_hours(cache_path)
+            stale = age_hours > maximum_age
+            if offline:
+                _LAST_CACHE_STATE = "offline_stale" if stale else "offline"
+                if stale:
+                    print(
+                        f"WARNING: offline URA land-use cache {cache_path} is stale "
+                        f"({age_hours:.1f}h > {maximum_age:.1f}h); "
+                        "using it because --offline was requested",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(f"Using offline URA land-use cache {cache_path}", file=sys.stderr)
+                return cached
+            if not stale:
+                _LAST_CACHE_STATE = "cached"
+                print(
+                    f"Using validated URA land-use cache {cache_path} "
+                    f"({age_hours:.1f}h old)",
+                    file=sys.stderr,
+                )
+                return cached
+            _LAST_CACHE_STATE = "stale_refreshing"
+            print(
+                f"WARNING: URA land-use cache {cache_path} is stale "
+                f"({age_hours:.1f}h > {maximum_age:.1f}h); refreshing",
+                file=sys.stderr,
+            )
+    elif offline:
+        sys.exit(
+            f"ERROR: offline URA land-use cache is missing: {cache_path}; "
+            "run once online with --cache-dir"
+        )
+
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
 
     poll_url = POLL_URL.format(ds=DATASET_ID)
     for attempt in range(4):
@@ -131,10 +257,14 @@ def poll_download_geojson(cache_dir: str | None = None) -> dict:
         raw = _http_bytes(file_url, timeout=120)
     except Exception as exc:
         sys.exit(f"ERROR: download failed for {DATASET_ID}: {exc}")
-    if cache_path:
-        with open(cache_path, "wb") as f:
-            f.write(raw)
-    return json.loads(raw.decode("utf-8"))
+    try:
+        payload = _validated_geojson(raw, file_url)
+    except ValueError as exc:
+        sys.exit(f"ERROR: downloaded URA land-use payload is invalid: {exc}")
+    if cache_path is not None:
+        _atomic_write_validated_cache(cache_path, raw, file_url)
+    _LAST_CACHE_STATE = "fresh"
+    return payload
 
 
 def feature_list(geojson: dict) -> list[dict]:
@@ -298,10 +428,28 @@ def main() -> None:
     ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument("--buffer-km", type=float, default=DEFAULT_BUFFER_KM)
     ap.add_argument("--cache-dir", help="cache fetched GeoJSON bytes")
+    ap.add_argument(
+        "--max-cache-age-hours",
+        type=float,
+        default=DEFAULT_MAX_CACHE_AGE_HOURS,
+        help="refresh online caches older than this many hours (default: 24)",
+    )
+    ap.add_argument(
+        "--offline",
+        action="store_true",
+        help="perform no HTTP and require a valid cache (stale caches are warned)",
+    )
     args = ap.parse_args()
 
     estates = pd.read_csv(args.estates)
-    geojson = poll_download_geojson(args.cache_dir)
+    try:
+        geojson = poll_download_geojson(
+            args.cache_dir,
+            max_cache_age_hours=args.max_cache_age_hours,
+            offline=args.offline,
+        )
+    except ValueError as exc:
+        sys.exit(f"ERROR: {exc}")
     rows = rows_for_estates(estates, geojson, buffer_km=args.buffer_km)
 
     out_df = pd.DataFrame(rows)[

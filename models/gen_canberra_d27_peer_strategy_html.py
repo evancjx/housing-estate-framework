@@ -53,7 +53,7 @@ from gen_canberra_crescent_d27_html import (
     clean_text,
     comparison_window,
     load_district_transactions,
-    load_lookup,
+    load_location_lookup,
     nearest_station,
 )
 
@@ -353,7 +353,7 @@ def build_spatial_rows(
     locations_path: pathlib.Path,
     mrt_path: pathlib.Path,
 ) -> list[dict[str, Any]]:
-    locations = load_lookup(locations_path)
+    locations = load_location_lookup(locations_path)
     mrt = pd.read_csv(mrt_path)
     out = []
     for row in project_rows:

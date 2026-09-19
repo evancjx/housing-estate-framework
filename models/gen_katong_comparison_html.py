@@ -48,6 +48,7 @@ import html
 import math
 import pathlib
 import re
+import sys
 from datetime import date
 from typing import Any
 
@@ -55,6 +56,14 @@ import pandas as pd
 
 
 ROOT = pathlib.Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
+
 DEFAULT_PROFILES = ROOT / "data/inputs/katong_project_profiles.csv"
 DEFAULT_TRANSACTIONS = ROOT / "data/outputs/private_transactions_bedrooms.csv"
 DEFAULT_LOCATIONS = ROOT / "data/outputs/private_project_locations.csv"
@@ -65,6 +74,7 @@ DEFAULT_OUT = ROOT / "katong_condo_comparison.html"
 
 SQM_TO_SQFT = 10.7639
 MIN_GROWTH_SAMPLE = 3
+LEDGER_PAGE_SIZE = 100
 PROFILE_COLUMNS = {
     "name",
     "url",
@@ -301,6 +311,19 @@ def _lookup(path: pathlib.Path, columns: list[str]) -> dict[str, dict[str, Any]]
         raise SystemExit(f"{path} missing required columns: {missing}")
     frame = frame.copy()
     frame["project"] = frame["project_name"].map(normalise_project)
+    frame = frame[~frame["project"].duplicated(keep=False)]
+    return {
+        row["project"]: row.to_dict()
+        for _, row in frame.drop_duplicates("project", keep="last").iterrows()
+    }
+
+
+def _location_lookup(path: pathlib.Path) -> dict[str, dict[str, Any]]:
+    try:
+        frame = load_usable_project_locations(path)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
+    frame["project"] = frame["project_name"].map(normalise_project)
     return {
         row["project"]: row.to_dict()
         for _, row in frame.drop_duplicates("project", keep="last").iterrows()
@@ -437,7 +460,7 @@ def build_rows(
         project = profile["project"]
         project_txns = txns[txns["project"].eq(project)]
         location = locations.get(project, {})
-        school = schools.get(project, {})
+        school = schools.get(project, {}) if location else {}
         lat = pd.to_numeric(pd.Series([location.get("lat")]), errors="coerce").iloc[0]
         lon = pd.to_numeric(pd.Series([location.get("lon")]), errors="coerce").iloc[0]
         lat_value = None if pd.isna(lat) else float(lat)
@@ -473,10 +496,15 @@ def build_rows(
                 "lon": lon_value,
                 "nearest_mrt": station,
                 "nearest_mrt_m": station_m,
-                "primary_1km_count": int(
-                    pd.to_numeric(
-                        pd.Series([school.get("primary_1km_count")]), errors="coerce"
-                    ).fillna(0).iloc[0]
+                "primary_1km_count": (
+                    int(primary_count)
+                    if pd.notna(
+                        primary_count := pd.to_numeric(
+                            pd.Series([school.get("primary_1km_count")]),
+                            errors="coerce",
+                        ).iloc[0]
+                    )
+                    else None
                 ),
                 "primary_1km_schools": clean_text(
                     school.get("primary_1km_schools"), "None in project diagnostic"
@@ -516,7 +544,7 @@ def _headline_rows(rows: list[dict[str, Any]]) -> str:
                   <td class="{growth_class}"><b>{_percent(stats['growth_pct'])}</b>
                     <small>n={stats['prior_n']} → n={stats['recent_n']}</small></td>
                   <td><b>{stats['turnover_pct']:.1f}%</b><small>12m caveats / {int(row['official_units']):,} units</small></td>
-                  <td><b>{esc(row['nearest_mrt'])}</b><small>{_number(row['nearest_mrt_m'], 'm straight-line')} · {row['primary_1km_count']} primary within 1km</small></td>
+                  <td><b>{esc(row['nearest_mrt'])}</b><small>{_number(row['nearest_mrt_m'], 'm straight-line')} · {row['primary_1km_count'] if row['primary_1km_count'] is not None else '—'} primary within 1km</small></td>
                 </tr>"""
             )
     return "".join(output)
@@ -667,7 +695,7 @@ def _ledger(txns: pd.DataFrame, profiles: pd.DataFrame) -> str:
             else "Unknown"
         )
         output.append(
-            f"""<tr data-project="{esc(slugs[row.project])}" data-cohort="{esc(cohorts[row.project])}"
+            f"""<tr tabindex="-1" data-project="{esc(slugs[row.project])}" data-cohort="{esc(cohorts[row.project])}"
                     data-sale="{row.sale_state}" data-bed="{row.bedroom_bucket}"
                     data-search="{esc(row.project)} {esc(row.floor_level)} {bedrooms}">
               <td>{row.sale_period.strftime('%b %Y')}</td>
@@ -739,7 +767,8 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
 .map-key{{display:flex;gap:10px 18px;flex-wrap:wrap;margin-top:10px;font-size:.78rem}}.map-key i{{display:inline-grid;place-items:center;width:22px;height:22px;color:#fff;border-radius:50%;font-style:normal;margin-right:5px}}
 .unit-gate .status{{display:inline-block;padding:5px 8px;border-radius:6px;background:#fff}}.status.available{{color:var(--green)}}.status.unavailable{{color:var(--red)}}.unit-metrics{{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .source-grid{{display:grid;grid-template-columns:1fr 1fr;gap:20px}}.source-grid>div{{border:1px solid var(--line);border-radius:16px;padding:18px;background:#fff}}.source-grid li{{margin:.55em 0}}code{{font-size:.85em;background:#fff;padding:2px 5px;border-radius:5px}}
-.ledger-meta{{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}}.hidden{{display:none!important}}.top-link{{display:inline-block;margin-bottom:20px;color:var(--muted);text-decoration:none}}
+.ledger-meta{{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}}.ledger-pager{{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px}}.ledger-pager p{{margin:0;color:var(--muted)}}.ledger-noscript{{padding:14px 16px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}}.hidden{{display:none!important}}.top-link{{display:inline-block;margin-bottom:20px;color:var(--muted);text-decoration:none}}
+@media print{{.ledger-wrap{{overflow:visible}}.ledger-pager button,.controls,.ledger-meta .control-row{{display:none!important}}}}
 @media(max-width:1050px){{.profiles{{grid-template-columns:repeat(2,1fr)}}.hero-meta,.metrics{{grid-template-columns:repeat(2,1fr)}}}}
 @media(max-width:680px){{main{{padding-inline:14px}}.profiles,.source-grid{{grid-template-columns:1fr}}.hero-meta,.metrics{{grid-template-columns:1fr 1fr}}h1{{font-size:3.25rem}}.controls{{position:static}}}}
 </style></head><body><main>
@@ -791,9 +820,13 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
 <section id="ledger"><h2>Full transaction ledger</h2>
 <div class="ledger-meta"><p>Every valid caveat for the eight reviewed projects in the committed input. The comparison controls above also filter this ledger.</p>
 <div class="control-row"><div><label for="ledger-search">Search ledger</label><input id="ledger-search" type="search" placeholder="Project or floor band"></div>
-<button id="export-ledger" type="button">Export visible CSV</button></div></div>
-<div class="table-wrap"><table id="ledger-table"><thead><tr><th>Sale month</th><th>Project</th><th>Sale state</th><th>Beds</th><th>Floor band</th><th>Area</th><th>Price</th><th>PSF</th><th>Provenance</th></tr></thead>
-<tbody>{_ledger(txns, profiles)}</tbody></table></div>
+<button id="export-ledger" type="button">Export all filtered CSV</button></div></div>
+<div class="table-wrap ledger-wrap"><table id="ledger-table"><thead><tr><th>Sale month</th><th>Project</th><th>Sale state</th><th>Beds</th><th>Floor band</th><th>Area</th><th>Price</th><th>PSF</th><th>Provenance</th></tr></thead>
+<tbody id="ledger-body"></tbody></table></div>
+<template id="ledger-row-template"><table><tbody>{_ledger(txns, profiles)}</tbody></table></template>
+<div class="ledger-pager"><p id="ledger-count" role="status" aria-live="polite">JavaScript is required to display {len(txns):,} embedded transactions.</p>
+<button id="ledger-show-more" type="button">Show {LEDGER_PAGE_SIZE} more</button></div>
+<noscript><p class="ledger-noscript" role="alert">The transaction ledger needs JavaScript for filtering and display. The report summaries, methodology and source register remain available above and below.</p></noscript>
 <div class="empty hidden" id="ledger-empty">No ledger rows match the active controls.</div></section>
 
 <section><h2>Planning, fit and risk register</h2>
@@ -812,10 +845,26 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
   const search = document.getElementById("ledger-search");
   const toggles = [...document.querySelectorAll(".project-toggle")];
   const headlineRows = [...document.querySelectorAll("#headline-table tbody tr")];
-  const ledgerRows = [...document.querySelectorAll("#ledger-table tbody tr")];
+  const ledgerBody = document.getElementById("ledger-body");
+  const ledgerRows = [...document.getElementById("ledger-row-template").content.querySelectorAll("tbody tr")];
+  const ledgerCount = document.getElementById("ledger-count");
+  const ledgerShowMore = document.getElementById("ledger-show-more");
+  const PAGE_SIZE = {LEDGER_PAGE_SIZE};
   const activeProjects = new Set(toggles.map(button => button.dataset.project));
+  let filteredLedgerRows = [];
+  let visibleLimit = PAGE_SIZE;
+  let prePrintVisibleLimit = null;
 
-  function apply() {{
+  function renderLedger(focusIndex = null) {{
+    const renderedRows = filteredLedgerRows.slice(0, visibleLimit);
+    ledgerBody.replaceChildren(...renderedRows);
+    ledgerCount.textContent = `${{renderedRows.length.toLocaleString()}} of ${{filteredLedgerRows.length.toLocaleString()}} filtered transactions shown`;
+    ledgerShowMore.hidden = renderedRows.length >= filteredLedgerRows.length;
+    document.getElementById("ledger-empty").classList.toggle("hidden", filteredLedgerRows.length > 0);
+    if (focusIndex !== null && renderedRows[focusIndex]) renderedRows[focusIndex].focus();
+  }}
+
+  function apply(resetPage = true) {{
     let headlineVisible = 0;
     headlineRows.forEach(row => {{
       const visible = activeProjects.has(row.dataset.project)
@@ -826,17 +875,15 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
     }});
     document.getElementById("headline-empty").classList.toggle("hidden", headlineVisible > 0);
     const term = search.value.trim().toUpperCase();
-    let ledgerVisible = 0;
-    ledgerRows.forEach(row => {{
+    filteredLedgerRows = ledgerRows.filter(row => {{
       const stateMatch = sale.value === "all" || row.dataset.sale === sale.value;
       const bedMatch = bed.value === "all" || row.dataset.bed === bed.value;
-      const visible = activeProjects.has(row.dataset.project) && stateMatch && bedMatch
+      return activeProjects.has(row.dataset.project) && stateMatch && bedMatch
         && (cohort.value === "all" || row.dataset.cohort === cohort.value)
         && (!term || row.dataset.search.includes(term));
-      row.classList.toggle("hidden", !visible);
-      if (visible) ledgerVisible += 1;
     }});
-    document.getElementById("ledger-empty").classList.toggle("hidden", ledgerVisible > 0);
+    if (resetPage) visibleLimit = PAGE_SIZE;
+    renderLedger();
   }}
 
   toggles.forEach(button => button.addEventListener("click", () => {{
@@ -845,10 +892,16 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
     else activeProjects.add(project);
     button.classList.toggle("active", activeProjects.has(project));
     button.setAttribute("aria-pressed", activeProjects.has(project));
-    apply();
+    apply(true);
   }}));
-  [sale, bed, cohort].forEach(control => control.addEventListener("change", apply));
-  search.addEventListener("input", apply);
+  [sale, bed, cohort].forEach(control => control.addEventListener("change", () => apply(true)));
+  search.addEventListener("input", () => apply(true));
+
+  ledgerShowMore.addEventListener("click", () => {{
+    const firstNewIndex = Math.min(visibleLimit, filteredLedgerRows.length);
+    visibleLimit += PAGE_SIZE;
+    renderLedger(firstNewIndex);
+  }});
 
   const query = new URLSearchParams(location.search);
   if (query.has("sale") && [...sale.options].some(option => option.value === query.get("sale"))) sale.value = query.get("sale");
@@ -877,15 +930,26 @@ th{{position:sticky;top:0;background:#f5f2eb;z-index:2;font-size:.72rem;text-tra
   }});
 
   document.getElementById("export-ledger").addEventListener("click", () => {{
-    const visible = ledgerRows.filter(row => !row.classList.contains("hidden"));
     const headers = [...document.querySelectorAll("#ledger-table thead th")].map(cell => cell.textContent.trim());
-    const lines = [headers, ...visible.map(row => [...row.cells].map(cell => cell.textContent.trim().replace(/\\s+/g, " ")))]
+    const lines = [headers, ...filteredLedgerRows.map(row => [...row.cells].map(cell => cell.textContent.trim().replace(/\\s+/g, " ")))]
       .map(values => values.map(value => `"${{value.replaceAll('"', '""')}}"`).join(","));
     const blob = new Blob([lines.join("\\n")], {{type:"text/csv;charset=utf-8"}});
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-    link.download = "katong-visible-transactions.csv"; link.click(); URL.revokeObjectURL(link.href);
+    link.download = "katong-filtered-transactions.csv"; link.click(); URL.revokeObjectURL(link.href);
   }});
-  apply();
+
+  window.addEventListener("beforeprint", () => {{
+    prePrintVisibleLimit = visibleLimit;
+    visibleLimit = filteredLedgerRows.length;
+    renderLedger();
+  }});
+  window.addEventListener("afterprint", () => {{
+    if (prePrintVisibleLimit === null) return;
+    visibleLimit = prePrintVisibleLimit;
+    prePrintVisibleLimit = null;
+    renderLedger();
+  }});
+  apply(true);
 }})();
 </script></body></html>"""
 
@@ -909,7 +973,7 @@ def generate(
         raise SystemExit(f"no transaction rows for profiled projects: {missing}")
     periods = analysis_periods(txns, as_of)
     complete_txns = txns[txns["sale_period"] <= periods["full_end"]].copy()
-    locations = _lookup(locations_path, ["project_name", "lat", "lon"])
+    locations = _location_lookup(locations_path)
     schools = _lookup(
         schools_path,
         ["project_name", "primary_1km_count", "primary_1km_schools"],
@@ -932,6 +996,11 @@ def main() -> None:
     parser.add_argument("--mrt", default=str(DEFAULT_MRT))
     parser.add_argument("--units", default=str(DEFAULT_UNITS))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument(
+        "--as-of",
+        type=date.fromisoformat,
+        help="Report date in YYYY-MM-DD form (defaults to today)",
+    )
     args = parser.parse_args()
     out_path, rows, periods = generate(
         pathlib.Path(args.profiles),
@@ -941,6 +1010,7 @@ def main() -> None:
         pathlib.Path(args.mrt),
         pathlib.Path(args.units),
         pathlib.Path(args.out),
+        as_of=args.as_of,
     )
     print(
         f"Written: {out_path} ({len(rows)} projects, "

@@ -758,6 +758,24 @@ def render_html(rows: list[dict[str, Any]], metadata: dict[str, Any]) -> str:
     overflow: auto;
     max-height: 62vh;
   }
+  .table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 10px 0 0;
+  }
+  .table-actions button {
+    min-height: 36px;
+    border: 1px solid #cfd6e3;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #1f2937;
+    padding: 7px 11px;
+    cursor: pointer;
+  }
+  .table-actions button:hover { border-color: #0f766e; }
+  .table-actions button[hidden] { display: none; }
   table {
     width: 100%;
     min-width: 1260px;
@@ -827,6 +845,11 @@ def render_html(rows: list[dict[str, Any]], metadata: dict[str, Any]) -> str:
     .metrics { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
     .toolbar { grid-template-columns: 1fr 1fr; }
     .workspace { grid-template-columns: 1fr; }
+    .table-actions { align-items: flex-start; flex-direction: column; }
+  }
+  @media print {
+    .toolbar, .table-actions { display: none !important; }
+    .table-wrap { max-height: none; overflow: visible; }
   }
 </style>
 </head>
@@ -948,11 +971,19 @@ def render_html(rows: list[dict[str, Any]], metadata: dict[str, Any]) -> str:
       <tbody id="tableBody"></tbody>
     </table>
   </section>
+  <div class="table-actions">
+    <div id="tableCount" class="muted" role="status" aria-live="polite"></div>
+    <div>
+      <button id="showMoreRows" type="button">Show 100 more</button>
+      <button id="downloadRows" type="button">Download all filtered rows</button>
+    </div>
+  </div>
 </main>
 
 <script>
 const DATA = __DATA_JSON__;
 const META = __META_JSON__;
+const PAGE_SIZE = 100;
 
 let state = {
   level: "district",
@@ -963,7 +994,9 @@ let state = {
   sortKey: "projection_rate_pct",
   sortDir: -1,
   selectedKey: null,
+  visibleLimit: PAGE_SIZE,
 };
+let lastFilteredRows = [];
 
 function fmtInt(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
@@ -1039,9 +1072,10 @@ function renderMetrics() {
 }
 function renderTable(rows) {
   const activeKey = state.selectedKey;
-  document.getElementById("tableBody").innerHTML = rows.map(row => {
+  const renderedRows = rows.slice(0, state.visibleLimit);
+  document.getElementById("tableBody").innerHTML = renderedRows.map(row => {
     const firstWhy = row.why && row.why.length ? row.why[0] : "";
-    return `<tr data-key="${escapeHtml(row.key)}" class="${row.key === activeKey ? "active" : ""}">
+    return `<tr data-key="${escapeHtml(row.key)}" tabindex="-1" class="${row.key === activeKey ? "active" : ""}">
       <td>${escapeHtml(row.level)}</td>
       <td>D${escapeHtml(row.district)}</td>
       <td class="project-cell"><strong>${escapeHtml(row.label)}</strong><br><span class="muted">${escapeHtml(row.planning_area || "")}</span></td>
@@ -1065,6 +1099,36 @@ function renderTable(rows) {
       render();
     });
   });
+  const shown = Math.min(renderedRows.length, rows.length);
+  document.getElementById("tableCount").textContent =
+    `${fmtInt(shown)} of ${fmtInt(rows.length)} filtered rows shown`;
+  document.getElementById("showMoreRows").hidden = shown >= rows.length;
+}
+
+function csvCell(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function downloadFilteredRows() {
+  const columns = [
+    ["view", row => row.level], ["district", row => row.district],
+    ["project_or_area", row => row.label], ["planning_area", row => row.planning_area],
+    ["transactions", row => row.total_n], ["active_years", row => row.active_years],
+    ["baseline_psf", row => row.baseline_psf], ["recent_psf", row => row.recent_psf],
+    ["recent_growth_pct", row => row.recent_growth_pct],
+    ["projection_rate_pct", row => row.projection_rate_pct],
+    ["confidence", row => row.confidence], ["peer_delta_pp", row => row.trend_delta_pp],
+  ];
+  const lines = [
+    columns.map(column => csvCell(column[0])).join(","),
+    ...lastFilteredRows.map(row => columns.map(column => csvCell(column[1](row))).join(",")),
+  ];
+  const blob = new Blob([lines.join("\\n")], {type: "text/csv;charset=utf-8"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "landed-growth-filtered.csv";
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 function drawChart(row) {
   const host = document.getElementById("chart");
@@ -1142,6 +1206,7 @@ function render() {
   document.getElementById("projectMode").classList.toggle("active", state.level === "project");
   document.getElementById("minTxnLabel").textContent = String(state.minTxn);
   const rows = selectedRows();
+  lastFilteredRows = rows;
   if (!state.selectedKey || !rows.some(row => row.key === state.selectedKey)) {
     state.selectedKey = rows.length ? rows[0].key : null;
   }
@@ -1152,27 +1217,48 @@ function render() {
   renderDetail(selected);
 }
 function bindEvents() {
-  document.getElementById("districtMode").addEventListener("click", () => { state.level = "district"; state.selectedKey = null; render(); });
-  document.getElementById("projectMode").addEventListener("click", () => { state.level = "project"; state.selectedKey = null; render(); });
-  document.getElementById("searchBox").addEventListener("input", event => { state.search = event.target.value; state.selectedKey = null; render(); });
-  document.getElementById("districtFilter").addEventListener("change", event => { state.district = event.target.value; state.selectedKey = null; render(); });
-  document.getElementById("confidenceFilter").addEventListener("change", event => { state.confidence = event.target.value; state.selectedKey = null; render(); });
-  document.getElementById("sortSelect").addEventListener("change", event => { state.sortKey = event.target.value; render(); });
-  document.getElementById("minTxn").addEventListener("input", event => { state.minTxn = Number(event.target.value); state.selectedKey = null; render(); });
+  const resetRows = () => { state.visibleLimit = PAGE_SIZE; state.selectedKey = null; };
+  document.getElementById("districtMode").addEventListener("click", () => { state.level = "district"; resetRows(); render(); });
+  document.getElementById("projectMode").addEventListener("click", () => { state.level = "project"; resetRows(); render(); });
+  document.getElementById("searchBox").addEventListener("input", event => { state.search = event.target.value; resetRows(); render(); });
+  document.getElementById("districtFilter").addEventListener("change", event => { state.district = event.target.value; resetRows(); render(); });
+  document.getElementById("confidenceFilter").addEventListener("change", event => { state.confidence = event.target.value; resetRows(); render(); });
+  document.getElementById("sortSelect").addEventListener("change", event => { state.sortKey = event.target.value; state.visibleLimit = PAGE_SIZE; render(); });
+  document.getElementById("minTxn").addEventListener("input", event => { state.minTxn = Number(event.target.value); resetRows(); render(); });
   document.querySelectorAll("th[data-sort]").forEach(th => {
     th.addEventListener("click", () => {
       const key = th.dataset.sort;
       if (state.sortKey === key) state.sortDir *= -1;
       else { state.sortKey = key; state.sortDir = -1; }
+      state.visibleLimit = PAGE_SIZE;
       document.getElementById("sortSelect").value = state.sortKey;
       render();
     });
   });
+  document.getElementById("showMoreRows").addEventListener("click", () => {
+    const previous = state.visibleLimit;
+    state.visibleLimit += PAGE_SIZE;
+    render();
+    const rows = document.querySelectorAll("#tableBody tr");
+    if (rows[previous]) rows[previous].focus();
+  });
+  document.getElementById("downloadRows").addEventListener("click", downloadFilteredRows);
 }
 populateDistricts();
 renderMetrics();
 bindEvents();
 render();
+let printLimit = null;
+window.addEventListener("beforeprint", () => {
+  printLimit = state.visibleLimit;
+  state.visibleLimit = Number.MAX_SAFE_INTEGER;
+  render();
+});
+window.addEventListener("afterprint", () => {
+  if (printLimit !== null) state.visibleLimit = printLimit;
+  printLimit = null;
+  render();
+});
 </script>
 </body>
 </html>
@@ -1184,12 +1270,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate landed growth dashboard HTML")
     parser.add_argument("--input", default=str(DEFAULT_INPUT), help="EdgeProp landed transaction CSV")
     parser.add_argument("--out", default=str(DEFAULT_OUTPUT), help="Output HTML path")
+    parser.add_argument(
+        "--generated-on",
+        type=date.fromisoformat,
+        help="Preserve an explicit report-generation date (YYYY-MM-DD)",
+    )
     args = parser.parse_args()
 
     input_path = pathlib.Path(args.input)
     output_path = pathlib.Path(args.out)
     data = load_landed_transactions(input_path)
-    rows, metadata = prepare_dashboard_payload(data)
+    rows, metadata = prepare_dashboard_payload(data, generated_on=args.generated_on)
     output_path.write_text(render_html(rows, metadata), encoding="utf-8")
     print(f"Wrote {len(rows)} dashboard rows to {output_path}")
 

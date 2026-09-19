@@ -52,7 +52,8 @@ Historical paths under `models/` remain runnable compatibility CLIs:
 ### Pipeline order
 
 ```bash
-make pipeline   # full regeneration: derived layers → provision → liveability → value → master
+make pipeline   # network refresh: build + validate a staged run, then stop awaiting review
+make pipeline-promote RUN_ID=<run-id>  # revalidate and atomically promote reviewed staged bytes
 make pipeline-reuse  # deterministic/offline rebuild from committed derived layers
 make smoke      # pytest gate (run before and after changes)
 ```
@@ -67,7 +68,8 @@ Organised into four subdirectories:
 - **`data/raw/`** — scraper artifacts: `raw/ura/` (per-district URA PMI dumps) and `raw/edgeprop/` (not-clean EdgeProp scrape dumps + project lists).
 - **`data/_archive/`** — superseded one-off experiment outputs kept for reference; nothing reads them.
 
-Canonical outputs from the most recent committed pipeline run (reproducible via `make pipeline`):
+Canonical outputs from the most recent reviewed pipeline run (offline-reproducible via
+`make pipeline-reuse`; refreshed candidates require `make pipeline-promote`):
 - **[master_output.csv](data/outputs/master_output.csv)** — headline deliverable; estates × Provision/Liveability/Value/Employment/Risk/Life-Path joined across all models.
 - **provision_scores.csv**, **liveability_matrix.csv**, **value_output.csv** — intermediate model outputs.
 - **lease_risk.csv**, **employment_scores_{T0,T5,T15}.csv** — supporting model outputs.
@@ -82,7 +84,7 @@ Throwaway synthetic data used only to verify the scripts run end-to-end. NOT rea
 - **[comparison_table.html](comparison_table.html)** — interactive cross-model comparison table (estates × Provision/Liveability/Value/Employment/Risk). Rebuild it after pipeline changes with `python -m sg_estate.reporting.builders.comparison`.
 - **[buyer_profile_table.html](buyer_profile_table.html)** — scenario-specific buyer screening with hard constraints, persona/horizon fit, tenure-separated Value and profile-local ranks. Refresh `data/outputs/buyer_profile_output.csv` with `python models/buyer_profile_model.py`, then rebuild the page with `python -m sg_estate.reporting.builders.buyer_profile`.
 - **[mrt_comparison_table.html](mrt_comparison_table.html)** — interactive official-source MRT/LRT code-line explorer with audited service status, a T5 planned overlay, derived representative-point diagnostics and gated estate context. Refresh the source layer with `python3 models/ingest_lta_rail.py`, cascade model outputs with `make pipeline-reuse AS_OF_YEAR=2026`, then re-run `python3 -m sg_estate.reporting.builders.mrt_comparison`.
-- **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project explorer with focused Overview, Access, Schools, Price, Transactions and Estate context views. Filters and sorting are shareable through the URL. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/outputs/private_project_locations.csv`, then `make private-project-table`.
+- **[private_project_comparison_table.html](private_project_comparison_table.html)** — interactive private apartment/condo project explorer with focused Overview, Access, Schools, Price, Transactions and Estate context views. Filters and sorting are shareable through the URL. The project tools hydrate one immutable shared browser catalog; their Make targets rebuild that catalog before regenerating a page. Run `make private-project-locations` with `ONEMAP_TOKEN` to refresh `data/outputs/private_project_locations.csv`, then `make private-project-table`.
 - **[project_exit_comparison.html](project_exit_comparison.html)** — interactive exit-scenario comparison for selected private projects, using achieved size-matched transactions and user-controlled purchase date, planned sale date, annual growth and selling-cost assumptions. Evidence coverage and scenario outputs stay separate rather than collapsing into one project score. Rebuild with `make project-exit-comparison`.
 - **[condo_framework_comparison.html](condo_framework_comparison.html)** — select any two named condominium records and compare achieved transactions, tenure, access and schools alongside the same estate-context Provision, Liveability, private Value, Employment, Risk and Life Path factors as `comparison_table.html`. Run `make condo-framework-comparison`.
 - **[multi_condo_framework_comparison.html](multi_condo_framework_comparison.html)** — build an ordered set of two to five named condominiums, keep project A as the reference, compare the latest five complete years or all safely mapped history, and inspect annual medians, detailed analysis and full filtered transaction ledgers before the separate estate-context framework. Run `make multi-condo-framework-comparison`; this also refreshes the compact on-demand shards in `site/assets/condo-transactions/`.
@@ -97,9 +99,26 @@ the machine-readable catalog used for report discovery; every non-index root rep
 entry. Shared browser assets belong in `site/assets/` and are referenced from reports as
 `assets/<name>`.
 
-The build also derives a compact `projects.json` lookup from the committed EdgeProp project list
-and transaction district field. It contains only project names, slugs, and known districts; raw
-transactions and exact-unit records are not published in the lookup.
+The landing search uses the immutable project identity registry under
+`site/assets/project-identity-registry/`. It reconciles stable project-tool IDs, the EdgeProp name
+index, reviewed geocodes, transaction membership, and dedicated report routes. Duplicate names
+remain distinct by street/district, while unresolved names stay discoverable with an explicit
+no-evidence state; they are never routed to an empty achieved-transaction view. Rebuild it with
+`make project-identity-registry` after changing any governed identity source.
+
+The Pages artifact also generates `data-status.json` from the governed data catalog, promoted
+pipeline manifest, and private-transaction manifest. Validated source receipts keep accepted-byte
+hashes, row counts, source identities, retrieval/coverage evidence and cache/fallback states tied
+to the run; legacy unknowns remain null and post-run file changes are labelled. The landing page
+keeps model generation, source coverage, partial periods, and retrieval dates separate. Browser-loaded JSON uses
+the shared bounded loader in `site/assets/data-loader.js`, which provides timeouts, schema checks,
+in-flight deduplication, a small success cache, visible fallback states, and manual retry.
+
+Network acquisition can be kept outside canonical inputs while it is reviewed: use
+`models/data_ingest.py --out-dir <staging-dir>` and `models/fetch_chas.py --out
+<staging-dir>/chas.csv`; the other receipt-enabled ingesters already accept explicit output paths.
+Review those bytes and receipts before explicitly replacing a governed source input; the pipeline
+does not discover or auto-promote arbitrary acquisition directories.
 
 ```bash
 make pages-check  # validate catalog coverage and report paths

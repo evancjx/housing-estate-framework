@@ -132,12 +132,17 @@ __STATION_OPTIONS__
 
     <div class="view-caveat" id="view-caveat">Overview keeps achieved transactions, access and estate context visibly separate. Choose a focused view for definitions and diagnostics.</div>
 
+    <div class="project-data-status" id="project-data-status" data-state="loading" role="status" aria-live="polite" aria-atomic="true">
+      <span id="project-data-status-copy">Showing the starter projects while the full project catalog loads…</span>
+      <button id="project-data-retry" type="button" hidden>Retry full catalog</button>
+    </div>
+
     <details class="column-guide">
       <summary>Column definitions for this view</summary>
       <dl id="column-guide-list"></dl>
     </details>
 
-    <div class="tbl-wrap" id="table-wrap" role="region" aria-label="Scrollable private condominium project comparison table" tabindex="0">
+    <div class="tbl-wrap" id="table-wrap" role="region" aria-label="Scrollable private condominium project comparison table" aria-busy="true" tabindex="0">
       <table id="private-project-table" aria-describedby="table-guidance">
         <caption>Achieved private-project transactions, project-level spatial diagnostics and separately labelled surrounding-estate framework context.</caption>
         <thead id="private-project-table-head"></thead>
@@ -196,6 +201,7 @@ __STATION_OPTIONS__
 <noscript><p class="noscript-note">Enable JavaScript to filter and render the private-project evidence table.</p></noscript>
 <script id="private-project-comparison-data" type="application/json">__PROJECT_DATA_JSON__</script>
 <script id="private-project-comparison-config" type="application/json">__PROJECT_CONFIG_JSON__</script>
+<script src="assets/data-loader.js"></script>
 <script src="assets/private-project-comparison.js"></script>
 <script src="assets/research-shell.js" data-research-shell></script>
 </body>

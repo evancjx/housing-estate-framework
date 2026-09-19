@@ -36,10 +36,19 @@ import argparse
 import html as html_mod
 import math
 import pathlib
+import sys
 
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
+
 DEFAULT_EDGEPROP = ROOT / "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
 DEFAULT_LOCATIONS = ROOT / "data/outputs/private_project_locations.csv"
 DEFAULT_MRT = ROOT / "data/inputs/mrt_layer.csv"
@@ -52,6 +61,13 @@ def normalise_district(value) -> str:
     text = str(value).strip()
     digits = "".join(ch for ch in text if ch.isdigit())
     return digits.zfill(2)[-2:] if digits else ""
+
+
+def load_locations(path: pathlib.Path) -> pd.DataFrame:
+    try:
+        return load_usable_project_locations(path)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -99,7 +115,8 @@ def nearest_station_by_project(projects: list[str], locations: pd.DataFrame,
     stations = stations.dropna(subset=["lat", "lon"])
     loc = locations.copy()
     loc["project"] = loc["project_name"].astype(str).str.strip().str.upper()
-    loc = loc.dropna(subset=["lat", "lon"]).drop_duplicates(subset=["project"])
+    loc = loc.dropna(subset=["lat", "lon"])
+    loc = loc[~loc["project"].duplicated(keep=False)]
     coords = loc.set_index("project")[["lat", "lon"]]
     out: dict[str, dict] = {}
     for project in projects:
@@ -271,10 +288,15 @@ def main() -> None:
     if ta.empty or tb.empty:
         raise SystemExit(f"ERROR: no condo/apartment rows for D{da} ({len(ta)}) or D{db} ({len(tb)})")
 
-    locations = pd.read_csv(args.locations)
+    locations = load_locations(pathlib.Path(args.locations))
     mrt = pd.read_csv(args.mrt)
-    mrt_a = nearest_station_by_project(sorted(ta["project"].unique()), locations, mrt)
-    mrt_b = nearest_station_by_project(sorted(tb["project"].unique()), locations, mrt)
+    location_districts = locations["postal_district"].map(normalise_district)
+    mrt_a = nearest_station_by_project(
+        sorted(ta["project"].unique()), locations[location_districts.eq(da)], mrt
+    )
+    mrt_b = nearest_station_by_project(
+        sorted(tb["project"].unique()), locations[location_districts.eq(db)], mrt
+    )
 
     html = build_page(da, db, label_a, label_b, ta, tb, mrt_a, mrt_b)
     out = pathlib.Path(args.out_dir) / f"district_pair_comparison_D{da}_D{db}.html"

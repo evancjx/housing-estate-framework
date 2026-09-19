@@ -5,6 +5,7 @@ import os
 import sys
 
 import pandas as pd
+from sg_estate.project_locations import LEGACY_LOCATION_COLUMNS
 
 sys.path.insert(
     0,
@@ -65,10 +66,12 @@ def _spatial(tmp_path):
                 "project_name": project,
                 "lat": 1.40 + index * 0.0001,
                 "lon": 103.82,
+                "match_status": "matched",
+                "review_status": "approved_legacy",
             }
             for index, project in enumerate(strategy.INTEGRATION_PROJECTS)
         ]
-    ).to_csv(locations, index=False)
+    ).reindex(columns=LEGACY_LOCATION_COLUMNS).to_csv(locations, index=False)
     mrt = tmp_path / "mrt.csv"
     pd.DataFrame(
         [

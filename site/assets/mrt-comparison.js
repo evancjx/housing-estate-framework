@@ -8,6 +8,22 @@
   const tableBody = document.getElementById("mrt-comparison-table-body");
   if (!dataElement || !lineElement || !configElement || !tableHead || !tableBody) return;
 
+  function failEmbeddedData(message = "Station evidence is unavailable. Reload this page or regenerate the report.") {
+    const caveat = document.getElementById("view-caveat");
+    const tableWrap = document.querySelector(".tbl-wrap");
+    const empty = document.getElementById("empty-state");
+    if (caveat) {
+      caveat.textContent = message;
+      caveat.setAttribute("role", "alert");
+      caveat.setAttribute("aria-live", "assertive");
+    }
+    if (tableWrap) {
+      tableWrap.hidden = true;
+      tableWrap.setAttribute("aria-busy", "false");
+    }
+    if (empty) empty.hidden = true;
+  }
+
   let rows;
   let lines;
   let config;
@@ -15,17 +31,26 @@
     rows = JSON.parse(dataElement.textContent || "[]");
     lines = JSON.parse(lineElement.textContent || "[]");
     config = JSON.parse(configElement.textContent || "{}");
+    if (
+      !Array.isArray(rows)
+      || !rows.length
+      || !Array.isArray(lines)
+      || !lines.length
+      || !config
+      || typeof config !== "object"
+      || Array.isArray(config)
+    ) {
+      throw new TypeError("The embedded station payload has an unexpected shape.");
+    }
   } catch (error) {
-    document.getElementById("view-caveat").textContent =
-      `The station data could not be loaded: ${error.message}`;
+    failEmbeddedData();
     return;
   }
 
   const BAND_ORDER = { F: 1, D: 2, C: 3, B: 4, "B+": 5, A: 6 };
   const VALUE_TRUST_THRESHOLD = Number(config.value_trust_threshold);
   if (!Number.isFinite(VALUE_TRUST_THRESHOLD) || VALUE_TRUST_THRESHOLD <= 0) {
-    document.getElementById("view-caveat").textContent =
-      "The Value publication threshold is missing or invalid.";
+    failEmbeddedData("Station evidence is unavailable because its Value publication threshold is invalid. Reload this page or regenerate the report.");
     return;
   }
   const ARCHETYPES = {
@@ -531,6 +556,7 @@
     elements.sortStatus.textContent = sortLabel();
     elements.caveat.textContent = VIEW_CAVEATS[state.view] || VIEW_CAVEATS.overview;
     elements.tableWrap.hidden = visibleRows.length === 0;
+    elements.tableWrap.setAttribute("aria-busy", "false");
     elements.empty.hidden = visibleRows.length !== 0;
     updateButtonState("[data-view]", "view", state.view);
     updateButtonState("button[data-status]", "status", state.status);

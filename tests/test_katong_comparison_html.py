@@ -5,6 +5,7 @@ import os
 import sys
 
 import pandas as pd
+from sg_estate.project_locations import LEGACY_LOCATION_COLUMNS
 import pytest
 
 sys.path.insert(
@@ -101,16 +102,48 @@ def _transactions(tmp_path):
     return path
 
 
+def _many_transactions(tmp_path, count=250):
+    rows = []
+    for index in range(count):
+        project = PROJECTS[index % len(PROJECTS)]
+        rows.append(
+            {
+                "project_name": project,
+                "postal_district": "15",
+                "planning_area": "MARINE PARADE",
+                "property_type": "Apartment",
+                "tenure": "Freehold" if project == "HAIG COURT" else "99 years",
+                "sale_month": "2026-06" if index % 3 else "2026-05",
+                "type_of_sale": "Resale",
+                "transacted_price": 1_000_000 + index * 1_000,
+                "area_sqm": 50 + index % 3,
+                "floor_level": "06 to 10",
+                "data_source": "ura_private",
+                "bedrooms": 2,
+                "bedroom_source": "edgeprop_exact",
+            }
+        )
+    path = tmp_path / "many-transactions.csv"
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
+
+
 def _spatial_files(tmp_path):
     locations = tmp_path / "locations.csv"
     schools = tmp_path / "schools.csv"
     mrt = tmp_path / "mrt.csv"
     pd.DataFrame(
         [
-            {"project_name": project, "lat": 1.30 + index * 0.01, "lon": 103.89}
+            {
+                "project_name": project,
+                "lat": 1.30 + index * 0.01,
+                "lon": 103.89,
+                "match_status": "matched",
+                "review_status": "approved_legacy",
+            }
             for index, project in enumerate(PROJECTS)
         ]
-    ).to_csv(locations, index=False)
+    ).reindex(columns=LEGACY_LOCATION_COLUMNS).to_csv(locations, index=False)
     pd.DataFrame(
         [
             {
@@ -243,6 +276,65 @@ def test_generate_builds_filters_ledger_and_honest_unit_empty_state(tmp_path):
     assert 'id="sale-state"' in page
     assert 'id="bedroom"' in page
     assert 'id="ledger-table"' in page
+    assert '<tbody id="ledger-body"></tbody>' in page
+    assert 'id="ledger-row-template"' in page
+    assert 'id="ledger-show-more"' in page
+    assert 'role="status" aria-live="polite"' in page
+    assert "filteredLedgerRows.map" in page
+    assert 'window.addEventListener("beforeprint"' in page
     assert "Exact-unit file not supplied" in page
     assert "unified project ranking" not in page
     assert "No asking prices, rental yields or estate-level Provision scores" in page
+
+
+def test_transaction_ledger_pages_filters_exports_and_restores_print(tmp_path):
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    locations, schools, mrt = _spatial_files(tmp_path)
+    out = tmp_path / "katong-many.html"
+    katong.generate(
+        _profiles(tmp_path),
+        _many_transactions(tmp_path),
+        locations,
+        schools,
+        mrt,
+        tmp_path / "no-unit-file.csv",
+        out,
+        as_of=date(2026, 7, 25),
+    )
+
+    with playwright_api.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except playwright_api.Error as error:
+            pytest.skip(f"Chromium cannot launch in this environment: {error}")
+        page = browser.new_page()
+        try:
+            page.goto(out.as_uri())
+            assert page.locator("#ledger-body tr").count() == 100
+            playwright_api.expect(page.locator("#ledger-count")).to_have_text(
+                "100 of 250 filtered transactions shown"
+            )
+
+            page.locator("#ledger-show-more").click()
+            assert page.locator("#ledger-body tr").count() == 200
+            playwright_api.expect(page.locator("#ledger-body tr").nth(100)).to_be_focused()
+
+            page.locator("#ledger-search").fill("HAIG COURT")
+            assert page.locator("#ledger-body tr").count() == 100
+            playwright_api.expect(page.locator("#ledger-count")).to_have_text(
+                "100 of 125 filtered transactions shown"
+            )
+            with page.expect_download() as download_info:
+                page.locator("#export-ledger").click()
+            exported = download_info.value.path().read_text(encoding="utf-8")
+            assert len(exported.splitlines()) == 126
+            assert "Haig Court" in exported
+            assert "Emerald Of Katong" not in exported
+
+            page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+            assert page.locator("#ledger-body tr").count() == 125
+            page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+            assert page.locator("#ledger-body tr").count() == 100
+        finally:
+            page.close()
+            browser.close()

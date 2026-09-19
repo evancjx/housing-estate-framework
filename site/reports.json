@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "reports": [
     {
       "id": "estate-comparison",
@@ -8,6 +8,7 @@
       "category": "estate-framework",
       "kind": "comparison",
       "summary": "Explore Provision, persona-relative Liveability, tenure-separated Value and future context without collapsing estates into one ranking.",
+      "data_families": ["estate_model", "private_transactions"],
       "tags": ["estate", "context", "provision", "liveability", "value"]
     },
     {
@@ -17,6 +18,7 @@
       "category": "estate-framework",
       "kind": "explorer",
       "summary": "Build a household-specific shortlist with hard constraints, persona-and-horizon fit and tenure-separated Value—without creating a universal estate ranking.",
+      "data_families": ["estate_model", "private_transactions"],
       "tags": ["persona", "household", "screening", "liveability", "value"]
     },
     {
@@ -26,6 +28,7 @@
       "category": "home-finance",
       "kind": "tool",
       "summary": "Calculate a new home-loan repayment path or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.",
+      "data_families": ["finance_assumptions"],
       "tags": ["home loan", "mortgage", "calculator", "refinance", "reprice", "repayment"],
       "featured": true
     },
@@ -36,6 +39,7 @@
       "category": "home-finance",
       "kind": "tool",
       "summary": "Model a BUC or completed condominium and allocate each acquisition cost and progressive payment across co-owners' cash, CPF and loan funding with an exact-dollar ledger.",
+      "data_families": ["finance_assumptions"],
       "tags": ["condominium", "BUC", "couple", "partner", "co-owner", "funding ledger", "progressive payment", "CPF"],
       "featured": true
     },
@@ -46,6 +50,7 @@
       "category": "private-property",
       "kind": "tool",
       "summary": "Compare project-specific exit scenarios against achieved, size-matched private-property transactions while keeping assumptions, sample coverage and costs visible.",
+      "data_families": ["private_transactions", "rail_network", "finance_assumptions", "market_research"],
       "tags": ["condominium", "project", "exit", "transaction", "scenario", "selling costs"],
       "featured": true
     },
@@ -56,6 +61,7 @@
       "category": "estate-framework",
       "kind": "explorer",
       "summary": "Inspect official-source station-code-line memberships, a bounded five-year planned overlay, derived representative points and separately labelled estate framework context without ranking the rail network.",
+      "data_families": ["rail_network", "estate_model", "private_transactions"],
       "tags": ["mrt", "lrt", "transport", "interchange", "planned rail", "centroid", "estate", "context"]
     },
     {
@@ -65,6 +71,7 @@
       "category": "estate-framework",
       "kind": "method",
       "summary": "Understand how source layers flow into the separate Provision, Liveability and Value views.",
+      "data_families": ["estate_model", "private_transactions"],
       "tags": ["method", "architecture", "provenance"]
     },
     {
@@ -74,6 +81,7 @@
       "category": "private-property",
       "kind": "explorer",
       "summary": "Inspect achieved project transactions through focused access, school, price, transaction and separately governed estate-context views without creating a universal project ranking.",
+      "data_families": ["estate_model", "private_transactions", "rail_network", "market_research"],
       "tags": ["condominium", "project", "transaction", "district"],
       "featured": true
     },
@@ -84,6 +92,7 @@
       "category": "private-property",
       "kind": "comparison",
       "summary": "Select two condominium projects and compare achieved project evidence alongside the estate Provision, Liveability, private Value, employment, risk and life-path framework.",
+      "data_families": ["estate_model", "private_transactions", "rail_network", "market_research"],
       "tags": ["condominium", "comparison", "provision", "liveability", "value"],
       "featured": true
     },
@@ -94,6 +103,7 @@
       "category": "private-property",
       "kind": "comparison",
       "summary": "Compare two to five condominium projects across five complete years or longer available history, annual medians, detailed analysis, full transaction ledgers and separate estate framework views.",
+      "data_families": ["estate_model", "private_transactions", "rail_network", "market_research"],
       "tags": ["condominium", "comparison", "transaction", "ledger", "analysis", "provision", "liveability", "value"],
       "featured": true
     },
@@ -104,7 +114,18 @@
       "category": "private-property",
       "kind": "research",
       "summary": "Compare eight reviewed Katong projects by sale state, bedroom, floor, size, growth, liquidity and exact-unit evidence coverage.",
+      "data_families": ["private_transactions", "rail_network", "market_research"],
       "tags": ["katong", "condominium", "transaction", "unit", "sale state"],
+      "project_names": [
+        "EMERALD OF KATONG",
+        "TEMBUSU GRAND",
+        "GRAND DUNMAN",
+        "THE CONTINUUM",
+        "KATONG REGENCY",
+        "HAIG COURT",
+        "THE SHORE RESIDENCES",
+        "ONE AMBER"
+      ],
       "featured": true
     },
     {
@@ -114,7 +135,9 @@
       "category": "private-property",
       "kind": "research",
       "summary": "Compare achieved resale prices, bedroom mix, liquidity, access, buyer fit and planning context across nine projects.",
+      "data_families": ["private_transactions", "rail_network", "market_research"],
       "tags": ["poiz", "resale", "condominium", "east"],
+      "project_names": ["THE POIZ RESIDENCES"],
       "featured": true
     },
     {
@@ -124,7 +147,9 @@
       "category": "private-property",
       "kind": "transaction-ledger",
       "summary": "Inspect unit-type growth, annual PSF history and the underlying resale transaction ledger.",
-      "tags": ["poiz", "unit", "transaction", "growth"]
+      "data_families": ["private_transactions", "market_research"],
+      "tags": ["poiz", "unit", "transaction", "growth"],
+      "project_names": ["THE POIZ RESIDENCES"]
     },
     {
       "id": "district-17",
@@ -133,6 +158,7 @@
       "category": "district",
       "kind": "comparison",
       "summary": "Review private residential transaction evidence for Changi, Loyang and Pasir Ris.",
+      "data_families": ["private_transactions"],
       "tags": ["district 17", "changi", "loyang", "pasir ris"]
     },
     {
@@ -142,6 +168,7 @@
       "category": "district",
       "kind": "comparison",
       "summary": "Review private residential transaction evidence for Tampines and Pasir Ris.",
+      "data_families": ["private_transactions"],
       "tags": ["district 18", "tampines", "pasir ris"]
     },
     {
@@ -151,6 +178,7 @@
       "category": "district",
       "kind": "research",
       "summary": "Compare 34 Tampines Planning Area projects by indicative primary-school proximity and usable walking access to operational MRT entrances.",
+      "data_families": ["private_transactions", "rail_network", "market_research"],
       "tags": ["tampines", "simei", "condominium", "school", "mrt", "area guide"],
       "featured": true
     },
@@ -161,6 +189,7 @@
       "category": "district",
       "kind": "comparison",
       "summary": "Review private residential transaction evidence for Yishun and Sembawang.",
+      "data_families": ["private_transactions"],
       "tags": ["district 27", "yishun", "sembawang", "canberra"]
     },
     {
@@ -170,6 +199,7 @@
       "category": "district",
       "kind": "comparison",
       "summary": "Compare private residential transaction evidence across Districts 18 and 26.",
+      "data_families": ["rail_network", "market_research"],
       "tags": ["district 18", "district 26", "comparison"]
     },
     {
@@ -179,6 +209,7 @@
       "category": "private-property",
       "kind": "dashboard",
       "summary": "Explore landed transaction and PSF growth diagnostics by project and district.",
+      "data_families": ["market_research"],
       "tags": ["landed", "growth", "psf", "transaction"]
     },
     {
@@ -188,7 +219,9 @@
       "category": "canberra",
       "kind": "research",
       "summary": "Audit launch evidence, bedroom-matched peers and District 27 condominium transactions.",
+      "data_families": ["rail_network", "market_research"],
       "tags": ["canberra", "district 27", "launch", "transaction"],
+      "project_names": ["CANBERRA CRESCENT RESIDENCES"],
       "featured": true
     },
     {
@@ -198,6 +231,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Compare Canberra Crescent with nearby peers to minimise location drift.",
+      "data_families": ["market_research"],
       "tags": ["canberra", "micro-location", "peer"]
     },
     {
@@ -207,6 +241,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Separate lease vintage, project age and launch-state effects from observed price differences.",
+      "data_families": ["market_research"],
       "tags": ["canberra", "lease", "newness", "launch"]
     },
     {
@@ -216,6 +251,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Test rail, retail and town-centre convenience as distinct evidence layers.",
+      "data_families": ["rail_network", "market_research"],
       "tags": ["canberra", "integration", "rail", "retail"]
     },
     {
@@ -225,6 +261,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Match bedroom, size and floor cohorts before comparing total quantum and PSF.",
+      "data_families": ["market_research"],
       "tags": ["canberra", "bedroom", "size", "floor"]
     },
     {
@@ -234,6 +271,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Keep new sale, sub-sale and resale evidence separate when studying price and liquidity.",
+      "data_families": ["market_research"],
       "tags": ["canberra", "new sale", "sub-sale", "resale"]
     },
     {
@@ -243,6 +281,7 @@
       "category": "canberra",
       "kind": "workbook",
       "summary": "Classify delivered, committed and conceptual infrastructure without treating plans as booked returns.",
+      "data_families": ["market_research"],
       "tags": ["canberra", "planning", "infrastructure", "risk"]
     }
   ]

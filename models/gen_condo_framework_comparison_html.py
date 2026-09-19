@@ -41,6 +41,7 @@ from typing import Any
 import pandas as pd
 
 import gen_private_project_comparison_html as private_projects
+import private_project_catalog
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -56,6 +57,8 @@ DEFAULT_EMPLOYMENT_T5 = ROOT / "data/outputs/employment_scores_T5.csv"
 DEFAULT_EMPLOYMENT_T15 = ROOT / "data/outputs/employment_scores_T15.csv"
 DEFAULT_LIFE_PATHS = ROOT / "data/outputs/life_paths.csv"
 DEFAULT_OUT = ROOT / "condo_framework_comparison.html"
+DEFAULT_PROJECT_CATALOG = ROOT / "site/assets/project-catalog/manifest.json"
+DEFAULT_TRANSACTION_MANIFEST = ROOT / "site/assets/condo-transactions/manifest.json"
 
 SQM_TO_SQFT = 10.7639
 GENERIC_PROJECT_NAMES = {"-", "N/A", "RESIDENTIAL APARTMENTS"}
@@ -425,13 +428,46 @@ def render_html(
     projects: list[dict[str, Any]],
     latest_month: str | None,
     as_of: date,
+    project_catalog: dict[str, Any] | None = None,
 ) -> str:
+    if not isinstance(project_catalog, dict):
+        raise SystemExit("a validated private project catalog is required")
+    try:
+        private_project_catalog.validate_project_catalog(project_catalog)
+    except ValueError as exc:
+        raise SystemExit(f"invalid private project catalog: {exc}") from exc
     first_default, second_default = _default_ids(projects)
-    browser_projects, browser_contexts = build_browser_payload(projects)
+    defaults = (first_default, second_default)
+    default_set = set(defaults)
+    browser_projects = [
+        project
+        for project in private_project_catalog.comparison_projects(project_catalog)
+        if project.get("id") in default_set
+    ]
+    if {project.get("id") for project in browser_projects} != default_set:
+        raise SystemExit("project catalog is missing one or more two-project defaults")
+    browser_projects.sort(key=lambda project: defaults.index(project["id"]))
+    context_keys = {project.get("context_key") for project in browser_projects}
+    browser_contexts = {
+        key: value
+        for key, value in project_catalog["contexts"].items()
+        if key in context_keys
+    }
     project_json = script_safe_json(browser_projects)
     context_json = script_safe_json(browser_contexts)
-    default_json = script_safe_json((first_default, second_default))
-    options = _options_html(projects)
+    default_json = script_safe_json(defaults)
+    catalog_revision = project_catalog["catalog_revision"]
+    catalog_json = script_safe_json(
+        {
+            "path": private_project_catalog.catalog_asset_path(catalog_revision),
+            "revision": catalog_revision,
+            "schema": project_catalog["schema"],
+            "transaction_dataset_revision": project_catalog[
+                "transaction_dataset_revision"
+            ],
+        }
+    )
+    options = _options_html(browser_projects)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Two-condominium framework comparison</title>
@@ -443,7 +479,7 @@ def render_html(
 main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.04em}}h1{{max-width:900px;margin:.2em 0;font-size:clamp(2.8rem,7vw,5.8rem);font-weight:500;line-height:.96}}h2{{margin:60px 0 8px;font-size:clamp(1.8rem,4vw,3rem)}}p{{max-width:80ch}}
 .eyebrow{{color:var(--accent);font-size:.7rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase}}.lede{{color:var(--muted);font-size:1.08rem}}.hero{{padding:34px 0 38px;border-bottom:1px solid var(--line)}}.proof{{display:flex;gap:10px 26px;flex-wrap:wrap;margin-top:24px;color:var(--muted);font-size:.76rem;font-weight:700}}.proof span::before{{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:var(--accent)}}
 .compare-panel{{margin:30px 0;padding:8px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.58);box-shadow:var(--shadow)}}.compare-inner{{padding:22px;border-radius:15px;background:#fff}}.input-grid{{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:end}}label{{display:block;font-size:.69rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}}input{{width:100%;min-height:49px;margin-top:6px;padding:11px 13px;border:1px solid #b9c9c1;border-radius:9px;background:#fff;color:var(--ink);font:inherit;outline:none}}input:focus{{border-color:var(--accent);box-shadow:0 0 0 3px rgba(8,120,109,.13)}}
-.actions{{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}}button{{min-height:42px;padding:9px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:.78rem;font-weight:850;cursor:pointer}}button.primary{{border-color:var(--accent);background:var(--accent);color:#fff}}button:hover{{border-color:var(--accent)}}.swap{{align-self:end;margin-bottom:3px;border-radius:999px}}.form-error{{min-height:22px;margin:10px 0 0;color:#9a3d33;font-size:.78rem}}
+.actions{{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}}button{{min-height:42px;padding:9px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:.78rem;font-weight:850;cursor:pointer}}button.primary{{border-color:var(--accent);background:var(--accent);color:#fff}}button:hover{{border-color:var(--accent)}}.swap{{align-self:end;margin-bottom:3px;border-radius:999px}}.form-error{{min-height:22px;margin:10px 0 0;color:#9a3d33;font-size:.78rem}}.catalog-state{{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:.72rem}}.catalog-state[data-state="error"]{{color:#9a3d33}}.catalog-state button{{min-height:34px;padding:5px 9px}}
 .context-note,.caveat{{margin:20px 0;padding:16px 18px;border-left:4px solid var(--accent);border-radius:12px;background:var(--accent-soft);font-size:.82rem}}.caveat{{border-color:var(--warm);background:var(--warm-soft)}}.subject-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}}.subject{{position:relative;min-height:295px;padding:22px;border:1px solid var(--line);border-radius:17px;background:var(--card)}}.subject-badge{{display:grid;width:32px;height:32px;place-items:center;border-radius:9px;background:var(--navy);color:#fff;font-weight:900}}.subject h3{{margin:20px 0 5px;font-size:1.35rem;letter-spacing:-.03em}}.subject .location{{color:var(--muted);font-size:.78rem}}.subject-metrics{{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:20px 0;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden}}.subject-metrics div{{padding:12px;background:#f9faf7}}.subject-metrics span{{display:block;color:var(--muted);font-size:.65rem}}.subject-metrics b{{display:block;margin-top:3px;font-size:.93rem}}.subject-links{{display:flex;gap:12px;flex-wrap:wrap;font-size:.72rem;font-weight:800;color:var(--accent)}}
 .factor-group{{margin-top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}}.factor-group header{{padding:17px 18px;background:#eef2ee}}.factor-group h3{{margin:0;font-size:1rem}}.factor-group header p{{margin:4px 0 0;color:var(--muted);font-size:.72rem}}.factor-head,.factor-row{{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(190px,1fr) minmax(190px,1fr) minmax(160px,.8fr)}}.factor-head{{background:var(--navy);color:#fff;font-size:.67rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}}.factor-head>div,.factor-row>div{{padding:12px 15px}}.factor-row{{border-top:1px solid var(--line);align-items:start}}.factor-row:hover{{background:#fbfcfa}}.factor-label{{font-size:.78rem;font-weight:850}}.factor-value{{font-size:.82rem}}.factor-value small,.factor-diff small{{display:block;margin-top:3px;color:var(--muted);font-size:.68rem}}.factor-diff{{color:var(--muted);font-size:.74rem}}.band{{display:inline-block;padding:2px 7px;border-radius:5px;background:#e8ece9;font-weight:900}}.band-A{{background:#d9efe4;color:#176045}}.band-Bp{{background:#dceaf3;color:#235a78}}.band-C,.band-D,.band-F{{background:#f5e5df;color:#8b4834}}.gap-positive{{color:#187157;font-weight:850}}.gap-negative{{color:#a3443a;font-weight:850}}
 .empty{{padding:24px;border:1px dashed #aebdb5;border-radius:12px;color:var(--muted);text-align:center}}.legend{{display:flex;gap:9px 18px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:.68rem}}.legend b{{color:var(--ink)}}[hidden]{{display:none!important}}:focus-visible{{outline:3px solid #f2a900;outline-offset:2px}}
@@ -465,6 +501,7 @@ main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{
   <label>Project B<input id="project-b" list="project-options" autocomplete="off" placeholder="Type another condominium name"></label>
 </div><datalist id="project-options">{options}</datalist>
 <div class="actions"><button class="primary" type="submit">Compare projects</button><button id="copy-view" type="button">Copy comparison link</button><button id="print-view" type="button">Print / save PDF</button></div>
+<div class="catalog-state" id="project-catalog-state" role="status" aria-live="polite"><span id="project-catalog-status">Loading the full project catalog… The example projects are ready now.</span><button id="retry-project-catalog" type="button" hidden>Retry project catalog</button></div>
 <p class="form-error" id="form-error" role="alert" aria-live="polite"></p></form>
 </div></section>
 
@@ -478,19 +515,23 @@ main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{
 <div class="caveat"><b>Read before deciding.</b> Project price summaries cover each project's available transaction history and can differ in period, sale state, unit mix and sample depth. “Recent vs all” is mix-sensitive, not an appreciation rate. Estate framework values describe the planning-area context or disclosed proxy, not the condominium, block, stack or unit. HDB Value and HDB remaining-lease risk are not applied to private projects.</div>
 </section>
 </main><script src="assets/research-shell.js" data-research-shell></script>
+<script src="assets/data-loader.js"></script>
 <script>
 (() => {{
-  const CONTEXTS = {context_json};
-  const PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
+  const PROJECT_CATALOG = {catalog_json};
+  const PROJECT_CATALOG_SCHEMA = "private-project-catalog.v1";
+  let CONTEXTS = {context_json};
+  let PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
   const DEFAULTS = {default_json};
-  const byId = new Map(PROJECTS.map(project => [project.id, project]));
-  const byLabel = new Map(PROJECTS.map(project => [project.selection_label.toUpperCase(), project]));
-  const nameCounts = PROJECTS.reduce((counts, project) => counts.set(project.project.toUpperCase(), (counts.get(project.project.toUpperCase()) || 0) + 1), new Map());
-  const byUniqueName = new Map(PROJECTS.filter(project => nameCounts.get(project.project.toUpperCase()) === 1).map(project => [project.project.toUpperCase(), project]));
+  let byId = new Map(), byLabel = new Map(), byUniqueName = new Map();
   const inputA = document.getElementById("project-a");
   const inputB = document.getElementById("project-b");
   const error = document.getElementById("form-error");
+  const catalogState = document.getElementById("project-catalog-state");
+  const catalogStatus = document.getElementById("project-catalog-status");
+  const catalogRetry = document.getElementById("retry-project-catalog");
   let selected = null;
+  let catalogLoadSequence = 0;
 
   const esc = value => String(value ?? "—").replace(/[&<>"']/g, character => ({{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}}[character]));
   const available = value => value !== null && value !== undefined && value !== "" && value !== "not_covered";
@@ -508,6 +549,96 @@ main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{
     if (!key) return null;
     return byId.get(key) || byLabel.get(key.toUpperCase()) || byUniqueName.get(key.toUpperCase()) || null;
   }};
+
+  function sameContract(actual, expected) {{
+    if (actual===expected) return true;
+    if (Array.isArray(actual) || Array.isArray(expected)) return Array.isArray(actual) && Array.isArray(expected) && actual.length===expected.length && actual.every((value,index)=>sameContract(value,expected[index]));
+    if (!actual || !expected || typeof actual!=="object" || typeof expected!=="object") return false;
+    const actualKeys=Object.keys(actual).sort(),expectedKeys=Object.keys(expected).sort();
+    return actualKeys.length===expectedKeys.length && actualKeys.every((key,index)=>key===expectedKeys[index] && sameContract(actual[key],expected[key]));
+  }}
+
+  function rebuildProjectIndexes() {{
+    byId=new Map(PROJECTS.map(project=>[project.id,project]));
+    byLabel=new Map(PROJECTS.map(project=>[project.selection_label.toUpperCase(),project]));
+    const nameCounts=PROJECTS.reduce((counts,project)=>counts.set(project.project.toUpperCase(),(counts.get(project.project.toUpperCase()) || 0)+1),new Map());
+    byUniqueName=new Map(PROJECTS.filter(project=>nameCounts.get(project.project.toUpperCase())===1).map(project=>[project.project.toUpperCase(),project]));
+  }}
+
+  function validateProjectCatalog(catalog) {{
+    const requiredKeys=["catalog_revision","contexts","counts","latest_project_month","projects","schema","transaction_dataset_revision"];
+    if (!catalog || typeof catalog!=="object" || Array.isArray(catalog)) return "The project catalog is not an object.";
+    const actualKeys=Object.keys(catalog).sort();
+    if (!sameContract(actualKeys,requiredKeys)) return "The project catalog has an unexpected top-level contract.";
+    if (catalog.schema!==PROJECT_CATALOG.schema || catalog.schema!==PROJECT_CATALOG_SCHEMA || catalog.catalog_revision!==PROJECT_CATALOG.revision) return "The project catalog revision or schema does not match this page.";
+    if (catalog.transaction_dataset_revision!==PROJECT_CATALOG.transaction_dataset_revision) return "The project catalog transaction generation does not match this page.";
+    if (!Array.isArray(catalog.projects) || !catalog.contexts || typeof catalog.contexts!=="object" || Array.isArray(catalog.contexts) || !catalog.counts || typeof catalog.counts!=="object" || Array.isArray(catalog.counts)) return "The project catalog projects, contexts, or counts are malformed.";
+    const ids=new Set(),usedContexts=new Set();let comparisonCount=0,transactionCount=0;
+    for (const project of catalog.projects) {{
+      const capabilities=project?.capabilities;
+      const capabilityKeys=capabilities && typeof capabilities==="object" ? Object.keys(capabilities).sort() : [];
+      if (!project || typeof project!=="object" || !String(project.id || "").trim() || !String(project.selection_label || "").trim() || !capabilities || typeof capabilities!=="object" || !sameContract(capabilityKeys,["framework_comparison","private_explorer","project_exit","transactions"]) || typeof capabilities.private_explorer!=="boolean" || typeof capabilities.framework_comparison!=="boolean" || typeof capabilities.transactions!=="boolean" || typeof capabilities.project_exit!=="boolean" || ids.has(String(project.id))) return "The project catalog contains an invalid or duplicate project record.";
+      if (!capabilities.private_explorer || capabilities.transactions!==capabilities.project_exit || capabilities.transactions && !capabilities.framework_comparison) return "The project catalog contains an inconsistent capability assignment.";
+      ids.add(String(project.id));
+      if (capabilities.framework_comparison) {{
+        comparisonCount+=1;
+        if (!String(project.context_key || "").trim() || !catalog.contexts[project.context_key]) return "A comparison project is missing its framework context.";
+        usedContexts.add(project.context_key);
+      }} else if (project.context_key!==null) return "An explorer-only project unexpectedly claims framework context.";
+      if (capabilities.transactions) {{
+        transactionCount+=1;
+        if (!String(project.transaction_shard || "").startsWith(`assets/condo-transactions/${{PROJECT_CATALOG.transaction_dataset_revision}}/shard-`) || !Number.isInteger(project.transaction_count) || project.transaction_count<0) return "A transaction-capable catalog record has invalid shard metadata.";
+      }}
+    }}
+    const countKeys=Object.keys(catalog.counts).sort();
+    if (!sameContract(countKeys,["all","comparison","transaction"]) || Number(catalog.counts.all)!==catalog.projects.length || Number(catalog.counts.comparison)!==comparisonCount || Number(catalog.counts.transaction)!==transactionCount) return "The project catalog counts do not reconcile to its project records.";
+    if (usedContexts.size!==Object.keys(catalog.contexts).length || Object.keys(catalog.contexts).some(key=>!usedContexts.has(key))) return "The project catalog contains an unused or unreferenced framework context.";
+    if (comparisonCount<2) return "The project catalog does not contain enough comparison projects.";
+    return true;
+  }}
+
+  function renderCatalogOptions() {{
+    document.getElementById("project-options").innerHTML=PROJECTS.map(project=>`<option value="${{esc(project.selection_label)}}">D${{esc(project.district || "—")}} · ${{esc(project.planning_area || "Unknown area")}} · ${{esc(project.street || "Unknown street")}}</option>`).join("");
+  }}
+
+  function restoreFromURL() {{
+    const params=new URLSearchParams(location.search);
+    const requestedA=params.get("a"),requestedB=params.get("b");
+    const nextA=byId.get(requestedA) || byId.get(DEFAULTS[0]);
+    const nextB=byId.get(requestedB) || byId.get(DEFAULTS[1]);
+    inputA.value=nextA.selection_label;inputB.value=nextB.selection_label;
+    compare(false);
+  }}
+
+  async function hydrateProjectCatalog() {{
+    const sequence=++catalogLoadSequence;
+    catalogState.dataset.state="loading";
+    catalogStatus.textContent="Loading the full project catalog… The example projects remain usable.";
+    catalogStatus.setAttribute("role","status");
+    catalogRetry.hidden=true;
+    try {{
+      if (!window.SGEstateData?.loadJSON) throw new Error("The shared project catalog loader is unavailable.");
+      const catalog=await window.SGEstateData.loadJSON(PROJECT_CATALOG.path,{{revision:PROJECT_CATALOG.revision,timeoutMs:12_000,validate:validateProjectCatalog}});
+      if (sequence!==catalogLoadSequence) return;
+      CONTEXTS=catalog.contexts;
+      PROJECTS=catalog.projects.filter(project=>project.capabilities.framework_comparison).map(project=>({{...project,...(CONTEXTS[project.context_key] || {{}})}}));
+      rebuildProjectIndexes();
+      renderCatalogOptions();
+      catalogState.dataset.state="ready";
+      catalogStatus.textContent=`${{PROJECTS.length.toLocaleString("en-SG")}} projects ready.`;
+      catalogStatus.setAttribute("role","status");
+      catalogRetry.hidden=true;
+      restoreFromURL();
+    }} catch (failure) {{
+      if (sequence!==catalogLoadSequence) return;
+      const fileHelp=location.protocol==="file:" ? " Open this report through a local web server; browsers block JSON loading from file:// pages." : "";
+      const reason=failure instanceof Error && failure.message ? ` ${{failure.message}}` : "";
+      catalogState.dataset.state="error";
+      catalogStatus.textContent=`The full project catalog could not be loaded.${{reason}}${{fileHelp}} The example projects remain usable.`;
+      catalogStatus.setAttribute("role","alert");
+      catalogRetry.hidden=false;
+    }}
+  }}
 
   function renderValue(value) {{
     const prepared = typeof value === "object" && value !== null ? value : {{main:value}};
@@ -652,12 +783,15 @@ main{{max-width:1180px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{
     catch (_) {{window.prompt("Copy this comparison link",url);}}
   }});
   document.getElementById("print-view").addEventListener("click", () => window.print());
+  catalogRetry.addEventListener("click", () => {{
+    window.SGEstateData?.invalidate?.(PROJECT_CATALOG.path,{{revision:PROJECT_CATALOG.revision}});
+    void hydrateProjectCatalog();
+  }});
+  window.addEventListener("popstate",restoreFromURL);
 
-  const params = new URLSearchParams(location.search);
-  const initialA = byId.get(params.get("a")) || byId.get(DEFAULTS[0]);
-  const initialB = byId.get(params.get("b")) || byId.get(DEFAULTS[1]);
-  inputA.value = initialA.selection_label; inputB.value = initialB.selection_label;
-  compare(false);
+  rebuildProjectIndexes();
+  restoreFromURL();
+  void hydrateProjectCatalog();
 }})();
 </script></body></html>"""
 
@@ -712,6 +846,8 @@ def generate(
     life_paths_path: pathlib.Path = DEFAULT_LIFE_PATHS,
     out_path: pathlib.Path = DEFAULT_OUT,
     as_of: date | None = None,
+    project_catalog_path: pathlib.Path = DEFAULT_PROJECT_CATALOG,
+    transaction_manifest_path: pathlib.Path = DEFAULT_TRANSACTION_MANIFEST,
 ) -> tuple[pathlib.Path, int]:
     projects, latest_month = load_projects_for_comparison(
         private_path,
@@ -726,8 +862,29 @@ def generate(
         employment_t15_path,
         life_paths_path,
     )
+    try:
+        transaction_manifest = json.loads(
+            transaction_manifest_path.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(
+            f"cannot load transaction manifest {transaction_manifest_path}: {exc}"
+        ) from exc
+    try:
+        project_catalog = private_project_catalog.load_project_catalog(
+            project_catalog_path,
+            transaction_manifest=transaction_manifest,
+        )
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     out_path.write_text(
-        render_html(projects, latest_month, as_of or date.today()), encoding="utf-8"
+        render_html(
+            projects,
+            latest_month,
+            as_of or date.today(),
+            project_catalog,
+        ),
+        encoding="utf-8",
     )
     return out_path, len(projects)
 
@@ -747,6 +904,10 @@ def main() -> None:
     parser.add_argument("--employment-t5", default=str(DEFAULT_EMPLOYMENT_T5))
     parser.add_argument("--employment-t15", default=str(DEFAULT_EMPLOYMENT_T15))
     parser.add_argument("--life-paths", default=str(DEFAULT_LIFE_PATHS))
+    parser.add_argument("--project-catalog", default=str(DEFAULT_PROJECT_CATALOG))
+    parser.add_argument(
+        "--transaction-manifest", default=str(DEFAULT_TRANSACTION_MANIFEST)
+    )
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
     out_path, count = generate(
@@ -762,6 +923,8 @@ def main() -> None:
         pathlib.Path(args.employment_t15),
         pathlib.Path(args.life_paths),
         pathlib.Path(args.out),
+        project_catalog_path=pathlib.Path(args.project_catalog),
+        transaction_manifest_path=pathlib.Path(args.transaction_manifest),
     )
     print(
         f"Written: {out_path} ({out_path.stat().st_size // 1024:,} KB, "

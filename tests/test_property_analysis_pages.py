@@ -417,7 +417,9 @@ def test_same_slug_cannot_split_history_across_display_names(tmp_path):
         discover_property_analyses(tmp_path)
 
 
-def test_new_property_analysis_route_overrides_legacy_project_route(tmp_path):
+def test_new_property_analysis_is_discoverable_without_replacing_authored_report(
+    tmp_path,
+):
     source = _write_analysis(
         tmp_path,
         slug="the-poiz-residences",
@@ -429,14 +431,25 @@ def test_new_property_analysis_route_overrides_legacy_project_route(tmp_path):
         encoding="utf-8",
     )
 
-    build_pages_site.inject_property_library(
-        index_copy, [parse_property_analysis(source)]
+    analysis = parse_property_analysis(source)
+    authored = next(
+        report
+        for report in build_pages_site.load_catalog()["reports"]
+        if report["path"] == "poiz_east_resale_comparison.html"
     )
+    merged = {
+        "reports": [
+            analysis.catalog_entry(is_latest=True),
+            authored,
+        ]
+    }
+    build_pages_site.inject_report_library(index_copy, merged)
     rendered = index_copy.read_text(encoding="utf-8")
 
-    legacy = '"THE POIZ RESIDENCES": "poiz_east_resale_comparison.html"'
-    generated = (
-        '"THE POIZ RESIDENCES": '
-        '"property-analysis-2026-07-26-the-poiz-residences.html"'
-    )
-    assert rendered.index(legacy) < rendered.index(generated)
+    assert rendered.count(
+        'data-report-path="poiz_east_resale_comparison.html"'
+    ) == 1
+    assert rendered.count(
+        'data-report-path="property-analysis-2026-07-26-the-poiz-residences.html"'
+    ) == 1
+    assert "Property analysis · Resale · 26 Jul 2026 · Latest" in rendered

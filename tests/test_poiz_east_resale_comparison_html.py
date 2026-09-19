@@ -5,6 +5,7 @@ import os
 import sys
 
 import pandas as pd
+from sg_estate.project_locations import LEGACY_LOCATION_COLUMNS
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models"))
 
@@ -94,10 +95,16 @@ def _spatial_files(tmp_path):
     locations = tmp_path / "locations.csv"
     pd.DataFrame(
         [
-            {"project_name": project, "lat": 1.30 + index * 0.001, "lon": 103.80}
+            {
+                "project_name": project,
+                "lat": 1.30 + index * 0.001,
+                "lon": 103.80,
+                "match_status": "matched",
+                "review_status": "approved_legacy",
+            }
             for index, project in enumerate(projects)
         ]
-    ).to_csv(locations, index=False)
+    ).reindex(columns=LEGACY_LOCATION_COLUMNS).to_csv(locations, index=False)
 
     schools = tmp_path / "schools.csv"
     pd.DataFrame(

@@ -41,12 +41,21 @@ import html
 import math
 import pathlib
 import re
+import sys
 from datetime import date
 from typing import Any
 
 import pandas as pd
 
 ROOT = pathlib.Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
+
 DEFAULT_PROFILES = ROOT / "data/inputs/poiz_east_project_profiles.csv"
 DEFAULT_TRANSACTIONS = ROOT / "data/outputs/private_transactions_bedrooms.csv"
 DEFAULT_LOCATIONS = ROOT / "data/outputs/private_project_locations.csv"
@@ -209,11 +218,12 @@ def lease_remaining(tenure_profile: str, as_of: date) -> float | None:
 
 
 def load_location_lookup(path: pathlib.Path) -> dict[str, dict[str, Any]]:
-    locations = pd.read_csv(path)
+    try:
+        locations = load_usable_project_locations(path)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
     locations["project"] = locations["project_name"].map(normalise_project)
-    locations["lat"] = pd.to_numeric(locations["lat"], errors="coerce")
-    locations["lon"] = pd.to_numeric(locations["lon"], errors="coerce")
-    locations = locations.dropna(subset=["lat", "lon"]).drop_duplicates("project")
+    locations = locations[~locations["project"].duplicated(keep=False)]
     return locations.set_index("project").to_dict("index")
 
 
@@ -292,7 +302,7 @@ def build_rows(
             stats[str(bedrooms)] = describe(current[current["bedrooms"].eq(bedrooms)])
 
         station = nearest_open_station(project, locations, mrt)
-        school = schools.get(project, {})
+        school = schools.get(project, {}) if project in locations else {}
         primary_count = pd.to_numeric(
             pd.Series([school.get("primary_1km_count")]), errors="coerce"
         ).iloc[0]

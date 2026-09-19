@@ -477,6 +477,25 @@ button:disabled,
   color: var(--decision-muted);
 }
 
+.catalog-state {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: var(--decision-muted);
+  font-size: .75rem;
+}
+
+.catalog-state[data-state="error"] {
+  color: var(--decision-danger);
+}
+
+.catalog-state button {
+  min-height: 34px;
+  padding: 5px 9px;
+}
+
 #form-error,
 .status-error {
   color: var(--decision-danger) !important;

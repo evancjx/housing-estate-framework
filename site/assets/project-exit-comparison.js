@@ -4,6 +4,9 @@
   const MIN_PROJECTS = 2;
   const MAX_PROJECTS = 5;
   const CANONICAL_SOURCE_FALLBACK = "ura_private";
+  const PROJECT_CATALOG_SCHEMA = "private-project-catalog.v1";
+  const DATASET_REVISION_RE = /^[0-9a-f]{64}$/;
+  const REVISION_MISMATCH_MESSAGE = "Transaction data generation changed while this page was open. Reload this page before using transaction evidence.";
   const URL_KEYS = [
     "p", "price", "areaSqft", "tolerancePct", "toleranceSqft", "saleState", "purchaseDate",
     "saleDate", "annualGrowth", "sellingRate", "saleCosts",
@@ -17,6 +20,25 @@
     } else {
       callback();
     }
+  };
+
+  const sameTransactionContract = (actual, expected) => {
+    if (actual === expected) return true;
+    if (Array.isArray(actual) || Array.isArray(expected)) {
+      return Array.isArray(actual) && Array.isArray(expected)
+        && actual.length === expected.length
+        && actual.every((value, index) => sameTransactionContract(value, expected[index]));
+    }
+    if (!actual || !expected || typeof actual !== "object" || typeof expected !== "object") {
+      return false;
+    }
+    const actualKeys = Object.keys(actual).sort();
+    const expectedKeys = Object.keys(expected).sort();
+    return actualKeys.length === expectedKeys.length
+      && actualKeys.every(
+        (key, index) => key === expectedKeys[index]
+          && sameTransactionContract(actual[key], expected[key])
+      );
   };
 
   ready(() => {
@@ -40,12 +62,16 @@
       formError: document.getElementById("form-error"),
       copy: document.getElementById("copy-view"),
       reset: document.getElementById("reset-view"),
+      catalogState: document.getElementById("project-catalog-state"),
+      catalogStatus: document.getElementById("project-catalog-status"),
+      catalogRetry: document.getElementById("retry-project-catalog"),
     };
 
     const required = [
       "app", "form", "slots", "add", "targetArea", "tolerance", "saleState",
       "purchaseDate", "saleDate", "annualGrowth", "sellingRate", "saleCosts",
       "results", "status", "formError", "copy", "reset",
+      "catalogState", "catalogStatus", "catalogRetry",
     ];
     const missing = required.filter(key => !elements[key]);
     if (!dataElement || missing.length) {
@@ -66,15 +92,45 @@
         throw new TypeError("The embedded payload has an unexpected shape.");
       }
     } catch (error) {
-      failPage(`The project comparison data could not be read: ${error.message}`);
+      failPage(`The project comparison data could not be read: ${error.message} Reload this page; if the problem remains, rebuild the report from validated source data.`);
       return;
     }
 
-    const projects = payload.projects
+    const datasetRevision = stringValue(payload.dataset_revision);
+    if (!DATASET_REVISION_RE.test(datasetRevision)) {
+      failPage("The embedded transaction revision is unavailable. Reload the page; if the problem remains, rebuild the report from one complete transaction generation.");
+      return;
+    }
+    const catalogPath = stringValue(payload.catalog?.path);
+    const catalogRevision = stringValue(payload.catalog?.revision);
+    const catalogSchema = stringValue(payload.catalog?.schema);
+    if (
+      !catalogPath
+      || !DATASET_REVISION_RE.test(catalogRevision)
+      || catalogSchema !== PROJECT_CATALOG_SCHEMA
+    ) {
+      failPage("The project catalog bootstrap is unavailable. Rebuild the report from one validated catalog generation.");
+      return;
+    }
+    const expectedTransactionSchema = payload.transaction_schema;
+    const expectedTransactionEnumerations = payload.transaction_enumerations;
+    if (
+      !expectedTransactionSchema
+      || typeof expectedTransactionSchema !== "object"
+      || Array.isArray(expectedTransactionSchema)
+      || !expectedTransactionEnumerations
+      || typeof expectedTransactionEnumerations !== "object"
+      || Array.isArray(expectedTransactionEnumerations)
+    ) {
+      failPage("The embedded transaction contract is unavailable. Reload the page; if the problem remains, rebuild the report from one complete transaction generation.");
+      return;
+    }
+
+    let projects = payload.projects
       .filter(project => project && typeof project === "object" && stringValue(project.id))
       .map(normaliseProject);
-    const projectById = new Map(projects.map(project => [project.id, project]));
-    const projectByLabel = new Map(projects.map(project => [normaliseProjectLabel(project.selectionLabel), project]));
+    let projectById = new Map(projects.map(project => [project.id, project]));
+    let projectByLabel = new Map(projects.map(project => [normaliseProjectLabel(project.selectionLabel), project]));
     if (projectById.size < MIN_PROJECTS) {
       failPage("At least two projects are required to open the decision lab.");
       return;
@@ -104,18 +160,22 @@
     const configuredMaximum = integerValue(payload.limits?.max_projects);
     const minimumProjects = clamp(configuredMinimum || MIN_PROJECTS, MIN_PROJECTS, MAX_PROJECTS);
     const maximumProjects = clamp(configuredMaximum || MAX_PROJECTS, minimumProjects, MAX_PROJECTS);
+    const requestedCatalogProjectIds = new URL(window.location.href).searchParams.getAll("p");
+    const needsCatalogForURL = requestedCatalogProjectIds.some(id => !projectById.has(id));
     const defaults = buildDefaults();
-    const shardCache = new Map();
     let state = stateFromURL(defaults);
     let lastAnalyses = [];
     let renderSequence = 0;
     let refreshTimer = 0;
+    let catalogReady = false;
+    let catalogLoadSequence = 0;
 
     populateProjectOptions();
     applyGlobalControls();
     renderProjectSlots();
     bindEvents();
-    void refresh({ syncURL: true });
+    void refresh({ syncURL: !needsCatalogForURL });
+    void hydrateProjectCatalog();
 
     function failPage(message) {
       elements.app?.setAttribute("aria-busy", "false");
@@ -125,6 +185,178 @@
       }
       if (elements.results) {
         elements.results.innerHTML = `<div class="decision-error" role="alert"><h2>Decision lab unavailable</h2><p>${escapeHTML(message)}</p></div>`;
+      }
+    }
+
+    function validateProjectCatalog(catalog) {
+      const requiredKeys = [
+        "catalog_revision", "contexts", "counts", "latest_project_month", "projects",
+        "schema", "transaction_dataset_revision",
+      ];
+      if (!catalog || typeof catalog !== "object" || Array.isArray(catalog)) {
+        return "The project catalog is not an object.";
+      }
+      const actualKeys = Object.keys(catalog).sort();
+      if (
+        actualKeys.length !== requiredKeys.length
+        || !requiredKeys.every((key, index) => actualKeys[index] === key)
+      ) {
+        return "The project catalog has an unexpected top-level contract.";
+      }
+      if (catalog.schema !== catalogSchema || catalog.catalog_revision !== catalogRevision) {
+        return "The project catalog revision or schema does not match this page.";
+      }
+      if (catalog.transaction_dataset_revision !== datasetRevision) {
+        return REVISION_MISMATCH_MESSAGE;
+      }
+      if (
+        !Array.isArray(catalog.projects)
+        || !catalog.contexts
+        || typeof catalog.contexts !== "object"
+        || Array.isArray(catalog.contexts)
+        || !catalog.counts
+        || typeof catalog.counts !== "object"
+        || Array.isArray(catalog.counts)
+      ) {
+        return "The project catalog projects, contexts, or counts are malformed.";
+      }
+      const ids = new Set();
+      let exitCount = 0;
+      let comparisonCount = 0;
+      let transactionCount = 0;
+      const usedContexts = new Set();
+      for (const project of catalog.projects) {
+        const capabilities = project?.capabilities;
+        const capabilityKeys = capabilities && typeof capabilities === "object"
+          ? Object.keys(capabilities).sort()
+          : [];
+        if (
+          !project
+          || typeof project !== "object"
+          || !stringValue(project.id)
+          || !stringValue(project.selection_label)
+          || !capabilities
+          || typeof capabilities !== "object"
+          || !sameTransactionContract(
+            capabilityKeys,
+            ["framework_comparison", "private_explorer", "project_exit", "transactions"]
+          )
+          || typeof capabilities.private_explorer !== "boolean"
+          || typeof capabilities.framework_comparison !== "boolean"
+          || typeof capabilities.transactions !== "boolean"
+          || typeof capabilities.project_exit !== "boolean"
+          || ids.has(String(project.id))
+        ) {
+          return "The project catalog contains an invalid or duplicate project record.";
+        }
+        if (
+          !capabilities.private_explorer
+          || capabilities.transactions !== capabilities.project_exit
+          || (capabilities.transactions && !capabilities.framework_comparison)
+        ) {
+          return "The project catalog contains an inconsistent capability assignment.";
+        }
+        ids.add(String(project.id));
+        if (capabilities.framework_comparison) {
+          comparisonCount += 1;
+          if (!stringValue(project.context_key) || !catalog.contexts[project.context_key]) {
+            return "A comparison project is missing its framework context.";
+          }
+          usedContexts.add(project.context_key);
+        } else if (project.context_key !== null) {
+          return "An explorer-only project unexpectedly claims framework context.";
+        }
+        if (capabilities.transactions) {
+          transactionCount += 1;
+          if (
+            !stringValue(project.transaction_shard).startsWith(
+              `assets/condo-transactions/${datasetRevision}/shard-`
+            )
+            || !Number.isInteger(project.transaction_count)
+            || project.transaction_count < 0
+          ) {
+            return "A transaction-capable catalog record has invalid shard metadata.";
+          }
+        }
+        if (capabilities.project_exit) exitCount += 1;
+      }
+      const countKeys = Object.keys(catalog.counts).sort();
+      if (
+        !sameTransactionContract(countKeys, ["all", "comparison", "transaction"])
+        || Number(catalog.counts.all) !== catalog.projects.length
+        || Number(catalog.counts.comparison) !== comparisonCount
+        || Number(catalog.counts.transaction) !== transactionCount
+      ) {
+        return "The project catalog counts do not reconcile to its project records.";
+      }
+      if (
+        usedContexts.size !== Object.keys(catalog.contexts).length
+        || Object.keys(catalog.contexts).some(key => !usedContexts.has(key))
+      ) {
+        return "The project catalog contains an unused or unreferenced framework context.";
+      }
+      if (exitCount < minimumProjects) {
+        return "The project catalog does not contain enough exit-comparison projects.";
+      }
+      return true;
+    }
+
+    async function hydrateProjectCatalog() {
+      const sequence = ++catalogLoadSequence;
+      catalogReady = false;
+      elements.add.disabled = true;
+      elements.catalogState.dataset.state = "loading";
+      elements.catalogStatus.textContent = "Loading the full project catalog… The example projects remain usable.";
+      elements.catalogStatus.setAttribute("role", "status");
+      elements.catalogRetry.hidden = true;
+      try {
+        if (!window.SGEstateData?.loadJSON) {
+          throw new Error("The shared project catalog loader is unavailable.");
+        }
+        const catalog = await window.SGEstateData.loadJSON(catalogPath, {
+          revision: catalogRevision,
+          timeoutMs: 12_000,
+          validate: validateProjectCatalog,
+        });
+        if (sequence !== catalogLoadSequence) return;
+        const hydratedProjects = catalog.projects
+          .filter(project => project.capabilities.project_exit)
+          .map(normaliseProject);
+        projects = hydratedProjects;
+        projectById = new Map(projects.map(project => [project.id, project]));
+        projectByLabel = new Map(
+          projects.map(project => [normaliseProjectLabel(project.selectionLabel), project])
+        );
+        catalogReady = true;
+        populateProjectOptions();
+        elements.catalogState.dataset.state = "ready";
+        elements.catalogStatus.textContent = `${projects.length.toLocaleString("en-SG")} projects ready.`;
+        elements.catalogStatus.setAttribute("role", "status");
+        elements.catalogRetry.hidden = true;
+        elements.add.disabled = state.selections.length >= maximumProjects;
+        elements.add.setAttribute("aria-disabled", String(elements.add.disabled));
+        if (needsCatalogForURL) {
+          state = stateFromURL(defaults);
+          applyGlobalControls();
+          renderProjectSlots();
+          clearFormError();
+          void refresh({ syncURL: true });
+        }
+      } catch (error) {
+        if (sequence !== catalogLoadSequence) return;
+        catalogReady = false;
+        elements.add.disabled = true;
+        elements.add.setAttribute("aria-disabled", "true");
+        const fileHelp = window.location.protocol === "file:"
+          ? " Open this report through a local web server; browsers block JSON loading from file:// pages."
+          : "";
+        const reason = error instanceof Error && error.message
+          ? ` ${error.message}`
+          : "";
+        elements.catalogState.dataset.state = "error";
+        elements.catalogStatus.textContent = `The full project catalog could not be loaded.${reason}${fileHelp} The example projects remain usable.`;
+        elements.catalogStatus.setAttribute("role", "alert");
+        elements.catalogRetry.hidden = false;
       }
     }
 
@@ -279,7 +511,7 @@
             </div>
           </article>`;
       }).join("");
-      elements.add.disabled = state.selections.length >= maximumProjects;
+      elements.add.disabled = !catalogReady || state.selections.length >= maximumProjects;
       elements.add.setAttribute("aria-disabled", String(elements.add.disabled));
     }
 
@@ -387,6 +619,11 @@
         clearFormError();
         syncStateToURL("push");
         void refresh({ syncURL: false });
+      });
+
+      elements.catalogRetry.addEventListener("click", () => {
+        window.SGEstateData?.invalidate?.(catalogPath, { revision: catalogRevision });
+        void hydrateProjectCatalog();
       });
 
       window.addEventListener("popstate", () => {
@@ -518,10 +755,22 @@
       }));
       if (sequence !== renderSequence) return;
 
+      if (analyses.some(analysis => analysis.error === REVISION_MISMATCH_MESSAGE)) {
+        lastAnalyses = [];
+        elements.results.innerHTML = revisionFailureHTML();
+        elements.results.querySelector("[data-reload-transaction-data]")?.addEventListener(
+          "click",
+          () => window.location.reload()
+        );
+        setLoading(false);
+        setStatus(REVISION_MISMATCH_MESSAGE, true);
+        return;
+      }
+
       lastAnalyses = analyses;
       updateEntryHelpers(analyses);
       elements.results.innerHTML = renderResults(analyses, holdYears);
-      enhanceResultRegions();
+      enhanceResultRegions(analyses);
       setLoading(false);
       const availableCount = analyses.filter(analysis => !analysis.error).length;
       const errorCount = analyses.length - availableCount;
@@ -535,25 +784,30 @@
 
     function loadShard(path) {
       if (!path) return Promise.reject(new Error("No transaction shard is configured for this project."));
-      const url = new URL(path, document.baseURI).href;
-      if (shardCache.has(url)) return shardCache.get(url);
-      const request = fetch(url, { headers: { Accept: "application/json" } })
-        .then(response => {
-          if (!response.ok) throw new Error(`Transaction data returned HTTP ${response.status}.`);
-          return response.json();
-        })
-        .then(shard => {
-          if (!shard || typeof shard !== "object" || !shard.projects || !shard.enumerations) {
-            throw new TypeError("The transaction shard has an unexpected shape.");
+      if (!window.SGEstateData?.loadJSON) {
+        return Promise.reject(new Error("The shared transaction data loader is unavailable."));
+      }
+      return window.SGEstateData.loadJSON(path, {
+        revision: datasetRevision,
+        timeoutMs: 12_000,
+        validate: shard => {
+          if (
+            !shard
+            || typeof shard !== "object"
+            || !sameTransactionContract(shard.schema, expectedTransactionSchema)
+            || !shard.projects
+            || typeof shard.projects !== "object"
+            || Array.isArray(shard.projects)
+            || !sameTransactionContract(shard.enumerations, expectedTransactionEnumerations)
+          ) {
+            return "The transaction shard has an unexpected shape.";
           }
-          return shard;
-        })
-        .catch(error => {
-          shardCache.delete(url);
-          throw error;
-        });
-      shardCache.set(url, request);
-      return request;
+          if (shard.dataset_revision !== datasetRevision) {
+            return REVISION_MISMATCH_MESSAGE;
+          }
+          return true;
+        },
+      });
     }
 
     function analyseProject(project, selection, shard, holdYears) {
@@ -751,7 +1005,7 @@
     function renderEvidenceCard(analysis, index) {
       const project = analysis.project;
       if (analysis.error) {
-        return `<article class="evidence-card evidence-card-error"><p class="candidate-label">Candidate ${index + 1}</p><h3>${escapeHTML(project.selectionLabel)}</h3><p class="error-copy">Transaction evidence could not load: ${escapeHTML(analysis.error)}</p><p>Project identity remains available, but no cohort or modeled outcome is shown.</p></article>`;
+        return `<article class="evidence-card evidence-card-error"><p class="candidate-label">Candidate ${index + 1}</p><h3>${escapeHTML(project.selectionLabel)}</h3><p class="error-copy">Transaction evidence could not load: ${escapeHTML(analysis.error)}</p><p>Project identity remains available, but no cohort or modeled outcome is shown.</p><button type="button" data-retry-transaction-data>Retry transaction evidence</button></article>`;
       }
       const cohort = analysis.cohort;
       const sample = sampleAssessment(cohort.n);
@@ -902,11 +1156,23 @@
       else window.history.replaceState({}, "", next);
     }
 
-    function enhanceResultRegions() {
+    function enhanceResultRegions(analyses = []) {
       elements.results.querySelectorAll("details.ledger-card").forEach(details => {
         details.addEventListener("toggle", () => {
           const marker = details.querySelector("summary > span:last-child");
           if (marker) marker.textContent = details.open ? "−" : "+";
+        });
+      });
+      elements.results.querySelectorAll("[data-retry-transaction-data]").forEach(button => {
+        button.addEventListener("click", () => {
+          analyses.filter(analysis => analysis.error).forEach(analysis => {
+            if (analysis.project?.transactionShard) {
+              window.SGEstateData?.invalidate?.(analysis.project.transactionShard, {
+                revision: datasetRevision,
+              });
+            }
+          });
+          void refresh({ syncURL: false });
         });
       });
     }
@@ -939,6 +1205,10 @@
 
     function invalidResultsHTML() {
       return `<div class="decision-error decision-results-withheld"><p class="decision-kicker">Results withheld</p><h2>Correct the inputs to refresh the comparison.</h2><p>Previously calculated figures are hidden so they cannot be mistaken for results under the invalid assumptions above.</p></div>`;
+    }
+
+    function revisionFailureHTML() {
+      return `<div class="decision-error decision-results-withheld" role="alert"><p class="decision-kicker">Reload required</p><h2>Transaction results are withheld.</h2><p>${escapeHTML(REVISION_MISMATCH_MESSAGE)} No cohort, zero-row statistic, or modeled outcome is shown.</p><button type="button" data-reload-transaction-data>Reload page</button></div>`;
     }
 
     function normaliseProject(project) {

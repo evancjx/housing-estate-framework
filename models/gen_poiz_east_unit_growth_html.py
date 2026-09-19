@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import pathlib
 import re
 from datetime import date
@@ -46,6 +47,7 @@ DEFAULT_OUT = ROOT / "poiz_east_unit_growth_transactions.html"
 
 SQM_TO_SQFT = 10.7639
 MIN_GROWTH_SAMPLE = 3
+LEDGER_PAGE_SIZE = 100
 PROFILE_COLUMNS = {
     "name",
     "url",
@@ -395,28 +397,31 @@ def _annual_table(project: dict[str, Any], full_end: str) -> str:
 
 
 def _transaction_table(project: dict[str, Any]) -> str:
-    rows = []
+    records = []
     for number, txn in enumerate(project["transactions"], 1):
         period = str(txn["sale_period"])
         unit_key = txn["unit_key"]
         bedrooms = _unit_label(unit_key)
         floor = clean_text(txn.get("floor_level"), "Not published")
         partial = bool(txn["sale_period"] > pd.Period(project["stats"]["all"]["last_month"], freq="M"))
-        status = "<span class='partial'>partial month</span>" if partial else ""
         profile = f"{bedrooms} · {_number(txn['sqft'], suffix=' sqft', digits=0)}"
         searchable = f"{period} {bedrooms} {floor} {txn['price']:.0f} {txn['psf']:.0f}"
-        rows.append(
-            f"<tr data-unit='{_esc(unit_key)}' data-year='{period[:4]}' "
-            f"data-search='{_esc(searchable.lower())}'>"
-            f"<td><b>{period}</b>{status}<small>record {number:03d}</small></td>"
-            f"<td><b>{_esc(profile)}</b></td>"
-            f"<td>{_esc(floor)}</td>"
-            f"<td class='num'>{_money(float(txn['price']))}</td>"
-            f"<td class='num'>{_number(float(txn['psf']), prefix='S$', digits=0)}</td>"
-            f"<td>{_esc(clean_text(txn.get('tenure')))}</td>"
-            f"<td>{_esc(_bedroom_source_label(txn.get('bedroom_source')))}</td>"
-            f"<td>{_esc(_source_label(txn.get('data_source')))}</td>"
-            "</tr>"
+        records.append(
+            {
+                "unit": str(unit_key),
+                "year": period[:4],
+                "search": searchable.lower(),
+                "month": period,
+                "partial": partial,
+                "record": f"record {number:03d}",
+                "profile": profile,
+                "floor": floor,
+                "price": _money(float(txn["price"])),
+                "psf": _number(float(txn["psf"]), prefix="S$", digits=0),
+                "tenure": clean_text(txn.get("tenure")),
+                "bedroom_evidence": _bedroom_source_label(txn.get("bedroom_source")),
+                "sale_evidence": _source_label(txn.get("data_source")),
+            }
         )
     years = sorted(
         {str(txn["sale_period"])[:4] for txn in project["transactions"]},
@@ -431,6 +436,8 @@ def _transaction_table(project: dict[str, Any]) -> str:
         f"<option value='{year}'>{year}</option>"
         for year in years
     )
+    data_json = json.dumps(records, ensure_ascii=False, separators=(",", ":"))
+    data_json = data_json.replace("<", "\\u003c").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
     return (
         "<div class='ledger-controls'>"
         "<label>Unit type<select class='txn-unit'><option value='all'>All unit types</option>"
@@ -439,13 +446,19 @@ def _transaction_table(project: dict[str, Any]) -> str:
         f"{year_options}</select></label>"
         "<label class='search-label'>Search<input class='txn-search' type='search' "
         "placeholder='month, floor, price or PSF'></label>"
-        f"<span class='visible-count'>{len(project['transactions']):,} records shown</span>"
+        "<button class='ledger-action download-ledger' type='button'>Download filtered CSV</button>"
+        "<span class='visible-count' role='status' aria-live='polite'>Loading records…</span>"
         "</div>"
         "<div class='table-wrap ledger-wrap'><table class='transaction-table'><thead><tr>"
         "<th>Sale month</th><th>Observed unit profile</th><th>Floor range</th>"
         "<th class='num'>Achieved price</th><th class='num'>PSF</th><th>Tenure</th>"
         "<th>Bedroom evidence</th><th>Sale evidence</th>"
-        f"</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
+        "</tr></thead><tbody></tbody></table></div>"
+        "<div class='ledger-footer'>"
+        f"<button class='ledger-action show-more' type='button'>Show {LEDGER_PAGE_SIZE} more</button>"
+        "</div>"
+        "<noscript><p class='ledger-no-script'>Enable JavaScript to inspect and download the transaction ledger.</p></noscript>"
+        f"<script type='application/json' class='transaction-data'>{data_json}</script>"
     )
 
 
@@ -589,6 +602,14 @@ def render_html(
     color:var(--ink); padding:9px 10px; font:inherit; font-size:11px; }}
   .search-label {{ flex:1; }} .search-label input {{ width:100%; min-width:220px; }}
   .visible-count {{ margin-left:auto; padding:9px 0; color:var(--muted); font-size:10px; }}
+  .ledger-action {{ border:1px solid var(--accent); border-radius:9px; background:white;
+    color:var(--accent); padding:9px 12px; font:inherit; font-size:10px; font-weight:800;
+    cursor:pointer; }}
+  .ledger-action:hover,.ledger-action:focus-visible {{ background:var(--accent-soft); }}
+  .ledger-action[hidden] {{ display:none; }}
+  .ledger-footer {{ display:flex; justify-content:center; margin:12px 0 4px; }}
+  .ledger-no-script {{ padding:12px; border:1px solid var(--line); border-radius:9px;
+    background:white; color:var(--muted); font-size:11px; }}
   .ledger-wrap {{ max-height:650px; }} .transaction-table th {{ top:0; }}
   .partial {{ display:block; width:max-content; margin-top:4px; border-radius:99px;
     padding:2px 5px; color:var(--warm); background:#fff1d6; font-size:8px; font-weight:850; }}
@@ -602,6 +623,11 @@ def render_html(
     main {{ padding:28px 15px 50px; }}
     .method-grid,.project-metrics {{ grid-template-columns:1fr; }}
     .visible-count {{ width:100%; margin:0; }}
+  }}
+  @media print {{
+    .project-tabs,.ledger-controls,.ledger-footer {{ display:none !important; }}
+    .project-panel.active {{ display:block; }}
+    .ledger-wrap {{ max-height:none; overflow:visible; }}
   }}
 </style>
 </head>
@@ -622,12 +648,109 @@ def render_html(
 <div class="footer-note"><b>Evidence notes.</b> Growth excludes the partial {_esc(periods['partial'])} month. URA caveats are voluntary and not exhaustive; older EdgeProp backfill rows are identified in the ledger. Bedroom counts are secondary row matches because URA does not publish bedrooms. Price growth can remain mix-sensitive even inside a bedroom category because size, floor, facing, condition and view are not identical. Floor values are published ranges, not exact floors.</div>
 </main>
 <script>
+var LEDGER_PAGE_SIZE = {LEDGER_PAGE_SIZE};
+var LEDGER_HEADERS = ["Sale month","Observed unit profile","Floor range","Achieved price","PSF","Tenure","Bedroom evidence","Sale evidence"];
+var ledgerStates = new WeakMap();
+
+function csvCell(value) {{
+  var text = String(value == null ? "" : value);
+  return /[",\\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+}}
+
+function recordCells(record) {{
+  return [record.month,record.profile,record.floor,record.price,record.psf,
+    record.tenure,record.bedroom_evidence,record.sale_evidence];
+}}
+
+function buildLedgerRow(record) {{
+  var row = document.createElement("tr");
+  row.dataset.unit = record.unit;
+  row.dataset.year = record.year;
+  row.dataset.search = record.search;
+  recordCells(record).forEach(function(value, index) {{
+    var cell = document.createElement("td");
+    if (index === 3 || index === 4) cell.className = "num";
+    if (index === 0) {{
+      var strong = document.createElement("b");
+      strong.textContent = value;
+      cell.appendChild(strong);
+      if (record.partial) {{
+        var partial = document.createElement("span");
+        partial.className = "partial";
+        partial.textContent = "partial month";
+        cell.appendChild(partial);
+      }}
+      var sequence = document.createElement("small");
+      sequence.textContent = record.record;
+      cell.appendChild(sequence);
+    }} else if (index === 1) {{
+      var profile = document.createElement("b");
+      profile.textContent = value;
+      cell.appendChild(profile);
+    }} else {{
+      cell.textContent = value;
+    }}
+    row.appendChild(cell);
+  }});
+  return row;
+}}
+
+function filterLedger(panel) {{
+  var state = ledgerStates.get(panel);
+  var unit = panel.querySelector(".txn-unit").value;
+  var year = panel.querySelector(".txn-year").value;
+  var search = panel.querySelector(".txn-search").value.trim().toLowerCase();
+  state.filtered = state.records.filter(function(record) {{
+    return (unit === "all" || record.unit === unit) &&
+      (year === "all" || record.year === year) &&
+      (!search || record.search.indexOf(search) !== -1);
+  }});
+}}
+
+function renderLedger(panel, focusIndex) {{
+  var state = ledgerStates.get(panel);
+  if (!state || !panel.classList.contains("active")) return;
+  var body = panel.querySelector(".transaction-table tbody");
+  body.replaceChildren();
+  if (state.error) {{
+    panel.querySelector(".visible-count").textContent =
+      "Transaction ledger unavailable; regenerate this report.";
+    panel.querySelector(".show-more").hidden = true;
+    panel.querySelector(".download-ledger").disabled = true;
+    return;
+  }}
+  var shown = Math.min(state.limit, state.filtered.length);
+  var fragment = document.createDocumentFragment();
+  state.filtered.slice(0, shown).forEach(function(record) {{
+    fragment.appendChild(buildLedgerRow(record));
+  }});
+  body.appendChild(fragment);
+  panel.querySelector(".visible-count").textContent =
+    shown.toLocaleString() + " of " + state.filtered.length.toLocaleString() +
+    " filtered record" + (state.filtered.length === 1 ? "" : "s") + " shown";
+  var more = panel.querySelector(".show-more");
+  more.hidden = shown >= state.filtered.length;
+  if (focusIndex != null && body.rows[focusIndex]) {{
+    body.rows[focusIndex].tabIndex = -1;
+    body.rows[focusIndex].focus({{preventScroll:true}});
+    body.rows[focusIndex].scrollIntoView({{block:"nearest"}});
+  }}
+}}
+
+function clearLedger(panel) {{
+  var body = panel.querySelector(".transaction-table tbody");
+  if (body) body.replaceChildren();
+}}
+
 function activateProject(slug) {{
   document.querySelectorAll(".project-tab").forEach(function(button) {{
     button.classList.toggle("active", button.dataset.project === slug);
   }});
   document.querySelectorAll(".project-panel").forEach(function(panel) {{
-    panel.classList.toggle("active", panel.dataset.project === slug);
+    var active = panel.dataset.project === slug;
+    panel.classList.toggle("active", active);
+    if (active) renderLedger(panel);
+    else clearLedger(panel);
   }});
   if (history.replaceState) history.replaceState(null, "", "#" + slug);
 }}
@@ -636,34 +759,74 @@ document.querySelectorAll(".project-tab").forEach(function(button) {{
   button.addEventListener("click", function() {{ activateProject(button.dataset.project); }});
 }});
 
-function applyLedgerFilter(panel) {{
-  var unit = panel.querySelector(".txn-unit").value;
-  var year = panel.querySelector(".txn-year").value;
-  var search = panel.querySelector(".txn-search").value.trim().toLowerCase();
-  var visible = 0;
-  panel.querySelectorAll(".transaction-table tbody tr").forEach(function(row) {{
-    var show = (unit === "all" || row.dataset.unit === unit) &&
-      (year === "all" || row.dataset.year === year) &&
-      (!search || row.dataset.search.indexOf(search) !== -1);
-    row.hidden = !show;
-    if (show) visible += 1;
-  }});
-  panel.querySelector(".visible-count").textContent =
-    visible.toLocaleString() + " record" + (visible === 1 ? "" : "s") + " shown";
-}}
-
 document.querySelectorAll(".project-panel").forEach(function(panel) {{
+  var records;
+  try {{
+    records = JSON.parse(panel.querySelector(".transaction-data").textContent);
+    if (!Array.isArray(records)) throw new Error("ledger payload is not an array");
+  }} catch (error) {{
+    records = [];
+  }}
+  ledgerStates.set(panel, {{records:records,filtered:records.slice(),limit:LEDGER_PAGE_SIZE,
+    printLimit:null,error:!Array.isArray(records) || records.length === 0}});
   panel.querySelectorAll(".txn-unit,.txn-year").forEach(function(control) {{
-    control.addEventListener("change", function() {{ applyLedgerFilter(panel); }});
+    control.addEventListener("change", function() {{
+      var state = ledgerStates.get(panel);
+      state.limit = LEDGER_PAGE_SIZE;
+      filterLedger(panel);
+      renderLedger(panel);
+    }});
   }});
   panel.querySelector(".txn-search").addEventListener("input", function() {{
-    applyLedgerFilter(panel);
+    var state = ledgerStates.get(panel);
+    state.limit = LEDGER_PAGE_SIZE;
+    filterLedger(panel);
+    renderLedger(panel);
+  }});
+  panel.querySelector(".show-more").addEventListener("click", function() {{
+    var state = ledgerStates.get(panel);
+    var firstNew = Math.min(state.limit, state.filtered.length);
+    state.limit += LEDGER_PAGE_SIZE;
+    renderLedger(panel, firstNew);
+  }});
+  panel.querySelector(".download-ledger").addEventListener("click", function() {{
+    var state = ledgerStates.get(panel);
+    var lines = [LEDGER_HEADERS.map(csvCell).join(",")];
+    state.filtered.forEach(function(record) {{
+      lines.push(recordCells(record).map(csvCell).join(","));
+    }});
+    var blob = new Blob([lines.join("\\n") + "\\n"], {{type:"text/csv;charset=utf-8"}});
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = panel.dataset.project + "-filtered-transactions.csv";
+    link.click();
+    setTimeout(function() {{ URL.revokeObjectURL(link.href); }}, 0);
+  }});
+}});
+
+window.addEventListener("beforeprint", function() {{
+  document.querySelectorAll(".project-panel.active").forEach(function(panel) {{
+    var state = ledgerStates.get(panel);
+    state.printLimit = state.limit;
+    state.limit = state.filtered.length;
+    renderLedger(panel);
+  }});
+}});
+window.addEventListener("afterprint", function() {{
+  document.querySelectorAll(".project-panel.active").forEach(function(panel) {{
+    var state = ledgerStates.get(panel);
+    if (state.printLimit != null) state.limit = state.printLimit;
+    state.printLimit = null;
+    renderLedger(panel);
   }});
 }});
 
 var requested = window.location.hash.slice(1);
 if (requested && document.querySelector("[data-project='" + requested + "']")) {{
   activateProject(requested);
+}} else {{
+  var initial = document.querySelector(".project-panel.active");
+  if (initial) activateProject(initial.dataset.project);
 }}
 </script>
 </body></html>"""
@@ -693,11 +856,17 @@ def main() -> None:
     parser.add_argument("--profiles", default=str(DEFAULT_PROFILES))
     parser.add_argument("--transactions", default=str(DEFAULT_TRANSACTIONS))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument(
+        "--as-of",
+        type=date.fromisoformat,
+        help="Explicit report generation date (YYYY-MM-DD); defaults to today",
+    )
     args = parser.parse_args()
     out_path, projects, periods = generate(
         pathlib.Path(args.profiles),
         pathlib.Path(args.transactions),
         pathlib.Path(args.out),
+        as_of=args.as_of,
     )
     print(
         f"Written: {out_path} ({len(projects)} projects, "

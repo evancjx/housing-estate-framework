@@ -45,6 +45,7 @@ import html
 import math
 import pathlib
 import re
+import sys
 from datetime import date
 from typing import Any
 
@@ -61,6 +62,14 @@ from build_private_bedrooms import (
 )
 
 ROOT = pathlib.Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
+
 DEFAULT_RAW = ROOT / "data/raw/ura/pmi_d27_2021-2026.csv"
 DEFAULT_EDGEPROP = (
     ROOT
@@ -81,6 +90,7 @@ SUBJECT_UNITS = 376
 # estate-level input refresh remains a separately reviewed pipeline change.
 MRT_COORDINATE_OVERRIDES = {"NS12": (1.4432, 103.8296)}
 MIN_DELTA_SAMPLE = 3
+LEDGER_PAGE_SIZE = 100
 TAB_KEYS = ("all", "1", "2", "3", "4")
 TAB_LABELS = {
     "all": "All unit types",
@@ -333,6 +343,18 @@ def load_lookup(path: pathlib.Path) -> dict[str, dict[str, Any]]:
     frame["project"] = frame["project_name"].map(
         lambda value: re.sub(r"\s+", " ", str(value).strip()).upper()
     )
+    frame = frame[~frame["project"].duplicated(keep=False)]
+    return frame.set_index("project").to_dict("index")
+
+
+def load_location_lookup(path: pathlib.Path) -> dict[str, dict[str, Any]]:
+    try:
+        frame = load_usable_project_locations(path)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
+    frame["project"] = frame["project_name"].map(
+        lambda value: re.sub(r"\s+", " ", str(value).strip()).upper()
+    )
     return frame.drop_duplicates("project").set_index("project").to_dict("index")
 
 
@@ -436,7 +458,7 @@ def build_project_rows(
     for project, history in complete.groupby("project_name", sort=False):
         recent = current[current["project_name"].eq(project)]
         evidence = recent if not recent.empty else history
-        school = schools.get(project, {})
+        school = schools.get(project, {}) if project in locations else {}
         primary_count = pd.to_numeric(
             pd.Series([school.get("primary_1km_count")]),
             errors="coerce",
@@ -951,7 +973,7 @@ def _transaction_ledger(
             f"{row['psf']:.0f} {row['analysis']}"
         ).lower()
         rows.append(
-            f"<tr data-project='{_esc(slugify(row['project_name']))}' "
+            f"<tr tabindex='-1' data-project='{_esc(slugify(row['project_name']))}' "
             f"data-sale='{_esc(slugify(row['type_of_sale']))}' "
             f"data-unit='{_esc(row['unit_key'])}' data-year='{row['year']}' "
             f"data-position='{_esc(_position_key(row['position']))}' "
@@ -1013,7 +1035,9 @@ def _transaction_ledger(
         f"{position_options}</select></label>"
         "<label class='search-label'>Search<input id='ledger-search' type='search' "
         "placeholder='project, month, floor, price, PSF or diagnostic'></label>"
-        f"<span id='ledger-count'>{len(txns):,} records shown</span>"
+        f"<span id='ledger-count' role='status' aria-live='polite'>"
+        f"JavaScript is required to display {len(txns):,} embedded transactions.</span>"
+        "<button class='ledger-action' id='ledger-export' type='button'>Export all filtered CSV</button>"
         "</div>"
         "<div class='table-wrap ledger-wrap'><table class='ledger-table'><thead><tr>"
         "<th>Sale month</th><th>Project</th><th>Sale state</th><th>Unit profile / floor</th>"
@@ -1021,7 +1045,12 @@ def _transaction_ledger(
         "<th class='num'>D27 peer median<small>year · state · bedroom</small></th>"
         "<th class='num'>Peer position</th><th class='num'>Vs project</th>"
         "<th>Transaction diagnostic</th><th>Bedroom evidence</th>"
-        f"</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
+        "</tr></thead><tbody id='ledger-body'></tbody></table></div>"
+        f"<template id='ledger-row-template'><table><tbody>{''.join(rows)}</tbody></table></template>"
+        "<div class='ledger-pager'>"
+        f"<button class='ledger-action' id='ledger-show-more' type='button'>Show {LEDGER_PAGE_SIZE} more</button>"
+        "</div>"
+        "<noscript><p class='ledger-noscript' role='alert'>The transaction ledger needs JavaScript for filtering and display. The report summaries, methodology and source register remain available above and below.</p></noscript>"
     )
 
 
@@ -1156,6 +1185,11 @@ def render_html(
   #ledger-project {{ min-width:230px; }} .search-label {{ flex:1; }}
   .search-label input {{ width:100%; min-width:240px; }}
   #ledger-count {{ margin-left:auto; padding:9px 0; color:var(--muted); font-size:10px; }}
+  .ledger-action {{ border:1px solid var(--line); border-radius:9px; padding:9px 12px;
+    background:white; color:var(--ink); cursor:pointer; font:inherit; font-size:10px; font-weight:800; }}
+  .ledger-pager {{ display:flex; justify-content:flex-end; margin-top:10px; }}
+  .ledger-noscript {{ padding:13px 15px; border:1px dashed var(--line); border-radius:10px;
+    background:white; color:var(--muted); font-size:11px; }}
   .ledger-wrap {{ max-height:720px; }} .analysis-cell {{ min-width:390px; max-width:520px; line-height:1.5; }}
   .source-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }}
   .source-grid article {{ padding:17px; border:1px solid var(--line); border-radius:14px; background:white; }}
@@ -1176,6 +1210,10 @@ def render_html(
     #ledger-count {{ width:100%; margin:0; }}
     .ledger-controls label,.search-label {{ width:100%; }}
     select,input,#ledger-project,.search-label input {{ width:100%; min-width:0; min-height:40px; }}
+  }}
+  @media print {{
+    .ledger-wrap {{ max-height:none; overflow:visible; }}
+    .ledger-controls,.ledger-pager {{ display:none!important; }}
   }}
 </style>
 </head>
@@ -1260,32 +1298,85 @@ document.querySelectorAll(".matched-tab").forEach(function(button) {{
   }});
 }});
 
-function applyLedgerFilters() {{
+var ledgerBody = document.getElementById("ledger-body");
+var ledgerRows = Array.from(
+  document.getElementById("ledger-row-template").content.querySelectorAll("tbody tr")
+);
+var ledgerCount = document.getElementById("ledger-count");
+var ledgerShowMore = document.getElementById("ledger-show-more");
+var ledgerPageSize = {LEDGER_PAGE_SIZE};
+var ledgerVisibleLimit = ledgerPageSize;
+var filteredLedgerRows = [];
+var prePrintVisibleLimit = null;
+
+function renderLedgerRows(focusIndex) {{
+  var renderedRows = filteredLedgerRows.slice(0, ledgerVisibleLimit);
+  ledgerBody.replaceChildren.apply(ledgerBody, renderedRows);
+  ledgerCount.textContent = renderedRows.length.toLocaleString() + " of " +
+    filteredLedgerRows.length.toLocaleString() + " filtered transactions shown";
+  ledgerShowMore.hidden = renderedRows.length >= filteredLedgerRows.length;
+  if (focusIndex !== undefined && renderedRows[focusIndex]) renderedRows[focusIndex].focus();
+}}
+
+function applyLedgerFilters(resetPage) {{
   var project = document.getElementById("ledger-project").value;
   var sale = document.getElementById("ledger-sale").value;
   var unit = document.getElementById("ledger-unit").value;
   var year = document.getElementById("ledger-year").value;
   var position = document.getElementById("ledger-position").value;
   var search = document.getElementById("ledger-search").value.trim().toLowerCase();
-  var visible = 0;
-  document.querySelectorAll(".ledger-table tbody tr").forEach(function(row) {{
-    var show = (project === "all" || row.dataset.project === project) &&
+  filteredLedgerRows = ledgerRows.filter(function(row) {{
+    return (project === "all" || row.dataset.project === project) &&
       (sale === "all" || row.dataset.sale === sale) &&
       (unit === "all" || row.dataset.unit === unit) &&
       (year === "all" || row.dataset.year === year) &&
       (position === "all" || row.dataset.position === position) &&
       (!search || row.dataset.search.indexOf(search) !== -1);
-    row.hidden = !show;
-    if (show) visible += 1;
   }});
-  document.getElementById("ledger-count").textContent =
-    visible.toLocaleString() + " record" + (visible === 1 ? "" : "s") + " shown";
+  if (resetPage !== false) ledgerVisibleLimit = ledgerPageSize;
+  renderLedgerRows();
 }}
 
 document.querySelectorAll("#ledger-project,#ledger-sale,#ledger-unit,#ledger-year,#ledger-position").forEach(function(control) {{
-  control.addEventListener("change", applyLedgerFilters);
+  control.addEventListener("change", function() {{ applyLedgerFilters(true); }});
 }});
-document.getElementById("ledger-search").addEventListener("input", applyLedgerFilters);
+document.getElementById("ledger-search").addEventListener("input", function() {{ applyLedgerFilters(true); }});
+ledgerShowMore.addEventListener("click", function() {{
+  var firstNewIndex = Math.min(ledgerVisibleLimit, filteredLedgerRows.length);
+  ledgerVisibleLimit += ledgerPageSize;
+  renderLedgerRows(firstNewIndex);
+}});
+document.getElementById("ledger-export").addEventListener("click", function() {{
+  var headers = Array.from(document.querySelectorAll(".ledger-table thead th")).map(function(cell) {{
+    return cell.textContent.trim().replace(/\\s+/g, " ");
+  }});
+  var values = filteredLedgerRows.map(function(row) {{
+    return Array.from(row.cells).map(function(cell) {{
+      return cell.textContent.trim().replace(/\\s+/g, " ");
+    }});
+  }});
+  var csv = [headers].concat(values).map(function(columns) {{
+    return columns.map(function(value) {{ return '"' + value.replaceAll('"', '""') + '"'; }}).join(",");
+  }}).join("\\n");
+  var url = URL.createObjectURL(new Blob([csv], {{type:"text/csv;charset=utf-8"}}));
+  var link = document.createElement("a");
+  link.href = url;
+  link.download = "canberra-d27-filtered-transactions.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}});
+window.addEventListener("beforeprint", function() {{
+  prePrintVisibleLimit = ledgerVisibleLimit;
+  ledgerVisibleLimit = filteredLedgerRows.length;
+  renderLedgerRows();
+}});
+window.addEventListener("afterprint", function() {{
+  if (prePrintVisibleLimit === null) return;
+  ledgerVisibleLimit = prePrintVisibleLimit;
+  prePrintVisibleLimit = null;
+  renderLedgerRows();
+}});
+applyLedgerFilters(true);
 </script>
 </body></html>"""
 
@@ -1305,7 +1396,7 @@ def generate(
         raise SystemExit(f"{raw_path} has no {SUBJECT} transactions")
     window = comparison_window(txns, as_of)
     txns = add_transaction_diagnostics(txns)
-    locations = load_lookup(locations_path)
+    locations = load_location_lookup(locations_path)
     schools = load_lookup(schools_path)
     mrt = pd.read_csv(mrt_path)
     project_rows = build_project_rows(txns, window, locations, schools, mrt)
@@ -1335,6 +1426,11 @@ def main() -> None:
     parser.add_argument("--schools", default=str(DEFAULT_SCHOOLS))
     parser.add_argument("--mrt", default=str(DEFAULT_MRT))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument(
+        "--as-of",
+        type=date.fromisoformat,
+        help="Report date in YYYY-MM-DD form (defaults to today)",
+    )
     args = parser.parse_args()
     out_path, txns, window = generate(
         pathlib.Path(args.raw),
@@ -1343,6 +1439,7 @@ def main() -> None:
         pathlib.Path(args.schools),
         pathlib.Path(args.mrt),
         pathlib.Path(args.out),
+        as_of=args.as_of,
     )
     print(
         f"Written: {out_path} ({len(txns):,} official D27 transactions, "

@@ -38,6 +38,7 @@ import time
 import urllib.request
 import urllib.parse
 import urllib.error
+from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -45,6 +46,13 @@ import pandas as pd
 # Paths — resolve relative to this script so it works from any cwd
 # ---------------------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from sg_estate.adapters.http import get_bytes, get_json
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
+
 DATA_DIR   = os.path.join(SCRIPT_DIR, "..", "data", "inputs")
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -89,6 +97,63 @@ DATASETS = {
 
 # OneMap Search — no auth required
 ONEMAP_SEARCH = "https://www.onemap.gov.sg/api/common/elastic/search"
+POLYCLINIC_SOURCE_URL = (
+    f"{ONEMAP_SEARCH}?searchVal=polyclinic&returnGeom=Y&getAddrDetails=Y"
+)
+_LAST_SCHOOLS_USED_ONEMAP = False
+
+SOURCE_AUTHORITIES = {
+    "parks.csv": "NParks / data.gov.sg",
+    "markets.csv": "NEA / data.gov.sg",
+    "schools.csv": "MOE / data.gov.sg + OneMap geocoding fallback",
+    "polyclinics.csv": "OneMap Search (polyclinic query)",
+    "hdb_resale.csv": "HDB / data.gov.sg",
+}
+
+
+def _write_validated_csv_with_receipt(
+    df: pd.DataFrame,
+    output_path: str,
+    *,
+    required_columns: set[str],
+    authority: str,
+    source_url: str,
+    source_urls: list[str] | None = None,
+    source_identity: str,
+    cache_state: str = "fresh",
+    fallback_state: str = "not_used",
+    coverage_start: str | None = None,
+    coverage_end: str | None = None,
+) -> None:
+    """Write a normalized CSV, validate its persisted shape, then publish its receipt."""
+
+    df.to_csv(output_path, index=False)
+    persisted = pd.read_csv(output_path)
+    missing = sorted(required_columns - set(persisted.columns))
+    if missing:
+        raise ValueError(f"{output_path} missing required columns after write: {missing}")
+    if len(persisted) != len(df) or persisted.empty:
+        raise ValueError(
+            f"{output_path} row-count validation failed: "
+            f"expected {len(df)}, got {len(persisted)}"
+        )
+
+    receipt = build_source_receipt(
+        output_path,
+        dataset_id=os.path.basename(output_path),
+        authority=authority,
+        source_url=source_url,
+        source_urls=source_urls,
+        source_identity=source_identity,
+        retrieved_at=datetime.now(timezone.utc),
+        coverage_start=coverage_start,
+        coverage_end=coverage_end,
+        row_count=len(persisted),
+        cache_state=cache_state,
+        fallback_state=fallback_state,
+        validation_status="passed",
+    )
+    write_source_receipt(output_path, receipt)
 
 
 # ---------------------------------------------------------------------------
@@ -96,16 +161,22 @@ ONEMAP_SEARCH = "https://www.onemap.gov.sg/api/common/elastic/search"
 # ---------------------------------------------------------------------------
 def http_get_json(url: str, timeout: int = 30) -> dict:
     """Fetch URL and parse as JSON. Raises on HTTP error."""
-    req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": "sg-estate-ingest/1.0"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def http_get_bytes(url: str, timeout: int = 60) -> bytes:
     """Fetch URL and return raw bytes."""
-    req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+    return get_bytes(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": "sg-estate-ingest/1.0"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def poll_download(dataset_id: str, timeout: int = 60, retries: int = 4) -> bytes | None:
@@ -292,6 +363,9 @@ def process_schools(raw: bytes) -> pd.DataFrame:
     address columns with geocoded coords.
     Falls back to OneMap search per school if coordinates not present.
     """
+    global _LAST_SCHOOLS_USED_ONEMAP
+    _LAST_SCHOOLS_USED_ONEMAP = False
+
     import io
     try:
         df = pd.read_csv(io.BytesIO(raw))
@@ -321,6 +395,7 @@ def process_schools(raw: bytes) -> pd.DataFrame:
         return df.dropna(subset=["lat", "lon"])
     else:
         # No coordinate columns — geocode via OneMap using postal codes (more accurate than names)
+        _LAST_SCHOOLS_USED_ONEMAP = True
         name_col_raw = col_map.get("school_name") or col_map.get("name") or col_map.get("schoolname")
         postal_col_raw = col_map.get("postal_code") or col_map.get("postalcode") or col_map.get("postal")
 
@@ -500,12 +575,22 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true",
                         help="Re-download all layers even if output CSV already exists")
+    parser.add_argument(
+        "--out-dir",
+        default=DATA_DIR,
+        help=(
+            "Destination directory for staged CSVs and receipt sidecars "
+            "(default: data/inputs)"
+        ),
+    )
     args = parser.parse_args()
+    output_dir = os.path.abspath(args.out_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     def should_skip(filename: str) -> bool:
         if args.force:
             return False
-        path = os.path.join(DATA_DIR, filename)
+        path = os.path.join(output_dir, filename)
         if os.path.exists(path):
             print(f"  Skipping — {path} already exists (use --force to re-download)")
             return True
@@ -521,16 +606,25 @@ def main():
         status["parks.csv"] = "SKIP — already exists"
     else:
         raw = None
+        used_id = None
         for did in DATASETS["parks"]["ids"]:
             raw = poll_download(did)
             if raw:
+                used_id = did
                 print(f"  Fetched {len(raw):,} bytes (id={did})")
                 break
         if raw:
             df = process_parks(raw)
             if not df.empty:
-                out = os.path.join(DATA_DIR, "parks.csv")
-                df.to_csv(out, index=False)
+                out = os.path.join(output_dir, "parks.csv")
+                _write_validated_csv_with_receipt(
+                    df,
+                    out,
+                    required_columns={"lat", "lon"},
+                    authority=SOURCE_AUTHORITIES["parks.csv"],
+                    source_url=POLL_BASE.format(dataset_id=used_id),
+                    source_identity=f"data.gov.sg:{used_id}",
+                )
                 status["parks.csv"] = f"OK  — {len(df)} parks -> {out}"
             else:
                 status["parks.csv"] = "WARN — fetched but GeoJSON parsed 0 rows"
@@ -546,16 +640,25 @@ def main():
         status["markets.csv"] = "SKIP — already exists"
     else:
         raw = None
+        used_id = None
         for did in DATASETS["markets"]["ids"]:
             raw = poll_download(did)
             if raw:
+                used_id = did
                 print(f"  Fetched {len(raw):,} bytes (id={did})")
                 break
         if raw:
             df = process_markets(raw)
             if not df.empty:
-                out = os.path.join(DATA_DIR, "markets.csv")
-                df.to_csv(out, index=False)
+                out = os.path.join(output_dir, "markets.csv")
+                _write_validated_csv_with_receipt(
+                    df,
+                    out,
+                    required_columns={"lat", "lon"},
+                    authority=SOURCE_AUTHORITIES["markets.csv"],
+                    source_url=POLL_BASE.format(dataset_id=used_id),
+                    source_identity=f"data.gov.sg:{used_id}",
+                )
                 status["markets.csv"] = f"OK  — {len(df)} hawker centres -> {out}"
             else:
                 status["markets.csv"] = "WARN — fetched but GeoJSON parsed 0 rows"
@@ -567,40 +670,67 @@ def main():
     # 3. SCHOOLS
     # ------------------------------------------------------------------
     print("\n[3/6] Schools (MOE)...")
-    raw = None
-    used_id = None
-    for did in DATASETS["schools"]["ids"]:
-        raw = poll_download(did)
-        if raw:
-            import io
-            # Quick check: is this the general info file or a CCA file?
-            try:
-                preview = pd.read_csv(io.BytesIO(raw), nrows=2)
-                cols_lower = [c.lower() for c in preview.columns]
-                has_name = any(x in cols_lower for x in ["school_name", "schoolname", "name"])
-                # General Info has many columns (address, postal, telephone, etc.)
-                # Narrow files (CCAs, Programmes, Subjects) have <5 columns — skip them
-                if has_name and len(preview.columns) >= 5:
-                    used_id = did
-                    print(f"  Fetched {len(raw):,} bytes (id={did}) — {len(preview.columns)} cols, looks like general info")
-                    break
-                else:
-                    reason = "no name col" if not has_name else f"only {len(preview.columns)} cols (narrow file)"
-                    print(f"  id={did} — {reason}, cols: {list(preview.columns)[:6]} — skipping")
-                    raw = None
-            except Exception:
-                used_id = did
-                break
-    if raw:
-        df = process_schools(raw)
-        if not df.empty:
-            out = os.path.join(DATA_DIR, "schools.csv")
-            df.to_csv(out, index=False)
-            status["schools.csv"] = f"OK  — {len(df)} schools -> {out}"
-        else:
-            status["schools.csv"] = "WARN — fetched but produced 0 usable rows"
+    if should_skip("schools.csv"):
+        status["schools.csv"] = "SKIP — already exists"
     else:
-        status["schools.csv"] = "FAIL — could not find general info CSV in collection 457"
+        raw = None
+        used_id = None
+        for did in DATASETS["schools"]["ids"]:
+            raw = poll_download(did)
+            if raw:
+                import io
+                # Quick check: is this the general info file or a CCA file?
+                try:
+                    preview = pd.read_csv(io.BytesIO(raw), nrows=2)
+                    cols_lower = [c.lower() for c in preview.columns]
+                    has_name = any(x in cols_lower for x in ["school_name", "schoolname", "name"])
+                    # General Info has many columns (address, postal, telephone, etc.)
+                    # Narrow files (CCAs, Programmes, Subjects) have <5 columns — skip them
+                    if has_name and len(preview.columns) >= 5:
+                        used_id = did
+                        print(f"  Fetched {len(raw):,} bytes (id={did}) — {len(preview.columns)} cols, looks like general info")
+                        break
+                    else:
+                        reason = "no name col" if not has_name else f"only {len(preview.columns)} cols (narrow file)"
+                        print(f"  id={did} — {reason}, cols: {list(preview.columns)[:6]} — skipping")
+                        raw = None
+                except Exception:
+                    used_id = did
+                    break
+        if raw:
+            df = process_schools(raw)
+            if not df.empty:
+                out = os.path.join(output_dir, "schools.csv")
+                used_onemap = _LAST_SCHOOLS_USED_ONEMAP
+                primary_url = POLL_BASE.format(dataset_id=used_id)
+                _write_validated_csv_with_receipt(
+                    df,
+                    out,
+                    required_columns={"lat", "lon"},
+                    authority=SOURCE_AUTHORITIES["schools.csv"],
+                    source_url=primary_url,
+                    source_urls=(
+                        [primary_url, ONEMAP_SEARCH]
+                        if used_onemap
+                        else None
+                    ),
+                    source_identity=(
+                        f"data.gov.sg:{used_id} + OneMap Search geocoding"
+                        if used_onemap
+                        else f"data.gov.sg:{used_id}"
+                    ),
+                    # Both the primary dataset and the OneMap fallback are
+                    # retrieved in this run. ``mixed`` is reserved for an
+                    # actual fresh/cached or fresh/offline acquisition mix;
+                    # fallback use has its own explicit state.
+                    cache_state="fresh",
+                    fallback_state="used" if used_onemap else "not_used",
+                )
+                status["schools.csv"] = f"OK  — {len(df)} schools -> {out}"
+            else:
+                status["schools.csv"] = "WARN — fetched but produced 0 usable rows"
+        else:
+            status["schools.csv"] = "FAIL — could not find general info CSV in collection 457"
 
     time.sleep(3)
 
@@ -613,8 +743,15 @@ def main():
     else:
         df = fetch_polyclinics_onemap()
         if not df.empty:
-            out = os.path.join(DATA_DIR, "polyclinics.csv")
-            df.to_csv(out, index=False)
+            out = os.path.join(output_dir, "polyclinics.csv")
+            _write_validated_csv_with_receipt(
+                df,
+                out,
+                required_columns={"lat", "lon"},
+                authority=SOURCE_AUTHORITIES["polyclinics.csv"],
+                source_url=POLYCLINIC_SOURCE_URL,
+                source_identity="OneMap Search: searchVal=polyclinic, paginated",
+            )
             status["polyclinics.csv"] = f"OK  — {len(df)} results -> {out}"
         else:
             status["polyclinics.csv"] = "FAIL — OneMap search returned 0 results"
@@ -658,8 +795,21 @@ def main():
         if raw:
             df = process_hdb_resale(raw)
             if not df.empty:
-                out = os.path.join(DATA_DIR, "hdb_resale.csv")
-                df.to_csv(out, index=False)
+                out = os.path.join(output_dir, "hdb_resale.csv")
+                months = sorted(
+                    str(value)
+                    for value in df.get("month", pd.Series(dtype=str)).dropna().unique()
+                )
+                _write_validated_csv_with_receipt(
+                    df,
+                    out,
+                    required_columns={"town", "resale_price", "floor_area_sqm"},
+                    authority=SOURCE_AUTHORITIES["hdb_resale.csv"],
+                    source_url=POLL_BASE.format(dataset_id=used_id),
+                    source_identity=f"data.gov.sg:{used_id}",
+                    coverage_start=months[0] if months else None,
+                    coverage_end=months[-1] if months else None,
+                )
                 status["hdb_resale.csv"] = (
                     f"OK  — {len(df):,} transactions -> {out}  "
                     f"(towns: {df['town'].nunique()}, months: {df['month'].nunique() if 'month' in df.columns else '?'})"

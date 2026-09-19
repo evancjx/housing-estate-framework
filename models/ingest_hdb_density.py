@@ -52,16 +52,22 @@ RUN:
 """
 import argparse
 import csv
+from datetime import datetime, timezone
 import io
-import json
 import os
 import sys
 import urllib.request
-import urllib.error
+from pathlib import Path
 
 import pandas as pd
 
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
 from aliases import ESTATE_TOWN_ALIAS
+from sg_estate.adapters.http import get_json, get_text
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
 
 DATASET_ID = "d_17f5382f26140b1fdae0ba2ef6239d2f"
 POLL_URL = "https://api-open.data.gov.sg/v1/public/api/datasets/{ds}/poll-download"
@@ -108,9 +114,12 @@ TOWN_TO_ESTATE = {
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": _UA,
-                                                 "Accept": "application/json"})
-    return json.load(urllib.request.urlopen(req, timeout=timeout))
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": _UA, "Accept": "application/json"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def fetch_csv(cache_dir: str | None) -> str:
@@ -123,10 +132,12 @@ def fetch_csv(cache_dir: str | None) -> str:
     print(f"Fetching HDB Property Information ({DATASET_ID})…", file=sys.stderr)
     poll = _http_json(POLL_URL.format(ds=DATASET_ID))
     csv_url = poll["data"]["url"]
-    raw = urllib.request.urlopen(
-        urllib.request.Request(csv_url, headers={"User-Agent": _UA}),
-        timeout=120
-    ).read().decode("utf-8")
+    raw = get_text(
+        csv_url,
+        timeout=120,
+        headers={"User-Agent": _UA},
+        opener=urllib.request.urlopen,
+    )
     print(f"  {len(raw)} bytes", file=sys.stderr)
     if cache_dir:
         with open(cache_path, "w") as f:
@@ -210,6 +221,12 @@ def main():
     estates = pd.read_csv(args.estates)
     assert {"estate", "lat", "lon"} <= set(estates.columns)
 
+    cache_path = (
+        Path(args.cache_dir) / f"{DATASET_ID}.csv"
+        if args.cache_dir
+        else None
+    )
+    used_cache = cache_path is not None and cache_path.is_file()
     csv_text = fetch_csv(args.cache_dir)
     by_estate = aggregate_by_estate(csv_text)
     print(f"Aggregated {len(by_estate)} estates "
@@ -234,6 +251,27 @@ def main():
          "oldest_block_year", "newest_block_year"]
     ]
     out_df.to_csv(args.out, index=False)
+    year_values = [
+        int(value)
+        for column in ("oldest_block_year", "newest_block_year")
+        for value in out_df[column]
+        if pd.notna(value) and int(value) > 0
+    ]
+    receipt = build_source_receipt(
+        args.out,
+        dataset_id="hdb_density.csv",
+        authority="HDB / data.gov.sg + framework density assumptions",
+        source_url=POLL_URL.format(ds=DATASET_ID),
+        source_identity=f"data.gov.sg:{DATASET_ID}",
+        retrieved_at=None if used_cache else datetime.now(timezone.utc),
+        coverage_start=str(min(year_values)) if year_values else None,
+        coverage_end=str(max(year_values)) if year_values else None,
+        row_count=len(out_df),
+        cache_state="cached" if used_cache else "fresh",
+        fallback_state="not_used",
+        validation_status="passed",
+    )
+    write_source_receipt(args.out, receipt)
     print(f"\nWrote {len(out_df)} rows → {args.out}", file=sys.stderr)
 
     # Spot-check (brief Step 4)

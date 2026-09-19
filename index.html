@@ -38,7 +38,7 @@
     font-size:clamp(43px,6vw,72px); font-weight:500; line-height:.98; letter-spacing:-.045em; }
   .lede { max-width:660px; margin:0; color:var(--muted); font-size:17px; line-height:1.65; }
   .proof { display:flex; flex-wrap:wrap; gap:9px 22px; margin-top:28px; color:var(--muted);
-    font-size:11px; font-weight:700; }
+    font-size:12px; font-weight:700; }
   .proof span::before { content:""; display:inline-block; width:6px; height:6px; margin:0 8px 1px 0;
     border-radius:50%; background:var(--accent); }
   .finder { padding:8px; border:1px solid var(--line); border-radius:20px; background:rgba(255,255,255,.72);
@@ -52,7 +52,7 @@
     color:var(--muted); font-size:11px; font-weight:850; cursor:pointer; }
   .tab[aria-selected="true"] { background:white; color:var(--ink); box-shadow:0 2px 9px rgba(20,34,30,.1); }
   .research-panel[hidden] { display:none; }
-  label { display:block; margin:0 0 7px; font-size:10px; font-weight:900; letter-spacing:.06em;
+  label { display:block; margin:0 0 7px; font-size:11px; font-weight:900; letter-spacing:.06em;
     text-transform:uppercase; }
   .input-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; position:relative; }
   input,select { width:100%; min-height:47px; padding:10px 12px; border:1px solid #bccdc5;
@@ -69,8 +69,14 @@
     color:var(--ink); text-align:left; font-size:12px; cursor:pointer; }
   .suggestions button:hover,.suggestions button[aria-selected="true"] { background:var(--accent-soft); }
   .suggestions small { display:block; margin-top:2px; color:var(--muted); font-size:9px; }
-  .route-note { min-height:34px; margin:10px 0 0; color:var(--muted); font-size:10px; line-height:1.5; }
+  .route-note { min-height:34px; margin:10px 0 0; color:var(--muted); font-size:11px; line-height:1.5; }
   .route-note a { color:var(--accent); font-weight:800; }
+  .catalog-status { display:flex; min-height:28px; align-items:center; gap:8px; margin:3px 0 0;
+    color:var(--muted); font-size:9px; line-height:1.45; }
+  .catalog-status[data-state="error"] { color:#8d4036; }
+  .catalog-retry { min-height:27px; padding:4px 8px; border:1px solid currentColor; border-radius:7px;
+    background:white; color:inherit; font-size:9px; font-weight:850; cursor:pointer; }
+  .catalog-retry[hidden] { display:none; }
   .popular { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
   .popular button { padding:6px 8px; border:1px solid var(--line); border-radius:99px; background:white;
     color:var(--muted); font-size:9px; font-weight:750; cursor:pointer; }
@@ -79,15 +85,15 @@
     border:1px solid var(--line); border-radius:15px; overflow:hidden; background:var(--line); }
   .step { padding:21px; background:white; }
   .step b { display:block; margin-bottom:6px; font-size:12px; }
-  .step p { margin:0; color:var(--muted); font-size:10px; line-height:1.55; }
+  .step p { margin:0; color:var(--muted); font-size:11px; line-height:1.55; }
   .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin:44px 0 16px; }
   .section-head h2 { margin:0; font-size:24px; letter-spacing:-.035em; }
-  .section-head p { max-width:570px; margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
-  .collection-controls { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:15px; }
-  .filter-chip { min-height:34px; padding:7px 11px; border:1px solid var(--line); border-radius:99px;
-    background:white; color:var(--muted); font-size:10px; font-weight:800; cursor:pointer; }
-  .filter-chip.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
-  .report-search { width:min(290px,100%); min-height:34px; margin-left:auto; padding:7px 10px; font-size:11px; }
+  .section-head p { max-width:570px; margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+  .collection-controls { display:grid; grid-template-columns:minmax(220px,1.35fr) repeat(3,minmax(140px,.65fr));
+    align-items:end; gap:9px; margin-bottom:15px; }
+  .report-filter-field { min-width:0; }
+  .report-filter-field label { margin-bottom:5px; font-size:9px; }
+  .report-search,.report-filter { width:100%; min-height:42px; padding:8px 10px; font-size:11px; }
   .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; }
   .card { display:flex; min-height:194px; flex-direction:column; padding:20px; border:1px solid var(--line);
     border-radius:14px; background:var(--card); color:inherit; text-decoration:none;
@@ -95,32 +101,56 @@
   .card:hover { transform:translateY(-2px); border-color:#83b9ae; box-shadow:0 14px 32px rgba(20,34,30,.08); }
   .card[hidden] { display:none; }
   .tag { align-self:flex-start; padding:5px 8px; border-radius:99px; background:var(--accent-soft);
-    color:var(--accent); font-size:8px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+    color:var(--accent); font-size:9px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
   .card h3 { margin:18px 0 7px; font-size:17px; letter-spacing:-.025em; }
-  .card p { margin:0; color:var(--muted); font-size:10px; line-height:1.6; }
-  .open { margin-top:auto; padding-top:18px; color:var(--accent); font-size:10px; font-weight:900; }
+  .card p { margin:0; color:var(--muted); font-size:12px; line-height:1.55; }
+  .open { margin-top:auto; padding-top:18px; color:var(--accent); font-size:11px; font-weight:900; }
   .featured { min-height:244px; background:var(--navy); color:white; border-color:var(--navy); }
   .featured .tag { background:#274963; color:#a9e5d9; }
   .featured p { color:#bdcbd6; }
   .featured .open { color:#8cddd0; }
   .property-analysis-card { border-top:3px solid var(--warm); }
   .property-analysis-card .tag { background:var(--warm-soft); color:#76511f; }
+  .report-card { min-width:0; }
+  .report-primary-link { display:flex; min-width:0; flex:1; flex-direction:column; color:inherit; text-decoration:none; }
+  .report-card h3,.report-card p,.report-primary-link { overflow-wrap:anywhere; }
+  .report-history { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); }
+  .report-history summary { cursor:pointer; font-size:10px; font-weight:850; }
+  .report-history-list { display:grid; gap:7px; margin:9px 0 0; padding-left:18px; font-size:10px; line-height:1.45; }
+  .report-history-link { color:var(--accent); font-weight:750; overflow-wrap:anywhere; }
   .method { display:grid; grid-template-columns:1fr 1fr 1fr; gap:13px; margin-top:16px; }
   .method article { padding:18px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.58); }
-  .method b { font-size:11px; }
-  .method p { margin:6px 0 0; color:var(--muted); font-size:10px; line-height:1.55; }
+  .method b { font-size:12px; }
+  .method p { margin:6px 0 0; color:var(--muted); font-size:11px; line-height:1.55; }
   .data-note { margin-top:13px; padding:13px 15px; border-left:3px solid var(--warm);
-    background:var(--warm-soft); color:#72501f; font-size:10px; line-height:1.55; }
-  .empty { display:none; padding:25px; border:1px dashed #aec1b8; border-radius:12px;
+    background:var(--warm-soft); color:#72501f; font-size:11px; line-height:1.55; }
+  .data-status-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; }
+  .data-status-grid article { padding:18px; border:1px solid var(--line); border-radius:12px; background:white; }
+  .data-status-grid b,.data-status-grid strong { display:block; }
+  .data-status-grid b { color:var(--accent); font-size:9px; letter-spacing:.07em; text-transform:uppercase; }
+  .data-status-grid strong { margin-top:7px; font-size:14px; }
+  .data-status-grid p { margin:7px 0 0; color:var(--muted); font-size:10px; line-height:1.55; }
+  .data-status-link { margin:11px 0 0; color:var(--muted); font-size:10px; }
+  .data-status-link a { color:var(--accent); font-weight:800; }
+  .library-actions { display:flex; min-height:38px; margin-top:14px; align-items:center;
+    justify-content:space-between; gap:12px; }
+  .library-count { margin:0; color:var(--muted); font-size:11px; }
+  .library-toggle { min-height:36px; padding:7px 12px; border:1px solid var(--line); border-radius:9px;
+    background:white; color:var(--accent); font-size:11px; font-weight:850; cursor:pointer; }
+  .library-toggle:hover { border-color:var(--accent); background:var(--accent-soft); }
+  .library-toggle[hidden] { display:none; }
+  .empty { padding:25px; border:1px dashed #aec1b8; border-radius:12px;
     color:var(--muted); text-align:center; font-size:11px; }
+  .empty[hidden] { display:none; }
   footer { display:flex; justify-content:space-between; gap:30px; margin-top:54px; padding-top:18px;
-    border-top:1px solid var(--line); color:var(--muted); font-size:9px; line-height:1.65; }
+    border-top:1px solid var(--line); color:var(--muted); font-size:10px; line-height:1.65; }
   footer a { color:inherit; }
   :focus-visible { outline:3px solid #f2a900; outline-offset:2px; }
   @media(max-width:900px) {
     .hero { grid-template-columns:1fr; gap:32px; }
     .finder { max-width:680px; }
     .grid { grid-template-columns:repeat(2,1fr); }
+    .collection-controls { grid-template-columns:repeat(2,minmax(0,1fr)); }
   }
   @media(max-width:650px) {
     .site-nav { padding:0 15px; }
@@ -128,9 +158,10 @@
     main { padding:35px 15px 58px; }
     h1 { font-size:45px; }
     .finder-inner { padding:17px; }
-    .workflow,.grid,.method { grid-template-columns:1fr; }
+    .workflow,.grid,.method,.data-status-grid { grid-template-columns:1fr; }
     .section-head,footer { align-items:start; flex-direction:column; }
-    .report-search { width:100%; margin-left:0; }
+    .library-actions { align-items:flex-start; flex-direction:column; }
+    .collection-controls { grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -180,6 +211,10 @@
               <ul class="suggestions" id="condo-suggestions" role="listbox" hidden></ul>
             </div>
             <p class="route-note" id="condo-route" aria-live="polite">Searches open the all-project explorer. A dedicated project or district report is offered when one exists.</p>
+            <div class="catalog-status" id="project-catalog-status" data-state="loading" role="status" aria-live="polite">
+              <span id="project-catalog-status-copy">Loading canonical project registry…</span>
+              <button class="catalog-retry" id="project-catalog-retry" type="button" hidden>Retry</button>
+            </div>
             <div class="popular" aria-label="Example condominium searches">
               <button type="button" data-project="TREASURE AT TAMPINES">Treasure at Tampines</button>
               <button type="button" data-project="THE POIZ RESIDENCES">The Poiz Residences</button>
@@ -210,142 +245,489 @@
     <article class="step"><b>3 · Add household context</b><p>Read Provision, Liveability and tenure-specific Value as separate views.</p></article>
   </section>
 
+  <section id="data-status" aria-labelledby="data-status-title">
+    <!-- GENERATED_DATA_STATUS -->
+  </section>
+
   <section id="reports" aria-labelledby="reports-title">
     <div class="section-head">
       <div><div class="eyebrow">Research library</div><h2 id="reports-title">Choose the evidence you need</h2></div>
       <p>Start broad, then move into a district, project or transaction view. Dates and source limitations remain visible inside each report.</p>
     </div>
     <div class="collection-controls" aria-label="Filter reports">
-      <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true">All reports</button>
-      <button class="filter-chip" type="button" data-filter="project" aria-pressed="false">Projects</button>
-      <button class="filter-chip" type="button" data-filter="district" aria-pressed="false">Districts</button>
-      <button class="filter-chip" type="button" data-filter="estate" aria-pressed="false">Estates & households</button>
-      <button class="filter-chip" type="button" data-filter="tool" aria-pressed="false">Tools</button>
-      <button class="filter-chip" type="button" data-filter="method" aria-pressed="false">Method</button>
-      <button class="filter-chip" type="button" data-filter="analysis" aria-pressed="false">Property analyses</button>
-      <input class="report-search" id="report-search" type="search" placeholder="Filter this report library…" aria-label="Filter report library">
+      <div class="report-filter-field">
+        <label for="report-search">Search reports</label>
+        <input class="report-search" id="report-search" type="search" placeholder="Project, district or evidence…" aria-describedby="report-results-status">
+      </div>
+      <div class="report-filter-field">
+        <label for="report-category-filter">Category</label>
+        <select class="report-filter" id="report-category-filter" aria-describedby="report-results-status">
+          <!-- GENERATED_REPORT_CATEGORY_OPTIONS_START -->
+          <option value="all">All categories</option>
+          <option value="canberra">Canberra</option>
+          <option value="district">District</option>
+          <option value="estate-framework">Estate Framework</option>
+          <option value="home-finance">Home Finance</option>
+          <option value="private-property">Private Property</option>
+          <option value="property-analysis">Property Analysis</option>
+          <!-- GENERATED_REPORT_CATEGORY_OPTIONS_END -->
+        </select>
+      </div>
+      <div class="report-filter-field">
+        <label for="report-freshness-filter">Source date</label>
+        <select class="report-filter" id="report-freshness-filter" aria-describedby="report-results-status">
+          <option value="all">All source dates</option>
+        </select>
+      </div>
+      <div class="report-filter-field">
+        <label for="report-evidence-filter">Evidence family</label>
+        <select class="report-filter" id="report-evidence-filter" aria-describedby="report-results-status">
+          <option value="all">All evidence families</option>
+        </select>
+      </div>
     </div>
 
     <div class="grid" id="report-grid">
-      <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->
-      <a class="card featured" data-kind="district project" data-search="tampines planning area simei upper changi condo condominium executive condominium ec primary school within 1km mrt five minute walk" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
-        <span class="tag">Tampines · Dated area guide</span><h3>Condos, schools and five-minute MRT access</h3>
-        <p>Thirty-four projects checked against the Tampines planning boundary, primary-school proximity and usable walks to operational MRT entrances.</p>
-        <span class="open">Open Tampines guide →</span>
-      </a>
-      <a class="card featured" data-kind="tool" data-search="new home loan mortgage calculator repayment refinance repricing break even fees schedule stress" href="home_loan_planner.html">
-        <span class="tag">Interactive · Home finance</span><h3>Home loan planner</h3>
-        <p>Calculate a new loan or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.</p>
-        <span class="open">Calculate a home loan →</span>
-      </a>
-      <a class="card featured" data-kind="tool" data-search="condo condominium buc couple partner co-owner exact dollar funding ledger progressive payment cash cpf loan timeline" href="condo_loan_timeline_planner.html">
-        <span class="tag">Interactive · Condo funding plan</span><h3>Condo timeline &amp; funding ledger</h3>
-        <p>Allocate each acquisition cost and progressive property payment across both owners' cash and CPF contributions, with the loan shown as a separate funding source.</p>
-        <span class="open">Build a condo funding plan →</span>
-      </a>
-      <a class="card featured" data-kind="tool" data-search="condo condominium project exit sale scenario achieved transaction same size area tolerance growth selling costs" href="project_exit_comparison.html">
-        <span class="tag">Interactive · Exit scenarios</span><h3>Project exit comparison</h3>
-        <p>Compare user-defined sale scenarios with achieved, size-matched project transactions while keeping assumptions, evidence coverage and selling costs visible.</p>
-        <span class="open">Compare exit scenarios →</span>
-      </a>
-      <a class="card featured" data-kind="project" data-search="compare multiple up to five condo condominium framework provision liveability value employment risk matrix" href="multi_condo_framework_comparison.html">
-        <span class="tag">Interactive · Up to five</span><h3>Compare multiple condominiums</h3>
-        <p>Compare five complete years of transactions, annual medians, detailed analysis and full ledgers for two to five projects, with A as reference.</p>
-        <span class="open">Build a comparison set →</span>
-      </a>
-      <a class="card featured" data-kind="project" data-search="compare two condo condominium framework provision liveability value employment risk side by side" href="condo_framework_comparison.html">
-        <span class="tag">Interactive · Two projects</span><h3>Compare two condominiums</h3>
-        <p>Enter any two named projects and inspect achieved evidence beside the same estate-context factor families.</p>
-        <span class="open">Start a comparison →</span>
-      </a>
-      <a class="card featured" data-kind="project" data-search="all private condominium project comparison mrt schools price transactions" href="private_project_comparison_table.html">
-        <span class="tag">Start here · All projects</span><h3>Private condominium explorer</h3>
-        <p>Search projects across 28 districts, then filter transaction evidence, MRT access, schools and estate context.</p>
-        <span class="open">Open project explorer →</span>
-      </a>
-      <a class="card featured" data-kind="project district" data-search="katong district 15 emerald tembusu grand dunman continuum condo units sale state bedroom floor transactions" href="katong_condo_comparison.html">
-        <span class="tag">Katong · Reviewed comparison</span><h3>Katong condominium comparison</h3>
-        <p>Eight projects with like-for-like sale-state, bedroom, floor, size, growth, liquidity and exact-unit evidence controls.</p>
-        <span class="open">Compare Katong projects →</span>
-      </a>
-      <a class="card featured" data-kind="estate" data-search="estate comparison provision liveability personas value" href="comparison_table.html">
-        <span class="tag">Start here · Estate context</span><h3>Estate and household explorer</h3>
-        <p>Compare objective Provision, person-relative Liveability and tenure-segmented Value without blending the views.</p>
-        <span class="open">Open estate explorer →</span>
-      </a>
-      <a class="card" data-kind="project" data-search="poiz east resale condominium comparison" href="poiz_east_resale_comparison.html">
-        <span class="tag">Project comparison</span><h3>Poiz versus East-side resale</h3>
-        <p>Nine-project comparison of achieved prices, liquidity, access, buyer fit and planning context.</p>
-        <span class="open">Open comparison →</span>
-      </a>
-      <a class="card" data-kind="project" data-search="poiz unit type growth every resale transaction history floor size" href="poiz_east_unit_growth_transactions.html">
-        <span class="tag">Transaction explorer</span><h3>Unit-type growth and transactions</h3>
-        <p>Rolling growth by bedroom type, annual PSF history and transaction records with floor, size and provenance.</p>
-        <span class="open">Open transaction history →</span>
-      </a>
-      <a class="card" data-kind="district project" data-search="canberra crescent d27 deep analysis launch bedroom peers" href="canberra_crescent_d27_deep_analysis.html">
-        <span class="tag">Canberra · D27</span><h3>Canberra Crescent deep analysis</h3>
-        <p>Launch audit, bedroom-matched peers and District 27 private transaction diagnostics.</p>
-        <span class="open">Open deep analysis →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 17 d17 private project comparison" href="private_project_comparison_D17.html">
-        <span class="tag">District 17</span><h3>D17 project comparison</h3>
-        <p>Private residential transaction evidence for Changi, Loyang and Pasir Ris.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 18 d18 private project comparison pasir ris tampines" href="private_project_comparison_D18.html">
-        <span class="tag">District 18</span><h3>D18 project comparison</h3>
-        <p>Private residential transaction evidence for Pasir Ris and Tampines.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 27 d27 private project comparison yishun sembawang" href="private_project_comparison_D27.html">
-        <span class="tag">District 27</span><h3>D27 project comparison</h3>
-        <p>Private residential transaction evidence for Yishun and Sembawang.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district pair d18 d26 tampines lentor upper thomson" href="district_pair_comparison_D18_D26.html">
-        <span class="tag">District pair</span><h3>D18 versus D26</h3>
-        <p>A focused bedroom, size and MRT-distance comparison across two private districts.</p><span class="open">Open comparison →</span>
-      </a>
-      <a class="card" data-kind="project" data-search="landed growth dashboard transactions" href="landed_growth_dashboard.html">
-        <span class="tag">Landed</span><h3>Landed growth dashboard</h3>
-        <p>Interactive landed transaction and growth diagnostics, kept outside the condominium universe.</p><span class="open">Open dashboard →</span>
-      </a>
-      <a class="card" data-kind="estate" data-search="buyer household personas liveability profile young family professional retiree lifestyle" href="buyer_profile_table.html">
-        <span class="tag">Household fit</span><h3>Buyer profile explorer</h3>
-        <p>Scenario-specific screening with hard constraints, persona horizons and tenure-separated Value.</p><span class="open">Build a shortlist →</span>
-      </a>
-      <a class="card" data-kind="estate" data-search="mrt transport station comparison" href="mrt_comparison_table.html">
-        <span class="tag">Transport context</span><h3>MRT and LRT explorer</h3>
-        <p>Inspect audited code-line memberships, planned rail, derived geometry and controlled estate context without creating a station ranking.</p><span class="open">Explore the rail layer →</span>
-      </a>
-      <a class="card" data-kind="method" data-search="framework diagram method provision liveability value" href="framework_diagram.html">
-        <span class="tag">Method</span><h3>How the framework works</h3>
-        <p>A visual guide to the analytical structure, including the intentional split between views.</p><span class="open">Open method →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy micro location watergardens commodore" href="canberra_strategy_1_micro_location.html">
-        <span class="tag">Comparison practice · 01</span><h3>Start with micro-location</h3>
-        <p>Keep the subject active while choosing nearby peers, so location drift remains visible.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy newness lease vintage age period" href="canberra_strategy_2_newness.html">
-        <span class="tag">Comparison practice · 02</span><h3>Control for newness</h3>
-        <p>Separate lease vintage, project age and transaction period before reading a premium.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy integration mrt rail retail town centre" href="canberra_strategy_3_integration.html">
-        <span class="tag">Comparison practice · 03</span><h3>Price integration separately</h3>
-        <p>Test rail, retail and town-centre convenience as distinct layers rather than one premium.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy workbooks unit matching sale state planning newness micro location integration" href="canberra_strategy_4_unit_matching.html">
-        <span class="tag">Comparison practice · 04</span><h3>Match bedroom, size and floor</h3>
-        <p>A Canberra workbook demonstrating strict cohorts, total quantum, PSF and thin-cell withholding.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy sale state new sale sub sale resale liquidity" href="canberra_strategy_5_sale_state.html">
-        <span class="tag">Comparison practice · 05</span><h3>Keep sale states apart</h3>
-        <p>Separate new sale, sub sale and resale evidence by the process that formed each price.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy planning delivered committed conceptual" href="canberra_strategy_6_planning_context.html">
-        <span class="tag">Comparison practice · 06</span><h3>Treat plans as context</h3>
-        <p>Classify delivered, committed and conceptual infrastructure without booking future returns.</p><span class="open">Open workbook →</span>
-      </a>
+      <!-- GENERATED_REPORT_LIBRARY_START -->
+      <article class="card report-card featured" data-report-id="home-loan-planner" data-report-path="home_loan_planner.html" data-category="home-finance" data-search="home loan planner calculate a new home-loan repayment path or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments. home_loan_planner.html home-finance tool home loan mortgage calculator refinance reprice repayment" data-freshness="unknown" data-evidence-family="finance_assumptions" data-kind="tool">
+        <a class="report-primary-link" href="home_loan_planner.html">
+          <span class="tag">Home Finance · Tool</span>
+          <h3>Home loan planner</h3>
+          <p>Calculate a new home-loan repayment path or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="condo-loan-timeline-planner" data-report-path="condo_loan_timeline_planner.html" data-category="home-finance" data-search="condo timeline and funding ledger model a buc or completed condominium and allocate each acquisition cost and progressive payment across co-owners&#x27; cash, cpf and loan funding with an exact-dollar ledger. condo_loan_timeline_planner.html home-finance tool condominium buc couple partner co-owner funding ledger progressive payment cpf" data-freshness="unknown" data-evidence-family="finance_assumptions" data-kind="tool">
+        <a class="report-primary-link" href="condo_loan_timeline_planner.html">
+          <span class="tag">Home Finance · Tool</span>
+          <h3>Condo timeline and funding ledger</h3>
+          <p>Model a BUC or completed condominium and allocate each acquisition cost and progressive payment across co-owners&#x27; cash, CPF and loan funding with an exact-dollar ledger.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="project-exit-comparison" data-report-path="project_exit_comparison.html" data-category="private-property" data-search="project exit comparison compare project-specific exit scenarios against achieved, size-matched private-property transactions while keeping assumptions, sample coverage and costs visible. project_exit_comparison.html private-property tool condominium project exit transaction scenario selling costs" data-freshness="unknown" data-evidence-family="private_transactions rail_network finance_assumptions market_research" data-kind="tool">
+        <a class="report-primary-link" href="project_exit_comparison.html">
+          <span class="tag">Private Property · Tool</span>
+          <h3>Project exit comparison</h3>
+          <p>Compare project-specific exit scenarios against achieved, size-matched private-property transactions while keeping assumptions, sample coverage and costs visible.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="private-projects" data-report-path="private_project_comparison_table.html" data-category="private-property" data-search="private condominium project comparison inspect achieved project transactions through focused access, school, price, transaction and separately governed estate-context views without creating a universal project ranking. private_project_comparison_table.html private-property explorer condominium project transaction district" data-freshness="unknown" data-evidence-family="estate_model private_transactions rail_network market_research" data-kind="explorer">
+        <a class="report-primary-link" href="private_project_comparison_table.html">
+          <span class="tag">Private Property · Explorer</span>
+          <h3>Private condominium project comparison</h3>
+          <p>Inspect achieved project transactions through focused access, school, price, transaction and separately governed estate-context views without creating a universal project ranking.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="condo-framework-comparison" data-report-path="condo_framework_comparison.html" data-category="private-property" data-search="two-condominium framework comparison select two condominium projects and compare achieved project evidence alongside the estate provision, liveability, private value, employment, risk and life-path framework. condo_framework_comparison.html private-property comparison condominium comparison provision liveability value" data-freshness="unknown" data-evidence-family="estate_model private_transactions rail_network market_research" data-kind="comparison">
+        <a class="report-primary-link" href="condo_framework_comparison.html">
+          <span class="tag">Private Property · Comparison</span>
+          <h3>Two-condominium framework comparison</h3>
+          <p>Select two condominium projects and compare achieved project evidence alongside the estate Provision, Liveability, private Value, employment, risk and life-path framework.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="multi-condo-framework-comparison" data-report-path="multi_condo_framework_comparison.html" data-category="private-property" data-search="multi-condominium framework comparison compare two to five condominium projects across five complete years or longer available history, annual medians, detailed analysis, full transaction ledgers and separate estate framework views. multi_condo_framework_comparison.html private-property comparison condominium comparison transaction ledger analysis provision liveability value" data-freshness="unknown" data-evidence-family="estate_model private_transactions rail_network market_research" data-kind="comparison">
+        <a class="report-primary-link" href="multi_condo_framework_comparison.html">
+          <span class="tag">Private Property · Comparison</span>
+          <h3>Multi-condominium framework comparison</h3>
+          <p>Compare two to five condominium projects across five complete years or longer available history, annual medians, detailed analysis, full transaction ledgers and separate estate framework views.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="katong-comparison" data-report-path="katong_condo_comparison.html" data-category="private-property" data-search="katong condominium comparison compare eight reviewed katong projects by sale state, bedroom, floor, size, growth, liquidity and exact-unit evidence coverage. katong_condo_comparison.html private-property research katong condominium transaction unit sale state emerald of katong tembusu grand grand dunman the continuum katong regency haig court the shore residences one amber" data-freshness="unknown" data-evidence-family="private_transactions rail_network market_research" data-kind="research">
+        <a class="report-primary-link" href="katong_condo_comparison.html">
+          <span class="tag">Private Property · Research</span>
+          <h3>Katong condominium comparison</h3>
+          <p>Compare eight reviewed Katong projects by sale state, bedroom, floor, size, growth, liquidity and exact-unit evidence coverage.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="poiz-east-comparison" data-report-path="poiz_east_resale_comparison.html" data-category="private-property" data-search="poiz versus east-side resale condominiums compare achieved resale prices, bedroom mix, liquidity, access, buyer fit and planning context across nine projects. poiz_east_resale_comparison.html private-property research poiz resale condominium east the poiz residences" data-freshness="unknown" data-evidence-family="private_transactions rail_network market_research" data-kind="research">
+        <a class="report-primary-link" href="poiz_east_resale_comparison.html">
+          <span class="tag">Private Property · Research</span>
+          <h3>Poiz versus East-side resale condominiums</h3>
+          <p>Compare achieved resale prices, bedroom mix, liquidity, access, buyer fit and planning context across nine projects.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="tampines-condo-school-mrt-guide-2026-08-08" data-report-path="tampines_condo_school_mrt_area_guide_2026-08-08.html" data-category="district" data-search="tampines condominium, school and mrt area guide — 8 aug 2026 compare 34 tampines planning area projects by indicative primary-school proximity and usable walking access to operational mrt entrances. tampines_condo_school_mrt_area_guide_2026-08-08.html district research tampines simei condominium school mrt area guide" data-freshness="unknown" data-evidence-family="private_transactions rail_network market_research" data-kind="research">
+        <a class="report-primary-link" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
+          <span class="tag">District · Research</span>
+          <h3>Tampines condominium, school and MRT area guide — 8 Aug 2026</h3>
+          <p>Compare 34 Tampines Planning Area projects by indicative primary-school proximity and usable walking access to operational MRT entrances.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card featured" data-report-id="canberra-d27" data-report-path="canberra_crescent_d27_deep_analysis.html" data-category="canberra" data-search="canberra crescent district 27 deep analysis audit launch evidence, bedroom-matched peers and district 27 condominium transactions. canberra_crescent_d27_deep_analysis.html canberra research canberra district 27 launch transaction canberra crescent residences" data-freshness="unknown" data-evidence-family="rail_network market_research" data-kind="research">
+        <a class="report-primary-link" href="canberra_crescent_d27_deep_analysis.html">
+          <span class="tag">Canberra · Research</span>
+          <h3>Canberra Crescent District 27 deep analysis</h3>
+          <p>Audit launch evidence, bedroom-matched peers and District 27 condominium transactions.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-08-08-canberra-crescent-residences" data-report-path="property-analysis-2026-08-08-canberra-crescent-residences.html" data-category="property-analysis" data-search="canberra crescent residences — three-bedroom 2026 owner-exit and 3% annualised-return analysis for an august 2025 three-bedroom buyer selling around september 2026, a 3% gross annualised gain needs about s$2,033–s$2,079 psf, but a 3% cost-adjusted return needs about s$2,461–s$2,522 psf after the applicable 12% ssd; no owner exit yet proves those prices, so a realised 3% return in 2026 is not credible. property-analysis-2026-08-08-canberra-crescent-residences.html property-analysis property-analysis private property property analysis new launch valuation investment canberra crescent residences canberra crescent residences canberra-crescent-residences new launch 2026-08-08t11:07:32+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="canberra-crescent-residences">
+        <a class="report-primary-link" href="property-analysis-2026-08-08-canberra-crescent-residences.html">
+          <span class="tag">Property analysis · New Launch · 08 Aug 2026 · Latest</span>
+          <h3>Canberra Crescent Residences — three-bedroom 2026 owner-exit and 3% annualised-return analysis</h3>
+          <p>For an August 2025 three-bedroom buyer selling around September 2026, a 3% gross annualised gain needs about S$2,033–S$2,079 psf, but a 3% cost-adjusted return needs about S$2,461–S$2,522 psf after the applicable 12% SSD; no owner exit yet proves those prices, so a realised 3% return in 2026 is not credible.</p>
+          <span class="open">Open report →</span>
+        </a>
+        <div class="report-history">
+          <details>
+            <summary><span class="report-history-count">1 earlier snapshot</span></summary>
+            <ul class="report-history-list">
+          <li><a class="report-history-link" href="property-analysis-2026-08-03-canberra-crescent-residences.html" data-report-id="property-analysis-2026-08-03-canberra-crescent-residences" data-report-path="property-analysis-2026-08-03-canberra-crescent-residences.html" data-search="canberra crescent residences — new-launch inventory, matched-peer valuation and potential-quantum analysis public records reconcile to about 36 larger homes remaining, but there is no achieved owner exit; today&#x27;s lowest tickets still carry roughly 9%–20% psf premiums over the closest modern secondary substitutes, so selected 990 or 1,216 sq ft homes offer moderate long-horizon upside rather than high-confidence huge potential quantum. property-analysis-2026-08-03-canberra-crescent-residences.html property-analysis property-analysis private property property analysis new launch valuation investment canberra crescent residences canberra crescent residences canberra-crescent-residences new launch 2026-08-03t22:54:43+08:00" data-freshness="dated" data-evidence-family="market_research">Canberra Crescent Residences — new-launch inventory, matched-peer valuation and potential-quantum analysis · 03 Aug 2026</a></li>
+            </ul>
+          </details>
+        </div>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-08-08-parktown-residence" data-report-path="property-analysis-2026-08-08-parktown-residence.html" data-category="property-analysis" data-search="parktown residence — remaining-inventory quantum and exit-potential analysis the low-quantum 4-bedroom premium stock is the most defensible remaining buy; capital upside is plausible but entry-dependent, and there is no achieved owner-resale premium yet. property-analysis-2026-08-08-parktown-residence.html property-analysis property-analysis private property property analysis new launch valuation investment parktown residence parktown residence parktown-residence new launch 2026-08-08t02:25:47+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="parktown-residence">
+        <a class="report-primary-link" href="property-analysis-2026-08-08-parktown-residence.html">
+          <span class="tag">Property analysis · New Launch · 08 Aug 2026 · Latest</span>
+          <h3>PARKTOWN Residence — remaining-inventory quantum and exit-potential analysis</h3>
+          <p>The low-quantum 4-Bedroom Premium stock is the most defensible remaining buy; capital upside is plausible but entry-dependent, and there is no achieved owner-resale premium yet.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-08-08-pinery-residences" data-report-path="property-analysis-2026-08-08-pinery-residences.html" data-category="property-analysis" data-search="pinery residences — direct-mrt new-launch quantum and investor analysis pinery is a strong long-hold own-stay proposition, but not an asymmetric investment at roughly s$2,550 psf: most compact homes have been taken up, the publicly indicated balance is concentrated in s$2.97m–s$3.90m four- and five-bedroom stock, and a current buyer generally needs a long hold or sustained 4% annual price growth to approach a large five-year capital-only gain before financing and holding costs. property-analysis-2026-08-08-pinery-residences.html property-analysis property-analysis private property property analysis new launch valuation investment pinery residences pinery residences pinery-residences new launch 2026-08-08t02:21:46+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="pinery-residences">
+        <a class="report-primary-link" href="property-analysis-2026-08-08-pinery-residences.html">
+          <span class="tag">Property analysis · New Launch · 08 Aug 2026 · Latest</span>
+          <h3>Pinery Residences — direct-MRT new-launch quantum and investor analysis</h3>
+          <p>Pinery is a strong long-hold own-stay proposition, but not an asymmetric investment at roughly S$2,550 psf: most compact homes have been taken up, the publicly indicated balance is concentrated in S$2.97m–S$3.90m four- and five-bedroom stock, and a current buyer generally needs a long hold or sustained 4% annual price growth to approach a large five-year capital-only gain before financing and holding costs.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-08-08-the-lakegarden-residences" data-report-path="property-analysis-2026-08-08-the-lakegarden-residences.html" data-category="property-analysis" data-search="the lakegarden residences — 527 sqft 2026 owner-exit and 3% annualised-return analysis for a september 2026 sale, the median august 2023 buyer clears 3% gross annualised price growth above about s$1.195m, but needs about s$1.263m for a 3% cost-adjusted return before financing and holding costs; the s$1.22m working value implies 3.70% gross but only 1.86% cost-adjusted annualised, so 3% is plausible as paper growth rather than a representative realised return. property-analysis-2026-08-08-the-lakegarden-residences.html property-analysis property-analysis private property property analysis new launch valuation investment the lakegarden residences the lakegarden residences the-lakegarden-residences new launch 2026-08-08t01:30:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="the-lakegarden-residences">
+        <a class="report-primary-link" href="property-analysis-2026-08-08-the-lakegarden-residences.html">
+          <span class="tag">Property analysis · New Launch · 08 Aug 2026 · Latest</span>
+          <h3>The LakeGarden Residences — 527 sqft 2026 owner-exit and 3% annualised-return analysis</h3>
+          <p>For a September 2026 sale, the median August 2023 buyer clears 3% gross annualised price growth above about S$1.195m, but needs about S$1.263m for a 3% cost-adjusted return before financing and holding costs; the S$1.22m working value implies 3.70% gross but only 1.86% cost-adjusted annualised, so 3% is plausible as paper growth rather than a representative realised return.</p>
+          <span class="open">Open report →</span>
+        </a>
+        <div class="report-history">
+          <details>
+            <summary><span class="report-history-count">1 earlier snapshot</span></summary>
+            <ul class="report-history-list">
+          <li><a class="report-history-link" href="property-analysis-2026-08-03-the-lakegarden-residences.html" data-report-id="property-analysis-2026-08-03-the-lakegarden-residences" data-report-path="property-analysis-2026-08-03-the-lakegarden-residences.html" data-search="the lakegarden residences — new-launch inventory, valuation and potential-quantum analysis an august 2023 ordinary one-bedroom owner could make about s$45,000–s$53,000 in the ask-informed september 2026 cases before financing, but transaction-indexed downside ranges from a s$5,000 loss to breakeven and no achieved lakegarden owner exit yet validates the estimate. property-analysis-2026-08-03-the-lakegarden-residences.html property-analysis property-analysis private property property analysis new launch valuation investment the lakegarden residences the lakegarden residences the-lakegarden-residences new launch 2026-08-03t22:21:00+08:00" data-freshness="dated" data-evidence-family="market_research">The LakeGarden Residences — new-launch inventory, valuation and potential-quantum analysis · 03 Aug 2026</a></li>
+            </ul>
+          </details>
+        </div>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-bedok-rise-gls-future-condominium" data-report-path="property-analysis-2026-07-30-bedok-rise-gls-future-condominium.html" data-category="property-analysis" data-search="bedok rise gls future condominium — land basis, prospective launch pricing and potential-quantum analysis the bedok rise site is awarded residential development land, not a launched condominium. at capture it has no official project name, final licensed sales schedule or unit mix, price list, show-flat inventory, achieved residential caveats, rental ledger, top date or executable buyer offer.… property-analysis-2026-07-30-bedok-rise-gls-future-condominium.html property-analysis property-analysis private property property analysis future project valuation investment bedok rise gls future condominium bedok rise gls future condominium bedok-rise-gls-future-condominium future project 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="bedok-rise-gls-future-condominium">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-bedok-rise-gls-future-condominium.html">
+          <span class="tag">Property analysis · Future Project · 30 Jul 2026 · Latest</span>
+          <h3>Bedok Rise GLS future condominium — land basis, prospective launch pricing and potential-quantum analysis</h3>
+          <p>The Bedok Rise site is awarded residential development land, not a launched condominium. At capture it has no official project name, final licensed sales schedule or unit mix, price list, show-flat inventory, achieved residential caveats, rental ledger, TOP date or executable buyer offer.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-casa-flora" data-report-path="property-analysis-2026-07-30-casa-flora.html" data-category="property-analysis" data-search="casa flora — live resale inventory, large-format scarcity and potential-quantum analysis casa flora is a 30-unit freehold project completed in 1987. its current public resale market is unusually thin: the dedicated 99.co result displayed only one apparent physical unit, a 3,122 sqft three-bedroom home asking s$3.10m, or about s$993 psf. property-analysis-2026-07-30-casa-flora.html property-analysis property-analysis private property property analysis resale valuation investment casa flora casa flora casa-flora resale 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="casa-flora">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-casa-flora.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Casa Flora — live resale inventory, large-format scarcity and potential-quantum analysis</h3>
+          <p>Casa Flora is a 30-unit freehold project completed in 1987. Its current public resale market is unusually thin: the dedicated 99.co result displayed only one apparent physical unit, a 3,122 sqft three-bedroom home asking S$3.10m, or about S$993 psf.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-east-village" data-report-path="property-analysis-2026-07-30-east-village.html" data-category="property-analysis" data-search="east village — residential resale inventory, mixed-use risks and potential-quantum analysis east village has format-specific potential, not one project-wide bargain. its freehold tenure, low-ticket apartments and food/retail podium can support tenant demand, but the same mixed-use setting creates noise, odour, access and resale-pool risks. property-analysis-2026-07-30-east-village.html property-analysis property-analysis private property property analysis resale valuation investment east village east village east-village resale 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="east-village">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-east-village.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>East Village — residential resale inventory, mixed-use risks and potential-quantum analysis</h3>
+          <p>East Village has format-specific potential, not one project-wide bargain. Its freehold tenure, low-ticket apartments and food/retail podium can support tenant demand, but the same mixed-use setting creates noise, odour, access and resale-pool risks.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-limau-park" data-report-path="property-analysis-2026-07-30-limau-park.html" data-category="property-analysis" data-search="limau park — live resale inventory, freehold valuation and potential-quantum analysis limau park has moderate freehold own-stay potential but low-confidence huge investment quantum. its public price discovery is exceptionally thin: the committed latest-60-month dataset contains only three resale caveats, and the current portal sweep appears to show only two unique 1,270 sqft seller… property-analysis-2026-07-30-limau-park.html property-analysis property-analysis private property property analysis resale valuation investment limau park limau park limau-park resale 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="limau-park">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-limau-park.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Limau Park — live resale inventory, freehold valuation and potential-quantum analysis</h3>
+          <p>Limau Park has moderate freehold own-stay potential but low-confidence huge investment quantum. Its public price discovery is exceptionally thin: the committed latest-60-month dataset contains only three resale caveats, and the current portal sweep appears to show only two unique 1,270 sqft seller…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-palmwoods" data-report-path="property-analysis-2026-07-30-palmwoods.html" data-category="property-analysis" data-search="palmwoods — resale inventory, entry valuation and potential-quantum analysis palmwoods has credible low-quantum own-stay value and moderate resale potential, but not high-confidence “huge quantum” at the visible seller expectations. the best apparent inspection lead is the approximately 1,033 sqft two-bedroom advertisement near s$1.20m, or s$1,162 psf.… property-analysis-2026-07-30-palmwoods.html property-analysis property-analysis private property property analysis resale valuation investment palmwoods palmwoods palmwoods resale 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="palmwoods">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-palmwoods.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Palmwoods — resale inventory, entry valuation and potential-quantum analysis</h3>
+          <p>Palmwoods has credible low-quantum own-stay value and moderate resale potential, but not high-confidence “huge quantum” at the visible seller expectations. The best apparent inspection lead is the approximately 1,033 sqft two-bedroom advertisement near S$1.20m, or S$1,162 psf.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-tanah-merah-mansion" data-report-path="property-analysis-2026-07-30-tanah-merah-mansion.html" data-category="property-analysis" data-search="tanah merah mansion — live resale inventory, duplex optionality and potential-quantum analysis tanah merah mansion has two separate investment sub-markets: property-analysis-2026-07-30-tanah-merah-mansion.html property-analysis property-analysis private property property analysis resale valuation investment tanah merah mansion tanah merah mansion tanah-merah-mansion resale 2026-07-30t22:58:07+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="tanah-merah-mansion">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-tanah-merah-mansion.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Tanah Merah Mansion — live resale inventory, duplex optionality and potential-quantum analysis</h3>
+          <p>Tanah Merah Mansion has two separate investment sub-markets:</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-bedok-court" data-report-path="property-analysis-2026-07-30-bedok-court.html" data-category="property-analysis" data-search="bedok court — resale inventory and quantum analysis bedok court is a deep-value space and future-bedok-south-node proposition, but its approximately 55–56 remaining lease years make the exit case severely lease-constrained. the unusually large layouts can be excellent for own stay.… property-analysis-2026-07-30-bedok-court.html property-analysis property-analysis private property property analysis resale valuation investment bedok court bedok court bedok-court resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="bedok-court">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-bedok-court.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Bedok Court — resale inventory and quantum analysis</h3>
+          <p>Bedok Court is a deep-value space and future-Bedok-South-node proposition, but its approximately 55–56 remaining lease years make the exit case severely lease-constrained. The unusually large layouts can be excellent for own stay.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-east-meadows" data-report-path="property-analysis-2026-07-30-east-meadows.html" data-category="property-analysis" data-search="east meadows — resale inventory and quantum analysis east meadows is a conditional buy at a caveat-led price, not a high-confidence “huge quantum” opportunity. its 482-unit scale, practical family layouts and short advertised walk to tanah merah mrt support resale and rentability.… property-analysis-2026-07-30-east-meadows.html property-analysis property-analysis private property property analysis resale valuation investment east meadows east meadows east-meadows resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="east-meadows">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-east-meadows.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>East Meadows — resale inventory and quantum analysis</h3>
+          <p>East Meadows is a conditional buy at a caveat-led price, not a high-confidence “huge quantum” opportunity. Its 482-unit scale, practical family layouts and short advertised walk to Tanah Merah MRT support resale and rentability.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-eco" data-report-path="property-analysis-2026-07-30-eco.html" data-category="property-analysis" data-search="eco — resale inventory and quantum analysis eco has a relatively young lease and credible future-rail proposition, but it still does not offer high-confidence huge quantum at ordinary current asks. its 2012 lease, february 2017 top and proximity to both tanah merah mrt and the future bedok south mrt support a longer resale runway.… property-analysis-2026-07-30-eco.html property-analysis property-analysis private property property analysis resale valuation investment eco eco eco resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="eco">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-eco.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>eCO — resale inventory and quantum analysis</h3>
+          <p>eCO has a relatively young lease and credible future-rail proposition, but it still does not offer high-confidence huge quantum at ordinary current asks. Its 2012 lease, February 2017 TOP and proximity to both Tanah Merah MRT and the future Bedok South MRT support a longer resale runway.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-stratford-court" data-report-path="property-analysis-2026-07-30-stratford-court.html" data-category="property-analysis" data-search="stratford court — resale inventory and quantum analysis stratford court is a selective value buy for space, not a high-confidence huge-quantum investment. its low-rise character, 268-unit scale and 980–2,000 sqft legacy floor plates provide family utility near tanah merah mrt.… property-analysis-2026-07-30-stratford-court.html property-analysis property-analysis private property property analysis resale valuation investment stratford court stratford court stratford-court resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="stratford-court">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-stratford-court.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Stratford Court — resale inventory and quantum analysis</h3>
+          <p>Stratford Court is a selective value buy for space, not a high-confidence huge-quantum investment. Its low-rise character, 268-unit scale and 980–2,000 sqft legacy floor plates provide family utility near Tanah Merah MRT.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-tanamera-crest" data-report-path="property-analysis-2026-07-30-tanamera-crest.html" data-category="property-analysis" data-search="tanamera crest — resale inventory and quantum analysis tanamera crest is a fair-value family condominium with useful rental fallback, but current evidence does not support high-confidence huge quantum. its 288-unit scale, approximately 73 remaining lease years and ordinary 1,163–1,216 sqft three-bedroom stock around s$1.37m–s$1.49m provide a… property-analysis-2026-07-30-tanamera-crest.html property-analysis property-analysis private property property analysis resale valuation investment tanamera crest tanamera crest tanamera-crest resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="tanamera-crest">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-tanamera-crest.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Tanamera Crest — resale inventory and quantum analysis</h3>
+          <p>Tanamera Crest is a fair-value family condominium with useful rental fallback, but current evidence does not support high-confidence huge quantum. Its 288-unit scale, approximately 73 remaining lease years and ordinary 1,163–1,216 sqft three-bedroom stock around S$1.37m–S$1.49m provide a…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-the-tanamera" data-report-path="property-analysis-2026-07-30-the-tanamera.html" data-category="property-analysis" data-search="the tanamera — resale inventory and quantum analysis the tanamera is an appealing large-format, near-mrt own-stay property, but it is not a high-confidence huge-quantum investment at ordinary current asks. its 288 homes, basement parking and low-density family layouts are difficult to replace at the same total price.… property-analysis-2026-07-30-the-tanamera.html property-analysis property-analysis private property property analysis resale valuation investment the tanamera the tanamera the-tanamera resale 2026-07-30t22:48:38+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="the-tanamera">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-the-tanamera.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>The Tanamera — resale inventory and quantum analysis</h3>
+          <p>The Tanamera is an appealing large-format, near-MRT own-stay property, but it is not a high-confidence huge-quantum investment at ordinary current asks. Its 288 homes, basement parking and low-density family layouts are difficult to replace at the same total price.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-casa-merah" data-report-path="property-analysis-2026-07-30-casa-merah.html" data-category="property-analysis" data-search="casa merah — resale inventory, valuation and quantum analysis casa merah is a space-led family proposition near tanah merah mrt. its ordinary three-bedroom homes are much larger than the compact formats in newer neighbouring projects, achieved resale activity is healthy, and family-sized psf remains below younger grandeur park.… property-analysis-2026-07-30-casa-merah.html property-analysis property-analysis private property property analysis resale valuation investment casa merah casa merah casa-merah resale 2026-07-30t22:48:03+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="casa-merah">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-casa-merah.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Casa Merah — resale inventory, valuation and quantum analysis</h3>
+          <p>Casa Merah is a space-led family proposition near Tanah Merah MRT. Its ordinary three-bedroom homes are much larger than the compact formats in newer neighbouring projects, achieved resale activity is healthy, and family-sized PSF remains below younger Grandeur Park.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-urban-vista" data-report-path="property-analysis-2026-07-30-urban-vista.html" data-category="property-analysis" data-search="urban vista — resale inventory, valuation and quantum analysis urban vista has the lowest observed entry quantum among the immediate tanah merah mrt resale cluster and healthy resale/rental activity. a conventional 441 sqft unit around s$730k–s$750k or a conventional 560–603 sqft unit around s$900k–s$950k can be a defensible low-ticket purchase.… property-analysis-2026-07-30-urban-vista.html property-analysis property-analysis private property property analysis resale valuation investment urban vista urban vista urban-vista resale 2026-07-30t22:47:24+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="urban-vista">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-urban-vista.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Urban Vista — resale inventory, valuation and quantum analysis</h3>
+          <p>Urban Vista has the lowest observed entry quantum among the immediate Tanah Merah MRT resale cluster and healthy resale/rental activity. A conventional 441 sqft unit around S$730k–S$750k or a conventional 560–603 sqft unit around S$900k–S$950k can be a defensible low-ticket purchase.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-the-glades" data-report-path="property-analysis-2026-07-30-the-glades.html" data-category="property-analysis" data-search="the glades — resale inventory, valuation and quantum analysis the glades offers a useful combination of low entry quantum, tanah merah mrt access, active rental demand and unusually healthy resale turnover. it also trades below younger grandeur park on comparable size cohorts.… property-analysis-2026-07-30-the-glades.html property-analysis property-analysis private property property analysis resale valuation investment the glades the glades the-glades resale 2026-07-30t22:46:41+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="the-glades">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-the-glades.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>The Glades — resale inventory, valuation and quantum analysis</h3>
+          <p>The Glades offers a useful combination of low entry quantum, Tanah Merah MRT access, active rental demand and unusually healthy resale turnover. It also trades below younger Grandeur Park on comparable size cohorts.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-optima-at-tanah-merah" data-report-path="property-analysis-2026-07-30-optima-at-tanah-merah.html" data-category="property-analysis" data-search="optima @ tanah merah — resale inventory and quantum analysis optima @ tanah merah is a practical near-mrt project with established rental evidence, a manageable 297-home supply and useful conventional layouts. it has moderate defensive and selective appreciation potential, but the data does not support high-confidence &quot;huge&quot; future quantum at current asking… property-analysis-2026-07-30-optima-at-tanah-merah.html property-analysis property-analysis private property property analysis resale valuation investment optima @ tanah merah optima @ tanah merah optima-at-tanah-merah resale 2026-07-30t22:46:21+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="optima-at-tanah-merah">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-optima-at-tanah-merah.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Optima @ Tanah Merah — resale inventory and quantum analysis</h3>
+          <p>Optima @ Tanah Merah is a practical near-MRT project with established rental evidence, a manageable 297-home supply and useful conventional layouts. It has moderate defensive and selective appreciation potential, but the data does not support high-confidence &quot;huge&quot; future quantum at current asking…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-sceneca-residence" data-report-path="property-analysis-2026-07-30-sceneca-residence.html" data-category="property-analysis" data-search="sceneca residence — resale inventory and quantum analysis sceneca residence has a strong proposition: direct tanah merah mrt access, retail below, a young 99-year lease and a small 268-home residential supply. it should have good long-run owner-occupier and tenant relevance.… property-analysis-2026-07-30-sceneca-residence.html property-analysis property-analysis private property property analysis resale valuation investment sceneca residence sceneca residence sceneca-residence resale 2026-07-30t22:46:21+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="sceneca-residence">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-sceneca-residence.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Sceneca Residence — resale inventory and quantum analysis</h3>
+          <p>Sceneca Residence has a strong proposition: direct Tanah Merah MRT access, retail below, a young 99-year lease and a small 268-home residential supply. It should have good long-run owner-occupier and tenant relevance.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-30-grandeur-park-residences" data-report-path="property-analysis-2026-07-30-grandeur-park-residences.html" data-category="property-analysis" data-search="grandeur park residences — resale inventory, valuation and quantum analysis grandeur park residences is one of the stronger defensive resale propositions around tanah merah mrt: it is comparatively young, close to the interchange, has useful rental depth and recorded 33 resale caveats in the captured publication cut from july 2025 through may 2026.… property-analysis-2026-07-30-grandeur-park-residences.html property-analysis property-analysis private property property analysis resale valuation investment grandeur park residences grandeur park residences grandeur-park-residences resale 2026-07-30t22:45:56+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="grandeur-park-residences">
+        <a class="report-primary-link" href="property-analysis-2026-07-30-grandeur-park-residences.html">
+          <span class="tag">Property analysis · Resale · 30 Jul 2026 · Latest</span>
+          <h3>Grandeur Park Residences — resale inventory, valuation and quantum analysis</h3>
+          <p>Grandeur Park Residences is one of the stronger defensive resale propositions around Tanah Merah MRT: it is comparatively young, close to the interchange, has useful rental depth and recorded 33 resale caveats in the captured publication cut from July 2025 through May 2026.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-27-144a-lorong-sarina" data-report-path="property-analysis-2026-07-27-144a-lorong-sarina.html" data-category="property-analysis" data-search="144a lorong sarina — sale availability, land value and quantum analysis 144a lorong sarina has moderate freehold land-bank and own-stay potential, but the available evidence does not support high-confidence huge risk-adjusted investment quantum at an ordinary fair-market entry.… property-analysis-2026-07-27-144a-lorong-sarina.html property-analysis property-analysis private property property analysis resale valuation investment 144a lorong sarina 144a lorong sarina 144a-lorong-sarina resale 2026-07-27t21:45:49+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="144a-lorong-sarina">
+        <a class="report-primary-link" href="property-analysis-2026-07-27-144a-lorong-sarina.html">
+          <span class="tag">Property analysis · Resale · 27 Jul 2026 · Latest</span>
+          <h3>144A Lorong Sarina — sale availability, land value and quantum analysis</h3>
+          <p>144A Lorong Sarina has moderate freehold land-bank and own-stay potential, but the available evidence does not support high-confidence huge risk-adjusted investment quantum at an ordinary fair-market entry.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-27-the-poiz-residences" data-report-path="property-analysis-2026-07-27-the-poiz-residences.html" data-category="property-analysis" data-search="the poiz residences — resale inventory and quantum analysis the poiz residences is a strong defensive city-fringe property with direct mrt, retail and rental advantages, but the evidence does not support high-confidence huge capital appreciation from ordinary current asking prices.… property-analysis-2026-07-27-the-poiz-residences.html property-analysis property-analysis private property property analysis resale valuation investment the poiz residences the poiz residences the-poiz-residences resale 2026-07-27t00:34:27+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="the-poiz-residences">
+        <a class="report-primary-link" href="property-analysis-2026-07-27-the-poiz-residences.html">
+          <span class="tag">Property analysis · Resale · 27 Jul 2026 · Latest</span>
+          <h3>The Poiz Residences — resale inventory and quantum analysis</h3>
+          <p>The Poiz Residences is a strong defensive city-fringe property with direct MRT, retail and rental advantages, but the evidence does not support high-confidence huge capital appreciation from ordinary current asking prices.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-26-arc-at-tampines" data-report-path="property-analysis-2026-07-26-arc-at-tampines.html" data-category="property-analysis" data-search="arc at tampines — resale inventory and quantum analysis arc at tampines is an attractive own-stay-plus-carry proposition for a price-sensitive upgrader, but the available evidence does not support underwriting huge capital appreciation at most advertised prices.… property-analysis-2026-07-26-arc-at-tampines.html property-analysis property-analysis private property property analysis resale valuation investment arc at tampines arc at tampines arc-at-tampines resale 2026-07-26t12:46:23+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="arc-at-tampines">
+        <a class="report-primary-link" href="property-analysis-2026-07-26-arc-at-tampines.html">
+          <span class="tag">Property analysis · Resale · 26 Jul 2026 · Latest</span>
+          <h3>Arc at Tampines — resale inventory and quantum analysis</h3>
+          <p>Arc at Tampines is an attractive own-stay-plus-carry proposition for a price-sensitive upgrader, but the available evidence does not support underwriting huge capital appreciation at most advertised prices.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card property-analysis-card" data-report-id="property-analysis-2026-07-26-park-place-residences-at-plq" data-report-path="property-analysis-2026-07-26-park-place-residences-at-plq.html" data-category="property-analysis" data-search="park place residences at plq — resale inventory and quantum analysis park place residences at plq is a strong, defensive integrated development, but the evidence does not support underwriting huge capital appreciation at most advertised prices.… property-analysis-2026-07-26-park-place-residences-at-plq.html property-analysis property-analysis private property property analysis resale valuation investment park place residences at plq park place residences at plq park-place-residences-at-plq resale 2026-07-26t12:25:08+08:00" data-freshness="dated" data-evidence-family="market_research" data-kind="analysis project" data-project-slug="park-place-residences-at-plq">
+        <a class="report-primary-link" href="property-analysis-2026-07-26-park-place-residences-at-plq.html">
+          <span class="tag">Property analysis · Resale · 26 Jul 2026 · Latest</span>
+          <h3>Park Place Residences at PLQ — resale inventory and quantum analysis</h3>
+          <p>Park Place Residences at PLQ is a strong, defensive integrated development, but the evidence does not support underwriting huge capital appreciation at most advertised prices.…</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="estate-comparison" data-report-path="comparison_table.html" data-category="estate-framework" data-search="estate context explorer explore provision, persona-relative liveability, tenure-separated value and future context without collapsing estates into one ranking. comparison_table.html estate-framework comparison estate context provision liveability value" data-freshness="unknown" data-evidence-family="estate_model private_transactions" data-kind="comparison">
+        <a class="report-primary-link" href="comparison_table.html">
+          <span class="tag">Estate Framework · Comparison</span>
+          <h3>Estate context explorer</h3>
+          <p>Explore Provision, persona-relative Liveability, tenure-separated Value and future context without collapsing estates into one ranking.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="buyer-profiles" data-report-path="buyer_profile_table.html" data-category="estate-framework" data-search="buyer profile explorer build a household-specific shortlist with hard constraints, persona-and-horizon fit and tenure-separated value—without creating a universal estate ranking. buyer_profile_table.html estate-framework explorer persona household screening liveability value" data-freshness="unknown" data-evidence-family="estate_model private_transactions" data-kind="explorer">
+        <a class="report-primary-link" href="buyer_profile_table.html">
+          <span class="tag">Estate Framework · Explorer</span>
+          <h3>Buyer profile explorer</h3>
+          <p>Build a household-specific shortlist with hard constraints, persona-and-horizon fit and tenure-separated Value—without creating a universal estate ranking.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="mrt-comparison" data-report-path="mrt_comparison_table.html" data-category="estate-framework" data-search="mrt and lrt context explorer inspect official-source station-code-line memberships, a bounded five-year planned overlay, derived representative points and separately labelled estate framework context without ranking the rail network. mrt_comparison_table.html estate-framework explorer mrt lrt transport interchange planned rail centroid estate context" data-freshness="unknown" data-evidence-family="rail_network estate_model private_transactions" data-kind="explorer">
+        <a class="report-primary-link" href="mrt_comparison_table.html">
+          <span class="tag">Estate Framework · Explorer</span>
+          <h3>MRT and LRT context explorer</h3>
+          <p>Inspect official-source station-code-line memberships, a bounded five-year planned overlay, derived representative points and separately labelled estate framework context without ranking the rail network.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="framework-diagram" data-report-path="framework_diagram.html" data-category="estate-framework" data-search="framework architecture understand how source layers flow into the separate provision, liveability and value views. framework_diagram.html estate-framework method method architecture provenance" data-freshness="unknown" data-evidence-family="estate_model private_transactions" data-kind="method">
+        <a class="report-primary-link" href="framework_diagram.html">
+          <span class="tag">Estate Framework · Method</span>
+          <h3>Framework architecture</h3>
+          <p>Understand how source layers flow into the separate Provision, Liveability and Value views.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="poiz-east-transactions" data-report-path="poiz_east_unit_growth_transactions.html" data-category="private-property" data-search="poiz and east unit growth and transactions inspect unit-type growth, annual psf history and the underlying resale transaction ledger. poiz_east_unit_growth_transactions.html private-property transaction-ledger poiz unit transaction growth the poiz residences" data-freshness="unknown" data-evidence-family="private_transactions market_research" data-kind="transaction-ledger">
+        <a class="report-primary-link" href="poiz_east_unit_growth_transactions.html">
+          <span class="tag">Private Property · Transaction Ledger</span>
+          <h3>Poiz and East unit growth and transactions</h3>
+          <p>Inspect unit-type growth, annual PSF history and the underlying resale transaction ledger.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="district-17" data-report-path="private_project_comparison_D17.html" data-category="district" data-search="district 17 private project comparison review private residential transaction evidence for changi, loyang and pasir ris. private_project_comparison_d17.html district comparison district 17 changi loyang pasir ris" data-freshness="unknown" data-evidence-family="private_transactions" data-kind="comparison">
+        <a class="report-primary-link" href="private_project_comparison_D17.html">
+          <span class="tag">District · Comparison</span>
+          <h3>District 17 private project comparison</h3>
+          <p>Review private residential transaction evidence for Changi, Loyang and Pasir Ris.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="district-18" data-report-path="private_project_comparison_D18.html" data-category="district" data-search="district 18 private project comparison review private residential transaction evidence for tampines and pasir ris. private_project_comparison_d18.html district comparison district 18 tampines pasir ris" data-freshness="unknown" data-evidence-family="private_transactions" data-kind="comparison">
+        <a class="report-primary-link" href="private_project_comparison_D18.html">
+          <span class="tag">District · Comparison</span>
+          <h3>District 18 private project comparison</h3>
+          <p>Review private residential transaction evidence for Tampines and Pasir Ris.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="district-27" data-report-path="private_project_comparison_D27.html" data-category="district" data-search="district 27 private project comparison review private residential transaction evidence for yishun and sembawang. private_project_comparison_d27.html district comparison district 27 yishun sembawang canberra" data-freshness="unknown" data-evidence-family="private_transactions" data-kind="comparison">
+        <a class="report-primary-link" href="private_project_comparison_D27.html">
+          <span class="tag">District · Comparison</span>
+          <h3>District 27 private project comparison</h3>
+          <p>Review private residential transaction evidence for Yishun and Sembawang.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="district-18-26" data-report-path="district_pair_comparison_D18_D26.html" data-category="district" data-search="district 18 versus district 26 compare private residential transaction evidence across districts 18 and 26. district_pair_comparison_d18_d26.html district comparison district 18 district 26 comparison" data-freshness="unknown" data-evidence-family="rail_network market_research" data-kind="comparison">
+        <a class="report-primary-link" href="district_pair_comparison_D18_D26.html">
+          <span class="tag">District · Comparison</span>
+          <h3>District 18 versus District 26</h3>
+          <p>Compare private residential transaction evidence across Districts 18 and 26.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="landed-growth" data-report-path="landed_growth_dashboard.html" data-category="private-property" data-search="landed property growth dashboard explore landed transaction and psf growth diagnostics by project and district. landed_growth_dashboard.html private-property dashboard landed growth psf transaction" data-freshness="unknown" data-evidence-family="market_research" data-kind="dashboard">
+        <a class="report-primary-link" href="landed_growth_dashboard.html">
+          <span class="tag">Private Property · Dashboard</span>
+          <h3>Landed property growth dashboard</h3>
+          <p>Explore landed transaction and PSF growth diagnostics by project and district.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-micro-location" data-report-path="canberra_strategy_1_micro_location.html" data-category="canberra" data-search="canberra strategy 1: micro-location compare canberra crescent with nearby peers to minimise location drift. canberra_strategy_1_micro_location.html canberra workbook canberra micro-location peer" data-freshness="unknown" data-evidence-family="market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_1_micro_location.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 1: micro-location</h3>
+          <p>Compare Canberra Crescent with nearby peers to minimise location drift.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-newness" data-report-path="canberra_strategy_2_newness.html" data-category="canberra" data-search="canberra strategy 2: newness separate lease vintage, project age and launch-state effects from observed price differences. canberra_strategy_2_newness.html canberra workbook canberra lease newness launch" data-freshness="unknown" data-evidence-family="market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_2_newness.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 2: newness</h3>
+          <p>Separate lease vintage, project age and launch-state effects from observed price differences.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-integration" data-report-path="canberra_strategy_3_integration.html" data-category="canberra" data-search="canberra strategy 3: integration test rail, retail and town-centre convenience as distinct evidence layers. canberra_strategy_3_integration.html canberra workbook canberra integration rail retail" data-freshness="unknown" data-evidence-family="rail_network market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_3_integration.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 3: integration</h3>
+          <p>Test rail, retail and town-centre convenience as distinct evidence layers.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-unit-matching" data-report-path="canberra_strategy_4_unit_matching.html" data-category="canberra" data-search="canberra strategy 4: unit matching match bedroom, size and floor cohorts before comparing total quantum and psf. canberra_strategy_4_unit_matching.html canberra workbook canberra bedroom size floor" data-freshness="unknown" data-evidence-family="market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_4_unit_matching.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 4: unit matching</h3>
+          <p>Match bedroom, size and floor cohorts before comparing total quantum and PSF.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-sale-state" data-report-path="canberra_strategy_5_sale_state.html" data-category="canberra" data-search="canberra strategy 5: sale state keep new sale, sub-sale and resale evidence separate when studying price and liquidity. canberra_strategy_5_sale_state.html canberra workbook canberra new sale sub-sale resale" data-freshness="unknown" data-evidence-family="market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_5_sale_state.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 5: sale state</h3>
+          <p>Keep new sale, sub-sale and resale evidence separate when studying price and liquidity.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <article class="card report-card" data-report-id="canberra-planning-context" data-report-path="canberra_strategy_6_planning_context.html" data-category="canberra" data-search="canberra strategy 6: planning context classify delivered, committed and conceptual infrastructure without treating plans as booked returns. canberra_strategy_6_planning_context.html canberra workbook canberra planning infrastructure risk" data-freshness="unknown" data-evidence-family="market_research" data-kind="workbook">
+        <a class="report-primary-link" href="canberra_strategy_6_planning_context.html">
+          <span class="tag">Canberra · Workbook</span>
+          <h3>Canberra strategy 6: planning context</h3>
+          <p>Classify delivered, committed and conceptual infrastructure without treating plans as booked returns.</p>
+          <span class="open">Open report →</span>
+        </a>
+      </article>
+      <!-- GENERATED_REPORT_LIBRARY_END -->
     </div>
-    <div class="empty" id="report-empty">No report title matches that filter. Try a project or district in the research finder above.</div>
+    <div class="empty" id="report-empty" hidden>No report title matches that filter. Try a project or district in the research finder above.</div>
+    <div class="library-actions">
+      <p class="library-count" id="report-results-status" role="status" aria-live="polite"></p>
+      <button class="library-toggle" id="report-toggle" type="button" aria-controls="report-grid" hidden></button>
+    </div>
   </section>
 
   <section id="method" aria-labelledby="method-title">
@@ -367,26 +749,40 @@
 </main>
 
 <script src="assets/research-shell.js"></script>
+<script src="assets/data-loader.js"></script>
+<!-- GENERATED_REPORT_LIBRARY_CONFIG_START -->
+<script type="application/json" id="report-library-config">{"schema_version":1,"district_routes":{"17":"private_project_comparison_D17.html","18":"private_project_comparison_D18.html","27":"private_project_comparison_D27.html"}}</script>
+<!-- GENERATED_REPORT_LIBRARY_CONFIG_END -->
+<script type="application/json" id="project-identity-registry-config">{"schema":"project-identity-registry.v1","revision":"771a82ca0e5c234ac04b4d6e26a0f7cdb41c24b651eec1794cb47692bb68a49f","path":"assets/project-identity-registry/771a82ca0e5c234ac04b4d6e26a0f7cdb41c24b651eec1794cb47692bb68a49f/registry.json","counts":{"records":3609,"full":2400,"name_only":1209,"non_project":93,"explorer":2307,"comparison":2307,"transactions":2307,"exit":2307,"dedicated_report":34,"edgeprop":3477,"geocoded":2397,"property_analysis":26,"authored_report":10},"bootstrap":[{"id":"treasure-at-tampines","identity":{"name":"TREASURE AT TAMPINES","selection_label":"TREASURE AT TAMPINES","street":"TAMPINES LANE","district":"18","planning_area":"TAMPINES","precision":"full"},"aliases":[{"source":"edgeprop","source_key":"treasure-at-tampines","name":"TREASURE AT TAMPINES","match_basis":"unique_name"},{"source":"geocode","source_key":"TREASURE AT TAMPINES|TAMPINES LANE|18|TAMPINES","name":"TREASURE AT TAMPINES","match_basis":"exact_full_identity"},{"source":"project_catalog","source_key":"treasure-at-tampines","name":"TREASURE AT TAMPINES","match_basis":"exact_full_identity"}],"sources":{"project_catalog":["treasure-at-tampines"],"ura_explorer":["treasure-at-tampines"],"geocode":["TREASURE AT TAMPINES|TAMPINES LANE|18|TAMPINES"],"transaction_manifest":["treasure-at-tampines"],"edgeprop":["treasure-at-tampines"],"property_analysis":[],"authored_report":[]},"evidence":{"identity_status":"full","geocode_status":"matched","transaction_status":"canonical","report_status":"not_available","resolution":"canonical_identity"},"capabilities":{"explorer":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=TREASURE%20AT%20TAMPINES%20TAMPINES%20LANE&district=18","source":"private_project_explorer","is_latest":true}],"evidence_status":"achieved_transactions","reason":null},"comparison":{"available":true,"routes":[{"path":"condo_framework_comparison.html?a=treasure-at-tampines","source":"framework_comparison","is_latest":true}],"evidence_status":"project_and_estate_context","reason":null},"transactions":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=TREASURE%20AT%20TAMPINES%20TAMPINES%20LANE&district=18","source":"private_project_explorer","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"exit":{"available":true,"routes":[{"path":"project_exit_comparison.html?p=treasure-at-tampines","source":"project_exit","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"dedicated_report":{"available":false,"routes":[],"evidence_status":"not_available","reason":"No dedicated report is published for this identity."}}},{"id":"the-poiz-residences","identity":{"name":"THE POIZ RESIDENCES","selection_label":"THE POIZ RESIDENCES","street":"MEYAPPA CHETTIAR ROAD","district":"13","planning_area":"MACPHERSON","precision":"full"},"aliases":[{"source":"authored_report","source_key":"poiz_east_resale_comparison.html#the-poiz-residences","name":"THE POIZ RESIDENCES","match_basis":"exact_full_identity"},{"source":"authored_report","source_key":"poiz_east_unit_growth_transactions.html#the-poiz-residences","name":"THE POIZ RESIDENCES","match_basis":"exact_full_identity"},{"source":"edgeprop","source_key":"the-poiz-residences","name":"THE POIZ RESIDENCES","match_basis":"unique_name"},{"source":"geocode","source_key":"THE POIZ RESIDENCES|MEYAPPA CHETTIAR ROAD|13|MACPHERSON","name":"THE POIZ RESIDENCES","match_basis":"exact_full_identity"},{"source":"project_catalog","source_key":"the-poiz-residences","name":"THE POIZ RESIDENCES","match_basis":"exact_full_identity"},{"source":"property_analysis","source_key":"property-analysis-2026-07-27-the-poiz-residences.html#the-poiz-residences","name":"THE POIZ RESIDENCES","match_basis":"exact_full_identity"}],"sources":{"project_catalog":["the-poiz-residences"],"ura_explorer":["the-poiz-residences"],"geocode":["THE POIZ RESIDENCES|MEYAPPA CHETTIAR ROAD|13|MACPHERSON"],"transaction_manifest":["the-poiz-residences"],"edgeprop":["the-poiz-residences"],"property_analysis":["property-analysis-2026-07-27-the-poiz-residences.html#the-poiz-residences"],"authored_report":["poiz_east_resale_comparison.html#the-poiz-residences","poiz_east_unit_growth_transactions.html#the-poiz-residences"]},"evidence":{"identity_status":"full","geocode_status":"matched","transaction_status":"canonical","report_status":"available","resolution":"canonical_identity"},"capabilities":{"explorer":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=THE%20POIZ%20RESIDENCES%20MEYAPPA%20CHETTIAR%20ROAD&district=13","source":"private_project_explorer","is_latest":true}],"evidence_status":"achieved_transactions","reason":null},"comparison":{"available":true,"routes":[{"path":"condo_framework_comparison.html?a=the-poiz-residences","source":"framework_comparison","is_latest":true}],"evidence_status":"project_and_estate_context","reason":null},"transactions":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=THE%20POIZ%20RESIDENCES%20MEYAPPA%20CHETTIAR%20ROAD&district=13","source":"private_project_explorer","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"exit":{"available":true,"routes":[{"path":"project_exit_comparison.html?p=the-poiz-residences","source":"project_exit","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"dedicated_report":{"available":true,"routes":[{"path":"poiz_east_resale_comparison.html","source":"authored_report","is_latest":true},{"path":"poiz_east_unit_growth_transactions.html","source":"authored_report","is_latest":true},{"path":"property-analysis-2026-07-27-the-poiz-residences.html","source":"property_analysis","is_latest":true}],"evidence_status":"published_report","reason":null}}},{"id":"canberra-crescent-residences","identity":{"name":"CANBERRA CRESCENT RESIDENCES","selection_label":"CANBERRA CRESCENT RESIDENCES","street":"CANBERRA CRESCENT","district":"27","planning_area":"SEMBAWANG","precision":"full"},"aliases":[{"source":"authored_report","source_key":"canberra_crescent_d27_deep_analysis.html#canberra-crescent-residences","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"exact_full_identity"},{"source":"edgeprop","source_key":"canberra-crescent-residences","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"unique_name"},{"source":"geocode","source_key":"CANBERRA CRESCENT RESIDENCES|CANBERRA CRESCENT|27|SEMBAWANG","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"exact_full_identity"},{"source":"project_catalog","source_key":"canberra-crescent-residences","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"exact_full_identity"},{"source":"property_analysis","source_key":"property-analysis-2026-08-03-canberra-crescent-residences.html#canberra-crescent-residences","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"exact_full_identity"},{"source":"property_analysis","source_key":"property-analysis-2026-08-08-canberra-crescent-residences.html#canberra-crescent-residences","name":"CANBERRA CRESCENT RESIDENCES","match_basis":"exact_full_identity"}],"sources":{"project_catalog":["canberra-crescent-residences"],"ura_explorer":["canberra-crescent-residences"],"geocode":["CANBERRA CRESCENT RESIDENCES|CANBERRA CRESCENT|27|SEMBAWANG"],"transaction_manifest":["canberra-crescent-residences"],"edgeprop":["canberra-crescent-residences"],"property_analysis":["property-analysis-2026-08-03-canberra-crescent-residences.html#canberra-crescent-residences","property-analysis-2026-08-08-canberra-crescent-residences.html#canberra-crescent-residences"],"authored_report":["canberra_crescent_d27_deep_analysis.html#canberra-crescent-residences"]},"evidence":{"identity_status":"full","geocode_status":"matched","transaction_status":"canonical","report_status":"available","resolution":"canonical_identity"},"capabilities":{"explorer":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=CANBERRA%20CRESCENT%20RESIDENCES%20CANBERRA%20CRESCENT&district=27","source":"private_project_explorer","is_latest":true}],"evidence_status":"achieved_transactions","reason":null},"comparison":{"available":true,"routes":[{"path":"condo_framework_comparison.html?a=canberra-crescent-residences","source":"framework_comparison","is_latest":true}],"evidence_status":"project_and_estate_context","reason":null},"transactions":{"available":true,"routes":[{"path":"private_project_comparison_table.html?q=CANBERRA%20CRESCENT%20RESIDENCES%20CANBERRA%20CRESCENT&district=27","source":"private_project_explorer","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"exit":{"available":true,"routes":[{"path":"project_exit_comparison.html?p=canberra-crescent-residences","source":"project_exit","is_latest":true}],"evidence_status":"canonical_ura","reason":null},"dedicated_report":{"available":true,"routes":[{"path":"canberra_crescent_d27_deep_analysis.html","source":"authored_report","is_latest":true},{"path":"property-analysis-2026-08-08-canberra-crescent-residences.html","source":"property_analysis","is_latest":true},{"path":"property-analysis-2026-08-03-canberra-crescent-residences.html","source":"property_analysis","is_latest":false}],"evidence_status":"published_report","reason":null}}}]}</script>
 <script>
 (() => {
-  const PROJECT_REPORTS = {
-    "THE POIZ RESIDENCES": "poiz_east_resale_comparison.html",
-    "CANBERRA CRESCENT RESIDENCES": "canberra_crescent_d27_deep_analysis.html",
-    "EMERALD OF KATONG": "katong_condo_comparison.html?projects=emerald-of-katong",
-    "TEMBUSU GRAND": "katong_condo_comparison.html?projects=tembusu-grand",
-    "GRAND DUNMAN": "katong_condo_comparison.html?projects=grand-dunman",
-    "THE CONTINUUM": "katong_condo_comparison.html?projects=the-continuum",
-    "KATONG REGENCY": "katong_condo_comparison.html?projects=katong-regency",
-    "HAIG COURT": "katong_condo_comparison.html?projects=haig-court",
-    "THE SHORE RESIDENCES": "katong_condo_comparison.html?projects=the-shore-residences",
-    "ONE AMBER": "katong_condo_comparison.html?projects=one-amber",
-    /* GENERATED_PROPERTY_ANALYSIS_PROJECT_ROUTES */
-  };
-  const DISTRICT_REPORTS = {
-    "17": "private_project_comparison_D17.html",
-    "18": "private_project_comparison_D18.html",
-    "27": "private_project_comparison_D27.html"
-  };
+  const PROJECT_REGISTRY_SCHEMA = "project-identity-registry.v1";
+  const PROJECT_REGISTRY = JSON.parse(
+    document.getElementById("project-identity-registry-config")?.textContent || "null"
+  );
+  function loadReportLibraryConfig() {
+    const source = document.getElementById("report-library-config")?.textContent.trim();
+    if (!source || source.startsWith("<!--")) return {schema_version:1, district_routes:{}};
+    try {
+      const payload = JSON.parse(source);
+      const routes = payload?.district_routes;
+      if (payload?.schema_version !== 1 || !routes || typeof routes !== "object" || Array.isArray(routes)) {
+        return {schema_version:1, district_routes:{}};
+      }
+      const valid = Object.entries(routes).every(([district, path]) =>
+        /^(?:[1-9]|1[0-9]|2[0-8])$/.test(district)
+        && typeof path === "string"
+        && /^[A-Za-z0-9_.-]+\.html$/.test(path)
+      );
+      return valid ? payload : {schema_version:1, district_routes:{}};
+    } catch (_error) {
+      return {schema_version:1, district_routes:{}};
+    }
+  }
+  const DISTRICT_REPORTS = loadReportLibraryConfig().district_routes;
+  function districtReportPath(district) {
+    return DISTRICT_REPORTS[String(Number(district))] || null;
+  }
   const DISTRICT_NAMES = {
     "01":"Boat Quay · Raffles Place · Marina","02":"Chinatown · Tanjong Pagar","03":"Alexandra · Queenstown",
     "04":"HarbourFront · Telok Blangah","05":"Buona Vista · West Coast","06":"City Hall · Clarke Quay",
@@ -398,17 +794,19 @@
     "23":"Bukit Batok · Choa Chu Kang","24":"Lim Chu Kang · Tengah","25":"Admiralty · Woodlands",
     "26":"Lentor · Upper Thomson","27":"Sembawang · Yishun","28":"Seletar · Yio Chu Kang"
   };
-  const fallbackProjects = [
-    {name:"TREASURE AT TAMPINES",slug:"treasure-at-tampines",district:"18"},
-    {name:"THE POIZ RESIDENCES",slug:"the-poiz-residences",district:"13"},
-    {name:"CANBERRA CRESCENT RESIDENCES",slug:"canberra-crescent-residences",district:"27"}
-  ];
+  const fallbackProjects = Array.isArray(PROJECT_REGISTRY?.bootstrap)
+    ? PROJECT_REGISTRY.bootstrap
+    : [];
   let projects = fallbackProjects;
   let activeSuggestion = -1;
+  let selectedProjectId = null;
 
   const condoInput = document.getElementById("condo-search");
   const suggestions = document.getElementById("condo-suggestions");
   const condoRoute = document.getElementById("condo-route");
+  const projectCatalogStatus = document.getElementById("project-catalog-status");
+  const projectCatalogStatusCopy = document.getElementById("project-catalog-status-copy");
+  const projectCatalogRetry = document.getElementById("project-catalog-retry");
   const districtSelect = document.getElementById("district-select");
   const districtRoute = document.getElementById("district-route");
 
@@ -419,22 +817,128 @@
     districtSelect.append(option);
   });
 
-  fetch("projects.json")
-    .then(response => {
-      if (!response.ok) throw new Error("project index unavailable");
-      return response.json();
-    })
-    .then(payload => {
-      if (Array.isArray(payload.projects) && payload.projects.length) projects = payload.projects;
-    })
-    .catch(() => {});
+  function sameKeys(value, expected) {
+    return value && typeof value === "object" && !Array.isArray(value)
+      && Object.keys(value).sort().join("|") === [...expected].sort().join("|");
+  }
 
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(button => button.setAttribute("aria-selected", String(button === tab)));
-      document.getElementById("condo-panel").hidden = tab.id !== "condo-tab";
-      document.getElementById("district-panel").hidden = tab.id !== "district-tab";
-      document.getElementById(tab.id === "condo-tab" ? "condo-search" : "district-select").focus();
+  function safeRoute(route) {
+    return sameKeys(route, ["path","source","is_latest"])
+      && typeof route.path === "string"
+      && /^[A-Za-z0-9_.-]+\.html(?:\?[^#]*)?(?:#[^#]*)?$/.test(route.path)
+      && typeof route.source === "string" && route.source
+      && typeof route.is_latest === "boolean";
+  }
+
+  function validateProjectRegistry(payload) {
+    const rootKeys = ["schema","registry_revision","source_revisions","counts","records"];
+    const countKeys = ["records","full","name_only","non_project","explorer","comparison","transactions","exit","dedicated_report","edgeprop","geocoded","property_analysis","authored_report"];
+    if (!sameKeys(payload, rootKeys)
+      || payload.schema !== PROJECT_REGISTRY_SCHEMA
+      || payload.registry_revision !== PROJECT_REGISTRY.revision
+      || !/^[0-9a-f]{64}$/.test(payload.registry_revision)
+      || !sameKeys(payload.counts, countKeys)
+      || !Array.isArray(payload.records)
+      || payload.records.length !== payload.counts.records
+      || PROJECT_REGISTRY.path !== `assets/project-identity-registry/${payload.registry_revision}/registry.json`) {
+      return "The project identity registry has an unexpected root contract.";
+    }
+    const ids = new Set();
+    const identityKeys = ["name","selection_label","street","district","planning_area","precision"];
+    const sourceKeys = ["project_catalog","ura_explorer","geocode","transaction_manifest","edgeprop","property_analysis","authored_report"];
+    const evidenceKeys = ["identity_status","geocode_status","transaction_status","report_status","resolution"];
+    const capabilityKeys = ["explorer","comparison","transactions","exit","dedicated_report"];
+    for (const record of payload.records) {
+      if (!sameKeys(record, ["id","identity","aliases","sources","evidence","capabilities"])
+        || typeof record.id !== "string" || !record.id || ids.has(record.id)
+        || !sameKeys(record.identity, identityKeys)
+        || typeof record.identity.name !== "string" || !record.identity.name
+        || typeof record.identity.selection_label !== "string" || !record.identity.selection_label
+        || !["full","name_only"].includes(record.identity.precision)
+        || !Array.isArray(record.aliases)
+        || !sameKeys(record.sources, sourceKeys)
+        || Object.values(record.sources).some(value => !Array.isArray(value))
+        || !sameKeys(record.evidence, evidenceKeys)
+        || !sameKeys(record.capabilities, capabilityKeys)) {
+        return "The project identity registry contains an invalid record.";
+      }
+      ids.add(record.id);
+      for (const capability of Object.values(record.capabilities)) {
+        if (!sameKeys(capability, ["available","routes","evidence_status","reason"])
+          || typeof capability.available !== "boolean"
+          || !Array.isArray(capability.routes)
+          || capability.routes.some(route => !safeRoute(route))
+          || typeof capability.evidence_status !== "string"
+          || (capability.reason !== null && typeof capability.reason !== "string")
+          || (capability.available && capability.routes.length === 0)
+          || (!capability.available && capability.routes.length !== 0)) {
+          return "The project identity registry contains an invalid capability.";
+        }
+      }
+    }
+    return true;
+  }
+
+  function setProjectCatalogState(state, copy) {
+    projectCatalogStatus.dataset.state = state;
+    projectCatalogStatusCopy.textContent = copy;
+    projectCatalogRetry.hidden = state !== "error";
+    projectCatalogRetry.disabled = state === "loading";
+  }
+
+  async function loadProjectRegistry({ retry = false } = {}) {
+    setProjectCatalogState("loading", retry ? "Retrying canonical project registry…" : "Loading canonical project registry…");
+    try {
+      if (!window.SGEstateData?.loadJSON) throw new Error("Shared data loader unavailable");
+      if (retry) window.SGEstateData.invalidate(PROJECT_REGISTRY.path, {revision: PROJECT_REGISTRY.revision});
+      const payload = await window.SGEstateData.loadJSON(PROJECT_REGISTRY.path, {
+        revision: PROJECT_REGISTRY.revision,
+        timeoutMs: 12_000,
+        validate: validateProjectRegistry,
+      });
+      projects = payload.records;
+      selectedProjectId = null;
+      setProjectCatalogState(
+        "ready",
+        `Canonical project registry ready · ${projects.length.toLocaleString("en-SG")} identities.`
+      );
+      renderSuggestions();
+    } catch (error) {
+      projects = fallbackProjects;
+      setProjectCatalogState(
+        "error",
+        "Canonical project registry unavailable. Search is limited to the three examples below."
+      );
+      renderSuggestions();
+    }
+  }
+
+  projectCatalogRetry.addEventListener("click", () => void loadProjectRegistry({ retry: true }));
+  void loadProjectRegistry();
+
+  const researchTabs = Array.from(document.querySelectorAll(".tab"));
+  function activateResearchTab(tab) {
+    researchTabs.forEach(button => {
+      const selected = button === tab;
+      button.setAttribute("aria-selected", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+    document.getElementById("condo-panel").hidden = tab.id !== "condo-tab";
+    document.getElementById("district-panel").hidden = tab.id !== "district-tab";
+  }
+  researchTabs.forEach((tab, index) => {
+    tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+    tab.addEventListener("click", () => activateResearchTab(tab));
+    tab.addEventListener("keydown", event => {
+      let targetIndex = null;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") targetIndex = (index + 1) % researchTabs.length;
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") targetIndex = (index - 1 + researchTabs.length) % researchTabs.length;
+      if (event.key === "Home") targetIndex = 0;
+      if (event.key === "End") targetIndex = researchTabs.length - 1;
+      if (targetIndex === null) return;
+      event.preventDefault();
+      activateResearchTab(researchTabs[targetIndex]);
+      researchTabs[targetIndex].focus();
     });
   });
 
@@ -448,9 +952,44 @@
     })[character]);
   }
 
+  function matchingProjects(value = condoInput.value) {
+    const normalized = normalize(value);
+    if (!normalized) return [];
+    return projects.filter(project =>
+      normalize(project.identity.name) === normalized
+      || normalize(project.identity.selection_label) === normalized
+      || project.aliases.some(alias => normalize(alias.name) === normalized)
+    );
+  }
+
   function exactProject() {
-    const value = normalize(condoInput.value);
-    return projects.find(project => normalize(project.name) === value);
+    const selected = projects.find(project => project.id === selectedProjectId);
+    if (selected && normalize(selected.identity.selection_label) === normalize(condoInput.value)) {
+      return selected;
+    }
+    const matches = matchingProjects();
+    return matches.length === 1 ? matches[0] : undefined;
+  }
+
+  function preferredRoute(project) {
+    const dedicated = project?.capabilities?.dedicated_report;
+    if (dedicated?.available) {
+      return dedicated.routes.find(route => route.source === "property_analysis" && route.is_latest)
+        || dedicated.routes.find(route => route.is_latest)
+        || dedicated.routes[0];
+    }
+    const explorer = project?.capabilities?.explorer;
+    if (explorer?.available) {
+      return explorer.routes.find(route => route.is_latest) || explorer.routes[0];
+    }
+    return null;
+  }
+
+  function closeSuggestions() {
+    suggestions.hidden = true;
+    condoInput.setAttribute("aria-expanded", "false");
+    condoInput.removeAttribute("aria-activedescendant");
+    activeSuggestion = -1;
   }
 
   function updateCondoRoute(project = exactProject()) {
@@ -458,23 +997,32 @@
       condoRoute.textContent = "Searches open the all-project explorer. A dedicated project or district report is offered when one exists.";
       return;
     }
-    const directReport = PROJECT_REPORTS[normalize(condoInput.value)];
-    if (directReport) {
-      condoRoute.innerHTML = `Dedicated project research is available. <a href="${directReport}">Open that report</a>, or use the broader explorer.`;
-      return;
-    }
     if (!project) {
-      condoRoute.textContent = "No exact catalog match yet. You can still search this name in the all-project explorer.";
+      const exact = matchingProjects();
+      condoRoute.textContent = exact.length > 1
+        ? "Multiple identities share that name. Choose the district and street match from the suggestions before continuing."
+        : "No exact registry match yet. Choose a suggestion so the evidence route is explicit.";
       return;
     }
-    const report = PROJECT_REPORTS[normalize(project.name)];
-    const district = String(project.district || "").padStart(2, "0");
-    if (report) {
-      condoRoute.innerHTML = `Dedicated project research is available. <a href="${report}">Open that report</a>, or use the broader explorer.`;
-    } else if (DISTRICT_REPORTS[district]) {
-      condoRoute.innerHTML = `No dedicated project report yet. The project explorer is the best route; <a href="${DISTRICT_REPORTS[district]}">D${district} research</a> is also available.`;
+    const dedicated = project.capabilities.dedicated_report;
+    const explorer = project.capabilities.explorer;
+    const district = project.identity.district;
+    if (dedicated.available) {
+      const route = preferredRoute(project);
+      const broader = explorer.available
+        ? `, or <a href="${explorer.routes[0].path}">open the achieved-evidence explorer</a>`
+        : "";
+      condoRoute.innerHTML = `Dedicated project research is available. <a href="${route.path}">Open the latest report</a>${broader}.`;
+    } else if (explorer.available) {
+      const districtReport = districtReportPath(district);
+      const districtRoute = district && districtReport
+        ? ` <a href="${districtReport}">D${district} research</a> is also available.`
+        : "";
+      condoRoute.innerHTML = `No dedicated project report yet. <a href="${explorer.routes[0].path}">Open this identity in the achieved-evidence explorer</a>.${districtRoute}`;
     } else {
-      condoRoute.textContent = "No dedicated project report yet. The all-project explorer will open with this project name applied.";
+      condoRoute.textContent = explorer.reason
+        || dedicated.reason
+        || "This identity is indexed, but no achieved project evidence or dedicated report is published.";
     }
   }
 
@@ -482,24 +1030,33 @@
     const query = normalize(condoInput.value);
     activeSuggestion = -1;
     if (query.length < 2) {
-      suggestions.hidden = true;
-      condoInput.setAttribute("aria-expanded", "false");
+      closeSuggestions();
       updateCondoRoute();
       return;
     }
     const matches = projects
-      .filter(project => normalize(project.name).includes(query))
+      .filter(project => {
+        const searchable = [
+          project.identity.name,
+          project.identity.selection_label,
+          ...project.aliases.map(alias => alias.name),
+        ].map(normalize).join(" ");
+        return searchable.includes(query);
+      })
       .sort((a, b) => {
-        const aStarts = normalize(a.name).startsWith(query) ? 0 : 1;
-        const bStarts = normalize(b.name).startsWith(query) ? 0 : 1;
-        return aStarts - bStarts || a.name.localeCompare(b.name);
+        const aStarts = normalize(a.identity.name).startsWith(query) ? 0 : 1;
+        const bStarts = normalize(b.identity.name).startsWith(query) ? 0 : 1;
+        return aStarts - bStarts
+          || a.identity.selection_label.localeCompare(b.identity.selection_label)
+          || a.id.localeCompare(b.id);
       })
       .slice(0, 8);
     suggestions.innerHTML = matches.map((project, index) =>
-      `<li role="option"><button type="button" data-index="${index}" data-name="${escapeMarkup(project.name)}">${escapeMarkup(project.name)}<small>${project.district ? `District ${String(project.district).padStart(2, "0")}` : "Project explorer"}</small></button></li>`
+      `<li role="none"><button id="condo-option-${index}" role="option" aria-selected="false" type="button" data-project-id="${escapeMarkup(project.id)}">${escapeMarkup(project.identity.selection_label)}<small>${project.capabilities.explorer.available ? `Achieved evidence · D${escapeMarkup(project.identity.district || "—")}` : project.capabilities.dedicated_report.available ? "Dedicated research · no achieved explorer evidence" : "Name only · no achieved project evidence"}</small></button></li>`
     ).join("");
     suggestions.hidden = matches.length === 0;
     condoInput.setAttribute("aria-expanded", String(matches.length > 0));
+    condoInput.removeAttribute("aria-activedescendant");
     suggestions.querySelectorAll("button").forEach((button, index) => {
       button.addEventListener("click", () => chooseSuggestion(matches[index]));
     });
@@ -507,16 +1064,19 @@
   }
 
   function chooseSuggestion(project) {
-    condoInput.value = project.name;
-    suggestions.hidden = true;
-    condoInput.setAttribute("aria-expanded", "false");
+    selectedProjectId = project.id;
+    condoInput.value = project.identity.selection_label;
+    closeSuggestions();
     updateCondoRoute(project);
     condoInput.focus();
   }
 
-  condoInput.addEventListener("input", renderSuggestions);
+  condoInput.addEventListener("input", () => {
+    selectedProjectId = null;
+    renderSuggestions();
+  });
   condoInput.addEventListener("keydown", event => {
-    const buttons = Array.from(suggestions.querySelectorAll("button"));
+    const buttons = Array.from(suggestions.querySelectorAll("[role='option']"));
     if (!buttons.length || suggestions.hidden) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
@@ -524,15 +1084,19 @@
         ? (activeSuggestion + 1) % buttons.length
         : (activeSuggestion - 1 + buttons.length) % buttons.length;
       buttons.forEach((button, index) => button.setAttribute("aria-selected", String(index === activeSuggestion)));
+      condoInput.setAttribute("aria-activedescendant", buttons[activeSuggestion].id);
       buttons[activeSuggestion].scrollIntoView({block:"nearest"});
     } else if (event.key === "Enter" && activeSuggestion >= 0) {
       event.preventDefault();
-      condoInput.value = buttons[activeSuggestion].dataset.name;
-      suggestions.hidden = true;
-      updateCondoRoute();
+      const project = projects.find(item => item.id === buttons[activeSuggestion].dataset.projectId);
+      if (project) chooseSuggestion(project);
     } else if (event.key === "Escape") {
-      suggestions.hidden = true;
-      condoInput.setAttribute("aria-expanded", "false");
+      closeSuggestions();
+    }
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!(event.target instanceof Element) || !event.target.closest("#condo-panel .input-row")) {
+      closeSuggestions();
     }
   });
 
@@ -544,15 +1108,25 @@
       condoRoute.textContent = "Enter a condominium project name to continue.";
       return;
     }
-    const directReport = PROJECT_REPORTS[normalize(query)];
-    window.location.href = directReport
-      ? directReport
-      : `private_project_comparison_table.html?q=${encodeURIComponent(query)}`;
+    const project = exactProject();
+    if (!project) {
+      updateCondoRoute();
+      condoInput.focus();
+      return;
+    }
+    const route = preferredRoute(project);
+    if (!route) {
+      updateCondoRoute(project);
+      condoInput.focus();
+      return;
+    }
+    window.location.href = route.path;
   });
 
   document.querySelectorAll("[data-project]").forEach(button => {
     button.addEventListener("click", () => {
       condoInput.value = button.dataset.project;
+      selectedProjectId = null;
       updateCondoRoute();
       condoInput.focus();
     });
@@ -562,7 +1136,7 @@
     const district = districtSelect.value;
     if (!district) {
       districtRoute.textContent = "Select a district to see whether a dedicated report is available.";
-    } else if (DISTRICT_REPORTS[district]) {
+    } else if (districtReportPath(district)) {
       districtRoute.innerHTML = `A dedicated D${district} report is available and will open first. <a href="private_project_comparison_table.html?district=${district}">Use the all-project explorer instead</a>.`;
     } else {
       districtRoute.textContent = `No dedicated D${district} report yet. The all-project explorer will open with District ${district} applied.`;
@@ -577,34 +1151,201 @@
       districtRoute.textContent = "Choose a postal district to continue.";
       return;
     }
-    window.location.href = DISTRICT_REPORTS[district] || `private_project_comparison_table.html?district=${district}`;
+    window.location.href = districtReportPath(district) || `private_project_comparison_table.html?district=${district}`;
   });
 
-  let activeFilter = "all";
+  const LIBRARY_PREVIEW_LIMIT = 12;
+  let libraryExpanded = false;
   const reportSearch = document.getElementById("report-search");
-  function filterReports() {
-    const query = normalize(reportSearch.value);
-    let shown = 0;
-    document.querySelectorAll("#report-grid .card").forEach(card => {
-      const filterOk = activeFilter === "all" || card.dataset.kind.split(" ").includes(activeFilter);
-      const searchOk = !query || normalize(card.dataset.search + " " + card.textContent).includes(query);
-      card.hidden = !(filterOk && searchOk);
-      if (!card.hidden) shown += 1;
-    });
-    document.getElementById("report-empty").style.display = shown ? "none" : "block";
+  const reportCategory = document.getElementById("report-category-filter");
+  const reportFreshness = document.getElementById("report-freshness-filter");
+  const reportEvidence = document.getElementById("report-evidence-filter");
+  const reportToggle = document.getElementById("report-toggle");
+  const reportStatus = document.getElementById("report-results-status");
+  const reportEmpty = document.getElementById("report-empty");
+  const reportCards = Array.from(document.querySelectorAll("#report-grid .report-card"));
+
+  function reportTokens(value) {
+    const tokens = String(value || "").trim().split(/\s+/).filter(token => /^[a-z0-9_-]+$/.test(token));
+    return tokens;
   }
-  document.querySelectorAll(".filter-chip").forEach(button => {
-    button.addEventListener("click", () => {
-      activeFilter = button.dataset.filter;
-      document.querySelectorAll(".filter-chip").forEach(chip => {
-        const selected = chip === button;
-        chip.classList.toggle("active", selected);
-        chip.setAttribute("aria-pressed", String(selected));
+
+  function cardTokens(card, name) {
+    const values = [card, ...card.querySelectorAll(".report-history-link")]
+      .flatMap(node => reportTokens(node.dataset[name]));
+    return new Set(values);
+  }
+
+  function optionLabel(token) {
+    if (token === "dated") return "Dated report capture";
+    if (token === "unknown") return "No report-specific capture date";
+    return token.replace(/[_-]+/g, " ").replace(/\b\w/g, character => character.toUpperCase());
+  }
+
+  function populateReportFilter(select, tokens) {
+    const existing = new Set(Array.from(select.options, option => option.value));
+    [...tokens].sort((left, right) => {
+      if (left === "unknown") return 1;
+      if (right === "unknown") return -1;
+      return optionLabel(left).localeCompare(optionLabel(right));
+    }).forEach(token => {
+      if (existing.has(token)) return;
+      const option = document.createElement("option");
+      option.value = token;
+      option.textContent = optionLabel(token);
+      select.append(option);
+    });
+  }
+
+  const reportFilterOptions = {
+    category: new Set(reportCards.flatMap(card => reportTokens(card.dataset.category))),
+    freshness: new Set(reportCards.flatMap(card => [...cardTokens(card, "freshness")])),
+    evidence: new Set(reportCards.flatMap(card => [...cardTokens(card, "evidenceFamily")])),
+  };
+  populateReportFilter(reportCategory, reportFilterOptions.category);
+  populateReportFilter(reportFreshness, reportFilterOptions.freshness);
+  populateReportFilter(reportEvidence, reportFilterOptions.evidence);
+
+  function canonicalSearch(value) {
+    return String(value || "").trim().replace(/\s+/g, " ").slice(0, 160);
+  }
+
+  function selectedReportState() {
+    return {
+      q: canonicalSearch(reportSearch.value),
+      category: reportCategory.value,
+      freshness: reportFreshness.value,
+      evidence: reportEvidence.value,
+    };
+  }
+
+  function stateFromLocation() {
+    const params = new URLSearchParams(window.location.search);
+    const choose = (key, options) => {
+      const value = params.get(key) || "all";
+      return value === "all" || options.has(value) ? value : "all";
+    };
+    return {
+      q: canonicalSearch(params.get("q")),
+      category: choose("category", reportFilterOptions.category),
+      freshness: choose("freshness", reportFilterOptions.freshness),
+      evidence: choose("evidence", reportFilterOptions.evidence),
+    };
+  }
+
+  function applyReportState(state) {
+    reportSearch.value = state.q;
+    reportCategory.value = state.category;
+    reportFreshness.value = state.freshness;
+    reportEvidence.value = state.evidence;
+  }
+
+  function reportStateURL(state) {
+    const url = new URL(window.location.href);
+    ["q", "category", "freshness", "evidence"].forEach(key => url.searchParams.delete(key));
+    if (state.q) url.searchParams.set("q", state.q);
+    if (state.category !== "all") url.searchParams.set("category", state.category);
+    if (state.freshness !== "all") url.searchParams.set("freshness", state.freshness);
+    if (state.evidence !== "all") url.searchParams.set("evidence", state.evidence);
+    return url;
+  }
+
+  function writeReportState(mode) {
+    const next = reportStateURL(selectedReportState());
+    if (next.href === window.location.href) return;
+    try {
+      window.history[mode === "push" ? "pushState" : "replaceState"](
+        {reportFilters:true}, "", next.href
+      );
+    } catch (_error) {
+      // Some local-file browsers expose an opaque origin. Filtering must still work.
+    }
+  }
+
+  function filterReports({focusFirstNew = false} = {}) {
+    const state = selectedReportState();
+    const query = normalize(state.q);
+    const previouslyVisible = new Set(reportCards.filter(card => !card.hidden));
+    const isDefault = !query && state.category === "all" && state.freshness === "all" && state.evidence === "all";
+    const matchingLinks = new Map();
+    const matches = reportCards.filter(card => {
+      const categoryOk = state.category === "all" || reportTokens(card.dataset.category).includes(state.category);
+      const entries = [card, ...card.querySelectorAll(".report-history-link")];
+      const matching = entries.filter(entry => {
+        const entrySearch = entry === card
+          ? card.dataset.search
+          : `${entry.dataset.search || ""} ${entry.textContent}`;
+        const searchOk = !query || normalize(entrySearch || "").includes(query);
+        const freshnessOk = state.freshness === "all" || reportTokens(entry.dataset.freshness).includes(state.freshness);
+        const evidenceOk = state.evidence === "all" || reportTokens(entry.dataset.evidenceFamily).includes(state.evidence);
+        return categoryOk && freshnessOk && evidenceOk && searchOk;
       });
+      matchingLinks.set(card, matching);
+      const history = card.querySelector(".report-history details, details.report-history");
+      if (history && matching.length && !matching.includes(card)) history.open = true;
+      return matching.length > 0;
+    });
+    const preview = isDefault && !libraryExpanded;
+    const visible = preview ? matches.slice(0, LIBRARY_PREVIEW_LIMIT) : matches;
+    const visibleSet = new Set(visible);
+    reportCards.forEach(card => { card.hidden = !visibleSet.has(card); });
+    reportEmpty.hidden = matches.length > 0;
+    const visibleLinks = visible.reduce((count, card) => count + matchingLinks.get(card).length, 0);
+    const matchingLinkCount = matches.reduce((count, card) => count + matchingLinks.get(card).length, 0);
+    reportStatus.textContent = matches.length
+      ? `Showing ${visible.length} of ${matches.length} matching report groups · ${visibleLinks} of ${matchingLinkCount} matching report links.`
+      : "No matching reports.";
+    const canToggle = isDefault && matches.length > LIBRARY_PREVIEW_LIMIT;
+    reportToggle.hidden = !canToggle;
+    reportToggle.setAttribute("aria-expanded", String(libraryExpanded));
+    reportToggle.textContent = libraryExpanded
+      ? "Show fewer reports"
+      : `Show all ${matches.length} reports`;
+    if (focusFirstNew) {
+      const firstNew = visible.find(card => !previouslyVisible.has(card));
+      firstNew?.querySelector(".report-primary-link, a[href]")?.focus();
+    }
+  }
+
+  let searchEditActive = false;
+  reportSearch.addEventListener("input", () => {
+    libraryExpanded = false;
+    filterReports();
+    writeReportState(searchEditActive ? "replace" : "push");
+    searchEditActive = true;
+  });
+  function finishSearchEdit() {
+    const canonical = canonicalSearch(reportSearch.value);
+    if (reportSearch.value !== canonical) reportSearch.value = canonical;
+    filterReports();
+    writeReportState("replace");
+    searchEditActive = false;
+  }
+  reportSearch.addEventListener("change", finishSearchEdit);
+  reportSearch.addEventListener("blur", finishSearchEdit);
+  [reportCategory, reportFreshness, reportEvidence].forEach(select => {
+    select.addEventListener("change", () => {
+      searchEditActive = false;
+      libraryExpanded = false;
       filterReports();
+      writeReportState("push");
     });
   });
-  reportSearch.addEventListener("input", filterReports);
+  reportToggle.addEventListener("click", () => {
+    libraryExpanded = !libraryExpanded;
+    filterReports({focusFirstNew:libraryExpanded});
+  });
+
+  window.addEventListener("popstate", () => {
+    searchEditActive = false;
+    libraryExpanded = false;
+    applyReportState(stateFromLocation());
+    filterReports();
+  });
+
+  applyReportState(stateFromLocation());
+  filterReports();
+  writeReportState("replace");
 })();
 </script>
 </body>

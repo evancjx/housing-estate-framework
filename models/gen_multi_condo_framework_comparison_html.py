@@ -23,11 +23,13 @@ import argparse
 import html
 import json
 import pathlib
+import re
 from datetime import date
 from typing import Any
 
 import gen_condo_framework_comparison_html as two_project
 import multi_condo_transactions as transaction_data
+import private_project_catalog
 import pandas as pd
 
 
@@ -37,12 +39,14 @@ DEFAULT_BEDROOM_TRANSACTIONS = (
     ROOT / "data/outputs/private_transactions_bedrooms.csv"
 )
 DEFAULT_TRANSACTION_ASSETS = ROOT / "site/assets/condo-transactions"
+DEFAULT_PROJECT_CATALOG = ROOT / "site/assets/project-catalog/manifest.json"
 MIN_PROJECTS = 2
 MAX_PROJECTS = 5
+DATASET_REVISION_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 TRANSACTION_RESEARCH_CSS = """
-.transaction-research{margin-top:58px;padding-top:3px;border-top:1px solid var(--line)}.transaction-head{display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap}.transaction-head h2{margin-bottom:0}.transaction-head p{color:var(--muted)}.tx-controls{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:10px;margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:15px;background:#fff}.tx-control label{display:block;margin-bottom:5px;font-size:.65rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}.tx-control select{width:100%;min-height:43px;padding:8px 10px;border:1px solid #b9c9c1;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:.76rem}.tx-status{min-height:23px;color:var(--muted);font-size:.75rem}.tx-block{margin-top:24px}.tx-block-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}.tx-block h3{margin:0;font-size:1.08rem}.tx-block-head p{margin:2px 0 0;color:var(--muted);font-size:.7rem}.tx-scroll{max-width:100%;margin-top:9px;overflow:auto;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-scroll table{min-width:760px}.tx-scroll th[scope=row]{min-width:180px}.tx-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:11px}.tx-analysis-card{padding:17px;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-analysis-card h4{margin:10px 0 7px;font-size:.94rem}.tx-analysis-card p,.tx-analysis-card li{font-size:.72rem}.tx-analysis-card ul{margin:8px 0 0;padding-left:18px}.depth-low{color:#9a3d33;font-weight:850}.depth-medium{color:#8a5a19;font-weight:850}.depth-strong{color:#187157;font-weight:850}.tx-ledgers{display:grid;gap:11px;margin-top:11px}.tx-ledger{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}.tx-ledger summary{padding:14px 16px;background:#eef2ee;cursor:pointer;font-size:.8rem;font-weight:900}.tx-ledger-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:.68rem}.tx-ledger .tx-scroll{margin:0;border:0;border-radius:0}.tx-ledger table{min-width:920px}.tx-ledger th,.tx-ledger td{font-size:.69rem}.tx-partial{display:inline-block;margin-left:4px;padding:1px 5px;border-radius:4px;background:var(--warm-soft);color:#8c462e;font-size:.56rem;font-weight:900}.tx-source{font-weight:800}.tx-caveat{margin-top:20px;padding:15px 17px;border-left:4px solid var(--warm);border-radius:11px;background:var(--warm-soft);font-size:.76rem}
+.transaction-research{margin-top:58px;padding-top:3px;border-top:1px solid var(--line)}.transaction-head{display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap}.transaction-head h2{margin-bottom:0}.transaction-head p{color:var(--muted)}.tx-controls{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:10px;margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:15px;background:#fff}.tx-control label{display:block;margin-bottom:5px;font-size:.65rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}.tx-control select{width:100%;min-height:43px;padding:8px 10px;border:1px solid #b9c9c1;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:.76rem}.tx-status{min-height:23px;color:var(--muted);font-size:.75rem}.tx-block{margin-top:24px}.tx-block-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}.tx-block h3{margin:0;font-size:1.08rem}.tx-block-head p{margin:2px 0 0;color:var(--muted);font-size:.7rem}.tx-scroll{max-width:100%;margin-top:9px;overflow:auto;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-scroll table{min-width:760px}.tx-scroll th[scope=row]{min-width:180px}.tx-unavailable{color:#9a3d33;font-weight:850}.tx-analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:11px}.tx-analysis-card{padding:17px;border:1px solid var(--line);border-radius:13px;background:#fff}.tx-analysis-card h4{margin:10px 0 7px;font-size:.94rem}.tx-analysis-card p,.tx-analysis-card li{font-size:.72rem}.tx-analysis-card ul{margin:8px 0 0;padding-left:18px}.depth-low{color:#9a3d33;font-weight:850}.depth-medium{color:#8a5a19;font-weight:850}.depth-strong{color:#187157;font-weight:850}.tx-ledgers{display:grid;gap:11px;margin-top:11px}.tx-ledger{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}.tx-ledger summary{padding:14px 16px;background:#eef2ee;cursor:pointer;font-size:.8rem;font-weight:900}.tx-ledger-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:.68rem}.tx-ledger .tx-scroll{margin:0;border:0;border-radius:0}.tx-ledger table{min-width:920px}.tx-ledger th,.tx-ledger td{font-size:.69rem}.tx-partial{display:inline-block;margin-left:4px;padding:1px 5px;border-radius:4px;background:var(--warm-soft);color:#8c462e;font-size:.56rem;font-weight:900}.tx-source{font-weight:800}.tx-caveat{margin-top:20px;padding:15px 17px;border-left:4px solid var(--warm);border-radius:11px;background:var(--warm-soft);font-size:.76rem}
 @media(max-width:760px){.tx-controls{grid-template-columns:1fr 1fr}.transaction-head{display:block}}
 @media(max-width:520px){.tx-controls{grid-template-columns:1fr}.tx-analysis-grid{grid-template-columns:1fr}}
 @media print{.tx-controls,.tx-ledger-actions{display:none!important}.tx-ledger{break-inside:avoid}.tx-ledger>summary{list-style:none}.tx-ledger[open] .tx-scroll{overflow:visible}}
@@ -50,10 +54,10 @@ TRANSACTION_RESEARCH_CSS = """
 
 
 TRANSACTION_RESEARCH_HTML = """
-<section class="transaction-research" id="transaction-research" aria-labelledby="transaction-title">
+<section class="transaction-research" id="transaction-research" aria-labelledby="transaction-title" aria-busy="false">
   <div class="transaction-head"><div><div class="eyebrow">Full achieved-sales evidence</div><h2 id="transaction-title" tabindex="-1">Transaction comparison and detailed analysis</h2>
     <p>Compare every selected project over one common period, then inspect every available source row in its ledger.</p></div>
-    <button id="download-transactions" type="button">Download filtered CSV</button>
+    <button id="download-transactions" type="button" aria-describedby="tx-status" disabled>Download filtered CSV</button>
   </div>
   <div class="tx-controls" aria-label="Transaction comparison filters">
     <div class="tx-control"><label for="tx-window">Analysis period</label><select class="tx-filter" id="tx-window">
@@ -76,6 +80,7 @@ TRANSACTION_RESEARCH_HTML = """
     </select></div>
   </div>
   <p class="tx-status" id="tx-status" role="status" aria-live="polite"></p>
+  <button id="retry-transaction-data" type="button" hidden>Retry unavailable transaction sources</button>
   <div class="tx-block"><div class="tx-block-head"><div><h3>Selected-period snapshot</h3><p>All columns use the same active filters. Differences versus A are descriptive only.</p></div></div><div id="tx-snapshot"></div></div>
   <div class="tx-block"><div class="tx-block-head"><div><h3>Annual median achieved PSF</h3><p>Each value discloses its sample count; the current partial month is excluded.</p></div></div><div id="tx-trend"></div></div>
   <div class="tx-block"><div class="tx-block-head"><div><h3>Detailed analysis</h3><p>Evidence strength, observed market level, median movement, mix effects and comparability cautions.</p></div></div><div class="tx-analysis-grid" id="tx-analysis"></div></div>
@@ -86,13 +91,33 @@ TRANSACTION_RESEARCH_HTML = """
 
 
 TRANSACTION_RESEARCH_JS = r"""
+  const REVISION_MISMATCH_MESSAGE = "Transaction data generation changed while this page was open. Reload this page before using transaction evidence.";
   const TX_FILTERS = [
     ["tx-window","window","60"],["tx-sale","sale","all"],
     ["tx-bedroom","bed","all"],["tx-size","size","all"],
     ["tx-floor","floor","all"],["tx-source","source","all"]
   ];
-  const shardCache = new Map(), transactionRows = new Map(), ledgerLimits = new Map();
+  const transactionRows = new Map(), transactionErrors = new Map(), ledgerLimits = new Map();
+  const transactionResearch = document.getElementById("transaction-research");
+  const transactionRetry = document.getElementById("retry-transaction-data");
   let activeTxProjects = [], transactionLoadToken = 0;
+
+  function setTransactionBusy(loading) {
+    transactionResearch.setAttribute("aria-busy", String(loading));
+  }
+
+  function sameTransactionContract(actual,expected) {
+    if (actual===expected) return true;
+    if (Array.isArray(actual) || Array.isArray(expected)) {
+      return Array.isArray(actual) && Array.isArray(expected)
+        && actual.length===expected.length
+        && actual.every((value,index)=>sameTransactionContract(value,expected[index]));
+    }
+    if (!actual || !expected || typeof actual!=="object" || typeof expected!=="object") return false;
+    const actualKeys=Object.keys(actual).sort(), expectedKeys=Object.keys(expected).sort();
+    return actualKeys.length===expectedKeys.length
+      && actualKeys.every((key,index)=>key===expectedKeys[index] && sameTransactionContract(actual[key],expected[key]));
+  }
 
   const txMoney = value => available(value) ? new Intl.NumberFormat("en-SG",{style:"currency",currency:"SGD",maximumFractionDigits:0}).format(value) : "—";
   const txInteger = value => available(value) ? new Intl.NumberFormat("en-SG",{maximumFractionDigits:0}).format(value) : "—";
@@ -132,19 +157,52 @@ TRANSACTION_RESEARCH_JS = r"""
     return [row.month,row.price,row.area_sqm,row.floor || "",row.sale || ""].join("|");
   }
 
-  async function fetchTransactionShard(path) {
-    if (!path) throw new Error("Transaction path unavailable");
-    if (!shardCache.has(path)) {
-      shardCache.set(path, fetch(path).then(response => {
-        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-        return response.json();
-      }).catch(error => { shardCache.delete(path); throw error; }));
+  function validateTransactionShard(payload) {
+    if (
+      !payload
+      || typeof payload !== "object"
+      || !sameTransactionContract(payload.schema,EXPECTED_TRANSACTION_SCHEMA)
+      || !payload.projects
+      || typeof payload.projects !== "object"
+      || Array.isArray(payload.projects)
+      || !sameTransactionContract(payload.enumerations,EXPECTED_TRANSACTION_ENUMERATIONS)
+    ) {
+      return "The transaction shard has an unexpected shape or schema.";
     }
-    return shardCache.get(path);
+    if (payload.dataset_revision !== EXPECTED_DATASET_REVISION) {
+      return REVISION_MISMATCH_MESSAGE;
+    }
+    return true;
+  }
+
+  function transactionShardRequest(path) {
+    return {path, revision:EXPECTED_DATASET_REVISION, timeoutMs:12_000, validate:validateTransactionShard};
+  }
+
+  function transactionErrorMessage(error) {
+    return error instanceof Error && error.message
+      ? error.message
+      : "The transaction source is unavailable.";
   }
 
   function decodeProjectTransactions(project,payload) {
-    const values=payload.projects?.[project.id] || [], enums=payload.enumerations || {};
+    const values=payload.projects?.[project.id], enums=payload.enumerations || {};
+    if (!Array.isArray(values)) {
+      throw new Error("This project is missing from its transaction shard.");
+    }
+    const validEnum=(value,options,nullable=false)=>nullable && (value===null || value===undefined) || Number.isInteger(value) && value>=0 && value<options.length;
+    if (values.some(row => !Array.isArray(row)
+      || row.length !== 10
+      || !/^\d{4}-(0[1-9]|1[0-2])$/.test(row[0])
+      || ![1,2,3,4].every(index=>Number.isFinite(row[index]) && row[index]>0)
+      || !validEnum(row[5],enums.sale_types)
+      || !validEnum(row[6],enums.floor_levels,true)
+      || !(row[7]===null || row[7]===undefined || Number.isInteger(row[7]) && row[7]>0)
+      || !validEnum(row[8],enums.bedroom_sources,true)
+      || !validEnum(row[9],enums.data_sources,true)
+    )) {
+      throw new Error("This project's transaction rows are malformed.");
+    }
     return values.map(row => ({
       month:row[0], price:row[1], area_sqm:row[2], sqft:row[3], psf:row[4],
       sale:enums.sale_types?.[row[5]] || "Unknown",
@@ -234,40 +292,38 @@ TRANSACTION_RESEARCH_JS = r"""
     return {recentN:recent.length,priorN:prior.length,recentPsf,priorPsf,change:recent.length>=3 && prior.length>=3 && priorPsf ? (recentPsf/priorPsf-1)*100 : null,recentStart,priorStart,priorEnd};
   }
 
-  function vsReference(value,reference,formatter,percentDifference=false) {
-    if (!available(value) || !available(reference)) return "";
-    const difference=percentDifference && reference ? (value/reference-1)*100 : value-reference;
-    return `<small>vs A: ${esc(formatter(difference))}</small>`;
+  function unavailableTransactionCell(model) {
+    return `<td data-state="unavailable"><b class="tx-unavailable">Unavailable</b><small>${esc(model.error)}</small></td>`;
   }
 
   function renderTransactionSnapshot(projects,viewModels) {
-    const reference=viewModels[0].stats;
+    const reference=viewModels[0].error ? null : viewModels[0].stats;
+    const compared=(index,value)=>index ? (reference ? value : "Reference A unavailable") : "Reference";
     const rows=[
       ["Filtered coverage",(model)=>`${monthLabel(model.stats.first)}–${monthLabel(model.stats.last)}`,(model)=>`${txInteger(model.stats.n)} records`],
-      ["Transactions",(model)=>txInteger(model.stats.n),(model,index)=>index ? `vs A: ${signed(model.stats.n-reference.n,0)} records` : "Reference"],
-      ["Median achieved price",(model)=>txMoney(model.stats.medianPrice),(model,index)=>index ? `vs A: ${txPercent(available(model.stats.medianPrice) && reference.medianPrice ? (model.stats.medianPrice/reference.medianPrice-1)*100 : null)}` : "Reference"],
+      ["Transactions",(model)=>txInteger(model.stats.n),(model,index)=>compared(index,`vs A: ${reference ? signed(model.stats.n-reference.n,0) : "—"} records`)],
+      ["Median achieved price",(model)=>txMoney(model.stats.medianPrice),(model,index)=>compared(index,`vs A: ${txPercent(available(model.stats.medianPrice) && reference?.medianPrice ? (model.stats.medianPrice/reference.medianPrice-1)*100 : null)}`)],
       ["P10–P90 achieved price",(model)=>`${txMoney(model.stats.p10Price)}–${txMoney(model.stats.p90Price)}`,()=>""],
-      ["Median achieved PSF",(model)=>number(model.stats.medianPsf," psf"),(model,index)=>index ? `vs A: ${available(model.stats.medianPsf) && available(reference.medianPsf) ? signed(model.stats.medianPsf-reference.medianPsf,0) : "—"} psf` : "Reference"],
+      ["Median achieved PSF",(model)=>number(model.stats.medianPsf," psf"),(model,index)=>compared(index,`vs A: ${available(model.stats.medianPsf) && available(reference?.medianPsf) ? signed(model.stats.medianPsf-reference.medianPsf,0) : "—"} psf`)],
       ["P10–P90 achieved PSF",(model)=>`${number(model.stats.p10Psf," psf")}–${number(model.stats.p90Psf," psf")}`,()=>""],
-      ["Median recorded size",(model)=>number(model.stats.medianSqft," sqft"),(model,index)=>index ? `vs A: ${available(model.stats.medianSqft) && available(reference.medianSqft) ? signed(model.stats.medianSqft-reference.medianSqft,0) : "—"} sqft` : "Reference"],
+      ["Median recorded size",(model)=>number(model.stats.medianSqft," sqft"),(model,index)=>compared(index,`vs A: ${available(model.stats.medianSqft) && available(reference?.medianSqft) ? signed(model.stats.medianSqft-reference.medianSqft,0) : "—"} sqft`)],
       ["Sale-state mix",(model)=>model.stats.saleMix,()=>""],
       ["Bedroom-label coverage",(model)=>`${number(model.stats.bedroomCoverage)}%`,()=>""],
       ["Change in median achieved PSF",(model)=>txPercent(model.movement.change),(model)=>`prior n=${model.movement.priorN} → recent n=${model.movement.recentN}`]
     ];
     document.getElementById("tx-snapshot").innerHTML=`<div class="tx-scroll" role="region" tabindex="0" aria-label="Selected-period transaction snapshot">
       <table style="min-width:${170+projects.length*190}px"><thead><tr><th scope="col">Transaction factor</th>${projects.map((project,index)=>`<th scope="col">${LETTERS[index]} · ${esc(title(project.project))}</th>`).join("")}</tr></thead>
-      <tbody>${rows.map(([label,main,sub])=>`<tr><th scope="row">${esc(label)}</th>${viewModels.map((model,index)=>`<td>${esc(main(model,index))}<small>${esc(sub(model,index))}</small></td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+      <tbody>${rows.map(([label,main,sub])=>`<tr><th scope="row">${esc(label)}</th>${viewModels.map((model,index)=>model.error ? unavailableTransactionCell(model) : `<td>${esc(main(model,index))}<small>${esc(sub(model,index))}</small></td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
   }
 
   function renderTransactionTrend(projects,viewModels) {
-    const years=[...new Set(viewModels.flatMap(model=>model.analysisRows.map(row=>row.month.slice(0,4))))].sort();
-    if (!years.length) {
-      document.getElementById("tx-trend").innerHTML='<div class="empty">No annual trend remains under these filters.</div>';
-      return;
-    }
+    const years=[...new Set(viewModels.filter(model=>!model.error).flatMap(model=>model.analysisRows.map(row=>row.month.slice(0,4))))].sort();
+    const body=years.length
+      ? years.map(year=>`<tr><th scope="row">${year}</th>${viewModels.map(model=>{if (model.error) return unavailableTransactionCell(model);const rows=model.analysisRows.filter(row=>row.month.startsWith(year)),value=transactionStats(rows).medianPsf;return `<td>${number(value," psf")}<small>n=${rows.length}</small></td>`;}).join("")}</tr>`).join("")
+      : `<tr><th scope="row">Source status</th>${viewModels.map(model=>model.error ? unavailableTransactionCell(model) : '<td>—<small>No matching complete-month data</small></td>').join("")}</tr>`;
     document.getElementById("tx-trend").innerHTML=`<div class="tx-scroll" role="region" tabindex="0" aria-label="Annual median achieved PSF comparison">
       <table style="min-width:${170+projects.length*190}px"><thead><tr><th scope="col">Year</th>${projects.map((project,index)=>`<th scope="col">${LETTERS[index]} · ${esc(title(project.project))}</th>`).join("")}</tr></thead>
-      <tbody>${years.map(year=>`<tr><th scope="row">${year}</th>${viewModels.map(model=>{const rows=model.analysisRows.filter(row=>row.month.startsWith(year)),value=transactionStats(rows).medianPsf;return `<td>${number(value," psf")}<small>n=${rows.length}</small></td>`;}).join("")}</tr>`).join("")}</tbody></table></div>`;
+      <tbody>${body}</tbody></table></div>`;
   }
 
   function depthLabel(n) {
@@ -275,12 +331,19 @@ TRANSACTION_RESEARCH_JS = r"""
   }
 
   function renderDetailedTransactionAnalysis(projects,viewModels) {
-    const reference=viewModels[0].stats;
+    const reference=viewModels[0].error ? null : viewModels[0].stats;
     document.getElementById("tx-analysis").innerHTML=viewModels.map((model,index)=>{
+      if (model.error) {
+        return `<article class="tx-analysis-card" data-state="unavailable"><span class="project-badge badge-${LETTERS[index]}">${LETTERS[index]}</span>
+          <h4>${esc(title(model.project.project))}</h4>
+          <p><b class="tx-unavailable">Transaction evidence unavailable.</b> ${esc(model.error)} No zero-row statistics or comparisons are inferred.</p>
+        </article>`;
+      }
       const {stats,movement,allRows,analysisRows}=model, [depth,depthClass]=depthLabel(stats.n);
       const canonicalN=allRows.filter(row=>row.source==="ura_private").length, backfillN=allRows.filter(row=>row.source==="edgeprop_backfill").length;
-      const psfVs=index && available(stats.medianPsf) && reference.medianPsf ? (stats.medianPsf/reference.medianPsf-1)*100 : null;
-      const sizeVs=index && available(stats.medianSqft) && available(reference.medianSqft) ? stats.medianSqft-reference.medianSqft : null;
+      const psfVs=index && available(stats.medianPsf) && reference?.medianPsf ? (stats.medianPsf/reference.medianPsf-1)*100 : null;
+      const sizeVs=index && available(stats.medianSqft) && available(reference?.medianSqft) ? stats.medianSqft-reference.medianSqft : null;
+      const comparison=index ? (reference ? ` PSF is ${txPercent(psfVs)} and size is ${signed(sizeVs,0)} sqft versus A.` : " Project A transaction evidence is unavailable, so differences are withheld.") : " Project A is the neutral reference.";
       const cautions=[];
       if (stats.n<30) cautions.push("Selected cohort has fewer than 30 rows; medians are mix-sensitive.");
       if (stats.bedroomCoverage<80) cautions.push("Bedroom labels cover less than 80% of the filtered rows.");
@@ -291,7 +354,7 @@ TRANSACTION_RESEARCH_JS = r"""
       return `<article class="tx-analysis-card"><span class="project-badge badge-${LETTERS[index]}">${LETTERS[index]}</span>
         <h4>${esc(title(model.project.project))}</h4>
         <p><b class="${depthClass}">${depth}</b> selected evidence: n=${txInteger(stats.n)} across ${monthLabel(stats.first)}–${monthLabel(stats.last)}. Loaded history contains ${txInteger(canonicalN)} URA and ${txInteger(backfillN)} older-backfill rows.</p>
-        <ul><li><b>Observed level:</b> median ${txMoney(stats.medianPrice)}, ${number(stats.medianPsf," psf")} and ${number(stats.medianSqft," sqft")}.${index ? ` PSF is ${txPercent(psfVs)} and size is ${signed(sizeVs,0)} sqft versus A.` : " Project A is the neutral reference."}</li>
+        <ul><li><b>Observed level:</b> median ${txMoney(stats.medianPrice)}, ${number(stats.medianPsf," psf")} and ${number(stats.medianSqft," sqft")}.${comparison}</li>
         <li><b>Median movement:</b> ${movement.change===null ? "insufficient matched sample" : `${txPercent(movement.change)} from prior to recent 12 complete months`} (n=${movement.priorN} → n=${movement.recentN}). This is change in achieved median PSF, not repeat-unit appreciation.</li>
         <li><b>Mix:</b> ${esc(stats.saleMix)}; bedroom labels ${number(stats.bedroomCoverage)}%; floor labels ${number(stats.floorCoverage)}%.</li></ul>
         ${cautions.length ? `<p><b>Comparability cautions:</b> ${esc(cautions.join(" "))}</p>` : '<p><b>Comparability:</b> No additional automated caution beyond the disclosed period and mix limits.</p>'}
@@ -311,6 +374,11 @@ TRANSACTION_RESEARCH_JS = r"""
 
   function renderTransactionLedgers(projects) {
     document.getElementById("tx-ledgers").innerHTML=projects.map((project,index)=>{
+      const loadError=transactionErrors.get(project.id);
+      if (loadError) {
+        return `<details class="tx-ledger" data-state="unavailable"><summary>${LETTERS[index]} · ${esc(title(project.project))} — transaction evidence unavailable</summary>
+          <div class="empty"><b class="tx-unavailable">Transaction evidence unavailable.</b> ${esc(loadError)} No zero-row ledger is shown.</div></details>`;
+      }
       const rows=(transactionRows.get(project.id)||[]).filter(row=>matchesTransaction(row,{ledger:true}));
       const limit=ledgerLimits.get(project.id)||50, visible=rows.slice(0,limit);
       return `<details class="tx-ledger"><summary>${LETTERS[index]} · ${esc(title(project.project))} — ${txInteger(rows.length)} matching transactions</summary>
@@ -327,36 +395,98 @@ TRANSACTION_RESEARCH_JS = r"""
   function renderTransactionResearch(projects) {
     activeTxProjects=projects;
     const viewModels=projects.map(project=>{
+      const error=transactionErrors.get(project.id) || null;
+      if (error) return {project,error,allRows:[],analysisRows:[],stats:transactionStats([]),movement:movementStats([])};
       const allRows=transactionRows.get(project.id)||[], analysisRows=allRows.filter(row=>matchesTransaction(row));
-      return {project,allRows,analysisRows,stats:transactionStats(analysisRows),movement:movementStats(allRows)};
+      return {project,error:null,allRows,analysisRows,stats:transactionStats(analysisRows),movement:movementStats(allRows)};
     });
     renderTransactionSnapshot(projects,viewModels);
     renderTransactionTrend(projects,viewModels);
     renderDetailedTransactionAnalysis(projects,viewModels);
     renderTransactionLedgers(projects);
-    const total=viewModels.reduce((sum,model)=>sum+model.stats.n,0), bounds=periodBounds();
-    document.getElementById("tx-status").textContent=`${txInteger(total)} complete-month transactions match across ${projects.length} projects${bounds.start ? ` from ${monthLabel(bounds.start)} to ${monthLabel(bounds.end)}` : " over all available history"}.`;
+    const availableModels=viewModels.filter(model=>!model.error), unavailableCount=viewModels.length-availableModels.length;
+    const total=availableModels.reduce((sum,model)=>sum+model.stats.n,0), bounds=periodBounds();
+    const statusParts=availableModels.length
+      ? [`${txInteger(total)} complete-month transactions match across ${availableModels.length} available project${availableModels.length===1 ? "" : "s"}${bounds.start ? ` from ${monthLabel(bounds.start)} to ${monthLabel(bounds.end)}` : " over all available history"}.`]
+      : [`No transaction histories are available for the ${projects.length} selected projects.`];
+    if (unavailableCount) statusParts.push(`${unavailableCount} project source${unavailableCount===1 ? "" : "s"} unavailable; ${unavailableCount===1 ? "it is" : "they are"} excluded from totals and CSV.`);
+    document.getElementById("tx-status").textContent=statusParts.join(" ");
+    const downloadButton=document.getElementById("download-transactions");
+    downloadButton.disabled=!availableModels.length;
+    downloadButton.title=!availableModels.length
+      ? "No transaction data is available to download."
+      : unavailableCount
+        ? `CSV includes ${availableModels.length} available project${availableModels.length===1 ? "" : "s"} and excludes ${unavailableCount} unavailable source${unavailableCount===1 ? "" : "s"}.`
+        : "";
+    transactionRetry.hidden=unavailableCount===0;
+    setTransactionBusy(false);
+  }
+
+  function renderTransactionRevisionFailure(projects) {
+    activeTxProjects=[];
+    transactionRows.clear();
+    transactionErrors.clear();
+    projects.forEach(project=>transactionErrors.set(project.id,REVISION_MISMATCH_MESSAGE));
+    const status=document.getElementById("tx-status"), downloadButton=document.getElementById("download-transactions");
+    status.textContent=REVISION_MISMATCH_MESSAGE;
+    downloadButton.disabled=true;
+    downloadButton.title="Reload this page to request one complete transaction generation.";
+    transactionRetry.hidden=true;
+    document.getElementById("tx-snapshot").innerHTML=`<div class="empty" role="alert"><b>Reload required.</b> ${esc(REVISION_MISMATCH_MESSAGE)} <button id="reload-transaction-data" type="button">Reload page</button></div>`;
+    document.getElementById("tx-trend").innerHTML="";
+    document.getElementById("tx-analysis").innerHTML="";
+    document.getElementById("tx-ledgers").innerHTML="";
+    document.getElementById("reload-transaction-data")?.addEventListener("click",()=>location.reload());
+    setTransactionBusy(false);
   }
 
   async function loadTransactionResearch(projects) {
-    const token=++transactionLoadToken, txStatus=document.getElementById("tx-status");
-    activeTxProjects=[];transactionRows.clear();ledgerLimits.clear();
+    const token=++transactionLoadToken, txStatus=document.getElementById("tx-status"), downloadButton=document.getElementById("download-transactions");
+    activeTxProjects=[];transactionRows.clear();transactionErrors.clear();ledgerLimits.clear();
+    setTransactionBusy(true);
+    transactionRetry.hidden=true;
+    downloadButton.disabled=true;
+    downloadButton.title="Transaction histories are loading.";
     document.getElementById("tx-snapshot").innerHTML="";
     document.getElementById("tx-trend").innerHTML="";
     document.getElementById("tx-analysis").innerHTML="";
     document.getElementById("tx-ledgers").innerHTML="";
     txStatus.textContent=`Loading full transaction histories for ${projects.length} projects…`;
+    if (!window.SGEstateData?.loadMany) {
+      projects.forEach(project=>transactionErrors.set(project.id,"The shared transaction data loader is unavailable."));
+      renderTransactionResearch(projects);
+      return;
+    }
     try {
       const paths=[...new Set(projects.map(project=>project.transaction_shard).filter(Boolean))];
-      const payloads=await Promise.all(paths.map(async path=>[path,await fetchTransactionShard(path)]));
+      const settled=await window.SGEstateData.loadMany(paths.map(transactionShardRequest));
       if (token!==transactionLoadToken) return;
-      const byPath=new Map(payloads);
-      projects.forEach(project=>transactionRows.set(project.id,decodeProjectTransactions(project,byPath.get(project.transaction_shard)||{})));
+      if (settled.some(result=>result.status==="rejected" && transactionErrorMessage(result.reason)===REVISION_MISMATCH_MESSAGE)) {
+        renderTransactionRevisionFailure(projects);
+        return;
+      }
+      const byPath=new Map(paths.map((path,index)=>[path,settled[index]]));
+      projects.forEach(project=>{
+        if (!project.transaction_shard) {
+          transactionErrors.set(project.id,"No transaction source is configured for this project.");
+          return;
+        }
+        const result=byPath.get(project.transaction_shard);
+        if (!result || result.status!=="fulfilled") {
+          transactionErrors.set(project.id,transactionErrorMessage(result?.reason));
+          return;
+        }
+        try {
+          transactionRows.set(project.id,decodeProjectTransactions(project,result.value));
+        } catch (decodeError) {
+          transactionErrors.set(project.id,transactionErrorMessage(decodeError));
+        }
+      });
       renderTransactionResearch(projects);
     } catch (loadError) {
       if (token!==transactionLoadToken) return;
-      txStatus.textContent="Transaction histories could not be loaded. The estate-framework comparison remains available.";
-      document.getElementById("tx-snapshot").innerHTML=`<div class="empty">Transaction data load failed: ${esc(loadError.message)}</div>`;
+      projects.forEach(project=>transactionErrors.set(project.id,transactionErrorMessage(loadError)));
+      renderTransactionResearch(projects);
     }
   }
 
@@ -367,10 +497,11 @@ TRANSACTION_RESEARCH_JS = r"""
   }
 
   function downloadFilteredTransactions() {
-    if (!activeTxProjects.length) return;
+    const downloadableProjects=activeTxProjects.filter(project=>transactionRows.has(project.id) && !transactionErrors.has(project.id));
+    if (!downloadableProjects.length) return;
     const header=["project","sale_month","sale_state","bedrooms","bedroom_provenance","floor_level","area_sqm","area_sqft","price_sgd","psf_sgd","data_source"];
     const body=[header.map(csvCell).join(",")];
-    activeTxProjects.forEach(project=>(transactionRows.get(project.id)||[]).filter(row=>matchesTransaction(row,{ledger:true})).forEach(row=>{
+    downloadableProjects.forEach(project=>(transactionRows.get(project.id)||[]).filter(row=>matchesTransaction(row,{ledger:true})).forEach(row=>{
       body.push([project.project,row.month,row.sale,row.bedrooms,row.bedroom_source,row.floor,row.area_sqm,row.sqft,row.price,row.psf,row.source].map(csvCell).join(","));
     }));
     const blob=new Blob([body.join("\r\n")],{type:"text/csv;charset=utf-8"}), url=URL.createObjectURL(blob), link=document.createElement("a");
@@ -423,14 +554,69 @@ def render_html(
     latest_month: str | None,
     as_of: date,
     transaction_metadata: dict[str, Any] | None = None,
+    dataset_revision: str | None = None,
+    transaction_schema: dict[str, Any] | None = None,
+    transaction_enumerations: dict[str, Any] | None = None,
+    project_catalog: dict[str, Any] | None = None,
 ) -> str:
+    if not isinstance(dataset_revision, str) or not DATASET_REVISION_RE.fullmatch(
+        dataset_revision
+    ):
+        raise SystemExit(
+            "transaction manifest dataset_revision must be a lowercase 64-character "
+            "SHA-256 hex string"
+        )
+    if not isinstance(transaction_schema, dict) or not isinstance(
+        transaction_enumerations, dict
+    ):
+        raise SystemExit(
+            "transaction manifest schema and enumerations must be embedded for exact "
+            "browser validation"
+        )
     defaults = default_ids(projects)
+    if not isinstance(project_catalog, dict):
+        raise SystemExit("a validated private project catalog is required")
+    catalog_revision = project_catalog.get("catalog_revision")
+    if not isinstance(catalog_revision, str) or not DATASET_REVISION_RE.fullmatch(
+        catalog_revision
+    ):
+        raise SystemExit("project catalog revision must be a lowercase SHA-256 hex string")
+    if project_catalog.get("schema") != private_project_catalog.CATALOG_SCHEMA:
+        raise SystemExit(
+            f"project catalog schema must be {private_project_catalog.CATALOG_SCHEMA}"
+        )
+    if project_catalog.get("transaction_dataset_revision") != dataset_revision:
+        raise SystemExit("project catalog transaction revision does not match this page")
     transaction_metadata = transaction_metadata or {}
-    browser_projects, browser_contexts = two_project.build_browser_payload(projects)
+    default_set = set(defaults)
+    browser_projects = [
+        project
+        for project in project_catalog.get("projects", [])
+        if project.get("id") in default_set
+    ]
+    if {project.get("id") for project in browser_projects} != default_set:
+        raise SystemExit("project catalog is missing one or more multi-tool defaults")
+    browser_projects.sort(key=lambda project: defaults.index(project["id"]))
+    context_keys = {project.get("context_key") for project in browser_projects}
+    browser_contexts = {
+        key: value
+        for key, value in project_catalog.get("contexts", {}).items()
+        if key in context_keys
+    }
     project_json = two_project.script_safe_json(browser_projects)
     context_json = two_project.script_safe_json(browser_contexts)
     default_json = two_project.script_safe_json(defaults)
     metadata_json = two_project.script_safe_json(transaction_metadata)
+    revision_json = two_project.script_safe_json(dataset_revision)
+    schema_json = two_project.script_safe_json(transaction_schema)
+    enumerations_json = two_project.script_safe_json(transaction_enumerations)
+    catalog_json = two_project.script_safe_json(
+        {
+            "path": private_project_catalog.catalog_asset_path(catalog_revision),
+            "revision": catalog_revision,
+            "schema": project_catalog["schema"],
+        }
+    )
     transaction_count = transaction_metadata.get("reconciliation", {}).get(
         "project_transaction_count"
     )
@@ -439,7 +625,7 @@ def render_html(
         if transaction_count is not None
         else "On-demand full transaction ledgers"
     )
-    options = options_html(projects)
+    options = options_html(browser_projects)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Multi-condominium framework comparison</title>
@@ -449,7 +635,7 @@ def render_html(
 :root{{--ink:#18231f;--muted:#64716b;--paper:#f4f6f2;--card:#fff;--line:#d8e0da;--accent:#08786d;--accent-soft:#e1f2ed;--warm:#b25a35;--warm-soft:#fff0e7;--navy:#17324d;--shadow:0 20px 55px rgba(21,44,35,.09);--badge-a:#17324d;--badge-b:#08786d;--badge-c:#a45e2d;--badge-d:#67528b;--badge-e:#6a6656}}
 *{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;padding:20px;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}}main{{max-width:1280px;margin:auto;padding:30px 0 72px}}a{{color:inherit}}h1,h2{{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.04em}}h1{{max-width:1020px;margin:.2em 0;font-size:clamp(2.8rem,7vw,5.8rem);font-weight:500;line-height:.96}}h2{{margin:60px 0 8px;font-size:clamp(1.8rem,4vw,3rem)}}p{{max-width:84ch}}
 .eyebrow{{color:var(--accent);font-size:.7rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase}}.lede{{color:var(--muted);font-size:1.08rem}}.hero{{padding:34px 0 38px;border-bottom:1px solid var(--line)}}.proof{{display:flex;gap:10px 26px;flex-wrap:wrap;margin-top:24px;color:var(--muted);font-size:.76rem;font-weight:700}}.proof span::before{{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:var(--accent)}}
-.set-panel{{margin:30px 0;padding:8px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.58);box-shadow:var(--shadow)}}.set-inner{{padding:22px;border-radius:15px;background:#fff}}.set-head{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:13px}}.set-count{{color:var(--muted);font-size:.75rem;font-weight:800}}.project-tray{{display:grid;gap:8px}}.project-row{{display:grid;grid-template-columns:104px minmax(250px,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fafbf9}}.slot-label{{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}}.project-badge{{display:grid;width:32px;height:32px;place-items:center;border-radius:9px;background:var(--badge-a);color:#fff;font-size:.78rem;font-weight:900}}.project-row:nth-child(2) .project-badge,.badge-B{{background:var(--badge-b)}}.project-row:nth-child(3) .project-badge,.badge-C{{background:var(--badge-c)}}.project-row:nth-child(4) .project-badge,.badge-D{{background:var(--badge-d)}}.project-row:nth-child(5) .project-badge,.badge-E{{background:var(--badge-e)}}.badge-A{{background:var(--badge-a)}}
+.set-panel{{margin:30px 0;padding:8px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.58);box-shadow:var(--shadow)}}.set-inner{{padding:22px;border-radius:15px;background:#fff}}.set-head{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:13px}}.set-count{{color:var(--muted);font-size:.75rem;font-weight:800}}.catalog-state{{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:.72rem}}.catalog-state[data-state="error"]{{color:#9a3d33}}.catalog-state button{{min-height:34px;padding:5px 9px}}.project-tray{{display:grid;gap:8px}}.project-row{{display:grid;grid-template-columns:104px minmax(250px,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fafbf9}}.slot-label{{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}}.project-badge{{display:grid;width:32px;height:32px;place-items:center;border-radius:9px;background:var(--badge-a);color:#fff;font-size:.78rem;font-weight:900}}.project-row:nth-child(2) .project-badge,.badge-B{{background:var(--badge-b)}}.project-row:nth-child(3) .project-badge,.badge-C{{background:var(--badge-c)}}.project-row:nth-child(4) .project-badge,.badge-D{{background:var(--badge-d)}}.project-row:nth-child(5) .project-badge,.badge-E{{background:var(--badge-e)}}.badge-A{{background:var(--badge-a)}}
 .slot-field label{{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}input{{width:100%;min-height:47px;padding:10px 12px;border:1px solid #b9c9c1;border-radius:9px;background:#fff;color:var(--ink);font:inherit;outline:none}}input:focus{{border-color:var(--accent);box-shadow:0 0 0 3px rgba(8,120,109,.13)}}input.invalid{{border-color:#a83d34;box-shadow:0 0 0 2px rgba(168,61,52,.12)}}.row-actions{{display:flex;gap:5px}}button{{min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:.75rem;font-weight:850;cursor:pointer}}button.primary{{border-color:var(--accent);background:var(--accent);color:#fff}}button:hover:not(:disabled){{border-color:var(--accent)}}button:disabled{{cursor:not-allowed;opacity:.42}}.icon-button{{width:42px;padding:7px}}.set-actions{{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}}.set-error{{min-height:22px;margin:10px 0 0;color:#9a3d33;font-size:.78rem}}.set-status{{min-height:20px;margin:3px 0 0;color:var(--muted);font-size:.72rem}}
 .context-note,.caveat{{margin:20px 0;padding:16px 18px;border-left:4px solid var(--accent);border-radius:12px;background:var(--accent-soft);font-size:.82rem}}.caveat{{border-color:var(--warm);background:var(--warm-soft)}}.result-tools{{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap}}.result-tools h2{{margin-bottom:0}}.detail-actions{{display:flex;gap:7px;margin-bottom:4px}}
 .subject-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}}.subject{{min-height:285px;padding:19px;border:1px solid var(--line);border-radius:17px;background:var(--card)}}.subject h3{{margin:17px 0 5px;font-size:1.16rem;letter-spacing:-.03em}}.subject .location{{min-height:38px;color:var(--muted);font-size:.72rem}}.subject-metrics{{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:17px 0;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}}.subject-metrics div{{padding:10px;background:#f9faf7}}.subject-metrics span{{display:block;color:var(--muted);font-size:.61rem}}.subject-metrics b{{display:block;margin-top:3px;font-size:.84rem}}.subject p{{font-size:.76rem}}.subject-links{{font-size:.69rem;font-weight:850;color:var(--accent)}}
@@ -471,6 +657,7 @@ def render_html(
 <form id="set-form"><div class="project-tray" id="project-tray"></div>
 <datalist id="project-options">{options}</datalist>
 <div class="set-actions"><button id="add-project" type="button">+ Add project</button><button class="primary" type="submit">Compare projects</button><button id="copy-view" type="button">Copy comparison link</button><button id="print-view" type="button">Print / save PDF</button></div>
+<div class="catalog-state" id="project-catalog-state" role="status" aria-live="polite"><span id="project-catalog-status">Loading the full project catalog… The example projects are ready now.</span><button id="retry-project-catalog" type="button" hidden>Retry project catalog</button></div>
 <p class="set-error" id="set-error" role="alert" aria-live="assertive"></p></form>
 </div></section>
 
@@ -485,23 +672,30 @@ def render_html(
 <div class="caveat"><b>Read before deciding.</b> Project summaries can differ in period, sale state, unit mix and sample depth. “Recent vs all” is mix-sensitive, not appreciation. Estate framework values describe the planning-area context or disclosed proxy, not the condominium, block, stack or unit. HDB Value and HDB remaining-lease risk are not applied to private projects.</div>
 </section>
 </main><script src="assets/research-shell.js" data-research-shell></script>
+<script src="assets/data-loader.js"></script>
 <script>
 (() => {{
   const MIN_PROJECTS = {MIN_PROJECTS}, MAX_PROJECTS = {MAX_PROJECTS};
   const LETTERS = ["A","B","C","D","E"];
+  const EXPECTED_DATASET_REVISION = {revision_json};
+  const PROJECT_CATALOG = {catalog_json};
+  const PROJECT_CATALOG_SCHEMA = "private-project-catalog.v1";
+  const EXPECTED_TRANSACTION_SCHEMA = {schema_json};
+  const EXPECTED_TRANSACTION_ENUMERATIONS = {enumerations_json};
   const TX_META = {metadata_json};
-  const CONTEXTS = {context_json};
-  const PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
+  let CONTEXTS = {context_json};
+  let PROJECTS = {project_json}.map(project => ({{...project, ...(CONTEXTS[project.context_key] || {{}})}}));
   const DEFAULTS = {default_json};
-  const byId = new Map(PROJECTS.map(project => [project.id, project]));
-  const byLabel = new Map(PROJECTS.map(project => [project.selection_label.toUpperCase(), project]));
-  const nameCounts = PROJECTS.reduce((counts, project) => counts.set(project.project.toUpperCase(), (counts.get(project.project.toUpperCase()) || 0) + 1), new Map());
-  const byUniqueName = new Map(PROJECTS.filter(project => nameCounts.get(project.project.toUpperCase()) === 1).map(project => [project.project.toUpperCase(), project]));
+  let byId = new Map(), byLabel = new Map(), byUniqueName = new Map();
   const tray = document.getElementById("project-tray");
   const error = document.getElementById("set-error");
   const status = document.getElementById("set-status");
   const addButton = document.getElementById("add-project");
+  const catalogState = document.getElementById("project-catalog-state");
+  const catalogStatus = document.getElementById("project-catalog-status");
+  const catalogRetry = document.getElementById("retry-project-catalog");
   let slots = [], selected = [], slotSequence = 0;
+  let catalogReady = false, catalogLoadSequence = 0;
 
   const esc = value => String(value ?? "—").replace(/[&<>"']/g, character => ({{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}}[character]));
   const available = value => value !== null && value !== undefined && value !== "" && value !== "not_covered";
@@ -520,6 +714,87 @@ def render_html(
   const announce = message => {{status.textContent = message;}};
   const slot = project => ({{key:++slotSequence,value:project ? project.selection_label : ""}});
 
+  function rebuildProjectIndexes() {{
+    byId = new Map(PROJECTS.map(project => [project.id, project]));
+    byLabel = new Map(PROJECTS.map(project => [project.selection_label.toUpperCase(), project]));
+    const nameCounts = PROJECTS.reduce((counts, project) => counts.set(project.project.toUpperCase(), (counts.get(project.project.toUpperCase()) || 0) + 1), new Map());
+    byUniqueName = new Map(PROJECTS.filter(project => nameCounts.get(project.project.toUpperCase()) === 1).map(project => [project.project.toUpperCase(), project]));
+  }}
+
+  function validateProjectCatalog(catalog) {{
+    const requiredKeys=["catalog_revision","contexts","counts","latest_project_month","projects","schema","transaction_dataset_revision"];
+    if (!catalog || typeof catalog!=="object" || Array.isArray(catalog)) return "The project catalog is not an object.";
+    const actualKeys=Object.keys(catalog).sort();
+    if (actualKeys.length!==requiredKeys.length || !requiredKeys.every((key,index)=>actualKeys[index]===key)) return "The project catalog has an unexpected top-level contract.";
+    if (catalog.schema!==PROJECT_CATALOG.schema || catalog.schema!==PROJECT_CATALOG_SCHEMA || catalog.catalog_revision!==PROJECT_CATALOG.revision) return "The project catalog revision or schema does not match this page.";
+    if (catalog.transaction_dataset_revision!==EXPECTED_DATASET_REVISION) return REVISION_MISMATCH_MESSAGE;
+    if (!Array.isArray(catalog.projects) || !catalog.contexts || typeof catalog.contexts!=="object" || Array.isArray(catalog.contexts) || !catalog.counts || typeof catalog.counts!=="object" || Array.isArray(catalog.counts)) return "The project catalog projects, contexts, or counts are malformed.";
+    const ids=new Set(),usedContexts=new Set();let comparisonCount=0,transactionCount=0;
+    for (const project of catalog.projects) {{
+      const capabilities=project?.capabilities;
+      const capabilityKeys=capabilities && typeof capabilities==="object" ? Object.keys(capabilities).sort() : [];
+      if (!project || typeof project!=="object" || !String(project.id || "").trim() || !String(project.selection_label || "").trim() || !capabilities || typeof capabilities!=="object" || !sameTransactionContract(capabilityKeys,["framework_comparison","private_explorer","project_exit","transactions"]) || typeof capabilities.private_explorer!=="boolean" || typeof capabilities.framework_comparison!=="boolean" || typeof capabilities.transactions!=="boolean" || typeof capabilities.project_exit!=="boolean" || ids.has(String(project.id))) return "The project catalog contains an invalid or duplicate project record.";
+      if (!capabilities.private_explorer || capabilities.transactions!==capabilities.project_exit || capabilities.transactions && !capabilities.framework_comparison) return "The project catalog contains an inconsistent capability assignment.";
+      ids.add(String(project.id));
+      if (capabilities.framework_comparison) {{
+        comparisonCount+=1;
+        if (!String(project.context_key || "").trim() || !catalog.contexts[project.context_key]) return "A comparison project is missing its framework context.";
+        usedContexts.add(project.context_key);
+      }} else if (project.context_key!==null) return "An explorer-only project unexpectedly claims framework context.";
+      if (capabilities.transactions) {{
+        transactionCount+=1;
+        if (!String(project.transaction_shard || "").startsWith(`assets/condo-transactions/${{EXPECTED_DATASET_REVISION}}/shard-`) || !Number.isInteger(project.transaction_count) || project.transaction_count<0) return "A transaction-capable catalog record has invalid shard metadata.";
+      }}
+    }}
+    const countKeys=Object.keys(catalog.counts).sort();
+    if (!sameTransactionContract(countKeys,["all","comparison","transaction"]) || Number(catalog.counts.all)!==catalog.projects.length || Number(catalog.counts.comparison)!==comparisonCount || Number(catalog.counts.transaction)!==transactionCount) return "The project catalog counts do not reconcile to its project records.";
+    if (usedContexts.size!==Object.keys(catalog.contexts).length || Object.keys(catalog.contexts).some(key=>!usedContexts.has(key))) return "The project catalog contains an unused or unreferenced framework context.";
+    if (comparisonCount<MIN_PROJECTS) return "The project catalog does not contain enough comparison projects.";
+    if (catalog.projects.some(project => project.capabilities.framework_comparison && !Object.prototype.hasOwnProperty.call(catalog.contexts,project.context_key))) return "A comparison project is missing its framework context.";
+    return true;
+  }}
+
+  function renderCatalogOptions() {{
+    document.getElementById("project-options").innerHTML=PROJECTS.map(project=>`<option value="${{esc(project.selection_label)}}">D${{esc(project.district || "—")}} · ${{esc(project.planning_area || "Unknown area")}} · ${{esc(project.street || "Unknown street")}}</option>`).join("");
+  }}
+
+  async function hydrateProjectCatalog() {{
+    const sequence=++catalogLoadSequence;
+    catalogReady=false;
+    renderTray();
+    catalogState.dataset.state="loading";
+    catalogStatus.textContent="Loading the full project catalog… The example projects remain usable.";
+    catalogStatus.setAttribute("role","status");
+    catalogRetry.hidden=true;
+    try {{
+      if (!window.SGEstateData?.loadJSON) throw new Error("The shared project catalog loader is unavailable.");
+      const catalog=await window.SGEstateData.loadJSON(PROJECT_CATALOG.path,{{revision:PROJECT_CATALOG.revision,timeoutMs:12_000,validate:validateProjectCatalog}});
+      if (sequence!==catalogLoadSequence) return;
+      CONTEXTS=catalog.contexts;
+      PROJECTS=catalog.projects.filter(project=>project.capabilities.framework_comparison).map(project=>({{...project,...(CONTEXTS[project.context_key] || {{}})}}));
+      rebuildProjectIndexes();
+      renderCatalogOptions();
+      catalogReady=true;
+      catalogState.dataset.state="ready";
+      catalogStatus.textContent=`${{PROJECTS.length.toLocaleString("en-SG")}} projects ready.`;
+      catalogStatus.setAttribute("role","status");
+      catalogRetry.hidden=true;
+      renderTray();
+      const requested=new URLSearchParams(location.search).getAll("p");
+      if (requested.some(id=>byId.has(id) && !selected.some(project=>project.id===id))) restoreFromURL(false);
+    }} catch (failure) {{
+      if (sequence!==catalogLoadSequence) return;
+      catalogReady=false;
+      renderTray();
+      const fileHelp=location.protocol==="file:" ? " Open this report through a local web server; browsers block JSON loading from file:// pages." : "";
+      const reason=failure instanceof Error && failure.message ? ` ${{failure.message}}` : "";
+      catalogState.dataset.state="error";
+      catalogStatus.textContent=`The full project catalog could not be loaded.${{reason}}${{fileHelp}} The example projects remain usable.`;
+      catalogStatus.setAttribute("role","alert");
+      catalogRetry.hidden=false;
+    }}
+  }}
+
 {TRANSACTION_RESEARCH_JS}
 
   function syncSlotValues() {{
@@ -533,6 +808,12 @@ def render_html(
     transactionLoadToken += 1;
     activeTxProjects = [];
     transactionRows.clear();
+    transactionErrors.clear();
+    const downloadButton = document.getElementById("download-transactions");
+    downloadButton.disabled = true;
+    downloadButton.title = "Compare projects to load transaction data.";
+    transactionRetry.hidden = true;
+    setTransactionBusy(false);
     selected = [];
     document.getElementById("comparison-result").hidden = true;
     announce(message);
@@ -553,8 +834,8 @@ def render_html(
         </div></div>`;
     }}).join("");
     document.getElementById("set-count").textContent = `${{slots.length}} / ${{MAX_PROJECTS}} projects`;
-    addButton.disabled = slots.length >= MAX_PROJECTS;
-    addButton.textContent = slots.length >= MAX_PROJECTS ? "Maximum 5 projects" : "+ Add project";
+    addButton.disabled = !catalogReady || slots.length >= MAX_PROJECTS;
+    addButton.textContent = !catalogReady ? "Loading full catalog…" : slots.length >= MAX_PROJECTS ? "Maximum 5 projects" : "+ Add project";
     tray.querySelectorAll("input").forEach(input => input.addEventListener("input", () => {{
       const current = slots.find(item => item.key === Number(input.dataset.key));
       if (current) current.value = input.value;
@@ -789,10 +1070,22 @@ def render_html(
   }});
   document.getElementById("expand-all").addEventListener("click", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=true));
   document.getElementById("collapse-all").addEventListener("click", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=false));
+  catalogRetry.addEventListener("click", () => {{
+    window.SGEstateData?.invalidate?.(PROJECT_CATALOG.path,{{revision:PROJECT_CATALOG.revision}});
+    void hydrateProjectCatalog();
+  }});
+  transactionRetry.addEventListener("click", () => {{
+    activeTxProjects.filter(project=>transactionErrors.has(project.id)).forEach(project=>{{
+      if (project.transaction_shard) window.SGEstateData?.invalidate?.(project.transaction_shard,{{revision:EXPECTED_DATASET_REVISION}});
+    }});
+    if (activeTxProjects.length) void loadTransactionResearch(activeTxProjects);
+  }});
   window.addEventListener("beforeprint", () => document.querySelectorAll(".factor-group").forEach(group=>group.open=true));
   window.addEventListener("popstate", () => {{restoreTransactionFilters();restoreFromURL(false);}});
+  rebuildProjectIndexes();
   restoreTransactionFilters();
   restoreFromURL(false);
+  void hydrateProjectCatalog();
 }})();
 </script></body></html>"""
 
@@ -803,6 +1096,7 @@ def generate(
     private_path: pathlib.Path = two_project.DEFAULT_PRIVATE,
     bedroom_transactions_path: pathlib.Path = DEFAULT_BEDROOM_TRANSACTIONS,
     transaction_assets_path: pathlib.Path = DEFAULT_TRANSACTION_ASSETS,
+    project_catalog_path: pathlib.Path = DEFAULT_PROJECT_CATALOG,
 ) -> tuple[pathlib.Path, int]:
     projects, latest_month = two_project.load_projects_for_comparison(
         private_path=private_path
@@ -815,12 +1109,20 @@ def generate(
     transaction_data.write_shards(
         transaction_assets_path, shards, manifest
     )
+    project_catalog = private_project_catalog.load_project_catalog(
+        project_catalog_path,
+        transaction_manifest=manifest,
+    )
     out_path.write_text(
         render_html(
             projects,
             latest_month,
             as_of or date.today(),
             manifest["source_metadata"],
+            manifest.get("dataset_revision"),
+            manifest.get("schema"),
+            manifest.get("enumerations"),
+            project_catalog,
         ),
         encoding="utf-8",
     )
@@ -838,6 +1140,7 @@ def main() -> None:
     parser.add_argument(
         "--transaction-assets", default=str(DEFAULT_TRANSACTION_ASSETS)
     )
+    parser.add_argument("--project-catalog", default=str(DEFAULT_PROJECT_CATALOG))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
     out_path, count = generate(
@@ -845,6 +1148,7 @@ def main() -> None:
         private_path=pathlib.Path(args.private),
         bedroom_transactions_path=pathlib.Path(args.bedroom_transactions),
         transaction_assets_path=pathlib.Path(args.transaction_assets),
+        project_catalog_path=pathlib.Path(args.project_catalog),
     )
     manifest_path = pathlib.Path(args.transaction_assets) / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

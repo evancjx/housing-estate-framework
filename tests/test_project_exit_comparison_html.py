@@ -29,6 +29,9 @@ REQUIRED_IDS = {
     "form-error",
     "copy-view",
     "reset-view",
+    "project-catalog-state",
+    "project-catalog-status",
+    "retry-project-catalog",
 }
 
 
@@ -88,20 +91,30 @@ def _parse_page():
 
 def test_project_exit_page_exposes_stable_controls_and_valid_data():
     parser = _parse_page()
+    payload = json.loads("".join(parser.embedded_data))
 
     assert REQUIRED_IDS <= set(parser.ids)
     assert all(parser.ids[element_id] == 1 for element_id in REQUIRED_IDS)
     assert parser.id_tags["project-exit-data"] == "script"
     assert parser.id_tags["decision-form"] == "form"
     assert parser.embedded_data_type == "application/json"
-    assert isinstance(json.loads("".join(parser.embedded_data)), dict)
+    assert isinstance(payload, dict)
+    assert len(payload["dataset_revision"]) == 64
+    assert set(payload["dataset_revision"]) <= set("0123456789abcdef")
+    assert payload["catalog"]["schema"] == "private-project-catalog.v1"
+    assert len(payload["projects"]) == len(payload["defaults"]) == 3
+    assert PAGE.stat().st_size <= 500 * 1024
 
 
 def test_project_exit_page_uses_external_assets_without_inline_handlers():
     parser = _parse_page()
 
     assert parser.stylesheets.count("assets/project-exit-comparison.css") == 1
+    assert parser.script_sources.count("assets/data-loader.js") == 1
     assert parser.script_sources.count("assets/project-exit-comparison.js") == 1
+    assert parser.script_sources.index("assets/data-loader.js") < parser.script_sources.index(
+        "assets/project-exit-comparison.js"
+    )
     assert parser.inline_handlers == []
     assert parser.id_attributes["comparison-results"]["aria-label"] == (
         "Comparison results"
@@ -135,6 +148,29 @@ def test_project_exit_page_does_not_present_a_universal_verdict():
         "winner",
     ):
         assert phrase not in page
+
+
+def test_project_exit_consumer_versions_and_validates_transaction_shards():
+    script = (ROOT / "site" / "assets" / "project-exit-comparison.js").read_text(
+        encoding="utf-8"
+    )
+
+    assert "revision: datasetRevision" in script
+    assert "sameTransactionContract(shard.schema, expectedTransactionSchema)" in script
+    assert (
+        "sameTransactionContract(shard.enumerations, expectedTransactionEnumerations)"
+        in script
+    )
+    assert "shard.dataset_revision !== datasetRevision" in script
+    assert "Transaction data generation changed while this page was open" in script
+    assert "Reload required" in script
+    assert "No cohort, zero-row statistic, or modeled outcome is shown" in script
+    assert "window.location.reload()" in script
+    assert "hydrateProjectCatalog" in script
+    assert "capabilities.project_exit" in script
+    assert "revision: catalogRevision" in script
+    assert "Retry project catalog" in PAGE.read_text(encoding="utf-8")
+    assert "file:// pages" in script
 
 
 def test_project_exit_tool_is_discoverable_as_a_tool():

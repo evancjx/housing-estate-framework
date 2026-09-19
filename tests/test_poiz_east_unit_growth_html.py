@@ -1,7 +1,9 @@
 """Tests for the Poiz/East unit-type growth and transaction ledger."""
 
 from datetime import date
+import json
 import os
+import re
 import sys
 
 import pandas as pd
@@ -130,4 +132,84 @@ def test_generate_lists_every_resale_record_and_unit_limit(tmp_path):
     assert "partial month" in text
     assert "1 bedroom · 538 sqft" in text
     assert "2 bedrooms · 753 sqft" in text
-    assert "applyLedgerFilter" in text
+    assert "filterLedger" in text
+    assert "LEDGER_PAGE_SIZE = 100" in text
+    assert "Download filtered CSV" in text
+    assert "Show 100 more" in text
+    assert 'role=\'status\' aria-live=\'polite\'' in text
+    assert "beforeprint" in text
+    assert re.search(r"<tbody></tbody>.*transaction-data", text, re.DOTALL)
+
+
+def test_transaction_ledger_batches_filters_exports_and_restores_print(tmp_path):
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    profiles_path = _profiles(tmp_path)
+    base_rows = pd.read_csv(_transactions(tmp_path)).to_dict("records")
+    seed = base_rows[0]
+    rows = []
+    for index in range(250):
+        rows.append(
+            {
+                **seed,
+                "sale_month": "2026-06" if index < 240 else "2025-06",
+                "transacted_price": 1_000_000 + index * 1_000,
+                "bedrooms": 1 if index < 125 else 2,
+                "floor_level": "06 to 10" if index % 2 else "11 to 15",
+            }
+        )
+    transactions_path = tmp_path / "many-transactions.csv"
+    pd.DataFrame(rows).to_csv(transactions_path, index=False)
+    out = tmp_path / "unit-growth-many.html"
+    unit_growth.generate(
+        profiles_path,
+        transactions_path,
+        out,
+        as_of=date(2026, 7, 25),
+    )
+
+    source = out.read_text(encoding="utf-8")
+    payload_match = re.search(
+        r"<script type='application/json' class='transaction-data'>(.*?)</script>",
+        source,
+        re.DOTALL,
+    )
+    assert payload_match
+    assert len(json.loads(payload_match.group(1))) == 250
+    assert "<tbody></tbody>" in source
+
+    with playwright_api.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except playwright_api.Error as error:
+            pytest.skip(f"Chromium cannot launch in this environment: {error}")
+        page = browser.new_page()
+        try:
+            page.goto(out.as_uri())
+            rows_locator = page.locator(".project-panel.active .transaction-table tbody tr")
+            assert rows_locator.count() == 100
+            playwright_api.expect(
+                page.locator(".project-panel.active .visible-count")
+            ).to_have_text("100 of 250 filtered records shown")
+
+            page.locator(".project-panel.active .show-more").click()
+            assert rows_locator.count() == 200
+            playwright_api.expect(rows_locator.nth(100)).to_be_focused()
+
+            page.locator(".project-panel.active .txn-unit").select_option("2")
+            assert rows_locator.count() == 100
+            playwright_api.expect(
+                page.locator(".project-panel.active .visible-count")
+            ).to_have_text("100 of 125 filtered records shown")
+
+            with page.expect_download() as download_info:
+                page.locator(".project-panel.active .download-ledger").click()
+            exported = download_info.value.path().read_text(encoding="utf-8")
+            assert len(exported.splitlines()) == 126
+
+            page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+            assert rows_locator.count() == 125
+            page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+            assert rows_locator.count() == 100
+        finally:
+            page.close()
+            browser.close()

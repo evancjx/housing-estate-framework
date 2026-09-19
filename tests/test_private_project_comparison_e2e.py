@@ -23,17 +23,25 @@ class _QuietHandler(SimpleHTTPRequestHandler):
         return
 
 
-def _embedded_rows() -> list[dict]:
+def _embedded(script_id: str) -> object:
     match = re.search(
-        r'<script id="private-project-comparison-data" type="application/json">(.*?)</script>',
+        rf'<script id="{re.escape(script_id)}" type="application/json">(.*?)</script>',
         PAGE.read_text(encoding="utf-8"),
         flags=re.DOTALL,
     )
-    assert match, "generated private-project data is missing"
+    assert match, f"generated private-project payload {script_id!r} is missing"
     return json.loads(match.group(1))
 
 
-ROWS = _embedded_rows()
+CONFIG = _embedded("private-project-comparison-config")
+BOOTSTRAP_ROWS = _embedded("private-project-comparison-data")
+CATALOG_PATH = ROOT / "site" / CONFIG["catalog_path"]
+CATALOG = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+ROWS = [
+    row
+    for row in CATALOG["projects"]
+    if row["capabilities"]["private_explorer"] is True
+]
 TOTAL_ROWS = len(ROWS)
 PAGE_SIZE = 100
 SOURCE_COUNTS = {
@@ -74,11 +82,17 @@ def chromium_page(tmp_path_factory):
         for name in (
             "private-project-comparison.css",
             "private-project-comparison.js",
+            "data-loader.js",
             "estate-explorer.css",
             "research-shell.css",
             "research-shell.js",
         ):
             shutil.copy2(ROOT / "site" / "assets" / name, assets / name)
+        published_catalog = preview / CONFIG["catalog_path"]
+        published_catalog.parent.mkdir(parents=True)
+        shutil.copy2(CATALOG_PATH, published_catalog)
+        (preview / "reports.json").write_text("{}\n", encoding="utf-8")
+        (preview / "data-status.json").write_text("{}\n", encoding="utf-8")
 
         handler = partial(_QuietHandler, directory=str(preview))
         server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -98,11 +112,45 @@ def chromium_page(tmp_path_factory):
 
 def _load(page, url: str) -> None:
     page.goto(url, wait_until="load")
+    page.locator("#project-data-status[data-state='ready']").wait_for(state="visible")
     page.locator("#private-project-table-body tr").first.wait_for(state="visible")
 
 
 def _count_text(value: int) -> str:
     return f"{value:,}"
+
+
+def test_catalog_failure_keeps_bootstrap_usable_and_retry_hydrates(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    catalog_pattern = f"**/{CONFIG['catalog_revision']}/catalog.json*"
+    page.route(catalog_pattern, lambda route: route.abort())
+    try:
+        page.goto(url, wait_until="load")
+        playwright_api.expect(page.locator("#project-data-status")).to_have_attribute(
+            "data-state", "error"
+        )
+        playwright_api.expect(page.locator("#project-data-status-copy")).to_contain_text(
+            "starter projects remain usable"
+        )
+        playwright_api.expect(page.locator("#project-data-retry")).to_be_visible()
+        playwright_api.expect(page.locator("#visible-count")).to_have_text(
+            _count_text(len(BOOTSTRAP_ROWS))
+        )
+        assert page.locator("#private-project-table-body tr").count() == PAGE_SIZE
+
+        page.unroute(catalog_pattern)
+        page.locator("#project-data-retry").click()
+        playwright_api.expect(page.locator("#project-data-status")).to_have_attribute(
+            "data-state", "ready"
+        )
+        playwright_api.expect(page.locator("#visible-count")).to_have_text(
+            _count_text(TOTAL_ROWS)
+        )
+    finally:
+        page.unroute(catalog_pattern)
 
 
 def test_views_filters_empty_state_and_reset_work_without_browser_errors(

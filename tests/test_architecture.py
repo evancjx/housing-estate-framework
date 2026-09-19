@@ -101,6 +101,84 @@ def test_data_catalog_covers_all_committed_inputs():
         assert metadata["authority"]
 
 
+def test_data_catalog_records_actual_producer_ownership_and_provenance():
+    datasets = json.loads(
+        (ROOT / "data" / "catalog.json").read_text(encoding="utf-8")
+    )["datasets"]
+    expected = {
+        "bus_routes.csv": (
+            "ingested",
+            "external reviewed LTA DataMall snapshot (no in-repository producer)",
+            "LTA DataMall",
+        ),
+        "childcare.csv": (
+            "ingested",
+            "historical snapshot (no in-repository producer)",
+            "ECDA / data.gov.sg (historical source unverified)",
+        ),
+        "community.csv": (
+            "ingested",
+            "historical snapshot (no in-repository producer)",
+            "People's Association / data.gov.sg (historical source unverified)",
+        ),
+        "sport.csv": (
+            "ingested",
+            "historical snapshot (no in-repository producer)",
+            "SportSG / data.gov.sg (historical source unverified)",
+        ),
+        "supermarkets.csv": (
+            "ingested",
+            "historical snapshot (no in-repository producer)",
+            "unknown historical snapshot",
+        ),
+        "polyclinics.csv": (
+            "ingested",
+            "models/data_ingest.py",
+            "OneMap Search (polyclinic query)",
+        ),
+        "schools.csv": (
+            "ingested",
+            "models/data_ingest.py",
+            "MOE / data.gov.sg + OneMap geocoding fallback",
+        ),
+        "chas.csv": (
+            "ingested",
+            "models/fetch_chas.py",
+            "CHAS / data.gov.sg; OneMap fallback",
+        ),
+        "hdb_density.csv": (
+            "derived",
+            "models/ingest_hdb_density.py",
+            "HDB / data.gov.sg + framework density assumptions",
+        ),
+        "air_quality.csv": (
+            "derived",
+            "models/ingest_nea_air.py",
+            "NEA / data.gov.sg + framework climatology/region mapping + expressways.csv",
+        ),
+        "town_council_kpi.json": (
+            "curated",
+            "reviewed static transcription via models/ingest_tcmr.py",
+            "MND TCMR",
+        ),
+        "tree_canopy.csv": (
+            "derived",
+            "models/ingest_tree_canopy.py",
+            "NParks parks snapshot + MSS / data.gov.sg",
+        ),
+    }
+    for dataset_id, (zone, producer, authority) in expected.items():
+        assert datasets[dataset_id] == {
+            "zone": zone,
+            "producer": producer,
+            "authority": authority,
+        }
+    assert datasets["ura_private.csv"]["producer"] == (
+        "scrapers/ura_pmi_playwright.py / scrapers/ura_pmi_api.py -> "
+        "scrapers/ingest_ura_raw.py"
+    )
+
+
 def test_committed_data_files_stay_below_repository_limit():
     max_bytes = 50 * 1024 * 1024
     result = subprocess.run(

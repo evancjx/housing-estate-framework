@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import copy
 import json
+import pathlib
+import re
 
 import pandas as pd
 import pytest
@@ -240,9 +242,14 @@ def test_shards_are_deterministic_and_counts_coverage_reconcile():
     assert first == second
     assert len(shards) == transactions.SHARD_COUNT
     assert set(shards) == set(range(64))
+    revision = manifest["dataset_revision"]
+    assert re.fullmatch(r"[0-9a-f]{64}", revision)
     assert all(
         project["transaction_shard"]
-        == f"assets/condo-transactions/shard-{transactions.shard_index(project['id']):02d}.json"
+        == (
+            f"assets/condo-transactions/{revision}/"
+            f"shard-{transactions.shard_index(project['id']):02d}.json"
+        )
         for project in copied
     )
     canonical = manifest["source_metadata"]["canonical"]
@@ -270,17 +277,33 @@ def test_shards_are_deterministic_and_counts_coverage_reconcile():
         shard["shard_metadata"]["transaction_count"] for shard in shards.values()
     ) == 5
     for index, shard in shards.items():
+        assert shard["dataset_revision"] == revision
         assert shard["schema"]["fields"] == transactions.RECORD_FIELDS
         assert "enumerations" in shard
         assert "projects" in shard
         assert shard["shard_metadata"]["index"] == index
+    assert manifest["shard_count"] == 64
+    assert manifest["shards"] == [
+        {
+            "index": index,
+            "path": (
+                f"assets/condo-transactions/{revision}/shard-{index:02d}.json"
+            ),
+            "project_count": shards[index]["shard_metadata"]["project_count"],
+            "transaction_count": shards[index]["shard_metadata"][
+                "transaction_count"
+            ],
+        }
+        for index in range(64)
+    ]
+    transactions.validate_transaction_bundle(shards, manifest)
 
     alpha = _decode(shards, "alpha")
     expected_psf = 2_100_000 / (100 * transactions.SQM_TO_SQFT)
     assert alpha[0]["psf"] == pytest.approx(expected_psf, abs=0.01)
 
 
-def test_write_shards_overwrites_only_fixed_targets(tmp_path):
+def test_write_shards_publishes_revision_bundle_and_retains_unrelated_files(tmp_path):
     _, shards, manifest = _build([_ura()], [], [_project("alpha")])
     unrelated = tmp_path / "keep-me.json"
     unrelated.write_text("user data", encoding="utf-8")
@@ -289,13 +312,169 @@ def test_write_shards_overwrites_only_fixed_targets(tmp_path):
 
     written = transactions.write_shards(tmp_path, shards, manifest)
 
-    assert len(written) == 65
+    revision = manifest["dataset_revision"]
+    revision_dir = tmp_path / revision
+    assert len(written) == 66
     assert unrelated.read_text(encoding="utf-8") == "user data"
-    assert old_shard.read_text(encoding="utf-8") != "old"
-    assert len(list(tmp_path.glob("shard-*.json"))) == 64
+    assert old_shard.read_text(encoding="utf-8") == "old"
+    assert len(list(revision_dir.glob("shard-*.json"))) == 64
+    assert (revision_dir / "manifest.json").read_bytes() == (
+        tmp_path / "manifest.json"
+    ).read_bytes()
     assert json.loads((tmp_path / "manifest.json").read_text())["projects"][
         "alpha"
     ]["transaction_count"] == 1
+    loaded_shards = {
+        index: json.loads(
+            (revision_dir / f"shard-{index:02d}.json").read_text(encoding="utf-8")
+        )
+        for index in range(64)
+    }
+    transactions.validate_transaction_bundle(
+        loaded_shards,
+        json.loads((revision_dir / "manifest.json").read_text(encoding="utf-8")),
+    )
+
+
+def test_dataset_revision_is_canonical_and_changes_with_transaction_content():
+    projects = [_project("alpha")]
+    first = _build([_ura(price=2_000_000)], [], projects)
+    same = _build([_ura(price=2_000_000)], [], projects)
+    changed = _build([_ura(price=2_000_001)], [], projects)
+
+    _, first_shards, first_manifest = first
+    assert first_manifest["dataset_revision"] == same[2]["dataset_revision"]
+    assert first_manifest["dataset_revision"] != changed[2]["dataset_revision"]
+
+    reordered_manifest = {
+        key: copy.deepcopy(first_manifest[key])
+        for key in reversed(list(first_manifest))
+    }
+    reordered_shards = {
+        index: {
+            key: copy.deepcopy(first_shards[index][key])
+            for key in reversed(list(first_shards[index]))
+        }
+        for index in reversed(range(64))
+    }
+    assert transactions.compute_dataset_revision(
+        reordered_shards, reordered_manifest
+    ) == first_manifest["dataset_revision"]
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (
+            lambda shards, manifest: shards[0].update(dataset_revision="0" * 64),
+            "dataset_revision does not match",
+        ),
+        (
+            lambda shards, manifest: shards[transactions.shard_index("alpha")][
+                "projects"
+            ].pop("alpha"),
+            "project membership",
+        ),
+        (
+            lambda shards, manifest: manifest["projects"]["alpha"].update(
+                transaction_count=99
+            ),
+            "manifest metadata is inconsistent",
+        ),
+        (
+            lambda shards, manifest: manifest["shards"].pop(),
+            "exactly 64 entries",
+        ),
+    ],
+)
+def test_bundle_validation_rejects_revision_membership_and_count_tampering(
+    mutate, message
+):
+    _, original_shards, original_manifest = _build(
+        [_ura()], [], [_project("alpha")]
+    )
+    shards = copy.deepcopy(original_shards)
+    manifest = copy.deepcopy(original_manifest)
+    mutate(shards, manifest)
+
+    with pytest.raises(ValueError, match=message):
+        transactions.validate_transaction_bundle(shards, manifest)
+
+
+def test_injected_staging_write_failure_keeps_previous_generation_usable(
+    tmp_path, monkeypatch
+):
+    _, old_shards, old_manifest = _build(
+        [_ura(price=2_000_000)], [], [_project("alpha")]
+    )
+    transactions.write_shards(tmp_path, old_shards, old_manifest)
+    old_root_manifest = (tmp_path / "manifest.json").read_bytes()
+    old_revision = old_manifest["dataset_revision"]
+
+    _, new_shards, new_manifest = _build(
+        [_ura(price=2_000_001)], [], [_project("alpha")]
+    )
+    real_write = transactions._write_json_file
+
+    def fail_mid_bundle(path, payload):
+        if path.name == "shard-17.json" and ".staging-" in path.parent.name:
+            raise OSError("injected shard write failure")
+        return real_write(path, payload)
+
+    monkeypatch.setattr(transactions, "_write_json_file", fail_mid_bundle)
+    with pytest.raises(OSError, match="injected shard write failure"):
+        transactions.write_shards(tmp_path, new_shards, new_manifest)
+
+    assert (tmp_path / "manifest.json").read_bytes() == old_root_manifest
+    assert not (tmp_path / new_manifest["dataset_revision"]).exists()
+    assert not list(tmp_path.glob(".*.staging-*"))
+    loaded_old_shards = {
+        index: json.loads(
+            (tmp_path / old_revision / f"shard-{index:02d}.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for index in range(64)
+    }
+    transactions.validate_transaction_bundle(loaded_old_shards, old_manifest)
+
+
+def test_failed_root_manifest_switch_keeps_previous_root_and_complete_new_bundle(
+    tmp_path, monkeypatch
+):
+    _, old_shards, old_manifest = _build(
+        [_ura(price=2_000_000)], [], [_project("alpha")]
+    )
+    transactions.write_shards(tmp_path, old_shards, old_manifest)
+    old_root_manifest = (tmp_path / "manifest.json").read_bytes()
+
+    _, new_shards, new_manifest = _build(
+        [_ura(price=2_000_001)], [], [_project("alpha")]
+    )
+    real_replace = transactions.os.replace
+
+    def fail_root_switch(source, destination):
+        if pathlib.Path(destination) == tmp_path / "manifest.json":
+            raise OSError("injected manifest switch failure")
+        return real_replace(source, destination)
+
+    monkeypatch.setattr(transactions.os, "replace", fail_root_switch)
+    with pytest.raises(OSError, match="injected manifest switch failure"):
+        transactions.write_shards(tmp_path, new_shards, new_manifest)
+
+    assert (tmp_path / "manifest.json").read_bytes() == old_root_manifest
+    new_revision_dir = tmp_path / new_manifest["dataset_revision"]
+    assert new_revision_dir.is_dir()
+    assert len(list(new_revision_dir.glob("shard-*.json"))) == 64
+    loaded_new_shards = {
+        index: json.loads(
+            (new_revision_dir / f"shard-{index:02d}.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for index in range(64)
+    }
+    transactions.validate_transaction_bundle(loaded_new_shards, new_manifest)
 
 
 def test_rejects_non_fixed_shard_count_and_duplicate_project_ids():

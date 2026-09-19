@@ -1,8 +1,12 @@
 import pandas as pd
+from argparse import Namespace
+import pytest
 
 from scrapers import ingest_ura_raw, run_download
 from scrapers.ura_pmi_api import flatten_project_transactions
 from scrapers.ura_pmi_playwright import normalize_prop_types, raw_filename
+from sg_estate import source_receipts
+from sg_estate.contracts import ContractError
 
 
 def test_landed_property_type_aliases_and_raw_filenames():
@@ -301,6 +305,46 @@ def test_dedupe_matches_legacy_blank_type_of_area_to_populated_row():
     assert deduped.iloc[0]["type_of_area"] == "Strata"
 
 
+def test_run_writes_derived_receipt_with_emitted_sale_month_coverage(tmp_path):
+    raw = tmp_path / "pmi_d15_2021-2026.csv"
+    output = tmp_path / "renamed-output.csv"
+    pd.DataFrame(
+        {
+            "Project": ["A", "B", "A"],
+            "Type": ["Condominium"] * 3,
+            "Postal District": ["15"] * 3,
+            "Price ($)": ["1000000", "1200000", "1000000"],
+            "Area (sqm)": ["80", "90", "80"],
+            "Date of Sale": ["Jan-2025", "Mar-2026", "Jan-2025"],
+            "Tenure": ["Freehold"] * 3,
+        }
+    ).to_csv(raw, index=False)
+
+    ingest_ura_raw.run(
+        Namespace(
+            out=str(output),
+            files=[str(raw)],
+            raw_dir=str(tmp_path),
+            merge=False,
+            source_quality=None,
+        )
+    )
+
+    receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(output), output_path=output
+    )
+    assert receipt["dataset_id"] == "ura_private.csv"
+    assert receipt["authority"] == "URA PMI"
+    assert receipt["cache_state"] == "derived"
+    assert receipt["retrieved_at"] is None
+    assert receipt["coverage_start"] == "2025-01"
+    assert receipt["coverage_end"] == "2026-03"
+    assert receipt["row_count"] == 2
+    assert receipt["validation_status"] == "not_run"
+    assert str(tmp_path) not in receipt["source_identity"]
+    assert "acquisition completeness not asserted" in receipt["source_identity"]
+
+
 def test_run_download_api_subprocess_passes_selected_districts(monkeypatch, tmp_path):
     captured = {}
 
@@ -319,3 +363,47 @@ def test_run_download_api_subprocess_passes_selected_districts(monkeypatch, tmp_
     assert "--districts" in cmd
     district_pos = cmd.index("--districts")
     assert cmd[district_pos:district_pos + 3] == ["--districts", "15", "16"]
+
+
+def test_ingest_preserves_unknown_sale_month_and_project_age(tmp_path):
+    raw = tmp_path / "pmi_d15_2021-2026.csv"
+    pd.DataFrame(
+        {
+            "Project": ["UNKNOWN EVIDENCE"],
+            "Type": ["Condominium"],
+            "Postal District": ["15"],
+            "Price ($)": ["1000000"],
+            "Area (sqm)": ["80"],
+            "Tenure": ["Freehold"],
+        }
+    ).to_csv(raw, index=False)
+
+    out = ingest_ura_raw.ingest_file(raw)
+
+    assert pd.isna(out.iloc[0]["sale_month"])
+    assert pd.isna(out.iloc[0]["project_age_years"])
+    assert out.iloc[0]["sale_month_status"] == "unknown"
+    assert out.iloc[0]["project_age_status"] == "unknown_no_completion_evidence"
+    assert out.iloc[0]["property_type_group"] == "3"
+
+
+def test_direct_canonical_ingest_is_rejected_before_write(tmp_path):
+    raw = tmp_path / "pmi_d15_2021-2026.csv"
+    raw.write_text("Price ($),Area (sqm)\n1000000,80\n", encoding="utf-8")
+    canonical = ingest_ura_raw.CANONICAL_OUTPUT
+    before = canonical.read_bytes()
+
+    with pytest.raises(ContractError, match="Direct canonical URA writes are disabled"):
+        ingest_ura_raw.run(
+            Namespace(
+                out=str(canonical),
+                files=[str(raw)],
+                raw_dir=str(tmp_path),
+                merge=False,
+                source_quality=None,
+                attempt_manifest=None,
+                promote_run=None,
+            )
+        )
+
+    assert canonical.read_bytes() == before

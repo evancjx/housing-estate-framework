@@ -1,8 +1,41 @@
 (() => {
   "use strict";
 
-  const rows = JSON.parse(document.getElementById("buyer-profile-data").textContent);
-  const profiles = JSON.parse(document.getElementById("buyer-profile-summary").textContent);
+  const dataElement = document.getElementById("buyer-profile-data");
+  const summaryElement = document.getElementById("buyer-profile-summary");
+  const tableHead = document.getElementById("buyer-profile-table-head");
+  const tableBody = document.getElementById("buyer-profile-table-body");
+  if (!dataElement || !summaryElement || !tableHead || !tableBody) return;
+
+  function failEmbeddedData() {
+    const caveat = document.getElementById("view-caveat");
+    const tableWrap = document.querySelector(".tbl-wrap");
+    const empty = document.getElementById("empty-state");
+    if (caveat) {
+      caveat.textContent = "Buyer-profile evidence is unavailable. Reload this page or regenerate the report.";
+      caveat.setAttribute("role", "alert");
+      caveat.setAttribute("aria-live", "assertive");
+    }
+    if (tableWrap) {
+      tableWrap.hidden = true;
+      tableWrap.setAttribute("aria-busy", "false");
+    }
+    if (empty) empty.hidden = true;
+  }
+
+  let rows;
+  let profiles;
+  try {
+    rows = JSON.parse(dataElement.textContent || "[]");
+    profiles = JSON.parse(summaryElement.textContent || "[]");
+    if (!Array.isArray(rows) || !rows.length || !Array.isArray(profiles) || !profiles.length) {
+      throw new TypeError("The embedded buyer-profile payload has an unexpected shape.");
+    }
+  } catch (error) {
+    failEmbeddedData();
+    return;
+  }
+
   const profileMap = new Map(profiles.map((profile) => [profile.profile_id, profile]));
   const defaultProfile = profiles[0]?.profile_id || "";
 
@@ -13,8 +46,8 @@
     visibleCount: document.getElementById("visible-count"),
     visibleCopy: document.getElementById("visible-copy"),
     segmentList: document.getElementById("segment-choice-list"),
-    tableHead: document.getElementById("buyer-profile-table-head"),
-    tableBody: document.getElementById("buyer-profile-table-body"),
+    tableHead,
+    tableBody,
     tableGuidance: document.getElementById("table-guidance"),
     sortStatus: document.getElementById("sort-status"),
     caveat: document.getElementById("view-caveat"),
@@ -579,6 +612,7 @@
       : "The default order follows the selected profile-and-tenure rank. Sorting reorganises evidence for inspection and does not create a cross-profile ranking.";
     elements.empty.hidden = visibleRows.length !== 0;
     elements.tableWrap.hidden = visibleRows.length === 0;
+    elements.tableWrap.setAttribute("aria-busy", "false");
     updateButtonState("[data-view]", "view", state.view);
     updateButtonState("[data-status]", "status", state.status);
     if (updateURL) syncURL();

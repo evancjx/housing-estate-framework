@@ -8,15 +8,18 @@ from pathlib import Path
 import re
 
 import pandas as pd
+import pytest
 
 import gen_private_project_comparison_html as table
 from sg_estate.domain.value import CFG as VALUE_CFG
+from sg_estate.project_locations import CURRENT_LOCATION_COLUMNS
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "private_project_comparison_table.html"
 SCRIPT = ROOT / "site" / "assets" / "private-project-comparison.js"
 STYLE = ROOT / "site" / "assets" / "private-project-comparison.css"
+CATALOG = ROOT / "site" / "assets" / "project-catalog" / "manifest.json"
 
 
 def _page() -> str:
@@ -98,6 +101,22 @@ def _sample_row() -> dict:
     }
 
 
+def _catalog() -> dict:
+    return table.private_project_catalog.load_project_catalog(CATALOG)
+
+
+def _published_rows() -> list[dict]:
+    return table.private_project_catalog.explorer_projects(_catalog())
+
+
+def _explorer_rows() -> list[dict]:
+    fields = _embedded("private-project-comparison-config")["explorer_fields"]
+    return [
+        {field: project[field] for field in fields}
+        for project in _published_rows()
+    ]
+
+
 def test_aggregate_projects_includes_private_school_metrics() -> None:
     private = pd.DataFrame([
         {
@@ -164,7 +183,21 @@ def test_aggregate_projects_includes_private_school_metrics() -> None:
         }
     }
 
-    rows = table.aggregate_projects(private, estates, mrt, master, {}, school_metrics)
+    rows = table.aggregate_projects(
+        private,
+        estates,
+        mrt,
+        master,
+        {
+            key: {
+                "lat": 1.0,
+                "lon": 103.0,
+                "match_status": "matched",
+                "match_score": 105,
+            }
+        },
+        school_metrics,
+    )
 
     assert len(rows) == 1
     row = rows[0]
@@ -177,6 +210,97 @@ def test_aggregate_projects_includes_private_school_metrics() -> None:
     assert row["best_primary_1km_rank"] == 3
     assert row["best_secondary_2km_school"] == "TOP SECONDARY"
     assert row["best_jc_5km_school"] == "TOP JC"
+
+
+def test_pending_project_location_uses_canonical_centroid_fallback(tmp_path) -> None:
+    locations_path = tmp_path / "locations.csv"
+    pd.DataFrame(
+        [
+            {
+                "project_name": "TEST CONDO",
+                "street_name": "TEST ROAD",
+                "postal_district": "10",
+                "planning_area": "BISHAN",
+                "lat": 1.2,
+                "lon": 103.2,
+                "match_status": "matched",
+                "match_sha256": "a" * 64,
+                "review_status": "pending_changed",
+                "reviewed_at": "2026-08-01T00:00:00Z",
+                "reviewed_match_sha256": "b" * 64,
+            }
+        ]
+    ).reindex(columns=CURRENT_LOCATION_COLUMNS).to_csv(locations_path, index=False)
+    private = pd.DataFrame(
+        [
+            {
+                "project_name": "TEST CONDO",
+                "street_name": "TEST ROAD",
+                "district": "10",
+                "planning_area": "BISHAN",
+                "unit_price_psm": 10_000,
+                "transacted_price": 1_000_000,
+                "area_sqm": 100,
+                "sale_month_dt": pd.Timestamp("2026-01-01"),
+                "sale_type_norm": "Resale",
+                "property_type": "Condominium",
+                "tenure": "Freehold",
+                "market_segment": "Outside Central Region",
+            }
+        ]
+    )
+    estates = pd.DataFrame([{"estate": "BISHAN", "lat": 1.0, "lon": 103.0}])
+    mrt = pd.DataFrame(
+        [
+            {
+                "name": "CENTROID MRT",
+                "stn_code": "TS1",
+                "line": "Test Line",
+                "lat": 1.0,
+                "lon": 103.01,
+                "operational": 1,
+            }
+        ]
+    )
+    master = pd.DataFrame(
+        [
+            {
+                "estate": "BISHAN",
+                "provision_band": "B+",
+                "provision_score": 4.1,
+                "value_private_band": "B",
+                "value_private_score": 3.8,
+                "value_private_n": 100,
+            }
+        ]
+    ).set_index("estate")
+
+    loaded = table.load_project_locations(locations_path)
+    location_key = table.project_location_key(
+        "TEST CONDO", "TEST ROAD", "10", "BISHAN"
+    )
+    rows = table.aggregate_projects(
+        private,
+        estates,
+        mrt,
+        master,
+        loaded,
+        {
+            location_key: {
+                "primary_1km_count": 9,
+                "primary_1km_schools": "STALE SCHOOL",
+            }
+        },
+    )
+
+    assert loaded == {}
+    assert rows[0]["location_source"] == "centroid_proxy"
+    assert rows[0]["project_lat"] is None
+    assert rows[0]["project_lon"] is None
+    assert rows[0]["geocode_status"] == "missing"
+    assert rows[0]["station"] == "CENTROID MRT"
+    assert rows[0]["school_metrics_source"] == "missing"
+    assert rows[0]["primary_1km_count"] is None
 
 
 def test_band_context_withholds_thin_private_value_decimal() -> None:
@@ -233,6 +357,10 @@ def test_rendered_explorer_uses_shared_shell_and_progressive_views() -> None:
     assert html.count("assets/estate-explorer.css") == 1
     assert html.count("assets/private-project-comparison.css") == 1
     assert html.count("assets/private-project-comparison.js") == 1
+    assert html.count("assets/data-loader.js") == 1
+    assert html.index("assets/data-loader.js") < html.index(
+        "assets/private-project-comparison.js"
+    )
     assert '<main id="research-content">' in html
     assert 'id="private-project-comparison-data" type="application/json"' in html
     assert 'id="private-project-comparison-config" type="application/json"' in html
@@ -250,6 +378,9 @@ def test_rendered_explorer_uses_shared_shell_and_progressive_views() -> None:
     assert 'data-view="overview" aria-pressed="true"' in html
     assert 'id="reset-view" type="button"' in html
     assert 'id="show-more" type="button"' in html
+    assert 'id="project-data-status" data-state="loading" role="status"' in html
+    assert 'id="project-data-retry" type="button" hidden' in html
+    assert 'aria-busy="true"' in html
     assert 'id="private-project-table"' in html
     assert 'id="private-project-table-head"' in html
     assert 'id="private-project-table-body"' in html
@@ -288,12 +419,15 @@ def test_rendered_explorer_exposes_single_value_filters_and_reset_states() -> No
 
 
 def test_committed_artifact_preserves_current_project_evidence_anchors() -> None:
-    rows = _embedded("private-project-comparison-data")
+    bootstrap = _embedded("private-project-comparison-data")
+    rows = _published_rows()
     config = _embedded("private-project-comparison-config")
 
+    assert isinstance(bootstrap, list)
     assert isinstance(rows, list)
     assert isinstance(config, dict)
     counts = config["counts"]
+    assert len(bootstrap) == config["bootstrap_projects"] == 100
     assert len(rows) == counts["projects"] == 2_400
     assert sum(row["n"] for row in rows) == counts["transactions"] == 102_895
     assert len({row["district"] for row in rows}) == counts["districts"] == 28
@@ -316,6 +450,17 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
     assert config["page_size"] == 100
     assert config["recent_window_months"] == 12
     assert config["value_trust_threshold"] == int(VALUE_CFG["trust_decimal_n"])
+    assert re.fullmatch(r"[0-9a-f]{64}", config["catalog_revision"])
+    assert config["catalog_path"] == (
+        f"assets/project-catalog/{config['catalog_revision']}/catalog.json"
+    )
+    assert config["catalog_revision"] == _catalog()["catalog_revision"]
+    assert (
+        config["transaction_dataset_revision"]
+        == _catalog()["transaction_dataset_revision"]
+    )
+    assert set(config["explorer_fields"]) <= set(bootstrap[0])
+    assert all(row["capabilities"]["private_explorer"] is True for row in bootstrap)
 
     projects = {row["project"] for row in rows}
     assert {
@@ -343,7 +488,8 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
 
 
 def test_committed_artifact_matches_the_template_renderer() -> None:
-    rows = _embedded("private-project-comparison-data")
+    rows = _explorer_rows()
+    catalog_rows = _published_rows()
     config = _embedded("private-project-comparison-config")
     generated_on = date.fromisoformat(config["generated_on"])
 
@@ -351,23 +497,29 @@ def test_committed_artifact_matches_the_template_renderer() -> None:
         rows,
         config["latest_month"],
         generated_on=generated_on,
+        catalog_revision=config["catalog_revision"],
+        transaction_dataset_revision=config["transaction_dataset_revision"],
+        catalog_projects=catalog_rows,
     ) == _page()
 
 
-def test_committed_artifact_matches_fresh_committed_inputs(tmp_path: Path) -> None:
+def test_fresh_review_gated_inputs_require_catalog_regeneration(tmp_path: Path) -> None:
     config = _embedded("private-project-comparison-config")
     output = tmp_path / PAGE.name
 
-    generated, count = table.generate(
-        ROOT / "data/inputs/ura_private.csv",
-        table.DEFAULT_LOCATION_PATH,
-        table.DEFAULT_SCHOOL_METRICS_PATH,
-        output,
-        generated_on=date.fromisoformat(config["generated_on"]),
-    )
+    with pytest.raises(
+        RuntimeError,
+        match="private-explorer evidence differs from generated rows",
+    ):
+        table.generate(
+            ROOT / "data/inputs/ura_private.csv",
+            table.DEFAULT_LOCATION_PATH,
+            table.DEFAULT_SCHOOL_METRICS_PATH,
+            output,
+            generated_on=date.fromisoformat(config["generated_on"]),
+        )
 
-    assert count == config["counts"]["projects"]
-    assert generated.read_text(encoding="utf-8") == _page()
+    assert not output.exists()
 
 
 def test_browser_asset_implements_accessible_url_backed_batched_table() -> None:
@@ -384,4 +536,21 @@ def test_browser_asset_implements_accessible_url_backed_batched_table() -> None:
     assert "toFixed(2)}×" not in script
     assert "page_size" in script or "pageSize" in script
     assert 'getElementById("show-more")' in script or "getElementById('show-more')" in script
+    assert "SGEstateData" in script
+    assert "validateProjectCatalog" in script
+    assert "project-data-retry" in script
+    assert "Serve this folder over HTTP" in script
     assert STYLE.is_file()
+
+
+def test_committed_private_explorer_stays_within_initial_html_budget() -> None:
+    assert PAGE.stat().st_size <= 750 * 1024
+    source = _page()
+    assert source.count("<tbody") == 1
+    body = re.search(
+        r'<tbody id="private-project-table-body">(.*?)</tbody>',
+        source,
+        flags=re.DOTALL,
+    )
+    assert body
+    assert "<tr" not in body.group(1)

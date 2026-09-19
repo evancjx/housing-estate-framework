@@ -11,6 +11,7 @@ import pytest
 import shapefile
 
 from models import ingest_lta_rail as rail
+from sg_estate import source_receipts
 
 
 def _zip_bytes(filename: str, payload: bytes) -> bytes:
@@ -222,9 +223,104 @@ def test_build_layer_preserves_memberships_and_geometry_provenance(built_layer) 
     assert by_code.loc["CR13", "planned_opening"] == "2030"
 
 
+def test_download_bytes_delegates_to_shared_adapter_with_exact_policy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = []
+
+    def fake_get_bytes(url, **kwargs):
+        calls.append((url, kwargs))
+        return b"reviewed-source"
+
+    monkeypatch.setattr(rail, "get_bytes", fake_get_bytes)
+
+    assert rail.download_bytes("https://example.test/source.zip", timeout=37) == (
+        b"reviewed-source"
+    )
+    assert calls == [
+        (
+            "https://example.test/source.zip",
+            {
+                "timeout": 37,
+                "headers": {"User-Agent": "sg-estate-framework/rail-ingester"},
+            },
+        )
+    ]
+
+
+def test_offline_requires_every_local_input_before_any_download(
+    built_layer,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, paths = built_layer
+
+    def unexpected_download(*_args, **_kwargs):
+        raise AssertionError("incomplete offline mode must not use HTTP")
+
+    monkeypatch.setattr(rail, "download_bytes", unexpected_download)
+
+    with pytest.raises(
+        rail.RailDataError,
+        match=(
+            r"--offline requires all four local archive inputs; missing "
+            r"--station-archive, --exit-archive, --ura-geojson"
+        ),
+    ):
+        rail.main(
+            [
+                "--offline",
+                "--codes-archive", str(paths["codes"]),
+                "--registry", str(paths["registry"]),
+            ]
+        )
+
+
+def test_downloaded_checksum_mismatch_preserves_existing_outputs(
+    built_layer,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, paths = built_layer
+    output = tmp_path / "mrt_layer.csv"
+    names = tmp_path / "mrt_layer_names.csv"
+    output.write_bytes(b"previous layer\n")
+    names.write_bytes(b"previous names\n")
+    registry = json.loads(paths["registry"].read_text(encoding="utf-8"))
+    codes_url = rail._source_url(registry, rail.SOURCE_CODES)
+    calls = []
+
+    def changed_download(url, **_kwargs):
+        calls.append(url)
+        assert url == codes_url
+        return b"upstream changed without review"
+
+    monkeypatch.setattr(rail, "download_bytes", changed_download)
+
+    with pytest.raises(rail.RailDataError, match="SHA-256 changed"):
+        rail.main(
+            [
+                "--station-archive", str(paths["stations"]),
+                "--exit-archive", str(paths["exits"]),
+                "--ura-geojson", str(paths["ura"]),
+                "--registry", str(paths["registry"]),
+                "--output", str(output),
+                "--names-output", str(names),
+            ]
+        )
+
+    assert calls == [codes_url]
+    assert output.read_bytes() == b"previous layer\n"
+    assert names.read_bytes() == b"previous names\n"
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+@pytest.mark.parametrize(
+    "mode_args", [[], ["--offline"]], ids=["implicit-local", "explicit-offline"]
+)
 def test_local_archive_cli_never_downloads_and_writes_atomically(
     built_layer,
     monkeypatch: pytest.MonkeyPatch,
+    mode_args: list[str],
 ) -> None:
     _, paths = built_layer
 
@@ -234,6 +330,7 @@ def test_local_archive_cli_never_downloads_and_writes_atomically(
     monkeypatch.setattr(rail, "download_bytes", unexpected_download)
     result = rail.main(
         [
+            *mode_args,
             "--codes-archive", str(paths["codes"]),
             "--station-archive", str(paths["stations"]),
             "--exit-archive", str(paths["exits"]),
@@ -254,6 +351,120 @@ def test_local_archive_cli_never_downloads_and_writes_atomically(
     assert len(names) == 259
     assert names["stn_code"].is_unique
     assert not list(paths["output"].parent.glob("*.tmp"))
+
+    layer_receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(paths["output"]),
+        output_path=paths["output"],
+    )
+    names_receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(paths["names"]),
+        output_path=paths["names"],
+    )
+    assert layer_receipt["dataset_id"] == "mrt_layer.csv"
+    assert layer_receipt["authority"] == (
+        "LTA DataMall + reviewed LTA status + URA planned geometry"
+    )
+    assert names_receipt["dataset_id"] == "mrt_layer_names.csv"
+    assert names_receipt["authority"] == "LTA DataMall + reviewed LTA status"
+    for receipt in (layer_receipt, names_receipt):
+        assert receipt["cache_state"] == "offline"
+        assert receipt["retrieved_at"] is None
+        assert receipt["coverage_start"] is None
+        assert receipt["coverage_end"] == rail.STATUS_AS_OF
+        assert receipt["row_count"] == 259
+        assert receipt["validation_status"] == "passed"
+        assert str(paths["output"].parent) not in receipt["source_identity"]
+
+
+def test_receipt_mode_reflects_partial_local_input_mix(
+    built_layer,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, paths = built_layer
+    downloaded_urls = []
+
+    payload_by_url = {
+        rail._source_url(
+            json.loads(paths["registry"].read_text()), rail.SOURCE_POLYGONS
+        ): paths["stations"].read_bytes(),
+        rail._source_url(
+            json.loads(paths["registry"].read_text()), rail.SOURCE_EXITS
+        ): paths["exits"].read_bytes(),
+    }
+    registry = json.loads(paths["registry"].read_text())
+    ura_poll = rail._source_url(registry, rail.SOURCE_URA, "poll_url")
+    ura_download = "https://example.test/ura.geojson"
+    payload_by_url[ura_poll] = json.dumps(
+        {"data": {"url": ura_download}}
+    ).encode()
+    payload_by_url[ura_download] = paths["ura"].read_bytes()
+
+    def fake_download(url, **_kwargs):
+        downloaded_urls.append(url)
+        return payload_by_url[url]
+
+    monkeypatch.setattr(rail, "download_bytes", fake_download)
+    result = rail.main(
+        [
+            "--codes-archive", str(paths["codes"]),
+            "--registry", str(paths["registry"]),
+            "--output", str(paths["output"]),
+            "--names-output", str(paths["names"]),
+        ]
+    )
+
+    assert result == 0
+    assert downloaded_urls == [
+        rail._source_url(registry, rail.SOURCE_POLYGONS),
+        rail._source_url(registry, rail.SOURCE_EXITS),
+        ura_poll,
+        ura_download,
+    ]
+    receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(paths["output"]),
+        output_path=paths["output"],
+    )
+    assert receipt["cache_state"] == "mixed"
+    assert receipt["retrieved_at"] is not None
+    names_receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(paths["names"]),
+        output_path=paths["names"],
+    )
+    assert names_receipt["cache_state"] == "offline"
+    assert names_receipt["retrieved_at"] is None
+
+
+def test_downloaded_code_plus_local_status_makes_names_receipt_mixed(
+    built_layer,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, paths = built_layer
+    registry = json.loads(paths["registry"].read_text())
+    codes_url = rail._source_url(registry, rail.SOURCE_CODES)
+
+    def fake_download(url, **_kwargs):
+        assert url == codes_url
+        return paths["codes"].read_bytes()
+
+    monkeypatch.setattr(rail, "download_bytes", fake_download)
+    result = rail.main(
+        [
+            "--station-archive", str(paths["stations"]),
+            "--exit-archive", str(paths["exits"]),
+            "--ura-geojson", str(paths["ura"]),
+            "--registry", str(paths["registry"]),
+            "--output", str(paths["output"]),
+            "--names-output", str(paths["names"]),
+        ]
+    )
+
+    assert result == 0
+    receipt = source_receipts.read_source_receipt(
+        source_receipts.receipt_path_for(paths["names"]),
+        output_path=paths["names"],
+    )
+    assert receipt["cache_state"] == "mixed"
+    assert receipt["retrieved_at"] is not None
 
 
 def test_validate_layer_rejects_a_duplicate_code(built_layer) -> None:

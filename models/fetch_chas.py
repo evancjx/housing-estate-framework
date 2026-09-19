@@ -3,7 +3,17 @@
 Fetch CHAS clinics — tries data.gov.sg first, falls back to OneMap Search.
 Writes SG-Estate-Framework/data/inputs/chas.csv  (lat, lon, name)
 """
+import argparse
 import csv, html, json, os, re, sys, time, urllib.request, urllib.parse, urllib.error
+from datetime import datetime, timezone
+from pathlib import Path
+
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_bytes, get_json
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "inputs")
 OUT = os.path.join(DATA_DIR, "chas.csv")
@@ -12,16 +22,38 @@ POLL_BASE = "https://api-open.data.gov.sg/v1/public/api/datasets/{}/poll-downloa
 # CHAS Clinics — data.gov.sg dataset. The /datasets search API no longer surfaces it, but
 # poll-download by this ID works. GeoJSON FeatureCollection (~1190 clinics, lat/lon + HCI_NAME).
 CHAS_DATASET_ID = "d_548c33ea2d99e29ec63a7cc9edcccedc"
+CHAS_AUTHORITY = "CHAS / data.gov.sg; OneMap fallback"
+DATASET_SEARCH_URL = (
+    "https://api-open.data.gov.sg/v1/public/api/datasets"
+    "?query=CHAS+clinic&resultSize=10"
+)
+
+
+def _datagov_metadata(dataset_id):
+    poll_url = POLL_BASE.format(dataset_id)
+    return {
+        "source_url": poll_url,
+        "source_urls": None,
+        "source_identity": f"data.gov.sg:{dataset_id}",
+        "cache_state": "fresh",
+        "fallback_state": "not_used",
+    }
 
 def http_get_json(url, timeout=30):
-    req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode())
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": "sg-estate-ingest/1.0"},
+        opener=urllib.request.urlopen,
+    )
 
 def http_get_bytes(url, timeout=60):
-    req = urllib.request.Request(url, headers={"User-Agent": "sg-estate-ingest/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+    return get_bytes(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": "sg-estate-ingest/1.0"},
+        opener=urllib.request.urlopen,
+    )
 
 # ------------------------------------------------------------------
 # Strategy 0 (primary): known CHAS dataset by ID
@@ -50,20 +82,20 @@ def _chas_from_geojson(raw: bytes):
 
 
 def try_datagov_known():
-    """Primary source: the known CHAS Clinics dataset, fetched by ID via poll-download."""
+    """Return ``(rows, metadata)`` from the known CHAS dataset."""
     print(f"[1/3] Fetching known CHAS dataset {CHAS_DATASET_ID}...")
     try:
         meta = http_get_json(POLL_BASE.format(CHAS_DATASET_ID), timeout=25)
         url = meta.get("data", {}).get("url") or meta.get("url")
         if not url:
             print("    no download URL in poll response")
-            return None
+            return None, None
         rows = _chas_from_geojson(http_get_bytes(url, timeout=60))
         print(f"    parsed {len(rows)} clinics")
-        return rows or None
+        return (rows, _datagov_metadata(CHAS_DATASET_ID)) if rows else (None, None)
     except Exception as e:
         print(f"    failed: {e}")
-        return None
+        return None, None
 
 # ------------------------------------------------------------------
 # Strategy 1: data.gov.sg search -> poll-download
@@ -71,9 +103,7 @@ def try_datagov_known():
 def try_datagov():
     print("[1/2] Searching data.gov.sg for CHAS clinic dataset...")
     try:
-        search = http_get_json(
-            "https://api-open.data.gov.sg/v1/public/api/datasets"
-            "?query=CHAS+clinic&resultSize=10", timeout=15)
+        search = http_get_json(DATASET_SEARCH_URL, timeout=15)
         datasets = search.get("data", {}).get("datasets", [])
         candidates = [d for d in datasets
                       if "chas" in d.get("name", "").lower()
@@ -82,7 +112,7 @@ def try_datagov():
               f"{[d.get('name','') for d in candidates]}")
     except Exception as e:
         print(f"  data.gov.sg search failed: {e}")
-        return None
+        return None, None
 
     for d in candidates:
         did = d.get("datasetId")
@@ -120,7 +150,7 @@ def try_datagov():
                     rows.append({"lat": lat, "lon": lon, "name": name})
                 if rows:
                     print(f"    Got {len(rows)} clinics from GeoJSON/JSON")
-                    return rows
+                    return rows, _datagov_metadata(did)
             else:
                 # CSV
                 import io, pandas as pd
@@ -143,10 +173,10 @@ def try_datagov():
                             continue
                     if rows:
                         print(f"    Got {len(rows)} clinics from CSV")
-                        return rows
+                        return rows, _datagov_metadata(did)
         except Exception as e:
             print(f"    Failed: {e}")
-    return None
+    return None, None
 
 # ------------------------------------------------------------------
 # Strategy 2: OneMap Search (no token needed)
@@ -154,6 +184,7 @@ def try_datagov():
 def try_onemap_search():
     print("[2/2] Falling back to OneMap Search API (no token)...")
     results = []
+    queried_urls = []
     for query in ["CHAS clinic", "GP clinic", "family clinic"]:
         print(f"  Searching: '{query}'...")
         page, total_pages = 1, 1
@@ -161,6 +192,7 @@ def try_onemap_search():
         while page <= total_pages:
             url = (f"{ONEMAP_SEARCH}?searchVal={urllib.parse.quote(query)}"
                    f"&returnGeom=Y&getAddrDetails=Y&pageNum={page}")
+            queried_urls.append(url)
             try:
                 data = http_get_json(url, timeout=20)
             except Exception as e:
@@ -193,17 +225,35 @@ def try_onemap_search():
         if key not in seen:
             seen.add(key)
             out.append(r)
-    return out
+    metadata = {
+        "source_url": queried_urls[0] if queried_urls else ONEMAP_SEARCH,
+        "source_urls": list(dict.fromkeys(queried_urls)) or None,
+        "source_identity": (
+            "OneMap Search queries: CHAS clinic, GP clinic, family clinic"
+        ),
+        "cache_state": "fresh",
+        "fallback_state": "used",
+    }
+    return out, metadata
 
 # ------------------------------------------------------------------
 # Main
 # ------------------------------------------------------------------
-def main():
-    rows = try_datagov_known()
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--out",
+        default=OUT,
+        help="Destination staged CSV; its receipt is written beside it",
+    )
+    args = parser.parse_args(argv)
+    out_path = os.path.abspath(args.out)
+
+    rows, metadata = try_datagov_known()
     if not rows:
-        rows = try_datagov()
+        rows, metadata = try_datagov()
     if not rows:
-        rows = try_onemap_search()
+        rows, metadata = try_onemap_search()
 
     if not rows:
         print("ERROR: Could not fetch CHAS clinics from any source.")
@@ -215,15 +265,45 @@ def main():
     MIN_EXPECTED_CLINICS = 200
     if len(rows) < MIN_EXPECTED_CLINICS:
         sys.exit(f"ERROR: only {len(rows)} clinics fetched (< {MIN_EXPECTED_CLINICS}); "
-                 f"refusing to overwrite {OUT}. The CHAS source is likely broken — "
+                 f"refusing to overwrite {out_path}. The CHAS source is likely broken — "
                  f"keep the committed chas.csv and investigate the fetch.")
 
-    with open(OUT, "w", newline="", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["lat", "lon", "name"])
         w.writeheader()
         w.writerows(rows)
 
-    print(f"\nDone — {len(rows)} clinics written to {OUT}")
+    with open(out_path, newline="", encoding="utf-8") as f:
+        persisted = list(csv.DictReader(f))
+    if set(persisted[0] if persisted else ()) != {"lat", "lon", "name"}:
+        raise ValueError(f"{out_path} failed CHAS column validation")
+    if len(persisted) != len(rows):
+        raise ValueError(
+            f"{out_path} row-count validation failed: expected {len(rows)}, "
+            f"got {len(persisted)}"
+        )
+    if metadata is None:
+        raise ValueError("successful CHAS acquisition is missing source metadata")
+
+    receipt = build_source_receipt(
+        out_path,
+        dataset_id="chas.csv",
+        authority=CHAS_AUTHORITY,
+        source_url=metadata["source_url"],
+        source_urls=metadata["source_urls"],
+        source_identity=metadata["source_identity"],
+        retrieved_at=datetime.now(timezone.utc),
+        coverage_start=None,
+        coverage_end=None,
+        row_count=len(persisted),
+        cache_state=metadata["cache_state"],
+        fallback_state=metadata["fallback_state"],
+        validation_status="passed",
+    )
+    write_source_receipt(out_path, receipt)
+
+    print(f"\nDone — {len(rows)} clinics written to {out_path}")
     print("Re-run provision_model.py adding:  --clinics ../data/inputs/chas.csv")
 
 if __name__ == "__main__":

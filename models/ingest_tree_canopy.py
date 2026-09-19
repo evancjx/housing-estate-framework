@@ -41,16 +41,24 @@ RUN:
       --out data/inputs/tree_canopy.csv
 """
 import argparse
+import http.client
 import json
 import math
 import os
 import sys
 import urllib.request
 import urllib.error
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
+
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_json
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
 
 MSS_URL = "https://api.data.gov.sg/v1/environment/air-temperature?date={d}"
 _UA = "Mozilla/5.0 (housing-estate-framework/2.0)"
@@ -58,6 +66,8 @@ REFERENCE_STATION = "S24"   # Upper Changi Road North (coastal cool baseline)
 N_MONTHS = 12
 GREEN_RADIUS_M = 250        # park-point influence radius (each point counts a circle)
 SAMPLE_RADIUS_M = 1000      # canopy sample circle around estate centroid
+_LAST_SUCCESSFUL_SAMPLE_DATES = []
+_LAST_SUCCESSFUL_SAMPLE_MODES = []
 
 
 def haversine_m(lat1, lon1, lat2, lon2):
@@ -69,9 +79,12 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 
 def _http_json(url, timeout=30):
-    req = urllib.request.Request(url, headers={"User-Agent": _UA,
-                                                "Accept": "application/json"})
-    return json.load(urllib.request.urlopen(req, timeout=timeout))
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": _UA, "Accept": "application/json"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def monthly_sample_dates(n_months=12):
@@ -89,6 +102,9 @@ def monthly_sample_dates(n_months=12):
 
 def fetch_station_means(cache_dir):
     """Sample MSS noon readings monthly; return {station_id: (lat, lon, mean_c)}."""
+    global _LAST_SUCCESSFUL_SAMPLE_DATES, _LAST_SUCCESSFUL_SAMPLE_MODES
+    _LAST_SUCCESSFUL_SAMPLE_DATES = []
+    _LAST_SUCCESSFUL_SAMPLE_MODES = []
     samples = {}    # station_id -> [readings]
     stations = {}   # station_id -> (lat, lon, name)
     if cache_dir:
@@ -96,8 +112,9 @@ def fetch_station_means(cache_dir):
 
     for d in monthly_sample_dates(N_MONTHS):
         cache = os.path.join(cache_dir, f"mss_{d}.json") if cache_dir else None
+        used_cache = bool(cache and os.path.exists(cache))
         try:
-            if cache and os.path.exists(cache):
+            if used_cache:
                 with open(cache) as f:
                     payload = json.load(f)
             else:
@@ -106,7 +123,13 @@ def fetch_station_means(cache_dir):
                 if cache:
                     with open(cache, "w") as f:
                         json.dump(payload, f)
-        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+        except (
+            urllib.error.HTTPError,
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+            http.client.IncompleteRead,
+        ) as e:
             print(f"  MSS {d} failed: {e}", file=sys.stderr)
             continue
 
@@ -129,6 +152,11 @@ def fetch_station_means(cache_dir):
         for sid, vals in per_day.items():
             if vals:
                 samples.setdefault(sid, []).append(sum(vals) / len(vals))
+        if per_day:
+            _LAST_SUCCESSFUL_SAMPLE_DATES.append(d)
+            _LAST_SUCCESSFUL_SAMPLE_MODES.append(
+                "cached" if used_cache else "fresh"
+            )
 
     result = {}
     for sid, vals in samples.items():
@@ -221,6 +249,9 @@ def main():
     assert {"lat", "lon"} <= set(parks.columns)
 
     print(f"Sampling {N_MONTHS} monthly MSS readings…", file=sys.stderr)
+    global _LAST_SUCCESSFUL_SAMPLE_DATES, _LAST_SUCCESSFUL_SAMPLE_MODES
+    _LAST_SUCCESSFUL_SAMPLE_DATES = []
+    _LAST_SUCCESSFUL_SAMPLE_MODES = []
     stations = fetch_station_means(args.cache_dir)
     print(f"  {len(stations)} stations with valid means", file=sys.stderr)
 
@@ -279,6 +310,55 @@ def main():
          "mss_station", "annual_mean_temp_c", "uhi_delta_c"]
     ]
     out_df.to_csv(args.out, index=False)
+    if use_mss_fallback:
+        source_url = None
+        source_urls = None
+        source_identity = (
+            "committed MSS fallback:"
+            f"{Path(args.mss_fallback or args.out).name}; "
+            f"parks input:{Path(args.parks).name}"
+        )
+        retrieved_at = None
+        coverage_start = None
+        coverage_end = None
+        cache_state = "offline"
+        fallback_state = "used"
+    else:
+        successful_dates = sorted(set(_LAST_SUCCESSFUL_SAMPLE_DATES))
+        sampled_urls = [MSS_URL.format(d=value) for value in successful_dates]
+        source_urls = sampled_urls or None
+        source_url = sampled_urls[0] if sampled_urls else None
+        source_identity = "MSS air-temperature samples + committed parks input"
+        successful_modes = set(_LAST_SUCCESSFUL_SAMPLE_MODES)
+        cache_state = (
+            "mixed"
+            if successful_modes == {"fresh", "cached"}
+            else next(iter(successful_modes), "unknown")
+        )
+        retrieved_at = (
+            datetime.now(timezone.utc)
+            if "fresh" in successful_modes
+            else None
+        )
+        coverage_start = successful_dates[0] if successful_dates else None
+        coverage_end = successful_dates[-1] if successful_dates else None
+        fallback_state = "not_used"
+    receipt = build_source_receipt(
+        args.out,
+        dataset_id="tree_canopy.csv",
+        authority="NParks parks snapshot + MSS / data.gov.sg",
+        source_url=source_url,
+        source_urls=source_urls,
+        source_identity=source_identity,
+        retrieved_at=retrieved_at,
+        coverage_start=coverage_start,
+        coverage_end=coverage_end,
+        row_count=len(out_df),
+        cache_state=cache_state,
+        fallback_state=fallback_state,
+        validation_status="passed",
+    )
+    write_source_receipt(args.out, receipt)
     print(f"\nWrote {len(out_df)} rows → {args.out}", file=sys.stderr)
 
     # Spot-check (brief Step 5): GEYLANG / TOA PAYOH +UHI;

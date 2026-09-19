@@ -31,6 +31,7 @@ Notes:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import math
@@ -42,16 +43,26 @@ from typing import Any
 
 import pandas as pd
 
+import private_project_catalog
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from sg_estate.domain.value import CFG as VALUE_CFG  # noqa: E402
+from sg_estate.project_locations import (  # noqa: E402
+    ProjectLocationContractError,
+    load_usable_project_locations,
+)
 
 DEFAULT_LOCATION_PATH = ROOT / "data/outputs/private_project_locations.csv"
 DEFAULT_SCHOOL_METRICS_PATH = ROOT / "data/outputs/private_project_school_metrics.csv"
 TEMPLATE_PATH = ROOT / "sg_estate/reporting/templates/private_project_comparison_table.html"
 VALUE_TRUST_THRESHOLD = int(VALUE_CFG["trust_decimal_n"])
+BOOTSTRAP_PROJECTS = 100
+CATALOG_SCHEMA = private_project_catalog.CATALOG_SCHEMA
+TRANSACTION_MANIFEST_PATH = ROOT / "site/assets/condo-transactions/manifest.json"
+DEFAULT_PROJECT_CATALOG = ROOT / "site/assets/project-catalog/manifest.json"
 
 CONDO_TYPE_RE = re.compile(r"\b(?:apartment|condominium|executive condominium)\b", re.I)
 SALE_TYPE_LABELS = {
@@ -217,16 +228,14 @@ def load_private(path: pathlib.Path) -> pd.DataFrame:
 def load_project_locations(path: pathlib.Path) -> dict[tuple[str, str, str, str], dict[str, Any]]:
     if not path.exists():
         return {}
-    locations = pd.read_csv(path)
+    try:
+        locations = load_usable_project_locations(path, missing_ok=True)
+    except ProjectLocationContractError as exc:
+        raise SystemExit(f"{path} has an invalid project-location contract: {exc}") from exc
     required = {"project_name", "street_name", "postal_district", "planning_area", "lat", "lon"}
     missing = sorted(required - set(locations.columns))
     if missing:
         raise SystemExit(f"{path} missing required columns: {missing}")
-
-    locations = locations.copy()
-    locations["lat"] = pd.to_numeric(locations["lat"], errors="coerce")
-    locations["lon"] = pd.to_numeric(locations["lon"], errors="coerce")
-    locations = locations[locations["lat"].notna() & locations["lon"].notna()]
 
     out: dict[tuple[str, str, str, str], dict[str, Any]] = {}
     for _, row in locations.iterrows():
@@ -427,7 +436,9 @@ def aggregate_projects(
         context_area, context_basis = context_for_area(area)
         location_key = project_location_key(project, street, district, area)
         location = project_locations.get(location_key)
-        school = school_context((school_metrics or {}).get(location_key))
+        school = school_context(
+            (school_metrics or {}).get(location_key) if location else None
+        )
         if location:
             station = nearest_station(float(location["lat"]), float(location["lon"]), stations)
             location_source = "project_geocode"
@@ -511,15 +522,131 @@ def option_html(value: str, label: str) -> str:
     return f'<option value="{html.escape(value)}">{html.escape(label)}</option>'
 
 
+def _sha256_payload(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=True,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _transaction_dataset_revision() -> str:
+    try:
+        manifest = json.loads(TRANSACTION_MANIFEST_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            f"Cannot load transaction dataset revision from {TRANSACTION_MANIFEST_PATH}: {exc}"
+        ) from exc
+    revision = manifest.get("dataset_revision")
+    if not isinstance(revision, str) or not re.fullmatch(r"[0-9a-f]{64}", revision):
+        raise RuntimeError("Transaction manifest has no valid dataset_revision")
+    return revision
+
+
+def _published_catalog_revisions(
+    rows: list[dict[str, Any]],
+    latest_month: str | None,
+    catalog_path: pathlib.Path,
+) -> tuple[str, str, list[dict[str, Any]]]:
+    try:
+        catalog = private_project_catalog.load_project_catalog(catalog_path)
+    except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Cannot load shared project catalog {catalog_path}: {exc}") from exc
+    required_keys = {
+        "schema",
+        "catalog_revision",
+        "transaction_dataset_revision",
+        "latest_project_month",
+        "counts",
+        "projects",
+        "contexts",
+    }
+    if not isinstance(catalog, dict) or set(catalog) != required_keys:
+        raise RuntimeError("Shared project catalog has an unexpected top-level contract")
+    if catalog.get("schema") != CATALOG_SCHEMA:
+        raise RuntimeError(f"Shared project catalog schema must be {CATALOG_SCHEMA}")
+    catalog_revision = catalog.get("catalog_revision")
+    transaction_revision = catalog.get("transaction_dataset_revision")
+    if not isinstance(catalog_revision, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", catalog_revision
+    ):
+        raise RuntimeError("Shared project catalog has no valid catalog_revision")
+    if not isinstance(transaction_revision, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", transaction_revision
+    ):
+        raise RuntimeError("Shared project catalog has no valid transaction revision")
+    if transaction_revision != _transaction_dataset_revision():
+        raise RuntimeError("Shared project catalog transaction revision is stale")
+    if catalog.get("latest_project_month") != latest_month:
+        raise RuntimeError("Shared project catalog latest month differs from explorer data")
+
+    projects = catalog.get("projects")
+    if not isinstance(projects, list):
+        raise RuntimeError("Shared project catalog projects must be an array")
+    explorer_projects = private_project_catalog.explorer_projects(catalog)
+    def identity(row: dict[str, Any]) -> tuple[str, str, str, str]:
+        return (
+            normalise_name(row.get("project")),
+            normalise_name(row.get("street")),
+            normalise_district(row.get("district")),
+            normalise_name(row.get("planning_area")),
+        )
+
+    published_by_identity = {identity(project): project for project in explorer_projects}
+    if len(published_by_identity) != len(explorer_projects) or set(
+        published_by_identity
+    ) != {identity(row) for row in rows}:
+        raise RuntimeError(
+            "Shared project catalog private-explorer membership differs from generated rows"
+        )
+    for row in rows:
+        published = published_by_identity[identity(row)]
+        if any(published.get(field) != value for field, value in row.items()):
+            raise RuntimeError(
+                "Shared project catalog private-explorer evidence differs from generated rows"
+            )
+    return catalog_revision, transaction_revision, explorer_projects
+
+
 def render_html(
     rows: list[dict[str, Any]],
     latest_month: str | None,
     *,
     generated_on: date | None = None,
+    catalog_revision: str | None = None,
+    transaction_dataset_revision: str | None = None,
+    catalog_projects: list[dict[str, Any]] | None = None,
 ) -> str:
     generated_on = generated_on or date.today()
     today = generated_on.isoformat()
-    data_js = json.dumps(rows, indent=2).replace("</", "<\\/")
+    bootstrap_rows = sorted(
+        catalog_projects or rows,
+        key=lambda row: (
+            normalise_name(row.get("project")).casefold(),
+            normalise_name(row.get("street")).casefold(),
+            normalise_district(row.get("district")),
+        ),
+    )[:BOOTSTRAP_PROJECTS]
+    data_js = json.dumps(
+        bootstrap_rows,
+        ensure_ascii=True,
+        separators=(",", ":"),
+    ).replace("</", "<\\/")
+    transaction_dataset_revision = (
+        transaction_dataset_revision or _transaction_dataset_revision()
+    )
+    catalog_revision = catalog_revision or _sha256_payload(
+        {
+            "schema": CATALOG_SCHEMA,
+            "latest_project_month": latest_month,
+            "transaction_dataset_revision": transaction_dataset_revision,
+            "projects": rows,
+        }
+    )
+    if not re.fullmatch(r"[0-9a-f]{64}", catalog_revision):
+        raise ValueError("catalog_revision must be a lowercase SHA-256 digest")
 
     station_counts = pd.Series([row["station_key"] for row in rows]).value_counts().to_dict()
     station_labels = {
@@ -547,6 +674,11 @@ def render_html(
 
     config = {
         "page_size": 100,
+        "bootstrap_projects": len(bootstrap_rows),
+        "explorer_fields": sorted(rows[0]) if rows else [],
+        "catalog_path": private_project_catalog.catalog_asset_path(catalog_revision),
+        "catalog_revision": catalog_revision,
+        "transaction_dataset_revision": transaction_dataset_revision,
         "recent_window_months": 12,
         "value_trust_threshold": VALUE_TRUST_THRESHOLD,
         "latest_month": latest_month,
@@ -595,6 +727,9 @@ def generate(
     out_path: pathlib.Path,
     *,
     generated_on: date | None = None,
+    catalog_revision: str | None = None,
+    transaction_dataset_revision: str | None = None,
+    project_catalog_path: pathlib.Path = DEFAULT_PROJECT_CATALOG,
 ) -> tuple[pathlib.Path, int]:
     private = load_private(private_path)
     project_locations = load_project_locations(location_path)
@@ -605,7 +740,27 @@ def generate(
 
     rows = aggregate_projects(private, estates, mrt, master, project_locations, school_metrics)
     latest_month = month_text(private["sale_month_dt"].max())
-    html_text = render_html(rows, latest_month, generated_on=generated_on)
+    catalog_projects: list[dict[str, Any]] | None = None
+    if catalog_revision is None or transaction_dataset_revision is None:
+        (
+            published_catalog_revision,
+            published_transaction_revision,
+            catalog_projects,
+        ) = (
+            _published_catalog_revisions(rows, latest_month, project_catalog_path)
+        )
+        catalog_revision = catalog_revision or published_catalog_revision
+        transaction_dataset_revision = (
+            transaction_dataset_revision or published_transaction_revision
+        )
+    html_text = render_html(
+        rows,
+        latest_month,
+        generated_on=generated_on,
+        catalog_revision=catalog_revision,
+        transaction_dataset_revision=transaction_dataset_revision,
+        catalog_projects=catalog_projects,
+    )
     out_path.write_text(html_text, encoding="utf-8")
     return out_path, len(rows)
 
@@ -624,6 +779,11 @@ def main() -> None:
         help="Optional project school diagnostics CSV from models/private_school_metrics.py",
     )
     parser.add_argument("--out", default=str(ROOT / "private_project_comparison_table.html"), help="HTML output path")
+    parser.add_argument(
+        "--project-catalog",
+        default=str(DEFAULT_PROJECT_CATALOG),
+        help="Published shared project catalog selector used to bind the page revision",
+    )
     args = parser.parse_args()
 
     out_path, row_count = generate(
@@ -631,6 +791,7 @@ def main() -> None:
         pathlib.Path(args.locations),
         pathlib.Path(args.school_metrics),
         pathlib.Path(args.out),
+        project_catalog_path=pathlib.Path(args.project_catalog),
     )
     print(f"Written: {out_path} ({out_path.stat().st_size // 1024} KB, {row_count} project records)")
 

@@ -15,7 +15,8 @@ unit_number_status.
 
 Commands:
     python3 scrapers/edgeprop_condo_apartment_playwright.py discover
-    python3 scrapers/edgeprop_condo_apartment_playwright.py scrape --resume
+    python3 scrapers/edgeprop_condo_apartment_playwright.py scrape \
+        --generation-manifest data/runs/edgeprop-condo/run.json
 """
 
 from __future__ import annotations
@@ -23,16 +24,31 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import hashlib
 import html
+import inspect
+import io
+import os
 import re
 import sys
+import tempfile
+import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
+
+# Direct script execution exposes ``scrapers/`` but not necessarily the
+# repository root. Bootstrap it before importing the shared generation API.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from sg_estate import scrape_generation
+from sg_estate.contracts import ContractError
 
 try:
     from playwright.async_api import TimeoutError as PlaywrightTimeoutError
@@ -51,6 +67,9 @@ BASE_URL = "https://www.edgeprop.sg"
 DEFAULT_INDEX_URL = f"{BASE_URL}/condo-apartment/all"
 DEFAULT_PROJECTS = "data/raw/edgeprop/edgeprop_condo_apartment_projects.csv"
 DEFAULT_OUTPUT = "data/raw/edgeprop/edgeprop_condo_apartment_transactions_playwright_not_clean.csv"
+DEFAULT_GENERATION_OUTPUT = "edgeprop_condo_apartment_transactions.csv"
+GENERATION_SOURCE = "edgeprop_condo_apartment"
+ARTIFACT_SCHEMA = "edgeprop-condo-unit.v1"
 
 DATE_RE = re.compile(r"^\d{1,2}\s+[A-Z]{3}\s+\d{4}$", re.I)
 MONEY_RE = re.compile(r"^-?\d[\d,]*(?:\.\d+)?$")
@@ -95,6 +114,18 @@ class ScrapeResult:
     rows: list[dict[str, Any]]
     pages_scraped: int = 0
     oldest_date: str = ""
+    completion_reason: str = ""
+    source_advertised_count: int | None = None
+
+
+@dataclass(frozen=True)
+class GenerationRun:
+    manifest_path: Path
+    root: Path
+    scope: dict[str, object]
+    projects: tuple[dict[str, str], ...]
+    output_path: Path
+    unit_output_path: Path | None
 
 
 class LinkTextParser(HTMLParser):
@@ -350,7 +381,15 @@ def read_project_links(path: Path) -> list[dict[str, str]]:
         missing = required - set(reader.fieldnames or [])
         if missing:
             raise SystemExit(f"ERROR: {path} missing columns: {sorted(missing)}")
-        return [row for row in reader if row.get("url")]
+        return [
+            {
+                "name": clean_line(row.get("name", "")),
+                "url": clean_line(row.get("url", "")),
+                "slug": clean_line(row.get("slug", "")),
+            }
+            for row in reader
+            if row.get("url")
+        ]
 
 
 def read_completed_urls(path: Path) -> set[str]:
@@ -376,12 +415,49 @@ def append_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def write_unit_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     """Write the complete unit-level schema, including unavailable-unit rows."""
+    write_csv_atomic(path, UNIT_FIELDS, rows)
+
+
+def write_csv_atomic(
+    path: Path,
+    fieldnames: list[str],
+    rows: list[dict[str, Any]],
+) -> None:
+    """Replace one CSV atomically after rendering its complete contents."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=UNIT_FIELDS)
-        writer.writeheader()
-        for row in rows:
-            writer.writerow({field: row.get(field, "") for field in UNIT_FIELDS})
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({field: row.get(field, "") for field in fieldnames})
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        directory_descriptor = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_descriptor)
+        finally:
+            os.close(directory_descriptor)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def read_csv_exact(path: Path, expected_fields: list[str]) -> list[dict[str, str]]:
+    """Read one CSV only when its header is exactly the requested schema."""
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != expected_fields:
+            raise ContractError(
+                f"{path} has unexpected CSV header; expected {expected_fields!r}, "
+                f"got {reader.fieldnames!r}"
+            )
+        return list(reader)
 
 
 def append_unit_rows(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -516,17 +592,22 @@ async def scrape_project(
 
     text = await page.locator("body").inner_text(timeout=15_000)
     project_name, planning_area, district, property_type, tenure = project_context(text, project.get("name", ""))
+    source_advertised_count = advertised_sales_count(text)
 
     rows: list[dict[str, Any]] = []
     seen: set[tuple[Any, ...]] = set()
     oldest: datetime | None = None
     pages_scraped = 0
+    completion_reason = ""
 
     while pages_scraped < max_pages:
         text = ""
         page_rows: list[dict[str, Any]] = []
         for attempt in range(20):
             text = await page.locator("body").inner_text(timeout=15_000)
+            advertised_count = advertised_sales_count(text)
+            if advertised_count is not None:
+                source_advertised_count = advertised_count
             page_rows = parse_transaction_text(
                 text,
                 project_name=project_name,
@@ -549,6 +630,7 @@ async def scrape_project(
             await page.wait_for_timeout(500)
         pages_scraped += 1
         if not page_rows:
+            completion_reason = "zero_rows" if not rows else "pagination_rows_missing"
             break
 
         page_dates = [date for date in (row_date(row) for row in page_rows) if date is not None]
@@ -576,13 +658,18 @@ async def scrape_project(
             row["source_slug"] = project.get("slug", "")
             rows.append(row)
 
-        if page_dates and max(date.year for date in page_dates) < from_year:
+        if page_dates and min(date.year for date in page_dates) < from_year:
+            completion_reason = "from_year_boundary"
             break
 
         next_button = page.locator(
             "#SalesTransaction .ant-pagination-next:not(.ant-pagination-disabled) button"
         )
         if await next_button.count() == 0:
+            completion_reason = "terminal_pagination"
+            break
+        if pages_scraped >= max_pages:
+            completion_reason = "max_pages_exhausted"
             break
         old_key = first_row_key(page_rows)
         advanced = False
@@ -605,95 +692,675 @@ async def scrape_project(
             except Exception:
                 await page.wait_for_timeout(1000)
         if not advanced:
+            completion_reason = "pagination_click_failure"
             break
 
     oldest_date = oldest.strftime("%Y-%m-%d") if oldest else ""
-    return ScrapeResult(rows=rows, pages_scraped=pages_scraped, oldest_date=oldest_date)
+    if not completion_reason:
+        completion_reason = "max_pages_exhausted"
+    return ScrapeResult(
+        rows=rows,
+        pages_scraped=pages_scraped,
+        oldest_date=oldest_date,
+        completion_reason=completion_reason,
+        source_advertised_count=source_advertised_count,
+    )
 
 
-async def scrape(args: argparse.Namespace) -> None:
-    if async_playwright is None:
-        raise SystemExit("pip install playwright --break-system-packages")
-    projects = read_project_links(Path(args.input))
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def partition_id_for_url(source_url: str) -> str:
+    """Return a stable identifier-safe partition key without altering evidence."""
+    return f"url-{sha256_bytes(source_url.encode('utf-8'))}"
+
+
+def read_project_catalog(path: Path) -> tuple[list[dict[str, str]], str]:
+    """Read project rows and hash the exact catalog bytes used for the batch."""
+    try:
+        raw = path.read_bytes()
+        text = raw.decode("utf-8-sig")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise SystemExit(f"ERROR: cannot read project catalog {path}: {exc}") from exc
+    reader = csv.DictReader(io.StringIO(text, newline=""))
+    required = {"name", "url", "slug"}
+    missing = required - set(reader.fieldnames or [])
+    if missing:
+        raise SystemExit(f"ERROR: {path} missing columns: {sorted(missing)}")
+    projects = [
+        {
+            "name": clean_line(row.get("name", "")),
+            "url": clean_line(row.get("url", "")),
+            "slug": clean_line(row.get("slug", "")),
+        }
+        for row in reader
+        if row.get("url")
+    ]
+    return projects, sha256_bytes(raw)
+
+
+def select_project_batch(
+    projects: list[dict[str, str]], args: argparse.Namespace
+) -> list[dict[str, str]]:
+    selected = projects
     if args.match:
         needle = args.match.lower()
-        projects = [
-            project for project in projects
-            if needle in project.get("name", "").lower() or needle in project.get("slug", "").lower()
+        selected = [
+            project
+            for project in selected
+            if needle in project.get("name", "").lower()
+            or needle in project.get("slug", "").lower()
         ]
     if args.start:
-        projects = projects[args.start:]
+        selected = selected[args.start :]
     if args.limit:
-        projects = projects[: args.limit]
+        selected = selected[: args.limit]
+    return [
+        {**project, "partition_id": partition_id_for_url(project["url"])}
+        for project in selected
+    ]
 
-    out = Path(args.out)
-    unit_out = Path(args.unit_out) if args.unit_out else None
-    log_path = Path(args.log) if args.log else out.with_name(f"{out.stem}_attempts.csv")
-    completed = read_completed_urls(out) if args.resume else set()
-    completed |= read_completed_urls(log_path) if args.resume_attempts else set()
-    if completed:
-        projects = [project for project in projects if project["url"] not in completed]
 
-    if not projects:
-        print("Nothing to scrape.")
-        return
+def requested_scope(
+    *,
+    catalog_path: Path,
+    catalog_sha256: str,
+    projects: list[dict[str, str]],
+    from_year: int,
+    max_pages: int,
+    access_mode: str,
+) -> dict[str, object]:
+    return {
+        "project_catalog": {
+            "name": catalog_path.name,
+            "sha256": catalog_sha256,
+        },
+        "partitions": [
+            {
+                "partition_id": project["partition_id"],
+                "name": project["name"],
+                "source_url": project["url"],
+                "source_slug": project["slug"],
+            }
+            for project in projects
+        ],
+        "parameters": {
+            "access_mode": access_mode,
+            "artifact_schema": ARTIFACT_SCHEMA,
+            "from_year": from_year,
+            "max_pages": max_pages,
+        },
+    }
+
+
+def generation_local_path(root: Path, value: str, *, option: str) -> Path:
+    supplied = Path(value)
+    candidate = supplied if supplied.is_absolute() else root / supplied
+    resolved = candidate.resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError as exc:
+        raise SystemExit(
+            f"ERROR: {option} must resolve inside the generation root {root}"
+        ) from exc
+    return resolved
+
+
+def prepare_generation(args: argparse.Namespace) -> GenerationRun:
+    if getattr(args, "resume_attempts", False):
+        raise SystemExit(
+            "ERROR: --resume-attempts is unsupported: legacy attempt CSVs are "
+            "diagnostics only and are never resume evidence"
+        )
+    if args.start < 0:
+        raise SystemExit("ERROR: --start must be non-negative")
+    if args.limit is not None and args.limit <= 0:
+        raise SystemExit("ERROR: --limit must be positive")
+    if args.max_pages <= 0:
+        raise SystemExit("ERROR: --max-pages must be positive")
+    if args.from_year <= 0:
+        raise SystemExit("ERROR: --from-year must be positive")
 
     storage_state = None
     if args.storage_state:
         storage_path = Path(args.storage_state)
         if not storage_path.is_file():
             raise SystemExit(f"ERROR: --storage-state does not exist: {storage_path}")
-        storage_state = str(storage_path)
+        storage_state = str(storage_path.resolve())
+    args.storage_state = storage_state
 
-    total_rows = 0
-    all_status_counts = unit_status_counts([])
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=not args.headed)
-        context = await browser.new_context(
-            viewport={"width": 1440, "height": 1600},
-            user_agent=DEFAULT_USER_AGENT,
-            storage_state=storage_state,
+    catalog_path = Path(args.input)
+    projects, catalog_sha256 = read_project_catalog(catalog_path)
+    projects = select_project_batch(projects, args)
+    if not projects:
+        raise SystemExit("ERROR: the post-filter project batch is empty")
+    scope = requested_scope(
+        catalog_path=catalog_path,
+        catalog_sha256=catalog_sha256,
+        projects=projects,
+        from_year=args.from_year,
+        max_pages=args.max_pages,
+        access_mode="authorized" if storage_state else "public",
+    )
+
+    manifest_path = Path(args.generation_manifest).resolve()
+    root = manifest_path.parent
+    root.mkdir(parents=True, exist_ok=True)
+    output_path = generation_local_path(root, args.out, option="--out")
+    unit_output_path = (
+        generation_local_path(root, args.unit_out, option="--unit-out")
+        if args.unit_out
+        else None
+    )
+    reserved = {manifest_path}
+    if output_path in reserved:
+        raise SystemExit("ERROR: --out must not be the generation manifest")
+    if unit_output_path in reserved or unit_output_path == output_path:
+        raise SystemExit("ERROR: --unit-out must be distinct from the manifest and --out")
+    artifacts_root = (root / "artifacts").resolve()
+    try:
+        artifacts_root.relative_to(root.resolve())
+    except ValueError as exc:
+        raise SystemExit(
+            "ERROR: reserved artifacts/ directory resolves outside the generation root"
+        ) from exc
+    for label, candidate in (("--out", output_path), ("--unit-out", unit_output_path)):
+        if candidate is None:
+            continue
+        try:
+            candidate.relative_to(artifacts_root)
+        except ValueError:
+            pass
+        else:
+            raise SystemExit(f"ERROR: {label} must not use the reserved artifacts/ directory")
+
+    if args.log:
+        log_path = Path(args.log).resolve()
+        if log_path in {manifest_path, output_path, unit_output_path}:
+            raise SystemExit(
+                "ERROR: --log must not overwrite generation evidence or a candidate"
+            )
+        try:
+            log_path.relative_to(artifacts_root)
+        except ValueError:
+            pass
+        else:
+            raise SystemExit("ERROR: --log must not use the reserved artifacts/ directory")
+        args.log = str(log_path)
+
+    if manifest_path.exists():
+        manifest = scrape_generation.load_generation(
+            manifest_path,
+            expected_source=GENERATION_SOURCE,
+            expected_scope=scope,
+            expected_generation_id=args.generation_id,
         )
-        page = await context.new_page()
-        for idx, project in enumerate(projects, 1):
-            error = ""
-            status = "ok"
-            result = ScrapeResult(rows=[])
-            try:
-                result = await scrape_project(
-                    page,
-                    project,
-                    wait_ms=args.wait_ms,
-                    max_pages=args.max_pages,
-                    timeout_ms=args.timeout_ms,
-                    from_year=args.from_year,
-                )
-            except Exception as exc:
-                error = str(exc)
-                status = "error"
-                print(f"[{idx}/{len(projects)}] ERROR {project['url']}: {exc}", file=sys.stderr, flush=True)
-            if result.rows:
-                append_rows(out, result.rows)
-                if unit_out:
-                    append_unit_rows(unit_out, result.rows)
-                total_rows += len(result.rows)
-                project_counts = unit_status_counts(result.rows)
-                for status, count in project_counts.items():
-                    all_status_counts[status] += count
-            append_attempt(log_path, project, result, status, error)
+    else:
+        manifest = scrape_generation.new_generation(
+            GENERATION_SOURCE,
+            scope,
+            generation_id=args.generation_id,
+            now=utc_now(),
+        )
+        scrape_generation.write_generation(manifest_path, manifest)
+
+    normalized_projects = {
+        project["partition_id"]: project for project in projects
+    }
+    ordered_projects = tuple(
+        normalized_projects[str(partition["partition_id"])]
+        for partition in manifest["requested_scope"]["partitions"]
+    )
+    return GenerationRun(
+        manifest_path=manifest_path,
+        root=root,
+        scope=scope,
+        projects=ordered_projects,
+        output_path=output_path,
+        unit_output_path=unit_output_path,
+    )
+
+
+def validate_unit_rows(
+    rows: list[dict[str, Any]], project: dict[str, str], *, source: str
+) -> None:
+    if not rows:
+        raise ContractError(f"{source} has no transaction rows")
+    for index, row in enumerate(rows):
+        if row.get("source_url") != project["url"]:
+            raise ContractError(
+                f"{source} row {index} source_url does not match {project['url']!r}"
+            )
+        if row.get("source_slug") != project["slug"]:
+            raise ContractError(
+                f"{source} row {index} source_slug does not match exact source slug "
+                f"{project['slug']!r}"
+            )
+
+
+def validate_unit_artifact(
+    path: Path,
+    project: dict[str, str],
+    *,
+    expected_count: int | None = None,
+) -> list[dict[str, str]]:
+    rows = read_csv_exact(path, UNIT_FIELDS)
+    validate_unit_rows(rows, project, source=str(path))
+    if expected_count is not None and len(rows) != expected_count:
+        raise ContractError(
+            f"{path} row count mismatch: expected {expected_count}, got {len(rows)}"
+        )
+    return rows
+
+
+def attempt_observations(result: ScrapeResult) -> dict[str, object]:
+    return {
+        "completion_reason": result.completion_reason,
+        "oldest_date": result.oldest_date or None,
+        "pages_scraped": result.pages_scraped,
+        "parsed_row_count": len(result.rows),
+        "source_advertised_count": result.source_advertised_count,
+    }
+
+
+def append_diagnostic_attempt(
+    path_text: str | None,
+    project: dict[str, str],
+    result: ScrapeResult,
+    status: str,
+    error: str,
+) -> None:
+    if not path_text:
+        return
+    try:
+        append_attempt(Path(path_text), project, result, status, error)
+    except OSError as exc:
+        print(f"WARNING: could not append diagnostic log {path_text}: {exc}", file=sys.stderr)
+
+
+def new_attempt_id() -> str:
+    return f"attempt-{uuid.uuid4().hex}"
+
+
+async def invoke_scrape_project(
+    scrape_project_fn: Callable[..., Any],
+    page: Any,
+    project: dict[str, str],
+    args: argparse.Namespace,
+) -> ScrapeResult:
+    result = scrape_project_fn(
+        page,
+        project,
+        wait_ms=args.wait_ms,
+        max_pages=args.max_pages,
+        timeout_ms=args.timeout_ms,
+        from_year=args.from_year,
+    )
+    if inspect.isawaitable(result):
+        result = await result
+    if not isinstance(result, ScrapeResult):
+        raise TypeError("scrape_project must return ScrapeResult")
+    return result
+
+
+def record_failed_attempt(
+    run: GenerationRun,
+    project: dict[str, str],
+    result: ScrapeResult,
+    *,
+    started_at: datetime,
+    retrieved_at: datetime | None,
+    error_code: str,
+    error_message: str,
+) -> None:
+    completed_at = utc_now()
+    scrape_generation.record_attempt(
+        run.manifest_path,
+        project["partition_id"],
+        method="playwright",
+        status="failed",
+        started_at=started_at,
+        retrieved_at=retrieved_at,
+        completed_at=completed_at,
+        source_reported_row_count=result.source_advertised_count,
+        error_code=error_code,
+        error_message=error_message or error_code,
+        observations=attempt_observations(result),
+        attempt_id=new_attempt_id(),
+        now=completed_at,
+    )
+
+
+async def scrape_pending_projects(
+    run: GenerationRun,
+    args: argparse.Namespace,
+    page: Any,
+    *,
+    scrape_project_fn: Callable[..., Any] = scrape_project,
+) -> None:
+    successful = scrape_generation.successful_partition_ids(run.manifest_path)
+    pending_projects = [
+        project for project in run.projects if project["partition_id"] not in successful
+    ]
+    for idx, project in enumerate(pending_projects, 1):
+        started_at = utc_now()
+        result = ScrapeResult(rows=[])
+        retrieved_at: datetime | None = None
+        try:
+            result = await invoke_scrape_project(scrape_project_fn, page, project, args)
+            retrieved_at = utc_now()
+        except Exception as exc:
+            message = str(exc) or type(exc).__name__
+            record_failed_attempt(
+                run,
+                project,
+                result,
+                started_at=started_at,
+                retrieved_at=None,
+                error_code="scrape_exception",
+                error_message=message,
+            )
+            append_diagnostic_attempt(args.log, project, result, "failed", message)
             print(
-                f"[{idx}/{len(projects)}] {project.get('name', '')}: "
-                f"{len(result.rows)} rows, {result.pages_scraped} pages",
+                f"[{idx}/{len(pending_projects)}] ERROR {project['url']}: {message}",
+                file=sys.stderr,
                 flush=True,
             )
-            if args.delay:
-                await page.wait_for_timeout(int(args.delay * 1000))
-        await browser.close()
+            continue
 
-    print(f"Wrote {total_rows} transaction rows to {out}", flush=True)
-    if unit_out:
-        summary = ", ".join(f"{status}={count}" for status, count in all_status_counts.items())
-        print(f"Wrote unit provenance rows to {unit_out} ({summary})", flush=True)
+        if not result.rows:
+            reason = "zero_rows"
+            message = (
+                "project returned no rows; EdgeProp empty results cannot be "
+                "selected as complete"
+            )
+            record_failed_attempt(
+                run,
+                project,
+                result,
+                started_at=started_at,
+                retrieved_at=retrieved_at,
+                error_code=reason,
+                error_message=message,
+            )
+            append_diagnostic_attempt(args.log, project, result, "failed", message)
+            print(
+                f"[{idx}/{len(pending_projects)}] {project['name']}: 0 rows (pending)",
+                flush=True,
+            )
+            continue
+
+        if result.completion_reason not in {"terminal_pagination", "from_year_boundary"}:
+            reason = result.completion_reason or "completion_unproven"
+            message = (
+                f"partial rows were not selected because completion was {reason!r}"
+            )
+            record_failed_attempt(
+                run,
+                project,
+                result,
+                started_at=started_at,
+                retrieved_at=retrieved_at,
+                error_code=reason,
+                error_message=message,
+            )
+            append_diagnostic_attempt(args.log, project, result, "failed", message)
+            print(
+                f"[{idx}/{len(pending_projects)}] {project['name']}: "
+                f"{len(result.rows)} partial rows ({reason}; pending)",
+                flush=True,
+            )
+            continue
+
+        attempt_id = new_attempt_id()
+        artifact_path = (
+            run.root / "artifacts" / project["partition_id"] / f"{attempt_id}.csv"
+        )
+        try:
+            if artifact_path.exists():
+                raise ContractError(f"refusing to overwrite attempt artifact {artifact_path}")
+            validate_unit_rows(result.rows, project, source="scraped project rows")
+            write_csv_atomic(artifact_path, UNIT_FIELDS, result.rows)
+            validate_unit_artifact(
+                artifact_path, project, expected_count=len(result.rows)
+            )
+        except Exception as exc:
+            artifact_path.unlink(missing_ok=True)
+            message = str(exc) or type(exc).__name__
+            record_failed_attempt(
+                run,
+                project,
+                result,
+                started_at=started_at,
+                retrieved_at=retrieved_at,
+                error_code="artifact_validation_failed",
+                error_message=message,
+            )
+            append_diagnostic_attempt(args.log, project, result, "failed", message)
+            print(
+                f"[{idx}/{len(pending_projects)}] ERROR {project['url']}: {message}",
+                file=sys.stderr,
+                flush=True,
+            )
+            continue
+
+        completed_at = utc_now()
+        reported_count = (
+            result.source_advertised_count
+            if result.source_advertised_count == len(result.rows)
+            else None
+        )
+        scrape_generation.record_attempt(
+            run.manifest_path,
+            project["partition_id"],
+            method="playwright",
+            status="succeeded",
+            started_at=started_at,
+            retrieved_at=retrieved_at,
+            completed_at=completed_at,
+            artifact_path=artifact_path,
+            source_reported_row_count=reported_count,
+            observations=attempt_observations(result),
+            attempt_id=attempt_id,
+            now=completed_at,
+        )
+        append_diagnostic_attempt(args.log, project, result, "succeeded", "")
+        print(
+            f"[{idx}/{len(pending_projects)}] {project['name']}: "
+            f"{len(result.rows)} rows, {result.pages_scraped} pages "
+            f"({result.completion_reason})",
+            flush=True,
+        )
+        if args.delay:
+            await page.wait_for_timeout(int(args.delay * 1000))
+
+
+def validate_candidate(
+    path: Path,
+    fieldnames: list[str],
+    *,
+    expected_count: int,
+    projects_by_url: dict[str, dict[str, str]],
+    expected_counts: dict[str, int],
+) -> list[dict[str, str]]:
+    rows = read_csv_exact(path, fieldnames)
+    if len(rows) != expected_count:
+        raise ContractError(
+            f"{path} row count mismatch: expected {expected_count}, got {len(rows)}"
+        )
+    actual_counts = {source_url: 0 for source_url in expected_counts}
+    for index, row in enumerate(rows):
+        source_url = row.get("source_url", "")
+        project = projects_by_url.get(source_url)
+        if project is None:
+            raise ContractError(f"{path} row {index} has out-of-scope source_url {source_url!r}")
+        if row.get("source_slug") != project["slug"]:
+            raise ContractError(
+                f"{path} row {index} source_slug does not match exact source slug "
+                f"{project['slug']!r}"
+            )
+        actual_counts[source_url] += 1
+    if actual_counts != expected_counts:
+        raise ContractError(
+            f"{path} per-project row counts do not match selected artifacts"
+        )
+    return rows
+
+
+def reconcile_generation(run: GenerationRun) -> dict[str, object]:
+    manifest = scrape_generation.load_generation(
+        run.manifest_path,
+        expected_source=GENERATION_SOURCE,
+        expected_scope=run.scope,
+    )
+    pending = scrape_generation.pending_partition_ids(
+        manifest, manifest_path=run.manifest_path
+    )
+    if pending:
+        raise ContractError(
+            f"cannot reconcile generation while {len(pending)} requested partitions remain pending"
+        )
+
+    selected = scrape_generation.selected_artifacts(
+        manifest, manifest_path=run.manifest_path
+    )
+    if len(selected) != len(run.projects):
+        raise ContractError("every condo partition must select one positive-row artifact")
+    projects_by_partition = {
+        project["partition_id"]: project for project in run.projects
+    }
+    projects_by_url = {project["url"]: project for project in run.projects}
+    expected_counts: dict[str, int] = {}
+    unit_rows: list[dict[str, str]] = []
+    for artifact in selected:
+        project = projects_by_partition.get(artifact.partition_id)
+        if project is None:
+            raise ContractError(
+                f"selected artifact partition is outside requested batch: {artifact.partition_id}"
+            )
+        rows = validate_unit_artifact(
+            artifact.path, project, expected_count=artifact.row_count
+        )
+        unit_rows.extend(rows)
+        expected_counts[project["url"]] = artifact.row_count
+    expected_count = sum(artifact.row_count for artifact in selected)
+    if len(unit_rows) != expected_count:
+        raise ContractError("selected artifact rows were not assembled exactly once")
+
+    output_relative = run.output_path.relative_to(run.root.resolve()).as_posix()
+    if manifest["status"] == "complete":
+        output = manifest["output"]
+        assert isinstance(output, dict)
+        if output["relative_path"] != output_relative:
+            raise ContractError(
+                "complete generation is bound to a different --out candidate path"
+            )
+        validate_candidate(
+            run.output_path,
+            FIELDS,
+            expected_count=expected_count,
+            projects_by_url=projects_by_url,
+            expected_counts=expected_counts,
+        )
+        if run.unit_output_path:
+            write_csv_atomic(run.unit_output_path, UNIT_FIELDS, unit_rows)
+            validate_candidate(
+                run.unit_output_path,
+                UNIT_FIELDS,
+                expected_count=expected_count,
+                projects_by_url=projects_by_url,
+                expected_counts=expected_counts,
+            )
+        return manifest
+
+    if run.unit_output_path:
+        write_csv_atomic(run.unit_output_path, UNIT_FIELDS, unit_rows)
+        validate_candidate(
+            run.unit_output_path,
+            UNIT_FIELDS,
+            expected_count=expected_count,
+            projects_by_url=projects_by_url,
+            expected_counts=expected_counts,
+        )
+    legacy_rows = [
+        {field: row.get(field, "") for field in FIELDS} for row in unit_rows
+    ]
+    write_csv_atomic(run.output_path, FIELDS, legacy_rows)
+    validate_candidate(
+        run.output_path,
+        FIELDS,
+        expected_count=expected_count,
+        projects_by_url=projects_by_url,
+        expected_counts=expected_counts,
+    )
+    return scrape_generation.finalize_generation(
+        run.manifest_path, run.output_path, now=utc_now()
+    )
+
+
+async def scrape(
+    args: argparse.Namespace,
+    *,
+    page: Any | None = None,
+    scrape_project_fn: Callable[..., Any] = scrape_project,
+) -> None:
+    """Run or resume one exact generation; injected pages keep tests offline."""
+    run = prepare_generation(args)
+    manifest = scrape_generation.load_generation(
+        run.manifest_path,
+        expected_source=GENERATION_SOURCE,
+        expected_scope=run.scope,
+        expected_generation_id=args.generation_id,
+    )
+    pending = scrape_generation.pending_partition_ids(
+        manifest, manifest_path=run.manifest_path
+    )
+
+    if pending and page is not None:
+        await scrape_pending_projects(
+            run, args, page, scrape_project_fn=scrape_project_fn
+        )
+    elif pending:
+        if async_playwright is None:
+            raise SystemExit("pip install playwright --break-system-packages")
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch(headless=not args.headed)
+            try:
+                context = await browser.new_context(
+                    viewport={"width": 1440, "height": 1600},
+                    user_agent=DEFAULT_USER_AGENT,
+                    storage_state=args.storage_state,
+                )
+                live_page = await context.new_page()
+                await scrape_pending_projects(
+                    run, args, live_page, scrape_project_fn=scrape_project_fn
+                )
+            finally:
+                await browser.close()
+
+    pending = scrape_generation.pending_partition_ids(run.manifest_path)
+    if pending:
+        print(
+            f"ERROR: generation remains open with {len(pending)} pending partition(s); "
+            "no candidate was replaced",
+            file=sys.stderr,
+            flush=True,
+        )
+        raise SystemExit(1)
+
+    complete = reconcile_generation(run)
+    print(
+        f"Finalized generation {complete['generation_id']} with "
+        f"{complete['output']['row_count']} rows at {run.output_path}",
+        flush=True,
+    )
+    if run.unit_output_path:
+        print(f"Wrote full unit candidate to {run.unit_output_path}", flush=True)
 
 
 def write_project_csv(path: Path, projects: list[ProjectLink]) -> None:
@@ -775,12 +1442,34 @@ def build_parser() -> argparse.ArgumentParser:
 
     scrape_parser = sub.add_parser("scrape", help="Scrape discovered project transaction rows")
     scrape_parser.add_argument("--input", default=DEFAULT_PROJECTS, help="CSV with name,url,slug columns")
-    scrape_parser.add_argument("--out", default=DEFAULT_OUTPUT, help="Output CSV")
+    scrape_parser.add_argument(
+        "--generation-manifest",
+        required=True,
+        help=(
+            "Run-scoped JSON manifest. Its parent is the generation root; "
+            "partition artifacts and candidates never leave that root."
+        ),
+    )
+    scrape_parser.add_argument(
+        "--generation-id",
+        help=(
+            "Optional identifier for a new generation or exact expected ID "
+            "when resuming"
+        ),
+    )
+    scrape_parser.add_argument(
+        "--out",
+        default=DEFAULT_GENERATION_OUTPUT,
+        help=(
+            "Legacy-schema candidate path, relative to the generation root "
+            f"(default: {DEFAULT_GENERATION_OUTPUT})"
+        ),
+    )
     scrape_parser.add_argument(
         "--unit-out",
         help=(
-            "Optional dedicated unit-level CSV. Exact unit_number values are "
-            "written only when published; all rows retain unit_number_status."
+            "Optional full-unit candidate path relative to the generation root. "
+            "Exact unit_number values are written only when published."
         ),
     )
     scrape_parser.add_argument(
@@ -794,13 +1483,25 @@ def build_parser() -> argparse.ArgumentParser:
     scrape_parser.add_argument("--limit", type=int, help="Maximum project pages to scrape")
     scrape_parser.add_argument("--start", type=int, default=0, help="Zero-based project offset")
     scrape_parser.add_argument("--match", help="Filter project name/slug substring")
-    scrape_parser.add_argument("--resume", action="store_true", help="Skip source_url values already in --out")
+    scrape_parser.add_argument(
+        "--resume",
+        action="store_true",
+        help=(
+            "Compatibility flag; an existing exact manifest always resumes "
+            "only selected, validated partitions"
+        ),
+    )
     scrape_parser.add_argument(
         "--resume-attempts",
         action="store_true",
-        help="Also skip source_url values already recorded in --log",
+        help=(
+            "Rejected legacy option; attempt CSVs are diagnostics and never "
+            "resume evidence"
+        ),
     )
-    scrape_parser.add_argument("--log", help="Project attempt log CSV")
+    scrape_parser.add_argument(
+        "--log", help="Optional append-only human diagnostic CSV (never resume evidence)"
+    )
     scrape_parser.add_argument("--wait-ms", type=int, default=1200, help="Post-render wait per page")
     scrape_parser.add_argument("--timeout-ms", type=int, default=30_000, help="Navigation timeout per page")
     scrape_parser.add_argument("--max-pages", type=int, default=250, help="Maximum Sales-table pages per project")

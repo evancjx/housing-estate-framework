@@ -55,9 +55,27 @@ import urllib.error
 
 import pandas as pd
 
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from sg_estate.adapters.http import get_json
+from sg_estate.source_receipts import build_source_receipt, write_source_receipt
+
 PSI_URL = "https://api.data.gov.sg/v1/environment/psi?date={ymd}"
 REGIONS = ["north", "south", "east", "west", "central"]
 _UA = "Mozilla/5.0 (housing-estate-framework/2.0)"
+AIR_AUTHORITY = (
+    "NEA / data.gov.sg + framework climatology/region mapping + expressways.csv"
+)
+AIR_COLUMNS = [
+    "estate",
+    "region",
+    "pm25_annual_mean",
+    "no2_annual_mean",
+    "haze_days_y",
+    "road_buffer_correction",
+]
 
 # Each estate → NEA region. Manually transcribed from NEA's regional
 # definitions; estates not listed default to CENTRAL.
@@ -108,6 +126,68 @@ CLIMATOLOGY = {
 }
 
 
+def _validate_air_output(out: str, expected_rows: int) -> int:
+    persisted = pd.read_csv(out)
+    missing = sorted(set(AIR_COLUMNS) - set(persisted.columns))
+    if missing:
+        raise ValueError(f"{out} missing required columns after write: {missing}")
+    if len(persisted) != expected_rows or persisted.empty:
+        raise ValueError(
+            f"{out} row-count validation failed: expected {expected_rows}, "
+            f"got {len(persisted)}"
+        )
+    return len(persisted)
+
+
+def _receipt_cache_state(modes: list[str], *, fallback_only: bool = False) -> str:
+    if fallback_only or not modes:
+        return "offline"
+    unique = set(modes)
+    if unique == {"fresh", "cached"}:
+        return "mixed"
+    return next(iter(unique))
+
+
+def _write_air_receipt(
+    out: str,
+    *,
+    expressways_path: str,
+    row_count: int,
+    accepted_dates: list[str],
+    accepted_modes: list[str],
+    fallback_used: bool,
+    fallback_only: bool = False,
+) -> None:
+    dates = sorted(set(accepted_dates))
+    urls = [PSI_URL.format(ymd=value) for value in dates]
+    receipt = build_source_receipt(
+        out,
+        dataset_id="air_quality.csv",
+        authority=AIR_AUTHORITY,
+        source_url=urls[0] if urls else None,
+        source_urls=urls or None,
+        source_identity=(
+            "NEA PSI samples + framework ESTATE_REGION/CLIMATOLOGY + "
+            f"input:{os.path.basename(expressways_path)}"
+        ),
+        retrieved_at=(
+            dt.datetime.now(dt.timezone.utc)
+            if "fresh" in accepted_modes
+            else None
+        ),
+        coverage_start=dates[0] if dates else None,
+        coverage_end=dates[-1] if dates else None,
+        row_count=row_count,
+        cache_state=_receipt_cache_state(
+            accepted_modes,
+            fallback_only=fallback_only,
+        ),
+        fallback_state="used" if fallback_used else "not_used",
+        validation_status="passed",
+    )
+    write_source_receipt(out, receipt)
+
+
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371000.0
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -117,9 +197,12 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": _UA,
-                                                 "Accept": "application/json"})
-    return json.load(urllib.request.urlopen(req, timeout=timeout))
+    return get_json(
+        url,
+        timeout=timeout,
+        headers={"User-Agent": _UA, "Accept": "application/json"},
+        opener=urllib.request.urlopen,
+    )
 
 
 def fetch_day(ymd: str, cache_dir: str | None) -> dict | None:
@@ -217,6 +300,16 @@ def main():
 
     if args.stub:
         emit_climatology(estates, expressways, args.out)
+        row_count = _validate_air_output(args.out, len(estates))
+        _write_air_receipt(
+            args.out,
+            expressways_path=args.expressways,
+            row_count=row_count,
+            accepted_dates=[],
+            accepted_modes=[],
+            fallback_used=True,
+            fallback_only=True,
+        )
         return
 
     end = dt.date.today()
@@ -233,13 +326,31 @@ def main():
     region_no2 = {r: [] for r in REGIONS}
     haze_count = {r: 0 for r in REGIONS}
     n_fetched = 0
+    accepted_dates: list[str] = []
+    accepted_modes: list[str] = []
 
     for d in sample_dates:
-        day_data = fetch_day(d.isoformat(), args.cache_dir)
+        ymd = d.isoformat()
+        cache_path = (
+            os.path.join(args.cache_dir, f"psi_{ymd}.json")
+            if args.cache_dir
+            else None
+        )
+        was_cached = bool(cache_path and os.path.exists(cache_path))
+        day_data = fetch_day(ymd, args.cache_dir)
         if day_data is None:
             continue
-        n_fetched += 1
         daily = per_region_daily_mean(day_data)
+        contributed = any(
+            value is not None
+            for values in daily.values()
+            for value in values.values()
+        )
+        if not contributed:
+            continue
+        n_fetched += 1
+        accepted_dates.append(ymd)
+        accepted_modes.append("cached" if was_cached else "fresh")
         for r in REGIONS:
             v = daily.get(r, {})
             if v.get("pm25") is not None:
@@ -255,9 +366,23 @@ def main():
     if n_fetched == 0:
         print("No samples retrieved; falling back to climatology.", file=sys.stderr)
         emit_climatology(estates, expressways, args.out)
+        row_count = _validate_air_output(args.out, len(estates))
+        _write_air_receipt(
+            args.out,
+            expressways_path=args.expressways,
+            row_count=row_count,
+            accepted_dates=[],
+            accepted_modes=[],
+            fallback_used=True,
+            fallback_only=True,
+        )
         return
 
     region_means = {}
+    fallback_used = any(
+        not region_pm25[r] or not region_no2[r]
+        for r in REGIONS
+    )
     scale = 365.0 / args.sample_days  # annualise haze-day estimate
     for r in REGIONS:
         if region_pm25[r]:
@@ -283,6 +408,8 @@ def main():
     rows = []
     for est in estates.itertuples():
         name = str(est.estate).upper()
+        if name not in ESTATE_REGION:
+            fallback_used = True
         region = ESTATE_REGION.get(name, "central")
         rm = region_means[region]
         rbc = 0.2 if expressway_within_100m(float(est.lat), float(est.lon),
@@ -296,11 +423,17 @@ def main():
             "road_buffer_correction": rbc,
         })
 
-    out_df = pd.DataFrame(rows)[
-        ["estate", "region", "pm25_annual_mean", "no2_annual_mean",
-         "haze_days_y", "road_buffer_correction"]
-    ]
+    out_df = pd.DataFrame(rows)[AIR_COLUMNS]
     out_df.to_csv(args.out, index=False)
+    row_count = _validate_air_output(args.out, len(estates))
+    _write_air_receipt(
+        args.out,
+        expressways_path=args.expressways,
+        row_count=row_count,
+        accepted_dates=accepted_dates,
+        accepted_modes=accepted_modes,
+        fallback_used=fallback_used,
+    )
     print(f"\nWrote {len(out_df)} rows → {args.out}", file=sys.stderr)
 
     # Spot-check

@@ -143,9 +143,60 @@ body {
 .filter-field input:focus-visible,
 .filter-field select:focus-visible,
 .column-guide summary:focus-visible,
-.sort-button:focus-visible {
+.sort-button:focus-visible,
+#project-data-retry:focus-visible {
   outline: 3px solid var(--explorer-focus);
   outline-offset: 2px;
+}
+
+.project-data-status {
+  display: flex;
+  min-height: 46px;
+  margin: 0 24px 18px;
+  padding: 10px 13px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #b9cac2;
+  border-radius: 10px;
+  background: #f4f8f6;
+  color: #41564d;
+  font-size: .7rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.project-data-status[data-state="ready"] {
+  border-color: #b8d8ca;
+  background: #eaf5ef;
+  color: #245c46;
+}
+
+.project-data-status[data-state="error"] {
+  border-color: #e1c490;
+  background: #fff6e6;
+  color: #76511f;
+}
+
+#project-data-retry {
+  min-height: 36px;
+  flex: 0 0 auto;
+  padding: 6px 11px;
+  border: 1px solid #9f7840;
+  border-radius: 8px;
+  background: #fff;
+  color: #6f491c;
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+#project-data-retry:hover {
+  background: #fffaf1;
+}
+
+#project-data-retry[hidden] {
+  display: none;
 }
 
 .group-row .group-project {
@@ -554,6 +605,12 @@ tbody tr:hover .project-cell {
 
   .column-guide {
     margin: 0 17px 15px;
+  }
+
+  .project-data-status {
+    margin: 0 17px 15px;
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .column-guide dl {
