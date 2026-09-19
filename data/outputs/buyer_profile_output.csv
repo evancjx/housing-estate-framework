@@ -34,58 +34,58 @@ forming-family-hdb-balanced,DOVER,hdb,False,,3.364,1.0,value_below:C,YoungFam,T5
 forming-family-hdb-balanced,TAMPINES EAST,hdb,False,,3.207,1.0,value_below:C,YoungFam,T5,forming_family,3.363,C,3.363,0.456,2.997240615964808,D,proxy_from:TAMPINES,16107.0,3.2,C,3.0,B,3.13,C,A,False
 forming-family-hdb-balanced,TENGAH,hdb,False,,3.044,0.75,liveability_below:C;value_below:C;employment_below:D;value_n_below:100,YoungFam,T5,forming_family,2.928,D,2.928,1.27,,no_data,no_data,,2.0,F,5.0,A,2.38,F,G,False
 forming-family-hdb-balanced,MARINE PARADE,hdb,False,,2.806,1.0,value_below:C;lease_below:C,YoungFam,T5,forming_family,3.175,C,3.175,0.461,2.3354796578587105,F,direct,1423.0,3.83,B,1.0,D,3.03,C,D,False
-single-pro-condo-commute-value,BUKIT MERAH,condo,True,1,3.986,0.909,,SinglePro,T0,settling_single,4.007,B+,4.015,0.211,3.7895606607835557,B,direct,1684.0,4.22,B+,,,4.03,,B,False
-single-pro-condo-commute-value,BOON KENG,condo,True,2,3.928,0.909,,SinglePro,T0,settling_single,3.837,B,3.837,0.199,4.0729111157117,B+,direct,1478.0,3.92,B,,,3.9,,F,False
-single-pro-condo-commute-value,TOA PAYOH,condo,True,3,3.873,0.909,,SinglePro,T0,settling_single,3.648,B,4.275,0.801,4.222648867266447,B+,direct,3143.0,3.62,B,,,4.18,,B,False
-single-pro-condo-commute-value,BEDOK,condo,True,4,3.863,0.909,,SinglePro,T0,settling_single,3.496,C,4.212,0.899,4.263661602424515,B+,direct,4826.0,3.83,B,,,4.17,,B,False
-single-pro-condo-commute-value,ANG MO KIO,condo,True,5,3.705,0.909,,SinglePro,T0,settling_single,3.594,B,4.209,0.813,4.065636416873583,B+,direct,4347.0,3.25,C,,,3.75,,B,False
-single-pro-condo-commute-value,CHOA CHU KANG,condo,True,6,3.671,0.909,,SinglePro,T0,settling_single,3.502,B,3.708,0.344,4.101154744615307,B+,direct,5616.0,3.35,C,,,3.68,,B,False
-single-pro-condo-commute-value,BISHAN,condo,True,7,3.564,0.909,,SinglePro,T0,settling_single,3.511,B,3.628,0.236,3.497929822641653,C,direct,2701.0,3.73,B,,,3.65,,B,False
+single-pro-condo-commute-value,BUKIT MERAH,condo,True,1,3.986,0.909,,SinglePro,T0,settling_single,4.007,B+,4.015,0.211,3.789545721175835,B,direct,1684.0,4.22,B+,,,4.03,,B,False
+single-pro-condo-commute-value,BOON KENG,condo,True,2,3.928,0.909,,SinglePro,T0,settling_single,3.837,B,3.837,0.199,4.072870808097274,B+,direct,1478.0,3.92,B,,,3.9,,F,False
+single-pro-condo-commute-value,TOA PAYOH,condo,True,3,3.873,0.909,,SinglePro,T0,settling_single,3.648,B,4.275,0.801,4.222646787767778,B+,direct,3143.0,3.62,B,,,4.18,,B,False
+single-pro-condo-commute-value,BEDOK,condo,True,4,3.863,0.909,,SinglePro,T0,settling_single,3.496,C,4.212,0.899,4.263660681225415,B+,direct,4826.0,3.83,B,,,4.17,,B,False
+single-pro-condo-commute-value,ANG MO KIO,condo,True,5,3.705,0.909,,SinglePro,T0,settling_single,3.594,B,4.209,0.813,4.065634853728077,B+,direct,4347.0,3.25,C,,,3.75,,B,False
+single-pro-condo-commute-value,CHOA CHU KANG,condo,True,6,3.671,0.909,,SinglePro,T0,settling_single,3.502,B,3.708,0.344,4.101148128327991,B+,direct,5616.0,3.35,C,,,3.68,,B,False
+single-pro-condo-commute-value,BISHAN,condo,True,7,3.564,0.909,,SinglePro,T0,settling_single,3.511,B,3.628,0.236,3.4979145136011316,C,direct,2701.0,3.73,B,,,3.65,,B,False
 single-pro-condo-commute-value,HOLLAND VILLAGE,condo,False,,3.944,0.636,value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.85,B,3.85,0.177,,N/A,no_hdb_segment,0.0,4.17,B+,,,3.89,,D,True
 single-pro-condo-commute-value,HOUGANG,condo,False,,3.807,0.636,value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.964,B,4.093,0.29,,no_data,no_data,,3.35,C,,,4.1,,B,False
-single-pro-condo-commute-value,TAMPINES WEST,condo,False,,3.788,0.909,value_not_direct,SinglePro,T0,settling_single,3.642,B,3.642,0.105,4.331189085003637,B+,proxy_from:TAMPINES,6642.0,3.3,C,,,3.79,,A,False
+single-pro-condo-commute-value,TAMPINES WEST,condo,False,,3.788,0.909,value_not_direct,SinglePro,T0,settling_single,3.642,B,3.642,0.105,4.331173630365399,B+,proxy_from:TAMPINES,6642.0,3.3,C,,,3.79,,A,False
 single-pro-condo-commute-value,BUKIT BATOK,condo,False,,3.758,0.636,value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.601,B,3.743,0.359,,no_data,no_data,,4.08,B+,,,3.74,,B,False
 single-pro-condo-commute-value,BUKIT PANJANG,condo,False,,3.701,0.636,value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.784,B,4.087,0.517,,no_data,no_data,,3.35,C,,,4.05,,B,False
-single-pro-condo-commute-value,WOODLEIGH,condo,False,,3.61,0.909,value_not_direct,SinglePro,T0,settling_single,3.599,B,3.606,0.181,3.646833112639204,B,proxy_from:TOA PAYOH,3143.0,3.58,B,,,3.61,,E,False
-single-pro-condo-commute-value,GEYLANG,condo,False,,3.569,0.909,liveability_below:C,SinglePro,T0,settling_single,2.919,D,3.667,0.897,4.017629963688971,B+,direct,4542.0,4.12,B+,,,3.77,,B,False
-single-pro-condo-commute-value,CENTRAL AREA,condo,False,,3.56,0.318,excluded_archetype:X;liveability_below:C;employment_below:C,SinglePro,T0,settling_single,,N/R,,,3.447185877138193,C,direct,3817.0,,N/R,,,4.24,,X,False
+single-pro-condo-commute-value,WOODLEIGH,condo,False,,3.61,0.909,value_not_direct,SinglePro,T0,settling_single,3.599,B,3.606,0.181,3.646831316708536,B,proxy_from:TOA PAYOH,3143.0,3.58,B,,,3.61,,E,False
+single-pro-condo-commute-value,GEYLANG,condo,False,,3.569,0.909,liveability_below:C,SinglePro,T0,settling_single,2.919,D,3.667,0.897,4.0176158167779565,B+,direct,4542.0,4.12,B+,,,3.77,,B,False
+single-pro-condo-commute-value,CENTRAL AREA,condo,False,,3.56,0.318,excluded_archetype:X;liveability_below:C;employment_below:C,SinglePro,T0,settling_single,,N/R,,,3.447178103495878,C,direct,3817.0,,N/R,,,4.24,,X,False
 single-pro-condo-commute-value,PASIR RIS,condo,False,,3.545,0.636,value_below:C;employment_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.873,B,4.04,0.225,,no_data,no_data,,2.65,D,,,4.01,,C,False
-single-pro-condo-commute-value,KALLANG,condo,False,,3.503,0.909,value_below:C,SinglePro,T0,settling_single,3.742,B,3.781,0.211,2.8297342376875556,D,direct,965.0,3.92,B,,,3.68,,B,False
-single-pro-condo-commute-value,SEMBAWANG,condo,False,,3.464,0.909,liveability_below:C;employment_below:C,SinglePro,T0,settling_single,2.745,D,3.994,1.404,4.921894534063978,A,direct,2975.0,2.45,F,,,3.99,,B,False
-single-pro-condo-commute-value,QUEENSTOWN,condo,False,,3.446,0.909,value_below:C,SinglePro,T0,settling_single,3.29,C,3.443,0.336,2.997102743702823,D,direct,5541.0,4.4,B+,,,3.58,,B,False
+single-pro-condo-commute-value,KALLANG,condo,False,,3.503,0.909,value_below:C,SinglePro,T0,settling_single,3.742,B,3.781,0.211,2.8297174465064856,D,direct,965.0,3.92,B,,,3.68,,B,False
+single-pro-condo-commute-value,SEMBAWANG,condo,False,,3.464,0.909,liveability_below:C;employment_below:C,SinglePro,T0,settling_single,2.745,D,3.994,1.404,4.9214058009800965,A,direct,2974.0,2.45,F,,,3.99,,B,False
+single-pro-condo-commute-value,QUEENSTOWN,condo,False,,3.446,0.909,value_below:C,SinglePro,T0,settling_single,3.29,C,3.443,0.336,2.997089633223381,D,direct,5541.0,4.4,B+,,,3.58,,B,False
 single-pro-condo-commute-value,YISHUN,condo,False,,3.44,0.636,value_below:C;employment_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,3.772,B,3.959,0.399,,no_data,no_data,,2.5,D,,,4.02,,B,False
-single-pro-condo-commute-value,TAMPINES,condo,False,,3.419,0.909,liveability_below:C,SinglePro,T0,settling_single,2.649,D,3.849,1.315,4.354044964080174,B+,direct,6642.0,3.35,C,,,3.81,,A,False
-single-pro-condo-commute-value,CLEMENTI,condo,False,,3.417,0.909,liveability_below:C,SinglePro,T0,settling_single,2.519,D,3.622,1.243,3.9487676967188574,B,direct,7617.0,4.28,B+,,,3.75,,B,False
-single-pro-condo-commute-value,BUKIT TIMAH,condo,False,,3.321,0.909,liveability_below:C,SinglePro,T0,settling_single,2.751,D,3.939,1.263,3.5035139926630374,B,direct,12613.0,3.88,B,,,3.94,,D,False
-single-pro-condo-commute-value,DOVER,condo,False,,3.321,0.909,value_below:C;value_not_direct,SinglePro,T0,settling_single,3.065,C,3.451,0.546,2.896641199221164,D,proxy_from:QUEENSTOWN,5541.0,4.4,B+,,,3.46,,F,False
-single-pro-condo-commute-value,JURONG EAST,condo,False,,3.303,0.909,liveability_below:C,SinglePro,T0,settling_single,2.566,D,3.897,1.476,3.7490753441745674,B,direct,2352.0,3.88,B,,,3.63,,A,False
-single-pro-condo-commute-value,TAMPINES EAST,condo,False,,3.214,0.909,liveability_below:C;value_not_direct,SinglePro,T0,settling_single,2.907,D,3.083,0.276,3.656940652245815,B,proxy_from:TAMPINES,6642.0,3.2,C,,,3.2,,A,False
-single-pro-condo-commute-value,CANBERRA,condo,False,,3.183,0.909,liveability_below:C;employment_below:C;value_not_direct,SinglePro,T0,settling_single,2.482,F,3.595,1.258,4.465478248950276,B+,proxy_from:SEMBAWANG,2975.0,2.45,F,,,3.62,,B,False
+single-pro-condo-commute-value,TAMPINES,condo,False,,3.419,0.909,liveability_below:C,SinglePro,T0,settling_single,2.649,D,3.849,1.315,4.3540294278871166,B+,direct,6642.0,3.35,C,,,3.81,,A,False
+single-pro-condo-commute-value,CLEMENTI,condo,False,,3.417,0.909,liveability_below:C,SinglePro,T0,settling_single,2.519,D,3.622,1.243,3.94875692055905,B,direct,7617.0,4.28,B+,,,3.75,,B,False
+single-pro-condo-commute-value,BUKIT TIMAH,condo,False,,3.321,0.909,liveability_below:C,SinglePro,T0,settling_single,2.751,D,3.939,1.263,3.5036160128799856,B,direct,12613.0,3.88,B,,,3.94,,D,False
+single-pro-condo-commute-value,DOVER,condo,False,,3.321,0.909,value_below:C;value_not_direct,SinglePro,T0,settling_single,3.065,C,3.451,0.546,2.896628528199134,D,proxy_from:QUEENSTOWN,5541.0,4.4,B+,,,3.46,,F,False
+single-pro-condo-commute-value,JURONG EAST,condo,False,,3.303,0.909,liveability_below:C,SinglePro,T0,settling_single,2.566,D,3.897,1.476,3.7490455532931755,B,direct,2352.0,3.88,B,,,3.63,,A,False
+single-pro-condo-commute-value,TAMPINES EAST,condo,False,,3.214,0.909,liveability_below:C;value_not_direct,SinglePro,T0,settling_single,2.907,D,3.083,0.276,3.6569276034747435,B,proxy_from:TAMPINES,6642.0,3.2,C,,,3.2,,A,False
+single-pro-condo-commute-value,CANBERRA,condo,False,,3.183,0.909,liveability_below:C;employment_below:C;value_not_direct,SinglePro,T0,settling_single,2.482,F,3.595,1.258,4.465034836979435,B+,proxy_from:SEMBAWANG,2974.0,2.45,F,,,3.62,,B,False
 single-pro-condo-commute-value,JURONG WEST,condo,False,,3.035,0.636,liveability_below:C;value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,2.432,F,3.896,1.606,,no_data,no_data,,3.88,B,,,3.62,,B,False
-single-pro-condo-commute-value,SERANGOON,condo,False,,3.014,0.909,liveability_below:C,SinglePro,T0,settling_single,2.132,F,3.616,1.536,3.5655235475147378,B,direct,10166.0,3.73,B,,,3.29,,B,False
-single-pro-condo-commute-value,MARINE PARADE,condo,False,,3.012,0.909,liveability_below:C;value_below:C,SinglePro,T0,settling_single,2.714,D,2.925,0.338,2.868418348108587,D,direct,10178.0,3.83,B,,,3.07,,D,False
+single-pro-condo-commute-value,SERANGOON,condo,False,,3.014,0.909,liveability_below:C,SinglePro,T0,settling_single,2.132,F,3.616,1.536,3.565513754325924,B,direct,10166.0,3.73,B,,,3.29,,B,False
+single-pro-condo-commute-value,MARINE PARADE,condo,False,,3.012,0.909,liveability_below:C;value_below:C,SinglePro,T0,settling_single,2.714,D,2.925,0.338,2.8684165151278727,D,direct,10178.0,3.83,B,,,3.07,,D,False
 single-pro-condo-commute-value,SENGKANG,condo,False,,2.935,0.636,liveability_below:C;value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,2.696,D,3.637,1.089,,no_data,no_data,,3.05,C,,,3.69,,B,False
 single-pro-condo-commute-value,LENTOR,condo,False,,2.919,0.636,liveability_below:C;value_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,2.565,D,3.691,1.251,,N/A,no_hdb_segment,0.0,3.3,C,,,3.45,,F,False
-single-pro-condo-commute-value,WOODLANDS,condo,False,,2.914,0.909,liveability_below:C;employment_below:C,SinglePro,T0,settling_single,2.259,F,3.334,1.219,3.943927764146903,B,direct,899.0,2.45,F,,,3.41,,A,False
+single-pro-condo-commute-value,WOODLANDS,condo,False,,2.914,0.909,liveability_below:C;employment_below:C,SinglePro,T0,settling_single,2.259,F,3.334,1.219,3.943916264478302,B,direct,899.0,2.45,F,,,3.41,,A,False
 single-pro-condo-commute-value,PUNGGOL,condo,False,,2.77,0.636,liveability_below:C;value_below:C;employment_below:C;value_n_below:100;value_not_direct,SinglePro,T0,settling_single,2.737,D,3.631,1.002,,no_data,no_data,,2.45,F,,,3.45,,E,False
-single-pro-condo-commute-value,TENGAH,condo,False,,2.169,0.909,liveability_below:C;value_below:C;employment_below:C,SinglePro,T0,settling_single,1.658,F,3.248,1.696,2.7283029308961564,D,direct,860.0,2.0,F,,,2.5,,G,False
-forming-family-condo-balanced,TOA PAYOH,condo,True,1,4.221,0.909,,YoungFam,T5,forming_family,4.337,B+,4.337,0.689,4.222648867266447,B+,direct,3143.0,3.62,B,,,4.18,,B,False
-forming-family-condo-balanced,BEDOK,condo,True,2,4.178,0.909,,YoungFam,T5,forming_family,4.203,B+,4.203,0.707,4.263661602424515,B+,direct,4826.0,3.83,B,,,4.17,,B,False
-forming-family-condo-balanced,BUKIT MERAH,condo,True,3,4.036,0.909,,YoungFam,T5,forming_family,4.116,B+,4.116,0.109,3.7895606607835557,B,direct,1684.0,4.22,B+,,,4.03,,B,False
-forming-family-condo-balanced,ANG MO KIO,condo,True,4,4.001,0.909,,YoungFam,T5,forming_family,4.153,B+,4.153,0.559,4.065636416873583,B+,direct,4347.0,3.25,C,,,3.75,,B,False
-forming-family-condo-balanced,BOON KENG,condo,True,5,3.975,0.909,,YoungFam,T5,forming_family,3.954,B,3.954,0.117,4.0729111157117,B+,direct,1478.0,3.92,B,,,3.9,,F,False
-forming-family-condo-balanced,TAMPINES WEST,condo,True,6,3.925,0.909,,YoungFam,T5,forming_family,3.879,B,3.879,0.237,4.331189085003637,B+,proxy_from:TAMPINES,6642.0,3.3,C,,,3.79,,A,False
-forming-family-condo-balanced,TAMPINES,condo,True,7,3.921,0.909,,YoungFam,T5,forming_family,3.849,B,3.849,1.2,4.354044964080174,B+,direct,6642.0,3.35,C,,,3.81,,A,False
-forming-family-condo-balanced,GEYLANG,condo,True,8,3.907,0.909,,YoungFam,T5,forming_family,3.842,B,3.842,0.923,4.017629963688971,B+,direct,4542.0,4.12,B+,,,3.77,,B,False
-forming-family-condo-balanced,CLEMENTI,condo,True,9,3.883,0.909,,YoungFam,T5,forming_family,3.806,B,3.806,1.287,3.9487676967188574,B,direct,7617.0,4.28,B+,,,3.75,,B,False
-forming-family-condo-balanced,CHOA CHU KANG,condo,True,10,3.847,0.909,,YoungFam,T5,forming_family,3.853,B,3.853,0.351,4.101154744615307,B+,direct,5616.0,3.35,C,,,3.68,,B,False
-forming-family-condo-balanced,BUKIT TIMAH,condo,True,11,3.807,0.909,,YoungFam,T5,forming_family,3.907,B,3.907,1.156,3.5035139926630374,B,direct,12613.0,3.88,B,,,3.94,,D,False
-forming-family-condo-balanced,JURONG EAST,condo,True,12,3.729,0.909,,YoungFam,T5,forming_family,3.71,B,3.71,1.144,3.7490753441745674,B,direct,2352.0,3.88,B,,,3.63,,A,False
-forming-family-condo-balanced,BISHAN,condo,True,13,3.683,0.909,,YoungFam,T5,forming_family,3.764,B,3.764,0.253,3.497929822641653,C,direct,2701.0,3.73,B,,,3.65,,B,False
-forming-family-condo-balanced,WOODLEIGH,condo,True,14,3.655,0.909,,YoungFam,T5,forming_family,3.68,B,3.68,0.081,3.646833112639204,B,proxy_from:TOA PAYOH,3143.0,3.58,B,,,3.61,,E,False
-forming-family-condo-balanced,SERANGOON,condo,True,15,3.636,0.909,,YoungFam,T5,forming_family,3.713,B,3.713,1.581,3.5655235475147378,B,direct,10166.0,3.73,B,,,3.29,,B,False
-forming-family-condo-balanced,TAMPINES EAST,condo,True,16,3.404,0.909,,YoungFam,T5,forming_family,3.363,C,3.363,0.456,3.656940652245815,B,proxy_from:TAMPINES,6642.0,3.2,C,,,3.2,,A,False
-forming-family-condo-balanced,SEMBAWANG,condo,False,,4.143,0.909,employment_below:D,YoungFam,T5,forming_family,4.124,B+,4.124,1.379,4.921894534063978,A,direct,2975.0,2.45,F,,,3.99,,B,False
+single-pro-condo-commute-value,TENGAH,condo,False,,2.169,0.909,liveability_below:C;value_below:C;employment_below:C,SinglePro,T0,settling_single,1.658,F,3.248,1.696,2.728302816653285,D,direct,860.0,2.0,F,,,2.5,,G,False
+forming-family-condo-balanced,TOA PAYOH,condo,True,1,4.221,0.909,,YoungFam,T5,forming_family,4.337,B+,4.337,0.689,4.222646787767778,B+,direct,3143.0,3.62,B,,,4.18,,B,False
+forming-family-condo-balanced,BEDOK,condo,True,2,4.178,0.909,,YoungFam,T5,forming_family,4.203,B+,4.203,0.707,4.263660681225415,B+,direct,4826.0,3.83,B,,,4.17,,B,False
+forming-family-condo-balanced,BUKIT MERAH,condo,True,3,4.036,0.909,,YoungFam,T5,forming_family,4.116,B+,4.116,0.109,3.789545721175835,B,direct,1684.0,4.22,B+,,,4.03,,B,False
+forming-family-condo-balanced,ANG MO KIO,condo,True,4,4.001,0.909,,YoungFam,T5,forming_family,4.153,B+,4.153,0.559,4.065634853728077,B+,direct,4347.0,3.25,C,,,3.75,,B,False
+forming-family-condo-balanced,BOON KENG,condo,True,5,3.975,0.909,,YoungFam,T5,forming_family,3.954,B,3.954,0.117,4.072870808097274,B+,direct,1478.0,3.92,B,,,3.9,,F,False
+forming-family-condo-balanced,TAMPINES WEST,condo,True,6,3.925,0.909,,YoungFam,T5,forming_family,3.879,B,3.879,0.237,4.331173630365399,B+,proxy_from:TAMPINES,6642.0,3.3,C,,,3.79,,A,False
+forming-family-condo-balanced,TAMPINES,condo,True,7,3.921,0.909,,YoungFam,T5,forming_family,3.849,B,3.849,1.2,4.3540294278871166,B+,direct,6642.0,3.35,C,,,3.81,,A,False
+forming-family-condo-balanced,GEYLANG,condo,True,8,3.907,0.909,,YoungFam,T5,forming_family,3.842,B,3.842,0.923,4.0176158167779565,B+,direct,4542.0,4.12,B+,,,3.77,,B,False
+forming-family-condo-balanced,CLEMENTI,condo,True,9,3.883,0.909,,YoungFam,T5,forming_family,3.806,B,3.806,1.287,3.94875692055905,B,direct,7617.0,4.28,B+,,,3.75,,B,False
+forming-family-condo-balanced,CHOA CHU KANG,condo,True,10,3.847,0.909,,YoungFam,T5,forming_family,3.853,B,3.853,0.351,4.101148128327991,B+,direct,5616.0,3.35,C,,,3.68,,B,False
+forming-family-condo-balanced,BUKIT TIMAH,condo,True,11,3.807,0.909,,YoungFam,T5,forming_family,3.907,B,3.907,1.156,3.5036160128799856,B,direct,12613.0,3.88,B,,,3.94,,D,False
+forming-family-condo-balanced,JURONG EAST,condo,True,12,3.729,0.909,,YoungFam,T5,forming_family,3.71,B,3.71,1.144,3.7490455532931755,B,direct,2352.0,3.88,B,,,3.63,,A,False
+forming-family-condo-balanced,BISHAN,condo,True,13,3.683,0.909,,YoungFam,T5,forming_family,3.764,B,3.764,0.253,3.4979145136011316,C,direct,2701.0,3.73,B,,,3.65,,B,False
+forming-family-condo-balanced,WOODLEIGH,condo,True,14,3.655,0.909,,YoungFam,T5,forming_family,3.68,B,3.68,0.081,3.646831316708536,B,proxy_from:TOA PAYOH,3143.0,3.58,B,,,3.61,,E,False
+forming-family-condo-balanced,SERANGOON,condo,True,15,3.636,0.909,,YoungFam,T5,forming_family,3.713,B,3.713,1.581,3.565513754325924,B,direct,10166.0,3.73,B,,,3.29,,B,False
+forming-family-condo-balanced,TAMPINES EAST,condo,True,16,3.404,0.909,,YoungFam,T5,forming_family,3.363,C,3.363,0.456,3.6569276034747435,B,proxy_from:TAMPINES,6642.0,3.2,C,,,3.2,,A,False
+forming-family-condo-balanced,SEMBAWANG,condo,False,,4.143,0.909,employment_below:D,YoungFam,T5,forming_family,4.124,B+,4.124,1.379,4.9214058009800965,A,direct,2974.0,2.45,F,,,3.99,,B,False
 forming-family-condo-balanced,HOLLAND VILLAGE,condo,False,,4.037,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,4.04,B+,4.04,0.19,,N/A,no_hdb_segment,0.0,4.17,B+,,,3.89,,D,True
 forming-family-condo-balanced,HOUGANG,condo,False,,4.026,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,4.135,B+,4.135,0.171,,no_data,no_data,,3.35,C,,,4.1,,B,False
 forming-family-condo-balanced,PASIR RIS,condo,False,,3.977,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,4.212,B+,4.212,0.339,,no_data,no_data,,2.65,D,,,4.01,,C,False
@@ -93,17 +93,17 @@ forming-family-condo-balanced,BUKIT PANJANG,condo,False,,3.971,0.682,value_below
 forming-family-condo-balanced,BUKIT BATOK,condo,False,,3.889,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,3.881,B,3.881,0.28,,no_data,no_data,,4.08,B+,,,3.74,,B,False
 forming-family-condo-balanced,YISHUN,condo,False,,3.882,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,4.108,B+,4.108,0.336,,no_data,no_data,,2.5,D,,,4.02,,B,False
 forming-family-condo-balanced,JURONG WEST,condo,False,,3.842,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,3.876,B,3.876,1.444,,no_data,no_data,,3.88,B,,,3.62,,B,False
-forming-family-condo-balanced,CANBERRA,condo,False,,3.774,0.909,employment_below:D,YoungFam,T5,forming_family,3.728,B,3.728,1.246,4.465478248950276,B+,proxy_from:SEMBAWANG,2975.0,2.45,F,,,3.62,,B,False
+forming-family-condo-balanced,CANBERRA,condo,False,,3.774,0.909,employment_below:D,YoungFam,T5,forming_family,3.728,B,3.728,1.246,4.465034836979435,B+,proxy_from:SEMBAWANG,2974.0,2.45,F,,,3.62,,B,False
 forming-family-condo-balanced,SENGKANG,condo,False,,3.692,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,3.809,B,3.809,1.113,,no_data,no_data,,3.05,C,,,3.69,,B,False
-forming-family-condo-balanced,CENTRAL AREA,condo,False,,3.674,0.318,excluded_archetype:X;liveability_below:C;employment_below:D,YoungFam,T5,forming_family,,N/R,,,3.447185877138193,C,direct,3817.0,,N/R,,,4.24,,X,False
-forming-family-condo-balanced,QUEENSTOWN,condo,False,,3.581,0.909,value_below:C,YoungFam,T5,forming_family,3.697,B,3.697,0.407,2.997102743702823,D,direct,5541.0,4.4,B+,,,3.58,,B,False
-forming-family-condo-balanced,KALLANG,condo,False,,3.573,0.909,value_below:C,YoungFam,T5,forming_family,3.829,B,3.829,0.087,2.8297342376875556,D,direct,965.0,3.92,B,,,3.68,,B,False
-forming-family-condo-balanced,WOODLANDS,condo,False,,3.472,0.909,employment_below:D,YoungFam,T5,forming_family,3.454,C,3.454,1.195,3.943927764146903,B,direct,899.0,2.45,F,,,3.41,,A,False
-forming-family-condo-balanced,DOVER,condo,False,,3.436,0.909,value_below:C,YoungFam,T5,forming_family,3.501,B,3.501,0.436,2.896641199221164,D,proxy_from:QUEENSTOWN,5541.0,4.4,B+,,,3.46,,F,False
+forming-family-condo-balanced,CENTRAL AREA,condo,False,,3.674,0.318,excluded_archetype:X;liveability_below:C;employment_below:D,YoungFam,T5,forming_family,,N/R,,,3.447178103495878,C,direct,3817.0,,N/R,,,4.24,,X,False
+forming-family-condo-balanced,QUEENSTOWN,condo,False,,3.581,0.909,value_below:C,YoungFam,T5,forming_family,3.697,B,3.697,0.407,2.997089633223381,D,direct,5541.0,4.4,B+,,,3.58,,B,False
+forming-family-condo-balanced,KALLANG,condo,False,,3.573,0.909,value_below:C,YoungFam,T5,forming_family,3.829,B,3.829,0.087,2.8297174465064856,D,direct,965.0,3.92,B,,,3.68,,B,False
+forming-family-condo-balanced,WOODLANDS,condo,False,,3.472,0.909,employment_below:D,YoungFam,T5,forming_family,3.454,C,3.454,1.195,3.943916264478302,B,direct,899.0,2.45,F,,,3.41,,A,False
+forming-family-condo-balanced,DOVER,condo,False,,3.436,0.909,value_below:C,YoungFam,T5,forming_family,3.501,B,3.501,0.436,2.896628528199134,D,proxy_from:QUEENSTOWN,5541.0,4.4,B+,,,3.46,,F,False
 forming-family-condo-balanced,LENTOR,condo,False,,3.404,0.682,value_below:C;value_n_below:100,YoungFam,T5,forming_family,3.414,C,3.414,0.849,,N/A,no_hdb_segment,0.0,3.3,C,,,3.45,,F,False
 forming-family-condo-balanced,PUNGGOL,condo,False,,3.259,0.682,value_below:C;employment_below:D;value_n_below:100,YoungFam,T5,forming_family,3.372,C,3.372,0.635,,no_data,no_data,,2.45,F,,,3.45,,E,False
-forming-family-condo-balanced,MARINE PARADE,condo,False,,3.153,0.909,value_below:C,YoungFam,T5,forming_family,3.175,C,3.175,0.461,2.868418348108587,D,direct,10178.0,3.83,B,,,3.07,,D,False
-forming-family-condo-balanced,TENGAH,condo,False,,2.742,0.909,liveability_below:C;value_below:C;employment_below:D,YoungFam,T5,forming_family,2.928,D,2.928,1.27,2.7283029308961564,D,direct,860.0,2.0,F,,,2.5,,G,False
+forming-family-condo-balanced,MARINE PARADE,condo,False,,3.153,0.909,value_below:C,YoungFam,T5,forming_family,3.175,C,3.175,0.461,2.8684165151278727,D,direct,10178.0,3.83,B,,,3.07,,D,False
+forming-family-condo-balanced,TENGAH,condo,False,,2.742,0.909,liveability_below:C;value_below:C;employment_below:D,YoungFam,T5,forming_family,2.928,D,2.928,1.27,2.728302816653285,D,direct,860.0,2.0,F,,,2.5,,G,False
 landed-family-amenity-upside,BEDOK,landed,True,1,4.093,0.909,,Lifestyle,T5,upgrader,3.992,B,3.992,0.496,4.3218898482089365,B+,direct,855.0,3.83,B,,,4.17,,B,False
 landed-family-amenity-upside,TOA PAYOH,landed,True,2,4.013,0.909,,Lifestyle,T5,upgrader,4.063,B+,4.063,0.415,4.0047463830704215,B+,direct,45.0,3.62,B,,,4.18,,B,False
 landed-family-amenity-upside,BUKIT MERAH,landed,True,3,3.941,0.909,,Lifestyle,T5,upgrader,3.812,B,3.812,-0.195,4.03189982395794,B+,direct,66.0,4.22,B+,,,4.03,,B,False
