@@ -1,3 +1,5 @@
+import argparse
+
 import pandas as pd
 
 from scrapers import ingest_ura_raw, run_download
@@ -189,6 +191,7 @@ def test_dedupe_transactions_runs_without_merge_mode():
                 "project_name": "A",
                 "street_name": "TEST ROAD",
                 "floor_level": "",
+                "_source_file": "pmi_d03_2021-2026.csv",
             },
             {
                 "planning_area": "QUEENSTOWN",
@@ -199,6 +202,7 @@ def test_dedupe_transactions_runs_without_merge_mode():
                 "project_name": "A",
                 "street_name": "TEST ROAD",
                 "floor_level": "",
+                "_source_file": "pmi_d03_2024-2026.csv",
             },
         ]
     )
@@ -207,6 +211,113 @@ def test_dedupe_transactions_runs_without_merge_mode():
 
     assert len(deduped) == 1
     assert dropped == 1
+
+
+PMI_UNIT = {
+    "planning_area": "BEDOK",
+    "transacted_price": 2358000,
+    "area_sqm": 108,
+    "sale_month": "2025-01",
+    "property_type": "Apartment",
+    "project_name": "SCENECA RESIDENCE",
+    "street_name": "TANAH MERAH KECHIL LINK",
+    "floor_level": "01 to 05",
+    "type_of_area": "Strata",
+}
+
+
+def test_dedupe_keeps_identical_units_within_one_export():
+    # URA PMI rows carry no unit number: two units sold on identical terms
+    # in one export are two transactions, not a duplicate.
+    source = "pmi_d16_2021-2026.csv"
+    df = pd.DataFrame([{**PMI_UNIT, "_source_file": source}] * 2)
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert len(deduped) == 2
+    assert dropped == 0
+
+
+def test_dedupe_keeps_most_repeats_seen_in_any_single_export():
+    other = {**PMI_UNIT, "transacted_price": 1750000, "area_sqm": 70}
+    df = pd.DataFrame(
+        [{**PMI_UNIT, "_source_file": "pmi_d16_2021-2026.csv"}] * 2
+        + [{**other, "_source_file": "pmi_d16_2021-2026.csv"}]
+        + [{**PMI_UNIT, "_source_file": "pmi_d16_2024-2026.csv"}]
+        + [{**other, "_source_file": "pmi_d16_2024-2026.csv"}]
+    )
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert (deduped["transacted_price"] == 2358000).sum() == 2
+    assert (deduped["transacted_price"] == 1750000).sum() == 1
+    assert dropped == 2
+    assert "_source_file" not in deduped.columns
+
+
+def test_dedupe_merge_restores_units_collapsed_in_existing_output():
+    # Rows read back from an existing ura_private.csv have no source file.
+    df = pd.DataFrame(
+        [PMI_UNIT]
+        + [{**PMI_UNIT, "_source_file": "pmi_d16_2025-2026.csv"}] * 2
+    )
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert len(deduped) == 2
+    assert dropped == 1
+
+
+def test_dedupe_legacy_blank_rows_only_match_as_many_typed_rows():
+    blank = {**PMI_UNIT, "type_of_area": pd.NA}
+    df = pd.DataFrame(
+        [blank] * 2
+        + [{**PMI_UNIT, "_source_file": "pmi_d16_2025-2026.csv"}]
+    )
+
+    deduped, dropped = ingest_ura_raw.dedupe_transactions(df)
+
+    assert len(deduped) == 2
+    assert (deduped["type_of_area"] == "Strata").sum() == 1
+    assert dropped == 1
+
+
+def test_run_keeps_identical_units_and_drops_overlapping_exports(tmp_path):
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    pmi_row = {
+        "Project Name": "SCENECA RESIDENCE",
+        "Transacted Price ($)": "2,358,000",
+        "Area (SQFT)": "1,162.51",
+        "Unit Price ($ PSF)": "2,028",
+        "Sale Date": "Jan-25",
+        "Street Name": "TANAH MERAH KECHIL LINK",
+        "Type of Sale": "New Sale",
+        "Type of Area": "Strata",
+        "Area (SQM)": "108",
+        "Property Type": "Apartment",
+        "Number of Units": "1",
+        "Tenure": "99 yrs lease commencing from 2021",
+        "Postal District": "16",
+        "Market Segment": "Outside Central Region",
+        "Floor Level": "01 to 05",
+    }
+    other_row = {**pmi_row, "Transacted Price ($)": "1,750,000", "Area (SQM)": "70"}
+    for name in ("pmi_d16_2021-2026.csv", "pmi_d16_2024-2026.csv"):
+        pd.DataFrame([pmi_row, pmi_row, other_row]).to_csv(raw_dir / name, index=False)
+    out = tmp_path / "ura_private.csv"
+
+    ingest_ura_raw.run(
+        argparse.Namespace(
+            files=None, raw_dir=str(raw_dir), out=str(out), merge=False,
+            source_quality=None,
+        )
+    )
+
+    written = pd.read_csv(out)
+    assert (written["transacted_price"] == 2358000).sum() == 2
+    assert (written["transacted_price"] == 1750000).sum() == 1
+    assert not {"_source_file", "_occurrence"} & set(written.columns)
 
 
 def test_dedupe_keeps_distinct_exact_condo_units_apart():

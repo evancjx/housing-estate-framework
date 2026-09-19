@@ -318,8 +318,23 @@ def ingest_file(
     return df
 
 
+SOURCE_COL = "_source_file"
+
+
+def _occurrence(df: pd.DataFrame, key: list[str]) -> pd.Series:
+    """0, 1, 2... for each repeat of key within one source file."""
+    source = df[SOURCE_COL].fillna("") if SOURCE_COL in df.columns else pd.Series("", index=df.index)
+    return df.groupby([source, *key], dropna=False).cumcount()
+
+
 def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
-    """Drop duplicate raw transactions using the broadest stable key available."""
+    """Drop transactions repeated across overlapping sources.
+
+    URA PMI rows carry no unit number, so identical rows within one source are
+    distinct units sold on identical terms. A transaction's true count is the
+    most times it appears in any single source (raw file, or the existing
+    output for --merge); rows beyond that count are cross-source repeats.
+    """
     dedup_cols = ["planning_area", "transacted_price", "area_sqm", "sale_month", "property_type"]
     # Exact units that happen to share month/price/area are distinct
     # transactions. Include published address/unit context when available.
@@ -329,26 +344,34 @@ def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     before = len(df)
 
     if "type_of_area" not in df.columns:
-        df = df.drop_duplicates(subset=dedup_cols, keep="last")
-        return df, before - len(df)
+        df = df.assign(_occurrence=_occurrence(df, dedup_cols))
+        df = df.drop_duplicates(subset=dedup_cols + ["_occurrence"], keep="last")
+        return df.drop(columns=["_occurrence", SOURCE_COL], errors="ignore"), before - len(df)
 
     type_key = df["type_of_area"]
     has_type = type_key.notna() & type_key.astype(str).str.strip().ne("")
-    typed = df[has_type].drop_duplicates(subset=dedup_cols + ["type_of_area"], keep="last")
+    typed = df[has_type]
+    typed = typed.assign(_occurrence=_occurrence(typed, dedup_cols + ["type_of_area"]))
+    typed = typed.drop_duplicates(subset=dedup_cols + ["type_of_area", "_occurrence"], keep="last")
     legacy_blank = df[~has_type]
+    legacy_blank = legacy_blank.assign(_occurrence=_occurrence(legacy_blank, dedup_cols))
 
     if not typed.empty and not legacy_blank.empty:
-        typed_keys = typed[dedup_cols].drop_duplicates().assign(_has_typed_area=True)
-        blank_key_matches = legacy_blank[dedup_cols].merge(
-            typed_keys,
+        # A legacy blank row is the same transaction as a typed row while the
+        # typed rows for that key still outnumber its occurrence.
+        typed_counts = typed.groupby(dedup_cols, dropna=False).size().rename("_typed_count").reset_index()
+        blank_typed_count = legacy_blank[dedup_cols].merge(
+            typed_counts,
             on=dedup_cols,
             how="left",
-        )["_has_typed_area"].fillna(False)
-        legacy_blank = legacy_blank[~blank_key_matches.to_numpy()]
+        )["_typed_count"].fillna(0)
+        legacy_blank = legacy_blank[
+            legacy_blank["_occurrence"].to_numpy() >= blank_typed_count.to_numpy()
+        ]
 
-    legacy_blank = legacy_blank.drop_duplicates(subset=dedup_cols, keep="last")
+    legacy_blank = legacy_blank.drop_duplicates(subset=dedup_cols + ["_occurrence"], keep="last")
     df = pd.concat([legacy_blank, typed]).sort_index()
-    return df, before - len(df)
+    return df.drop(columns=["_occurrence", SOURCE_COL], errors="ignore"), before - len(df)
 
 
 def run(args):
@@ -374,7 +397,7 @@ def run(args):
         district = m.group(1) if m else None
         df = ingest_file(p, district, source_quality=args.source_quality)
         if not df.empty:
-            frames.append(df)
+            frames.append(df.assign(**{SOURCE_COL: str(p)}))
 
     if not frames:
         sys.exit("No data after ingestion.")
