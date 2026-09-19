@@ -145,12 +145,19 @@ def test_profile_status_views_and_reset_intersect_without_console_errors(chromiu
     playwright_api.expect(page.locator(".research-shell-nav")).to_be_visible()
     assert "Forming family · HDB" in page.locator("#scenario-detail").inner_text()
 
+    expected_condo_count = sum(
+        1
+        for row in _embedded_rows()
+        if row["profile_id"] == "single-pro-condo-commute-value"
+        and row["tenure"] == "condo"
+        and row["eligible"] is True
+    )
     profile_button = page.locator("[data-profile='single-pro-condo-commute-value']")
     profile_button.focus()
     profile_button.press("Enter")
     playwright_api.expect(profile_button).to_be_focused()
-    playwright_api.expect(page.locator("#visible-count")).to_have_text("7")
-    assert page.locator("#buyer-profile-table-body tr").count() == 7
+    playwright_api.expect(page.locator("#visible-count")).to_have_text(str(expected_condo_count))
+    assert page.locator("#buyer-profile-table-body tr").count() == expected_condo_count
     assert set(page.locator("#buyer-profile-table-body .segment-badge").all_inner_texts()) == {"CONDO"}
     assert "T0 · current" in page.locator("#scenario-detail").inner_text()
 
@@ -161,8 +168,15 @@ def test_profile_status_views_and_reset_intersect_without_console_errors(chromiu
     page.locator("#scenario-detail .scenario-copy").evaluate(
         "element => { element.dataset.stable = 'yes'; }"
     )
+    expected_filtered_count = sum(
+        1
+        for row in _embedded_rows()
+        if row["profile_id"] == "single-pro-condo-commute-value"
+        and row["tenure"] == "condo"
+        and row["eligible"] is False
+    )
     page.locator("[data-status='filtered']").click()
-    playwright_api.expect(page.locator("#visible-count")).to_have_text("28")
+    playwright_api.expect(page.locator("#visible-count")).to_have_text(str(expected_filtered_count))
     assert page.locator("#sort-status").inner_text().startswith("Estate")
     assert "shown alphabetically" in page.locator("#table-guidance").inner_text()
     playwright_api.expect(page.locator("thead th[data-column-key='estate']")).to_have_attribute("aria-sort", "ascending")

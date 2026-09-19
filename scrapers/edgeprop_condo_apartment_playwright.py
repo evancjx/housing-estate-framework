@@ -95,6 +95,12 @@ class ScrapeResult:
     rows: list[dict[str, Any]]
     pages_scraped: int = 0
     oldest_date: str = ""
+    # Why the pagination loop stopped. Only COMPLETE_REASONS prove every
+    # in-window row was read; anything else must be retried, not resumed past.
+    completion_reason: str = ""
+
+
+COMPLETE_REASONS = frozenset({"terminal_pagination", "from_year_boundary"})
 
 
 class LinkTextParser(HTMLParser):
@@ -363,6 +369,29 @@ def read_completed_urls(path: Path) -> set[str]:
         return {row["source_url"] for row in reader if row.get("source_url")}
 
 
+def read_succeeded_attempt_urls(path: Path) -> set[str]:
+    """URLs whose logged attempt is a complete, non-empty scrape.
+
+    Zero-row attempts are never trusted: EdgeProp's lazy-loaded table has
+    previously reported (0) for projects with sales. Legacy logs recorded such
+    attempts as ``ok`` with ``row_count`` 0, so those are retried too.
+    """
+    if not path.exists():
+        return set()
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if not {"source_url", "status", "row_count"} <= set(reader.fieldnames or []):
+            return set()
+        return {
+            row["source_url"]
+            for row in reader
+            if row.get("source_url")
+            and row.get("status") == "ok"
+            and row.get("row_count", "0").isdigit()
+            and int(row["row_count"]) > 0
+        }
+
+
 def append_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     write_header = not path.exists()
@@ -521,6 +550,7 @@ async def scrape_project(
     seen: set[tuple[Any, ...]] = set()
     oldest: datetime | None = None
     pages_scraped = 0
+    completion_reason = "max_pages"
 
     while pages_scraped < max_pages:
         text = ""
@@ -549,6 +579,7 @@ async def scrape_project(
             await page.wait_for_timeout(500)
         pages_scraped += 1
         if not page_rows:
+            completion_reason = "zero_rows" if pages_scraped == 1 else "page_rows_missing"
             break
 
         page_dates = [date for date in (row_date(row) for row in page_rows) if date is not None]
@@ -577,12 +608,14 @@ async def scrape_project(
             rows.append(row)
 
         if page_dates and max(date.year for date in page_dates) < from_year:
+            completion_reason = "from_year_boundary"
             break
 
         next_button = page.locator(
             "#SalesTransaction .ant-pagination-next:not(.ant-pagination-disabled) button"
         )
         if await next_button.count() == 0:
+            completion_reason = "terminal_pagination"
             break
         old_key = first_row_key(page_rows)
         advanced = False
@@ -605,10 +638,25 @@ async def scrape_project(
             except Exception:
                 await page.wait_for_timeout(1000)
         if not advanced:
+            completion_reason = "pagination_stalled"
             break
 
     oldest_date = oldest.strftime("%Y-%m-%d") if oldest else ""
-    return ScrapeResult(rows=rows, pages_scraped=pages_scraped, oldest_date=oldest_date)
+    return ScrapeResult(
+        rows=rows,
+        pages_scraped=pages_scraped,
+        oldest_date=oldest_date,
+        completion_reason=completion_reason,
+    )
+
+
+def attempt_outcome(result: ScrapeResult) -> tuple[str, str]:
+    """Return (status, error) for a scrape that did not raise."""
+    if result.completion_reason not in COMPLETE_REASONS:
+        return "failed", result.completion_reason or "completion_unknown"
+    if not result.rows:
+        return "failed", "zero_rows"
+    return "ok", ""
 
 
 async def scrape(args: argparse.Namespace) -> None:
@@ -630,7 +678,7 @@ async def scrape(args: argparse.Namespace) -> None:
     unit_out = Path(args.unit_out) if args.unit_out else None
     log_path = Path(args.log) if args.log else out.with_name(f"{out.stem}_attempts.csv")
     completed = read_completed_urls(out) if args.resume else set()
-    completed |= read_completed_urls(log_path) if args.resume_attempts else set()
+    completed |= read_succeeded_attempt_urls(log_path) if args.resume_attempts else set()
     if completed:
         projects = [project for project in projects if project["url"] not in completed]
 
@@ -672,18 +720,23 @@ async def scrape(args: argparse.Namespace) -> None:
                 error = str(exc)
                 status = "error"
                 print(f"[{idx}/{len(projects)}] ERROR {project['url']}: {exc}", file=sys.stderr, flush=True)
-            if result.rows:
+            else:
+                status, error = attempt_outcome(result)
+            # Partial or empty results are logged but not written, so --resume
+            # (which skips URLs already in --out) retries them next run.
+            if status == "ok":
                 append_rows(out, result.rows)
                 if unit_out:
                     append_unit_rows(unit_out, result.rows)
                 total_rows += len(result.rows)
                 project_counts = unit_status_counts(result.rows)
-                for status, count in project_counts.items():
-                    all_status_counts[status] += count
+                for unit_status, count in project_counts.items():
+                    all_status_counts[unit_status] += count
             append_attempt(log_path, project, result, status, error)
             print(
                 f"[{idx}/{len(projects)}] {project.get('name', '')}: "
-                f"{len(result.rows)} rows, {result.pages_scraped} pages",
+                f"{len(result.rows)} rows, {result.pages_scraped} pages"
+                + (f" ({status}: {error})" if status != "ok" else ""),
                 flush=True,
             )
             if args.delay:
@@ -798,7 +851,7 @@ def build_parser() -> argparse.ArgumentParser:
     scrape_parser.add_argument(
         "--resume-attempts",
         action="store_true",
-        help="Also skip source_url values already recorded in --log",
+        help="Also skip source_url values with a complete, non-empty attempt in --log",
     )
     scrape_parser.add_argument("--log", help="Project attempt log CSV")
     scrape_parser.add_argument("--wait-ms", type=int, default=1200, help="Post-render wait per page")

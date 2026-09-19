@@ -33,8 +33,10 @@ USAGE:
 """
 
 import argparse
+import os
 import sys
 import re
+import tempfile
 from pathlib import Path
 from datetime import datetime
 
@@ -210,14 +212,11 @@ def extract_sale_month(date_str: str) -> str | None:
 
 def compute_project_age(df: pd.DataFrame) -> pd.Series:
     """
-    Approximate project age in years = sale_year - completion_year.
-    Without completion data, use a floor of 0 (new) based on sale year
-    and a rough estimate from tenure commencement if available.
+    Project age is unknown: URA PMI downloads carry no completion year.
+    Keep the column null rather than inventing a value. The value model
+    does not use it as a control.
     """
-    # We don't have completion data in the portal download.
-    # Return a placeholder column; the value model uses it as a control
-    # variable so it needs to exist. Set 5 years as a reasonable default.
-    return pd.Series([5.0] * len(df), index=df.index)
+    return pd.Series(pd.NA, index=df.index, dtype="Float64")
 
 
 def ingest_file(
@@ -285,13 +284,13 @@ def ingest_file(
     if "tenure" not in df.columns:
         df["tenure"] = "99-year leasehold"
 
-    # sale_month
+    # sale_month: never invented. Unparseable dates stay null and the value
+    # model excludes those rows; a file with no date column is skipped.
     if "sale_date" in df.columns:
         df["sale_month"] = df["sale_date"].apply(extract_sale_month)
-    elif "sale_month" in df.columns:
-        pass  # already present
-    else:
-        df["sale_month"] = "2024-01"  # fallback
+    elif "sale_month" not in df.columns:
+        print(f"  [WARN] {path.name}: missing sale_date/sale_month — skipping")
+        return pd.DataFrame()
 
     # project_age_years
     df["project_age_years"] = compute_project_age(df)
@@ -374,6 +373,42 @@ def dedupe_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     return df.drop(columns=["_occurrence", SOURCE_COL], errors="ignore"), before - len(df)
 
 
+def coverage_key(df: pd.DataFrame, other: pd.DataFrame) -> list[str]:
+    """Finest location x type key both frames can be compared on."""
+    location = (
+        "postal_district"
+        if "postal_district" in df.columns and "postal_district" in other.columns
+        else "planning_area"
+    )
+    return [location, "property_type"]
+
+
+def missing_coverage(existing: pd.DataFrame, rebuilt: pd.DataFrame) -> list[tuple]:
+    """(location, property_type) groups present in existing but absent from rebuilt."""
+    key = coverage_key(existing, rebuilt)
+
+    def groups(frame):
+        keyed = frame[key].astype("string").apply(lambda col: col.str.strip())
+        if "postal_district" in key:
+            keyed["postal_district"] = keyed["postal_district"].str.zfill(2)
+        return set(keyed.dropna().itertuples(index=False, name=None))
+
+    return sorted(groups(existing) - groups(rebuilt))
+
+
+def write_csv_atomic(df: pd.DataFrame, out_path: Path) -> None:
+    """Write via a sibling temp file so a failed write never truncates out_path."""
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{out_path.name}.", suffix=".tmp", dir=out_path.parent)
+    try:
+        with os.fdopen(fd, "w", newline="", encoding="utf-8") as handle:
+            df.to_csv(handle, index=False)
+        os.replace(tmp_name, out_path)
+    except BaseException:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
+
+
 def run(args):
     out_path = Path(args.out)
     frames = []
@@ -412,8 +447,19 @@ def run(args):
     else:
         combined, dropped = dedupe_transactions(combined)
         print(f"Total: {len(combined)} rows (deduped {dropped} rows)")
+        # A rebuild from an incomplete raw_dir would silently drop whole
+        # districts from the canonical input. Refuse unless explicitly allowed.
+        if out_path.exists() and not args.allow_coverage_loss:
+            lost = missing_coverage(pd.read_csv(out_path, low_memory=False), combined)
+            if lost:
+                preview = ", ".join("/".join(map(str, group)) for group in lost[:10])
+                sys.exit(
+                    f"ERROR: rebuild would drop {len(lost)} location/property-type group(s) "
+                    f"present in {out_path}: {preview}{' ...' if len(lost) > 10 else ''}. "
+                    "Use --merge, add the missing raw files, or pass --allow-coverage-loss."
+                )
 
-    combined.to_csv(out_path, index=False)
+    write_csv_atomic(combined, out_path)
     print(f"\nWritten: {out_path}")
     print("\nRow counts by planning area:")
     for area, count in combined["planning_area"].value_counts().items():
@@ -430,6 +476,11 @@ def main():
     ap.add_argument("--files", nargs="*", help="Specific file(s) to ingest (overrides --raw_dir)")
     ap.add_argument("--out", default="data/inputs/ura_private.csv", help="Output file")
     ap.add_argument("--merge", action="store_true", help="Merge with existing --out file")
+    ap.add_argument(
+        "--allow-coverage-loss",
+        action="store_true",
+        help="Allow a non-merge rebuild to drop district/property-type groups present in --out",
+    )
     ap.add_argument(
         "--source_quality",
         help="Optional provenance marker applied to all ingested rows, e.g. not_clean",

@@ -199,8 +199,10 @@ python3 scrapers/edgeprop_condo_apartment_playwright.py scrape \
   --resume --resume-attempts --delay 0.5 --from-year 2019 \
   --start 0 --limit 300          # repeat with --start 300/600/900/1200/1500
 
-# 3. Retry error rows: rename the attempts log first (--resume-attempts skips
-#    everything ATTEMPTED, not just succeeded), then re-run without --start/--limit.
+# 3. Retry failures: re-run without --start/--limit. --resume-attempts skips only
+#    complete, non-empty attempts (status=ok). Zero-row, stalled-pagination and
+#    max-pages results are logged as status=failed, are not written to --out,
+#    and are retried automatically.
 
 # 4. Diagnose stubborn zero-row slugs (writes stage snapshots to data/raw/edgeprop/probe/)
 python3 scrapers/probe_zero_row.py <slug>
