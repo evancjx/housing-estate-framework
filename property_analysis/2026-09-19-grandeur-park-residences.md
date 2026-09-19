@@ -48,9 +48,11 @@ for the conventional 883 sqft three-bedroom at September 2026:
 | 06 to 10 | **S$1.791m** | S$2,029 |
 | 11 to 15 | **S$1.821m** | S$2,063 |
 
-That is a **narrower and better-specified** box than July's flat
-S$1.74m–S$1.80m "adjusted for floor". The floor adjustment is now measured,
-not hand-waved: **+2.3% for floors 6–10 and +4.1% for floors 11–15** over
+That is a **better-specified** box than July's flat S$1.74m–S$1.80m "adjusted
+for floor" — not a narrower one; it spans S$71k against July's S$60k, with a
+higher ceiling. The gain is that the spread is now attributable to a measured
+attribute rather than to cohort scatter. The floor adjustment is measured, not
+hand-waved: **+2.3% for floors 6–10 and +4.1% for floors 11–15** over
 floors 1–5, about S$70k top to bottom on an 883 sqft unit. Paying a
 high-floor price for a low-floor unit is the single most common avoidable
 error in this project, and it is worth roughly one year of price growth.
@@ -62,13 +64,18 @@ entry, a S$500,000 capital-only gain in five years requires an exit at
 - Grandeur's own trailing-12-month median resale PSF is **S$2,016**.
 - The newest integrated stock at the same MRT, Sceneca Residence, last traded
   at **S$2,323 psf** (2026 sub-sale) and **S$2,341 psf** (2025 sub-sale).
-- The Bedok Rise GLS site next to Tanah Merah MRT is expected to launch around
-  **S$2,600 psf**, for a project completing 2029–2030.
+- The Bedok Rise GLS site next to Tanah Merah MRT is underwritten at an
+  illustrative **S$2,500 psf** in this repository's own
+  [Bedok Rise analysis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-07-30-bedok-rise-gls-future-condominium.html),
+  which treats S$2,400–S$2,550 as defensible and S$2,550–S$2,700 as requiring
+  superior product evidence. External commentary after the land award spans
+  roughly S$2,300–S$2,700. Nothing has been released by the developer.
 
-So the S$500k five-year target asks a nine-year-old leasehold resale unit to
-exit **18% above today's brand-new integrated stock** and **5% above the
-consensus launch price of a condominium that will not exist until 2029**.
-That is not a bull case. That is a category error. Reject any pitch built on it.
+So the S$500k five-year target asks a 2016-lease resale unit to exit **18%
+above today's brand-new integrated stock at the same station**, and **9% above
+the rate this repository's own Bedok Rise analysis uses for a condominium that
+will not exist until 2029**. That is not a bull case. That is a category error.
+Reject any pitch built on it.
 
 An eight-year hold at **3.81%/yr** delivers the same S$500k and is defensible
 — it is close to the project's realised 3.40%/yr three-year rate. **Eight years
@@ -129,20 +136,39 @@ most decision-relevant single fact added here.
 
 ### Competing new supply is larger than the July report described
 
-The July report discussed Sceneca and the Bedok Rise parcel. It did not
-mention that **District 16 absorbed 784 new-sale units in 2026 alone** from the
-Bayshore precinct, in the same URA extract it was built from:
+The July report discussed Sceneca and the Bedok Rise parcel. It did not mention
+that **District 16 absorbed 929 new-sale units in 2026 alone**, counted from
+the raw URA extract `data/raw/ura/pmi_d16_2024-2026.csv`:
 
-| Project | 2026 new sales | 2026 median PSF | Months active |
-|---|---:|---:|---|
-| Vela Bay | 374 | S$2,861 | 2026-04 to 2026-07 |
-| Pinery Residences | 410 | S$2,537 | 2026-03 to 2026-06 |
-| Bagnall Haus | 91 (2025–26) | S$2,494 | 2025-01 to 2026-04 |
+| Project | Street | 2026 new sales | 2026 median PSF | Months active |
+|---|---|---:|---:|---|
+| Vela Bay | Bayshore Walk | 376 | S$2,862 | 2026-04 to 2026-07 |
+| Pinery Residences | Bedok Reservoir Road | 550 | S$2,548 | 2026-03 to 2026-06 |
+| Bagnall Haus | Upper East Coast Road | 3 | S$2,540 | 2026-02 to 2026-04 |
 
-These are not Tanah Merah substitutes on walking distance, but they are
-same-district, same-buyer-pool competition at a **26%–42% PSF premium** to
-Grandeur's resale level, and they are where D16 new-build demand is being
-absorbed right now. Bayshore is also where TEL Stage 5 lands — see below.
+**These three are not one precinct, and District 16 is a postal badge rather
+than a market.** Only **Vela Bay** is in the Bayshore precinct. **Pinery
+Residences sits in Tampines Planning Area** with a planned direct underground
+link to Tampines West MRT on the Downtown Line — the repository's own
+[Pinery analysis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-08-08-pinery-residences.html)
+states this explicitly and warns against reading a portal's district badge as a
+physical boundary. Bagnall Haus is an Upper East Coast infill.
+
+None are Tanah Merah substitutes on walking distance. What they establish is
+that D16-badged new-build demand is being absorbed **elsewhere in the east**, at
+a **26%–42% PSF premium** to Grandeur's resale level, by buyers who are not
+shopping at Tanah Merah. Read this as evidence about where the marginal new-build
+buyer is going, not as direct competition for a Grandeur resale unit.
+
+A counting note that matters for anyone reproducing these figures: the derived
+`data/inputs/ura_private.csv` is built by concatenating the raw district extracts
+and de-duplicating identical rows. For a new launch, many genuinely distinct units
+sell at the same price, size, month and floor band, so de-duplication silently
+collapses them — it returns 410 Pinery sales against 550 raw. Resale caveats
+almost never collide this way, and Grandeur's 184 rows survive de-duplication
+unchanged, so **every Grandeur figure in this report is unaffected**. New-launch
+volumes here are therefore taken from the raw extract, and new-launch volumes
+quoted from the derived file anywhere else should be treated as undercounts.
 
 ### The framework's own pipeline reading was refreshed on 8 August 2026
 
@@ -211,17 +237,22 @@ case that 5%+ is the trend rate is **also not supported** — the headline
 | 2026Q1 | 8 |
 | 2026Q2 | 8 |
 
-Quarterly volume is within its normal range. But within 2026Q2 the split is
-**April 6, May 2, June 0**, and **July 2026 is also zero** in an extract whose
-canonical coverage is complete through June. Annual turnover was 4.6%, 5.0%,
-5.1% and 5.0% of the 720 homes in 2022–2025; 2026 is running at **16 caveats
-in seven months, about 3.8% annualised**.
+Quarterly volume is within its normal range. Within 2026Q2 the split is
+**April 6, May 2, June 0**, and July 2026 is also zero — but July falls outside
+the extract's complete coverage, which ends at June, so only June's zero counts
+as evidence.
 
-Two zero months is thin evidence and the extract may miss late lodgements — I
-am **not** calling this a liquidity collapse. It is a flag that the last
-positive index point is built on January–April prints, which is exactly the
-window before the OCR sub-index went negative. **The local index and the
-segment index disagree, and the local one has the older data.**
+Over the six complete months of 2026, turnover is **16 caveats, or 2.22% of the
+720 homes, equal to 4.44% annualised**. Annual turnover was 4.6%, 5.0%, 5.1%
+and 5.0% in 2022–2025. **2026 sits at the bottom of that band, not outside it.**
+
+I had initially annualised over seven months to reach 3.8%, which overstated the
+slowdown by counting a month the extract does not cover. Corrected, the
+liquidity story is much weaker than it first looked: **there is no meaningful
+turnover deterioration in this data.** What survives is narrower and still worth
+noting — the last positive index point is built on January–April prints, which
+is exactly the window before the OCR sub-index went negative. **The local index
+and the segment index disagree, and the local one has the older data.**
 
 ## Hedonic fair-value grid, September 2026
 
@@ -296,9 +327,12 @@ twelve months, from the same URA extract:
 Grandeur is the **price leader of the cluster**, trading 7% above Bedok
 Residences — an integrated mall development sitting directly on Bedok MRT. Its
 youth and interchange proximity earn that. But note **The Glades**: the most
-liquid comparable in the cluster, 44 caveats, also 2016-vintage leasehold near
-Tanah Merah, and **down 1.5%** over the same window. The cluster is not moving
-as one body.
+liquid comparable in the cluster at 44 caveats, directly beside Tanah Merah
+MRT, and **down 1.5%** over the same window. It is not a like-for-like age
+comparison — its lease commenced **2013 against Grandeur's 2016**, so it
+carries three fewer years — but it is the closest high-volume read on how this
+station's leasehold stock is trading, and it is negative while Grandeur is
+positive. The cluster is not moving as one body.
 
 Now the new-build reference points:
 
@@ -309,31 +343,37 @@ Now the new-build reference points:
 | Sceneca Residence new sale, 2025 tail | S$2,065 | 38 units |
 | Sceneca Residence sub-sale, 2025 | S$2,341 | 1 |
 | Sceneca Residence sub-sale, 2026 | S$2,323 | 1 |
-| Bedok Rise, expected launch | ~S$2,600 | market estimate, S$2,300–S$2,700 range |
+| Bedok Rise, illustrative launch rate | S$2,500 | repository's own Bedok Rise analysis; external estimates S$2,300–S$2,700 |
 
 Two readings, and both matter.
 
 **The bull reading:** Sceneca launched at S$2,086 in 2023 and its leftover
-stock cleared at S$2,065 in 2025 — brand-new integrated pricing at this station
-went **nowhere for three years** while Grandeur rose 10.5%. The new-build
-premium at Tanah Merah has been compressing, and Bedok Rise at ~S$2,600 would
-re-open it and drag resale comparables up behind it.
+stock cleared at S$2,065 in 2025 — **-1.0%**, i.e. brand-new integrated pricing
+at this station went nowhere. Over that same 2023-to-2025 window Grandeur's
+quality-adjusted index rose **+6.6%** (annual averages of the half-year index,
+113.05 to 120.50). The new-build premium at Tanah Merah has been compressing
+from both ends, and a Bedok Rise launch at S$2,500-plus would re-open it and
+drag resale comparables up behind it.
 
 **The bear reading, which I think is stronger:** Sceneca's two sub-sales at
 S$2,323–S$2,341 are the only genuine market test of what "newest, integrated,
 on the station" is worth here. Grandeur at S$2,016 is already **87% of that
-number** while being nine years older with a 2016 lease start. The remaining
-convergence room is roughly **15%**, or about three years of 5% growth — and
-that assumes the new-build premium compresses to zero, which it does not.
+number**, against a lease that started **2016 versus Sceneca's 2021** — five
+years of lease, and roughly six years of building age. The remaining
+convergence room is about **15%**, or three years of 5% growth, and that
+assumes the new-build premium compresses to zero, which it does not.
 
-The Bedok Rise site was awarded to Bellis Residential (Allgreen) in December
-2025 at **S$1,330 psf ppr** for ~380 homes, with showflat preparation expected
-around mid-2026 and TOP projected 2029–2030
+No Bedok Rise price has been released. The site was awarded to Bellis
+Residential (Allgreen) in December 2025 at **S$1,330 psf ppr** for ~380 homes,
+with showflat preparation expected around mid-2026 and TOP projected 2029–2030
 ([99.co on the award](https://www.99.co/singapore/insider/bedok-rise-gls-strong-outcome-s1330-psf-ppr/);
 [URA tender launch](https://www.ura.gov.sg/news/media/pr25-48/);
 [URA award](https://www.ura.gov.sg/news/media/pr25-66/);
 [CBRE tender commentary](https://www.cbre.com.sg/press-releases/commentary-on-ura-tender-closing-at-bedok-rise-residential-site)).
-Pricing is unreleased; S$2,600 is a market estimate, not a fact.
+Pricing is unreleased. S$2,500 is this repository's own illustrative
+underwriting rate and S$2,300–S$2,700 is the spread of external commentary —
+neither is a developer figure, and the actual release will move every resale
+comparable at this station.
 
 ## Revised capital-only test
 
@@ -438,15 +478,17 @@ The figures below are the **June 2026** contracts captured in the 2026-07-30
 sweep of the
 [99.co URA/REALIS-derived rental ledger](https://www.99.co/singapore/condos-apartments/grandeur-park-residences).
 They have **not** been re-verified. Yields are recomputed at the model fair
-values in this report.
+values in this report, with one exception: the 900–1,000 sqft cohort has only
+two caveats and is excluded from the fair-value grid, so its yield is shown
+against the **May 2026 achieved price of S$2.05m** for a 980 sqft unit.
 
 | Area band / likely format | June 2026 monthly rent | Gross yield at model fair value |
 |---|---:|---:|
 | 400–500 sqft compact | S$2,900–S$3,100 | 3.7%–4.0% at S$0.923m |
 | 500–600 sqft 2BR | S$3,500–S$4,000 | 3.5%–4.0% at S$1.196m |
 | 600–700 sqft 2BR/study | S$3,500–S$3,800 | 3.0%–3.2% at S$1.421m |
-| 800–900 sqft 3BR | S$4,550–S$4,800 | 3.0%–3.2% at S$1.791m |
-| 900–1,000 sqft 3BR | ~S$5,100 | ~3.0% at S$2.03m |
+| 800–900 sqft 3BR | S$4,550–S$4,800 | 3.0%–3.2% at S$1.791m (model) |
+| 900–1,000 sqft 3BR | ~S$5,100 | ~3.0% at S$2.05m (achieved, not model) |
 
 Against these, **OCR non-landed rents fell 0.3% in Q2 2026 and islandwide
 vacancy rose to 6.4%**. A June-2026 contract is not a Q4-2026 contract. Gross
@@ -476,7 +518,6 @@ What can be said now is how those July asks scored against the model:
 |---|---:|---|---|
 | 883 sqft 3BR | S$1.799m | S$1.750m–S$1.821m | Fair at mid floor, rich at low floor |
 | 883 sqft 3BR | S$1.860m | S$1.750m–S$1.821m | Above fair at every floor band |
-| 667 sqft 2BR+study | — | S$1.388m–S$1.444m | July cohort asks clustered at fair |
 | 592 sqft 2BR | S$1.318m | S$1.283m–S$1.336m | Fair at mid-to-high floor |
 | 581 sqft 2BR | S$1.220m | S$1.190m–S$1.238m | Fair |
 | 560 sqft 2BR ground-floor patio | S$1.10m | S$1.168m (floor 01–05) | 6% below model — the patio discount is the question, not the price |
@@ -498,13 +539,17 @@ a question, not a bargain.**
   January–April caveats.
 - **The convergence trade is mostly spent.** At 87% of the newest integrated
   stock's sub-sale PSF, the remaining room to the observable ceiling is ~15%.
-- **The nearest true comparable is down.** The Glades, the most liquid
-  2016-vintage leasehold in the cluster, fell 1.5% over the last twelve months.
+- **The nearest high-volume comparable is down.** The Glades, 44 caveats and
+  beside the same station, fell 1.5% over the last twelve months — on a 2013
+  lease against Grandeur's 2016, so three years further along.
 - **Dollar-gain targets require impossible PSF.** S$500k in five years needs
   S$2,736 psf on an 883 sqft unit — above anything ever achieved at this
   station, new or old.
 - **New supply is both benchmark and substitute.** Bedok Rise (~380 units, next
-  to Tanah Merah) plus 784 D16 units absorbed at Bayshore in 2026 alone.
+  to Tanah Merah) is the direct one. The 929 D16-badged new-sale units absorbed
+  in 2026 are mostly *not* — 550 are Pinery in Tampines Planning Area and 376
+  are Vela Bay at Bayshore — but they show where the marginal new-build buyer in
+  the east is going, at a 26%–42% PSF premium.
 - **Thin cohorts.** The 1,238 sqft (4 caveats) and 1,453 sqft (11) grids carry
   wide error; 904 sqft and 1,744 sqft are not modellable at all.
 - **Internal competition.** 720 homes with heavily repeated layouts — 27 caveats
