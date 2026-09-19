@@ -140,7 +140,14 @@ def test_context_gates_and_value_proxies_are_visible(chromium_page) -> None:
     assert row.count() == 1
     assert "Proxy · Sembawang" in row.locator("td[data-column-key='hdb_value']").inner_text()
     assert "Proxy · Sembawang" in row.locator("td[data-column-key='private_value']").inner_text()
-    assert row.locator("td[data-column-key='hdb_value']").inner_text() != row.locator("td[data-column-key='private_value']").inner_text()
+    # Each cell renders its own segment's band. The two bands can coincide,
+    # so compare against the embedded payload rather than each other.
+    canberra = page.evaluate(
+        "() => JSON.parse(document.getElementById('mrt-comparison-data').textContent)"
+        ".find(item => item.station === 'Canberra')"
+    )
+    assert row.locator("td[data-column-key='hdb_value']").inner_text().startswith(canberra["hdb_value_band"])
+    assert row.locator("td[data-column-key='private_value']").inner_text().startswith(canberra["private_value_band"])
 
     page.locator("#station-search").fill("CC21")
     row = page.locator("#mrt-comparison-table-body tr")

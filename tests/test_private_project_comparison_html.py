@@ -295,7 +295,7 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
     assert isinstance(config, dict)
     counts = config["counts"]
     assert len(rows) == counts["projects"] == 2_400
-    assert sum(row["n"] for row in rows) == counts["transactions"] == 102_895
+    assert sum(row["n"] for row in rows) == counts["transactions"] == 107_037
     assert len({row["district"] for row in rows}) == counts["districts"] == 28
     assert len({row["station_key"] for row in rows}) == counts["stations"]
     assert (
