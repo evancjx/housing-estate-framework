@@ -8,6 +8,20 @@ Summary: **Updates the 2026-07-30 report. The project's own quality-adjusted pri
 
 ## Decision
 
+> **Correction, 20 September 2026.** The first published version of this
+> report used two Sceneca Residence sub-sales (S$2,323 and S$2,341 psf) as the
+> Tanah Merah new-build ceiling. A URA District 16 export captured on
+> 19 September 2026, and published in the
+> [2026-09-19 Sceneca Residence analysis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-19-sceneca-residence.html),
+> shows **ten** Sceneca sub-sales, nine of them in 2026 at
+> **S$2,279–S$2,398 psf (median S$2,312)**. The ceiling references below now
+> use that 2026 median and range. Because the median sits close to the original
+> single-sale anchor, the conclusions are unchanged: the S$500k five-year exit
+> is still about 18% above the ceiling (14% above its highest point), and
+> Grandeur still trades at about 87% of it. The 2025 Sceneca new-sale tail is
+> also restated from 38 to 39 units after a repository deduplication fix
+> recovered one January 2025 sale.
+
 This report **updates and partly corrects** the
 [2026-07-30 Grandeur Park analysis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-07-30-grandeur-park-residences.html).
 Two things must be said before anything else.
@@ -62,8 +76,10 @@ entry, a S$500,000 capital-only gain in five years requires an exit at
 **S$2,736 psf**. For context, at this station:
 
 - Grandeur's own trailing-12-month median resale PSF is **S$2,016**.
-- The newest integrated stock at the same MRT, Sceneca Residence, last traded
-  at **S$2,323 psf** (2026 sub-sale) and **S$2,341 psf** (2025 sub-sale).
+- The newest integrated stock at the same MRT, Sceneca Residence, has nine
+  2026 sub-sales at **S$2,279–S$2,398 psf, median S$2,312**, plus one 2025
+  sub-sale at S$2,341. The latest, in September 2026, was S$2,389 on a
+  678 sqft unit.
 - The Bedok Rise GLS site next to Tanah Merah MRT is underwritten at an
   illustrative **S$2,500 psf** in this repository's own
   [Bedok Rise analysis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-07-30-bedok-rise-gls-future-condominium.html),
@@ -72,7 +88,8 @@ entry, a S$500,000 capital-only gain in five years requires an exit at
   roughly S$2,300–S$2,700. Nothing has been released by the developer.
 
 So the S$500k five-year target asks a 2016-lease resale unit to exit **18%
-above today's brand-new integrated stock at the same station**, and **9% above
+above the median price of brand-new integrated stock at the same station**
+(14% above its highest 2026 sub-sale), and **9% above
 the rate this repository's own Bedok Rise analysis uses for a condominium that
 will not exist until 2029**. That is not a bull case. That is a category error.
 Reject any pitch built on it.
@@ -340,28 +357,29 @@ Now the new-build reference points:
 |---|---:|---|
 | Grandeur resale, trailing 12m median | S$2,016 | 35 caveats |
 | Sceneca Residence new sale, 2023 launch | S$2,086 | 175 units |
-| Sceneca Residence new sale, 2025 tail | S$2,065 | 38 units |
+| Sceneca Residence new sale, 2025 tail | S$2,064 | 39 units |
 | Sceneca Residence sub-sale, 2025 | S$2,341 | 1 |
-| Sceneca Residence sub-sale, 2026 | S$2,323 | 1 |
+| Sceneca Residence sub-sale, 2026 | S$2,312 median (S$2,279–S$2,398) | 9, URA D16 export captured 19 Sep 2026 |
 | Bedok Rise, illustrative launch rate | S$2,500 | repository's own Bedok Rise analysis; external estimates S$2,300–S$2,700 |
 
 Two readings, and both matter.
 
 **The bull reading:** Sceneca launched at S$2,086 in 2023 and its leftover
-stock cleared at S$2,065 in 2025 — **-1.0%**, i.e. brand-new integrated pricing
+stock cleared at S$2,064 in 2025 — **-1.1%**, i.e. brand-new integrated pricing
 at this station went nowhere. Over that same 2023-to-2025 window Grandeur's
 quality-adjusted index rose **+6.6%** (annual averages of the half-year index,
 113.05 to 120.50). The new-build premium at Tanah Merah has been compressing
 from both ends, and a Bedok Rise launch at S$2,500-plus would re-open it and
 drag resale comparables up behind it.
 
-**The bear reading, which I think is stronger:** Sceneca's two sub-sales at
-S$2,323–S$2,341 are the only genuine market test of what "newest, integrated,
-on the station" is worth here. Grandeur at S$2,016 is already **87% of that
-number**, against a lease that started **2016 versus Sceneca's 2021** — five
-years of lease, and roughly six years of building age. The remaining
-convergence room is about **15%**, or three years of 5% growth, and that
-assumes the new-build premium compresses to zero, which it does not.
+**The bear reading, which I think is stronger:** Sceneca's ten sub-sales —
+nine of them in 2026, at S$2,279–S$2,398 with a S$2,312 median — are the only
+genuine market test of what "newest, integrated, on the station" is worth
+here. Grandeur at S$2,016 is already **87% of that median**, against a lease
+that started **2016 versus Sceneca's 2021** — five years of lease, and roughly
+six years of building age. The remaining convergence room is about **15%**
+(19% to the highest 2026 sub-sale), or roughly three years of 5% growth, and
+that assumes the new-build premium compresses to zero, which it does not.
 
 No Bedok Rise price has been released. The site was awarded to Bellis
 Residential (Allgreen) in December 2025 at **S$1,330 psf ppr** for ~380 homes,
@@ -407,8 +425,9 @@ every case. That part is easy. The dollar targets are not:
 | 624 sqft, 06–10 | S$1.733m / 2,777 | 5.18% | 3.21% | S$1.938m / 3,106 | 7.56% | 4.66% |
 
 **This table is the report.** Read the PSF columns against the ceiling section:
-S$2,736 psf is 18% above the newest integrated stock's last sub-sale; S$3,025
-psf on a 667 sqft unit is 30% above it, and 50% above Grandeur's own
+S$2,736 psf is 18% above the median 2026 sub-sale of the newest integrated
+stock (14% above its highest); S$3,025 psf on a 667 sqft unit is 31% above
+that median, and 50% above Grandeur's own
 trailing-twelve-month median. A compact unit cannot deliver a large
 *dollar* gain without a fantastical PSF, because the dollar target is fixed and
 the area is small. **If the objective is a S$300k–S$500k dollar gain, the
@@ -538,7 +557,8 @@ a question, not a bargain.**
   rents both fell in Q2 2026. Grandeur's last positive index point is built on
   January–April caveats.
 - **The convergence trade is mostly spent.** At 87% of the newest integrated
-  stock's sub-sale PSF, the remaining room to the observable ceiling is ~15%.
+  stock's median 2026 sub-sale PSF, the remaining room to the observable
+  ceiling is ~15% (~19% to its highest sub-sale).
 - **The nearest high-volume comparable is down.** The Glades, 44 caveats and
   beside the same station, fell 1.5% over the last twelve months — on a 2013
   lease against Grandeur's 2016, so three years further along.
