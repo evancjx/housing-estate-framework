@@ -250,7 +250,7 @@ def test_non_residential_gate_and_value_provenance_remain_explicit() -> None:
     assert canberra["hdb_value_band"] == "B+"
     assert canberra["hdb_value_basis"] == "proxy_from:SEMBAWANG"
     assert canberra["hdb_value_status"] == "available"
-    assert canberra["private_value_band"] == "B+"
+    assert canberra["private_value_band"] == "A"
     assert canberra["private_value_basis"] == "proxy_from:SEMBAWANG"
     assert canberra["private_value_status"] == "available"
 

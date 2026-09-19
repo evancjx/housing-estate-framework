@@ -22,7 +22,7 @@ INPUT CONTRACT:
   --scores: provision_scores.csv with estate,score,score_private
   --private: URA private resale CSV in value_model.py private_resale schema:
       planning_area, transacted_price, area_sqm, property_type, tenure,
-      project_age_years, sale_month, type_of_area
+      sale_month, type_of_area
 
 OUTPUT:
   data/outputs/private_segment_value.csv with estate,property_segment,n,value_score,
