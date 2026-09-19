@@ -319,3 +319,60 @@ def test_run_download_api_subprocess_passes_selected_districts(monkeypatch, tmp_
     assert "--districts" in cmd
     district_pos = cmd.index("--districts")
     assert cmd[district_pos:district_pos + 3] == ["--districts", "15", "16"]
+
+
+def _ingest_args(raw, out, **overrides):
+    import argparse
+
+    values = dict(
+        files=[str(raw)], raw_dir=None, out=str(out), merge=False,
+        source_quality=None, allow_coverage_loss=False,
+    )
+    values.update(overrides)
+    return argparse.Namespace(**values)
+
+
+def _write_pmi(path, rows):
+    path.write_text(
+        "Project,Street,Type,Postal District,Market Segment,Tenure,Sale Type,"
+        "No. of Units,Price ($),Area (sqm),Unit Price ($psm),Date of Sale,Floor\n"
+        + "".join(
+            f"P{i},S,{kind},{district},OCR,Freehold,Resale,1,1000000,100,10000,Jan-25,01-05\n"
+            for i, (district, kind) in enumerate(rows)
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_rebuild_refuses_to_drop_existing_district_type_groups(tmp_path):
+    import pytest
+
+    out = tmp_path / "ura_private.csv"
+    full = tmp_path / "full.csv"
+    _write_pmi(full, [("15", "Condominium"), ("16", "Condominium"), ("16", "Detached House")])
+    ingest_ura_raw.run(_ingest_args(full, out))
+    before = out.read_bytes()
+
+    partial = tmp_path / "partial.csv"
+    _write_pmi(partial, [("15", "Condominium")])
+    with pytest.raises(SystemExit, match="drop 2 location/property-type"):
+        ingest_ura_raw.run(_ingest_args(partial, out))
+    assert out.read_bytes() == before
+
+    ingest_ura_raw.run(_ingest_args(partial, out, allow_coverage_loss=True))
+    assert len(ingest_ura_raw.pd.read_csv(out)) == 1
+
+
+def test_file_without_sale_date_is_skipped_not_backfilled(tmp_path):
+    raw = tmp_path / "no_date.csv"
+    raw.write_text(
+        "Project,Postal District,Type,Price ($),Area (sqm)\nP,15,Condominium,1000000,100\n",
+        encoding="utf-8",
+    )
+    assert ingest_ura_raw.ingest_file(raw).empty
+
+
+def test_write_csv_atomic_leaves_no_temp_files(tmp_path):
+    out = tmp_path / "x.csv"
+    ingest_ura_raw.write_csv_atomic(ingest_ura_raw.pd.DataFrame({"a": [1]}), out)
+    assert [p.name for p in tmp_path.iterdir()] == ["x.csv"]
