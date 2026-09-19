@@ -29,6 +29,11 @@ USAGE:
     # Keep only landed transaction groups if the API path is usable.
     python scrapers/ura_pmi_api.py --prop_types landed strata_landed --out_dir data/raw/ura/
 
+    # Monthly developer sales (PMI_Resi_Developer_Sales) for a YYYY-MM range.
+    # Written outside data/raw/ura/ so ingest_ura_raw.py's *.csv glob skips it.
+    python scrapers/ura_pmi_api.py --developer_sales 2025-08 2026-08 --districts 27 \
+        --out_dir data/raw/ura/developer_sales
+
 INSTALL:
     pip install requests --break-system-packages
 """
@@ -236,6 +241,66 @@ def flatten_project_transactions(records: list[dict]) -> list[dict]:
     return rows
 
 
+def developer_sales_periods(start: str, end: str) -> list[str]:
+    """Expand an inclusive YYYY-MM range into URA mmyy refPeriod values."""
+    year, month = (int(part) for part in start.split("-"))
+    end_year, end_month = (int(part) for part in end.split("-"))
+    periods = []
+    while (year, month) <= (end_year, end_month):
+        periods.append(f"{month:02d}{year % 100:02d}")
+        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+    return periods
+
+
+def flatten_developer_sales(records: list[dict]) -> list[dict]:
+    """Flatten PMI_Resi_Developer_Sales records into one row per project-month.
+
+    Prices are URA's median/lowest/highest $psf for units sold in the month.
+    Cumulative fields are kept exactly as reported; sold_to_date can net out
+    cancellations, so it is never derived from monthly sales.
+    """
+
+    def value(sales: dict, key: str):
+        field = sales.get(key)
+        return "" if field is None else field
+
+    rows = []
+    for project in records:
+        for sales in project.get("developerSales", []) or []:
+            rows.append({
+                "ref_month": parse_contract_month(sales.get("refPeriod", "")),
+                "project_name": project.get("project", ""),
+                "street_name": project.get("street", ""),
+                "postal_district": str(project.get("district", "")).strip().zfill(2),
+                "market_segment": project.get("marketSegment", ""),
+                "property_type": project.get("propertyType", ""),
+                "developer": project.get("developer", ""),
+                "units_avail": value(sales, "unitsAvail"),
+                "launched_to_date": value(sales, "launchedToDate"),
+                "sold_to_date": value(sales, "soldToDate"),
+                "launched_in_month": value(sales, "launchedInMonth"),
+                "sold_in_month": value(sales, "soldInMonth"),
+                "median_psf": value(sales, "medianPrice"),
+                "lowest_psf": value(sales, "lowestPrice"),
+                "highest_psf": value(sales, "highestPrice"),
+            })
+    return rows
+
+
+def fetch_developer_sales(access_key: str, token: str, ref_period: str, session: requests.Session) -> dict:
+    """Fetch PMI_Resi_Developer_Sales for one mmyy reference month."""
+    url = f"{INVOKE_URL}?service=PMI_Resi_Developer_Sales&refPeriod={ref_period}"
+    hdrs = {**HEADERS, "AccessKey": access_key, "Token": token}
+    r = session.get(url, headers=hdrs, timeout=60)
+    r.raise_for_status()
+
+    content_type = r.headers.get("Content-Type", "")
+    if "text/html" in content_type or r.text.strip().startswith("<"):
+        raise RuntimeError("L7 WAF challenge on developer-sales fetch")
+
+    return r.json()
+
+
 def transactions_to_csv(records: list, out_path: Path):
     """Write transaction records to CSV."""
     if not records:
@@ -333,6 +398,38 @@ def run(args):
     print(f"\nDone. Output: {out_path}")
 
 
+def run_developer_sales(args) -> Path:
+    """Fetch monthly developer sales for an inclusive YYYY-MM range and write one CSV."""
+    access_key = get_access_key()
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    session = requests.Session()
+    token = generate_token(access_key, session)
+
+    start, end = args.developer_sales
+    wanted_districts = {d.zfill(2) for d in args.districts} if args.districts else set()
+    rows = []
+    for ref_period in developer_sales_periods(start, end):
+        data = fetch_developer_sales(access_key, token, ref_period, session)
+        if data.get("Status") != "Success":
+            raise RuntimeError(f"Developer sales {ref_period}: Status={data.get('Status')}")
+        month_rows = flatten_developer_sales(data.get("Result", []))
+        if wanted_districts:
+            month_rows = [row for row in month_rows if row["postal_district"] in wanted_districts]
+        print(f"  {ref_period}: {len(month_rows)} project rows")
+        rows.extend(month_rows)
+        time.sleep(1)  # polite delay between months
+
+    if not rows:
+        sys.exit("[ERROR] No developer-sales rows retrieved.")
+    out_name = f"pmi_api_developer_sales_{start}_{end}"
+    if wanted_districts:
+        out_name += "_d" + "_d".join(sorted(wanted_districts))
+    out_path = out_dir / f"{out_name}.csv"
+    transactions_to_csv(rows, out_path)
+    return out_path
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="URA Data Service API client for private residential transactions"
@@ -349,7 +446,14 @@ def main():
         "--districts", nargs="*", metavar="NN",
         help="Optional postal district filter, e.g. --districts 03 07 08",
     )
+    ap.add_argument(
+        "--developer_sales", nargs=2, metavar=("START", "END"),
+        help="Fetch monthly developer sales (PMI_Resi_Developer_Sales) for an inclusive YYYY-MM range instead of transactions",
+    )
     args = ap.parse_args()
+    if args.developer_sales:
+        run_developer_sales(args)
+        return
     if args.prop_types:
         try:
             args.prop_types = normalize_prop_types(args.prop_types)

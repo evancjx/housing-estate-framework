@@ -3,8 +3,122 @@ import argparse
 import pandas as pd
 
 from scrapers import ingest_ura_raw, run_download
-from scrapers.ura_pmi_api import flatten_project_transactions
+from scrapers.ura_pmi_api import (
+    developer_sales_periods,
+    flatten_developer_sales,
+    flatten_project_transactions,
+)
 from scrapers.ura_pmi_playwright import normalize_prop_types, raw_filename
+
+
+# Shape of one PMI_Resi_Developer_Sales record as returned by the API (Aug 2026).
+DEVELOPER_SALES_RECORD = {
+    "street": "CANBERRA CRESCENT",
+    "district": "27",
+    "propertyType": "Non-Landed",
+    "project": "CANBERRA CRESCENT RESIDENCES",
+    "developer": "Peak Crescent Pte Ltd",
+    "developerSales": [
+        {
+            "refPeriod": "0826",
+            "medianPrice": 2031,
+            "highestPrice": 2046,
+            "lowestPrice": 1957,
+            "launchedToDate": 376,
+            "soldInMonth": 5,
+            "launchedInMonth": 0,
+            "soldToDate": 346,
+            "unitsAvail": 376,
+        }
+    ],
+    "marketSegment": "OCR",
+}
+
+
+def test_developer_sales_records_flatten_one_row_per_project_month():
+    rows = flatten_developer_sales([DEVELOPER_SALES_RECORD])
+
+    assert rows == [
+        {
+            "ref_month": "2026-08",
+            "project_name": "CANBERRA CRESCENT RESIDENCES",
+            "street_name": "CANBERRA CRESCENT",
+            "postal_district": "27",
+            "market_segment": "OCR",
+            "property_type": "Non-Landed",
+            "developer": "Peak Crescent Pte Ltd",
+            "units_avail": 376,
+            "launched_to_date": 376,
+            "sold_to_date": 346,
+            "launched_in_month": 0,
+            "sold_in_month": 5,
+            "median_psf": 2031,
+            "lowest_psf": 1957,
+            "highest_psf": 2046,
+        }
+    ]
+
+
+def test_developer_sales_keeps_reported_totals_and_blanks_missing_fields():
+    # soldToDate is URA's cumulative figure and can net out cancellations, so
+    # it must be kept as reported rather than derived from monthly sales.
+    record = {
+        "project": "TEST",
+        "district": "5",
+        "developerSales": [
+            {"refPeriod": "0726", "soldInMonth": 11, "soldToDate": 917},
+            {"refPeriod": "0826", "soldInMonth": 3, "soldToDate": 919, "medianPrice": None},
+        ],
+    }
+
+    rows = flatten_developer_sales([record])
+
+    assert [(r["ref_month"], r["sold_in_month"], r["sold_to_date"]) for r in rows] == [
+        ("2026-07", 11, 917),
+        ("2026-08", 3, 919),
+    ]
+    assert rows[0]["postal_district"] == "05"
+    assert rows[0]["median_psf"] == ""
+    assert rows[1]["median_psf"] == ""
+    assert rows[1]["developer"] == ""
+
+
+def test_run_developer_sales_fetches_each_month_and_filters_districts(monkeypatch, tmp_path):
+    from scrapers import ura_pmi_api
+
+    other = {**DEVELOPER_SALES_RECORD, "project": "ELSEWHERE", "district": "15"}
+    requested = []
+
+    def fake_fetch(access_key, token, ref_period, session):
+        requested.append(ref_period)
+        sales = [{**DEVELOPER_SALES_RECORD["developerSales"][0], "refPeriod": ref_period}]
+        return {
+            "Status": "Success",
+            "Result": [
+                {**DEVELOPER_SALES_RECORD, "developerSales": sales},
+                {**other, "developerSales": sales},
+            ],
+        }
+
+    monkeypatch.setattr(ura_pmi_api, "get_access_key", lambda: "key")
+    monkeypatch.setattr(ura_pmi_api, "generate_token", lambda key, session: "token")
+    monkeypatch.setattr(ura_pmi_api, "fetch_developer_sales", fake_fetch)
+    monkeypatch.setattr(ura_pmi_api.time, "sleep", lambda seconds: None)
+
+    out = ura_pmi_api.run_developer_sales(
+        argparse.Namespace(developer_sales=["2026-07", "2026-08"], districts=["27"], out_dir=str(tmp_path))
+    )
+
+    assert requested == ["0726", "0826"]
+    assert out.name == "pmi_api_developer_sales_2026-07_2026-08_d27.csv"
+    written = pd.read_csv(out, dtype=str)
+    assert written["ref_month"].tolist() == ["2026-07", "2026-08"]
+    assert set(written["project_name"]) == {"CANBERRA CRESCENT RESIDENCES"}
+
+
+def test_developer_sales_periods_span_year_boundary_in_api_format():
+    assert developer_sales_periods("2025-11", "2026-02") == ["1125", "1225", "0126", "0226"]
+    assert developer_sales_periods("2026-08", "2026-08") == ["0826"]
 
 
 def test_landed_property_type_aliases_and_raw_filenames():

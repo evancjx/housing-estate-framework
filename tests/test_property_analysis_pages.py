@@ -101,7 +101,7 @@ def test_real_property_analyses_are_discovered_newest_first():
     )
     assert (
         by_project["Canberra Crescent Residences"].captured_iso
-        == "2026-08-13T11:34:14+08:00"
+        == "2026-09-20T01:22:57+08:00"
     )
     assert (
         by_project["PARKTOWN Residence"].captured_iso
