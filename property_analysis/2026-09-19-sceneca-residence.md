@@ -15,7 +15,7 @@ young 99-year lease and only 268 homes should keep long-run owner-occupier
 and tenant relevance. What has changed is the price evidence.
 
 A fresh URA District 16 export shows **ten secondary-market Sub Sales**, not
-the two available in July. Eight are new to this analysis, including six in
+the two available in July. Eight are new to this analysis, including five in
 August 2026 alone. Every one of them cleared **above the highest developer
 price for the same exact size**, by 1.7% to 11.0%, and about 8.5% to 16.7%
 above the matching developer median. Recent subsales cluster tightly at
@@ -50,7 +50,7 @@ Revised evidence-backed buy boxes, for conventional mid-floor stacks:
 5. **1,163 sqft:** about S$2.69m. The low end of July's S$2.68m–S$2.79m asks
    is now at market, not "highly selective".
 
-Higher prices also compress the rental fallback to about **2.9%–3.4% gross**,
+Higher prices also compress the rental fallback to about **2.8%–3.4% gross**,
 and the illustrated capital-only break-even rises with the entry price.
 Sceneca now looks like a fairly priced, liquid-enough completed project, not
 an obvious discount.
@@ -332,7 +332,7 @@ second-property buyer.
 ## Principal risks
 
 - **Secondary evidence is still thin:** ten subsales, eight of them mid-floor
-  and six in one month, cannot establish a growth rate or a floor premium.
+  and five in one month, cannot establish a growth rate or a floor premium.
 - **No true resales yet:** every secondary row is a pre-completion Sub Sale.
   Post-completion resale pricing remains untested.
 - **The premium may be a handover effect:** completion, SSD expiry and fresh
