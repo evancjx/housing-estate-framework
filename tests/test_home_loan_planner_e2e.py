@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -13,6 +14,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "home_loan_planner.html"
+# The planner defaults its schedule start to the current month, so payoff
+# dates such as "Jul 2051" only hold for the date the expectations were
+# written. Freeze the page clock there instead of reading the real calendar.
+FIXED_NOW = datetime(2026, 8, 8, 12, 0, 0)
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
@@ -40,6 +45,7 @@ def chromium_page(tmp_path_factory):
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.clock.set_fixed_time(FIXED_NOW)
         url = f"http://127.0.0.1:{server.server_port}/{PAGE.name}"
         try:
             yield page, url
