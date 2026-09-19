@@ -162,8 +162,10 @@ SEGMENTS = {
     "private_resale": {
         "price_col": "transacted_price",
         "area_col":  "area_sqm",
-        "controls":  ["property_type", "type_of_area", "tenure", "project_age_years"],
-        "numeric_controls": ["project_age_years"],
+        # project_age_years is deliberately not a control: URA PMI downloads
+        # carry no completion year, so the ingested column was a constant
+        # placeholder. Re-add it only with real completion-year evidence.
+        "controls":  ["property_type", "type_of_area", "tenure"],
         "month_col": "sale_month",
         "area_key":  "planning_area",
     },
@@ -442,7 +444,7 @@ if __name__ == "__main__":
 #
 # (3) --private  ura_private.csv   [private resale]   source: URA REALIS / caveats
 #       required: planning_area, transacted_price, area_sqm, property_type,
-#                 type_of_area, tenure, project_age_years, sale_month
+#                 type_of_area, tenure, sale_month
 #       optional: market_segment
 #
 # (4) --rental  ura_rental.csv   [private rental]   source: URA rental contracts

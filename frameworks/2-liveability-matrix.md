@@ -87,6 +87,10 @@ Regression-residual (not crude percentile), segmented by tenure (HDB resale / pr
 private rental), with hierarchical shrinkage (transaction→project→subzone→town) so thin private
 samples don't distort. Adjustment capped 0.75×–1.25× until calibrated.
 
+Private resale controls are property type, type of area, tenure and sale month. Project age is
+**not** a control: URA transaction downloads carry no completion year, and a placeholder age is
+faked provenance. Re-add it only with sourced completion years.
+
 **In small, broadly-liveable Singapore, Value is arguably the PRIMARY output** — provision is high
 almost everywhere, so what varies most is price-for-equivalent-liveability and personal fit.
 
