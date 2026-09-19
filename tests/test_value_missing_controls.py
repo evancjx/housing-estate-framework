@@ -34,7 +34,7 @@ def _complete_private_rows():
     return rows
 
 
-def test_private_value_excludes_unknown_date_and_age_from_n(capsys):
+def test_private_value_excludes_unknown_date_and_blank_tenure_from_n(capsys):
     rows = _complete_private_rows()
     rows.extend(
         [
@@ -46,7 +46,7 @@ def test_private_value_excludes_unknown_date_and_age_from_n(capsys):
             {
                 **rows[1],
                 "transacted_price": 1_435_000,
-                "project_age_years": None,
+                "tenure": "  ",
             },
         ]
     )
@@ -58,20 +58,27 @@ def test_private_value_excludes_unknown_date_and_age_from_n(capsys):
     counts = residuals.set_index("estate")["n"].to_dict()
     assert counts == {"BISHAN": 5, "TAMPINES": 5}
     assert pd.isna(transactions.iloc[-2]["sale_month"])
-    assert pd.isna(transactions.iloc[-1]["project_age_years"])
+    assert transactions.iloc[-1]["tenure"] == "  "
     assert "excluded 2 of 12 rows before model fitting" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("unavailable", [None, "unknown"])
+def test_private_value_does_not_require_placeholder_project_age():
+    # URA downloads carry no completion year; age must not gate the model.
+    assert "project_age_years" not in value.SEGMENTS["private_resale"]["controls"]
+    transactions = pd.DataFrame(_complete_private_rows()).assign(project_age_years=None)
+
+    residuals = value.fit_segment(transactions, "private_resale", _scores())
+
+    assert residuals.set_index("estate")["n"].to_dict() == {"BISHAN": 5, "TAMPINES": 5}
+
+
+@pytest.mark.parametrize("unavailable", [None, "  "])
 def test_private_value_rejects_wholly_unavailable_required_control(unavailable):
     transactions = pd.DataFrame(_complete_private_rows())
-    transactions["project_age_years"] = unavailable
+    transactions["tenure"] = unavailable
 
     with pytest.raises(
         ContractError,
-        match=(
-            "private_resale required control 'project_age_years' has no usable "
-            "values"
-        ),
+        match="private_resale required control 'tenure' has no usable values",
     ):
         value.fit_segment(transactions, "private_resale", _scores())

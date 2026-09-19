@@ -212,14 +212,11 @@ def extract_sale_month(date_str: str) -> str | None:
 
 def compute_project_age(df: pd.DataFrame) -> pd.Series:
     """
-    Approximate project age in years = sale_year - completion_year.
-    Without completion data, use a floor of 0 (new) based on sale year
-    and a rough estimate from tenure commencement if available.
+    Project age is unknown: URA PMI downloads carry no completion year.
+    Keep the column null rather than inventing a value. The value model
+    does not use it as a control.
     """
-    # We don't have completion data in the portal download.
-    # Return a placeholder column; the value model uses it as a control
-    # variable so it needs to exist. Set 5 years as a reasonable default.
-    return pd.Series([5.0] * len(df), index=df.index)
+    return pd.Series(pd.NA, index=df.index, dtype="Float64")
 
 
 def ingest_file(
