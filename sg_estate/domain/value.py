@@ -75,6 +75,78 @@ def clean_psm(df, price_col, area_col):
     df["_lnpsm"] = np.log(df["_psm"])
     return df
 
+
+def _missing_value_mask(series):
+    """Treat nulls and blank text as unavailable model evidence."""
+    missing = series.isna()
+    if pd.api.types.is_object_dtype(series.dtype) or isinstance(
+        series.dtype, pd.StringDtype
+    ):
+        missing |= series.astype("string").str.strip().eq("").fillna(True)
+    return missing
+
+
+def _prepare_segment_rows(df, seg_name, segment):
+    """Return complete, finite rows for one segment and exclusion counts.
+
+    Every configured control is part of the executable model contract. Missing
+    values are excluded rather than imputed, and a wholly unavailable control
+    fails before the regression library can turn that absence into an opaque
+    Patsy error.
+    """
+    required = [
+        segment["price_col"],
+        segment["area_col"],
+        segment["area_key"],
+        segment["month_col"],
+        *segment["controls"],
+    ]
+    missing_columns = [column for column in required if column not in df.columns]
+    if missing_columns:
+        raise ContractError(
+            f"{seg_name} transaction input missing required columns: "
+            f"{missing_columns}"
+        )
+
+    prepared = df.copy()
+    prepared[segment["price_col"]] = pd.to_numeric(
+        prepared[segment["price_col"]], errors="coerce"
+    )
+    prepared[segment["area_col"]] = pd.to_numeric(
+        prepared[segment["area_col"]], errors="coerce"
+    )
+    for control in segment.get("numeric_controls", ()):
+        prepared[control] = pd.to_numeric(prepared[control], errors="coerce")
+
+    missing_by_column = {
+        column: _missing_value_mask(prepared[column]) for column in required
+    }
+    if not prepared.empty:
+        for control in segment["controls"]:
+            if missing_by_column[control].all():
+                raise ContractError(
+                    f"{seg_name} required control '{control}' has no usable values; "
+                    "missing controls must remain unknown and cannot be imputed"
+                )
+
+    missing_required = pd.Series(False, index=prepared.index)
+    for column in required:
+        missing_required |= missing_by_column[column]
+    missing_count = int(missing_required.sum())
+    prepared = prepared.loc[~missing_required].copy()
+
+    before_psm = len(prepared)
+    prepared = clean_psm(
+        prepared,
+        segment["price_col"],
+        segment["area_col"],
+    )
+    invalid_psm_count = before_psm - len(prepared)
+    return prepared, {
+        "missing_required": missing_count,
+        "invalid_psm": invalid_psm_count,
+    }
+
 # ----------------------------------------------------------------------
 # 2. SEGMENT MODELS — controls differ by tenure (framework §3 table)
 # ----------------------------------------------------------------------
@@ -83,6 +155,7 @@ SEGMENTS = {
         "price_col": "resale_price",
         "area_col":  "floor_area_sqm",
         "controls":  ["flat_type", "storey_band", "remaining_lease_years"],
+        "numeric_controls": ["remaining_lease_years"],
         "month_col": "month",
         "area_key":  "town",          # geographic rollup key in the file
     },
@@ -90,6 +163,7 @@ SEGMENTS = {
         "price_col": "transacted_price",
         "area_col":  "area_sqm",
         "controls":  ["property_type", "type_of_area", "tenure", "project_age_years"],
+        "numeric_controls": ["project_age_years"],
         "month_col": "sale_month",
         "area_key":  "planning_area",
     },
@@ -97,6 +171,7 @@ SEGMENTS = {
         "price_col": "monthly_rent",
         "area_col":  "area_sqm",
         "controls":  ["property_type", "project_age_years"],
+        "numeric_controls": ["project_age_years"],
         "month_col": "lease_month",
         "area_key":  "planning_area",
     },
@@ -108,15 +183,10 @@ SEGMENTS = {
 def fit_segment(df, seg_name, scores):
     import statsmodels.formula.api as smf
     s = SEGMENTS[seg_name]
-    df = df.copy()
     SCORE_BASE.validate(scores, source="value score input")
 
-    # price per sqm, logged
     n_before = len(df)
-    df = clean_psm(df, s["price_col"], s["area_col"])
-    dropped = n_before - len(df)
-    if dropped:
-        print(f"  [{seg_name}] dropped {dropped} rows with non-finite/zero psm")
+    df, exclusions = _prepare_segment_rows(df, seg_name, s)
 
     # Expand scores: for each alias whose target town has no score yet,
     # inject a shadow row using the alias estate's score so the regression
@@ -148,7 +218,21 @@ def fit_segment(df, seg_name, scores):
         how="left",
         validate="many_to_one",
     )
-    df = df.dropna(subset=["_score"])
+    missing_score_count = int(df["_score"].isna().sum())
+    exclusions["missing_score"] = missing_score_count
+    df = df.dropna(subset=["_score"]).copy()
+
+    excluded = sum(exclusions.values())
+    if excluded:
+        detail = ", ".join(
+            f"{label.replace('_', ' ')}={count}"
+            for label, count in exclusions.items()
+            if count
+        )
+        print(
+            f"  [{seg_name}] excluded {excluded} of {n_before} rows before "
+            f"model fitting ({detail})"
+        )
     if df.empty:
         return None
 
@@ -158,7 +242,12 @@ def fit_segment(df, seg_name, scores):
     # premium then multiplies it back, double-counting provision.
     model_formula = build_formula(df, s["controls"], s["month_col"])
     model = smf.ols(model_formula, data=df).fit()
-    df["_resid"] = model.resid
+    if len(model.resid) != len(df):
+        raise ContractError(
+            f"{seg_name} model unexpectedly omitted rows after explicit "
+            "complete-case validation"
+        )
+    df["_resid"] = model.resid.to_numpy()
 
     # ----- per-subzone/town residual with hierarchical shrinkage -----
     key = s["area_key"]
@@ -353,8 +442,8 @@ if __name__ == "__main__":
 #
 # (3) --private  ura_private.csv   [private resale]   source: URA REALIS / caveats
 #       required: planning_area, transacted_price, area_sqm, property_type,
-#                 tenure, project_age_years, sale_month
-#       optional: type_of_area, market_segment
+#                 type_of_area, tenure, project_age_years, sale_month
+#       optional: market_segment
 #
 # (4) --rental  ura_rental.csv   [private rental]   source: URA rental contracts
 #       required: planning_area, monthly_rent, area_sqm, property_type,
