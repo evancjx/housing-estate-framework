@@ -363,6 +363,41 @@ def process_schools(raw: bytes) -> pd.DataFrame:
             return pd.DataFrame()
 
 
+def layer_selected(filename: str, only: list[str] | None) -> bool:
+    """True when --only is unset or names this layer (with or without .csv)."""
+    if not only:
+        return True
+    stem = filename.removesuffix(".csv")
+    return any(name.strip().removesuffix(".csv") == stem for name in only)
+
+
+def merge_hdb_resale(existing: pd.DataFrame, fetched: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Merge a fresh download into the committed file, by month.
+
+    The download is a complete register for the months it reports, so those
+    months take its rows (picking up late registrations). Months it does not
+    report keep the committed rows: data.gov.sg's "Jan 2017 onwards" resource
+    dropped all of 2022 (verified 2026-09-20 — 2021-12 and 2023-01 return
+    rows, 2022-06 returns none, and no other resource in the collection
+    carries it), and a plain replace would delete those transactions.
+    """
+    if existing is None or existing.empty:
+        return fetched, {"months_preserved": [], "months_added": sorted(fetched.month.unique()),
+                         "rows_added": len(fetched)}
+    reported = set(fetched["month"])
+    preserved = sorted(set(existing["month"]) - reported)
+    added = sorted(reported - set(existing["month"]))
+    kept = existing[existing["month"].isin(preserved)]
+    merged = pd.concat([kept, fetched], ignore_index=True)
+    merged = merged.sort_values("month", kind="stable").reset_index(drop=True)
+    merged = merged.astype(existing.dtypes.to_dict())
+    return merged, {
+        "months_preserved": preserved,
+        "months_added": added,
+        "rows_added": len(merged) - len(existing),
+    }
+
+
 def process_hdb_resale(raw: bytes) -> pd.DataFrame:
     """
     HDB Resale Flat Prices (Jan 2017 onwards).
@@ -500,10 +535,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true",
                         help="Re-download all layers even if output CSV already exists")
+    parser.add_argument("--only", nargs="+", metavar="LAYER",
+                        help="Refresh only these layers, e.g. --only hdb_resale (implies --force for them)")
     args = parser.parse_args()
 
     def should_skip(filename: str) -> bool:
-        if args.force:
+        if not layer_selected(filename, args.only):
+            print(f"  Skipping — {filename} not selected by --only")
+            return True
+        if args.force or args.only:
             return False
         path = os.path.join(DATA_DIR, filename)
         if os.path.exists(path):
@@ -659,6 +699,17 @@ def main():
             df = process_hdb_resale(raw)
             if not df.empty:
                 out = os.path.join(DATA_DIR, "hdb_resale.csv")
+                # Never let a download that has lost months shorten the
+                # committed register: months it does not report are kept.
+                if os.path.exists(out):
+                    committed = pd.read_csv(out)
+                    df, merge_stats = merge_hdb_resale(committed, df)
+                    if merge_stats["months_preserved"]:
+                        preserved = merge_stats["months_preserved"]
+                        print(f"  [hdb] download omits {len(preserved)} committed month(s) "
+                              f"({preserved[0]}..{preserved[-1]}) — keeping those rows")
+                    if merge_stats["months_added"]:
+                        print(f"  [hdb] new months: {', '.join(merge_stats['months_added'])}")
                 df.to_csv(out, index=False)
                 status["hdb_resale.csv"] = (
                     f"OK  — {len(df):,} transactions -> {out}  "
