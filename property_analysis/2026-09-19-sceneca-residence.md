@@ -50,8 +50,9 @@ Revised evidence-backed buy boxes, for conventional mid-floor stacks:
 5. **1,163 sqft:** about S$2.69m. The low end of July's S$2.68m–S$2.79m asks
    is now at market, not "highly selective".
 
-Higher prices also compress the rental fallback to about **2.8%–3.4% gross**,
-and the illustrated capital-only break-even rises with the entry price.
+Higher prices also compress the rental fallback to about **2.9%–3.1% gross at
+URA's 2026Q2 median rent** (2.5%–3.4% across its quartile band), and the
+illustrated capital-only break-even rises with the entry price.
 Sceneca now looks like a fairly priced, liquid-enough completed project, not
 an obvious discount.
 
@@ -217,8 +218,31 @@ and must not be added together.
 
 ## Rental fallback
 
-Rent evidence is carried forward from the July capture: about 20 early rental
-contracts in May–June 2026 on the public project ledger. It was not refreshed.
+> **Rent update, 20 September 2026.** This section originally used portal
+> rent cards carried forward from the July capture. URA's own quarterly
+> median rents are now committed
+> (`data/raw/ura/rental/pmi_api_rental_median_2q26.csv`, captured
+> 2026-09-20), so the project's rents are primary evidence rather than
+> advertisements. Sceneca's **2026Q2** median is **S$5.88 psf per month**,
+> with a 25th–75th percentile band of **S$5.07–S$6.50**. The portal cards
+> were close for 700–800 sqft (S$4,450 assumed against S$4,430 implied) but
+> too high for the 600–700 sqft band, which is where the earlier "best
+> yield" claim came from. URA publishes one median per project, not one per
+> unit size, so the corrected yields below barely differ by size; the
+> quartile band matters far more than the floor area.
+
+URA's quarterly median rent for the project, all leases commenced in the
+quarter:
+
+| Quarter | 25th percentile | Median | 75th percentile |
+|---|---:|---:|---:|
+| 2026Q2 | S$5.07 psf/mo | **S$5.88 psf/mo** | S$6.50 psf/mo |
+
+Only one quarter is published for Sceneca: leases began after completion, so
+there is no rent history to trend.
+
+The earlier portal evidence is retained below for comparison. It is
+advertisement and portal-displayed contract data, not URA's register:
 
 | URA area band | Displayed monthly rents |
 |---|---:|
@@ -231,21 +255,33 @@ contracts in May–June 2026 on the public project ledger. It was not refreshed.
 | 1,100–1,200 sqft | About S$5,200–S$6,000 |
 | 1,500–1,600 sqft | About S$6,500 |
 
-Headline gross yields at achieved subsale prices:
+Headline gross yields at achieved subsale prices, using URA's 2026Q2 median
+and its quartile band:
 
-| Exact size | Purchase basis | Monthly rent assumed | Gross yield |
-|---|---:|---:|---:|
-| 689 sqft | S$1.57m–S$1.58m | S$4,400 | 3.34%–3.36% |
-| 753 sqft | S$1.73m | S$4,450–S$4,480 | 3.09%–3.11% |
-| 753 sqft | S$1.75m | S$4,450 | 3.05% |
-| 904 sqft | S$2.065m | S$5,000 | 2.91% |
-| 904 sqft | S$2.168m | S$5,000 | 2.77% |
+| Exact size | Purchase basis | Rent at median S$5.88 psf | Gross yield at median | Yield across the S$5.07–S$6.50 band |
+|---|---:|---:|---:|---:|
+| 689 sqft | S$1.57m | S$4,051 | **3.10%** | 2.67%–3.42% |
+| 753 sqft | S$1.73m | S$4,430 | **3.07%** | 2.65%–3.40% |
+| 753 sqft | S$1.75m | S$4,430 | **3.04%** | 2.62%–3.36% |
+| 904 sqft | S$2.065m | S$5,317 | **3.09%** | 2.66%–3.42% |
+| 904 sqft | S$2.168m | S$5,317 | **2.94%** | 2.54%–3.25% |
 
-The July S$1.50m lead implied about 3.6%. At achieved prices the fallback is
-weaker, and two-bedroom 689 sqft stock gives the best yield. Net yield is lower
-after maintenance, non-owner-occupier property tax, vacancy, leasing
-commission, repairs, furnishing, insurance and financing. The rent sample is
-small and early, and URA rent bands do not identify exact units.
+Two corrections to the original section:
+
+- **Size does not drive the yield here.** The earlier table implied the
+  689 sqft two-bedroom was the best yield at 3.34%; that rested on a portal
+  rent of S$4,400 for the 600–700 sqft band. URA's project median implies
+  about S$4,051 for the same unit and a 3.10% yield, in line with every other
+  size. Where a unit sits in the S$5.07–S$6.50 band matters more than its
+  floor area.
+- **The larger 904 sqft formats are not the weak yield they appeared to be.**
+  At the median they return 2.94%–3.09% rather than 2.77%–2.91%.
+
+The July S$1.50m lead would have implied about 3.5% on the same median. Net
+yield is lower after maintenance, non-owner-occupier property tax, vacancy,
+leasing commission, repairs, furnishing, insurance and financing. URA's
+median is one figure per project per quarter: it does not identify unit,
+floor or furnishing, and Sceneca has only one published quarter.
 
 ## Location, demand and future optionality
 
@@ -391,11 +427,14 @@ buyers now pay about S$2,280–S$2,400 psf, not launch PSF.
 
 At an achieved S$1.73m for 753 sqft, a first-property buyer needs about 6%
 gross growth just to break even after costs, the gross rental fallback is
-about 3.1%, and a S$500,000 capital-only profit needs about S$3,121 psf on
-exit. The rational strategy is unchanged in form but not in numbers: buy a
-verified unit at or slightly below the exact-size subsale evidence for its
-floor band, prefer two-bedroom 689 sqft stock for yield, and do not pay for a
-further rerating before any true post-completion resale confirms it.
+about 3.1% at URA's median rent, and a S$500,000 capital-only profit needs
+about S$3,121 psf on exit. The rational strategy is unchanged in form but not
+in numbers: buy a verified unit at or slightly below the exact-size subsale
+evidence for its floor band, and do not pay for a further rerating before any
+true post-completion resale confirms it. Do not choose a format for yield:
+URA's project median implies about 2.9%–3.1% across every size, so the
+entry price and the unit's position in the S$5.07–S$6.50 psf rent band decide
+the outcome.
 
 This report is a point-in-time research snapshot, not valuation, legal, tax or
 financial advice. Advertisements, caveats, rents, project status and tax rules
