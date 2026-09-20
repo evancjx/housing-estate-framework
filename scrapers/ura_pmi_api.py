@@ -287,6 +287,54 @@ def flatten_developer_sales(records: list[dict]) -> list[dict]:
     return rows
 
 
+def flatten_rental_medians(records: list[dict]) -> list[dict]:
+    """Flatten PMI_Resi_Rental_Median records into one row per project-quarter.
+
+    median/psf25/psf75 are rents in $ per square foot per month for leases
+    commenced in the quarter. Missing percentiles stay blank rather than 0.
+    """
+
+    def value(entry: dict, key: str):
+        field = entry.get(key)
+        return "" if field is None else field
+
+    rows = []
+    for project in records:
+        for entry in project.get("rentalMedian", []) or []:
+            rows.append({
+                "ref_quarter": entry.get("refPeriod", ""),
+                "project_name": project.get("project", ""),
+                "street_name": project.get("street", ""),
+                "postal_district": str(entry.get("district", "")).strip(),
+                "median_psf_pm": value(entry, "median"),
+                "psf25": value(entry, "psf25"),
+                "psf75": value(entry, "psf75"),
+                # SVY21 coordinates as published with the project record.
+                "x": project.get("x", ""),
+                "y": project.get("y", ""),
+            })
+    return rows
+
+
+def fetch_rental_medians(access_key: str, token: str, ref_period: str, session: requests.Session) -> dict:
+    """Fetch PMI_Resi_Rental_Median.
+
+    The service ignores the reference quarter for filtering: it returns every
+    quarter it holds (about three years) for each project, so one call is a
+    full refresh rather than an increment.
+    """
+    url = f"{INVOKE_URL}?service=PMI_Resi_Rental_Median&refPeriod={ref_period}"
+    hdrs = {**HEADERS, "AccessKey": access_key, "Token": token}
+    r = session.get(url, headers=hdrs, timeout=60)
+    r.raise_for_status()
+
+    content_type = r.headers.get("Content-Type", "")
+    if "text/html" in content_type or r.text.strip().startswith("<"):
+        raise RuntimeError("L7 WAF challenge on rental-median fetch")
+
+    return r.json()
+
+
 def fetch_developer_sales(access_key: str, token: str, ref_period: str, session: requests.Session) -> dict:
     """Fetch PMI_Resi_Developer_Sales for one mmyy reference month."""
     url = f"{INVOKE_URL}?service=PMI_Resi_Developer_Sales&refPeriod={ref_period}"
@@ -430,6 +478,33 @@ def run_developer_sales(args) -> Path:
     return out_path
 
 
+def run_rental_medians(args) -> Path:
+    """Fetch quarterly median rents per project and write one CSV."""
+    access_key = get_access_key()
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    session = requests.Session()
+    token = generate_token(access_key, session)
+
+    data = fetch_rental_medians(access_key, token, args.rental_medians, session)
+    if data.get("Status") != "Success":
+        raise RuntimeError(f"Rental medians {args.rental_medians}: Status={data.get('Status')}")
+    rows = flatten_rental_medians(data.get("Result", []))
+    wanted_districts = {d.zfill(2) for d in args.districts} if args.districts else set()
+    if wanted_districts:
+        rows = [row for row in rows if row["postal_district"].zfill(2) in wanted_districts]
+    if not rows:
+        sys.exit("[ERROR] No rental-median rows retrieved.")
+    quarters = sorted({row["ref_quarter"] for row in rows})
+    print(f"  {len(rows)} project-quarter rows, {quarters[0]}..{quarters[-1]}")
+    out_name = f"pmi_api_rental_median_{args.rental_medians}"
+    if wanted_districts:
+        out_name += "_d" + "_d".join(sorted(wanted_districts))
+    out_path = out_dir / f"{out_name}.csv"
+    transactions_to_csv(rows, out_path)
+    return out_path
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="URA Data Service API client for private residential transactions"
@@ -450,9 +525,16 @@ def main():
         "--developer_sales", nargs=2, metavar=("START", "END"),
         help="Fetch monthly developer sales (PMI_Resi_Developer_Sales) for an inclusive YYYY-MM range instead of transactions",
     )
+    ap.add_argument(
+        "--rental_medians", metavar="REFPERIOD",
+        help="Fetch quarterly median rents per project (PMI_Resi_Rental_Median), e.g. 2q26; the service returns every quarter it holds",
+    )
     args = ap.parse_args()
     if args.developer_sales:
         run_developer_sales(args)
+        return
+    if args.rental_medians:
+        run_rental_medians(args)
         return
     if args.prop_types:
         try:

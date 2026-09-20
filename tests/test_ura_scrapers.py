@@ -7,6 +7,7 @@ from scrapers.ura_pmi_api import (
     developer_sales_periods,
     flatten_developer_sales,
     flatten_project_transactions,
+    flatten_rental_medians,
 )
 from scrapers.ura_pmi_playwright import normalize_prop_types, raw_filename
 
@@ -114,6 +115,71 @@ def test_run_developer_sales_fetches_each_month_and_filters_districts(monkeypatc
     written = pd.read_csv(out, dtype=str)
     assert written["ref_month"].tolist() == ["2026-07", "2026-08"]
     assert set(written["project_name"]) == {"CANBERRA CRESCENT RESIDENCES"}
+
+
+# Shape of one PMI_Resi_Rental_Median record as returned by the API.
+RENTAL_MEDIAN_RECORD = {
+    "x": "40488.9532799527",
+    "project": "SCENECA RESIDENCE",
+    "y": "34462.0802518851",
+    "street": "TANAH MERAH KECHIL LINK",
+    "rentalMedian": [
+        {"refPeriod": "2026Q2", "psf75": 6.5, "median": 5.88, "psf25": 5.07, "district": "16"},
+        {"refPeriod": "2026Q1", "psf75": 6.3, "median": 5.7, "psf25": None, "district": "16"},
+    ],
+}
+
+
+def test_rental_medians_flatten_one_row_per_project_quarter():
+    rows = flatten_rental_medians([RENTAL_MEDIAN_RECORD])
+
+    assert rows == [
+        {
+            "ref_quarter": "2026Q2",
+            "project_name": "SCENECA RESIDENCE",
+            "street_name": "TANAH MERAH KECHIL LINK",
+            "postal_district": "16",
+            "median_psf_pm": 5.88,
+            "psf25": 5.07,
+            "psf75": 6.5,
+            "x": "40488.9532799527",
+            "y": "34462.0802518851",
+        },
+        {
+            "ref_quarter": "2026Q1",
+            "project_name": "SCENECA RESIDENCE",
+            "street_name": "TANAH MERAH KECHIL LINK",
+            "postal_district": "16",
+            "median_psf_pm": 5.7,
+            "psf25": "",
+            "psf75": 6.3,
+            "x": "40488.9532799527",
+            "y": "34462.0802518851",
+        },
+    ]
+
+
+def test_run_rental_medians_filters_districts_and_names_the_file(monkeypatch, tmp_path):
+    from scrapers import ura_pmi_api
+
+    other = {**RENTAL_MEDIAN_RECORD, "project": "ELSEWHERE",
+             "rentalMedian": [{**RENTAL_MEDIAN_RECORD["rentalMedian"][0], "district": "15"}]}
+
+    monkeypatch.setattr(ura_pmi_api, "get_access_key", lambda: "key")
+    monkeypatch.setattr(ura_pmi_api, "generate_token", lambda key, session: "token")
+    monkeypatch.setattr(ura_pmi_api, "fetch_rental_medians",
+                        lambda access_key, token, ref_period, session: {
+                            "Status": "Success", "Result": [RENTAL_MEDIAN_RECORD, other]})
+
+    out = ura_pmi_api.run_rental_medians(
+        argparse.Namespace(rental_medians="2q26", districts=["16"], out_dir=str(tmp_path))
+    )
+
+    assert out.name == "pmi_api_rental_median_2q26_d16.csv"
+    written = pd.read_csv(out, dtype=str)
+    assert set(written["project_name"]) == {"SCENECA RESIDENCE"}
+    assert written["ref_quarter"].tolist() == ["2026Q2", "2026Q1"]
+    assert written["median_psf_pm"].tolist() == ["5.88", "5.7"]
 
 
 def test_developer_sales_periods_span_year_boundary_in_api_format():
