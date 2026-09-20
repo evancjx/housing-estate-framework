@@ -160,6 +160,25 @@ def test_publication_rows_mask_x_filtered_and_low_sample_precision() -> None:
         assert ranked == list(range(1, len(ranked) + 1))
 
 
+def test_borderline_passes_are_published_and_rendered_with_their_flag() -> None:
+    rows = builder.load_rows(OUTPUT)
+
+    flagged = [row for row in rows if row["borderline_flags"]]
+    assert flagged
+    assert all(row["eligible"] for row in flagged)
+    queenstown = next(
+        row for row in rows
+        if row["profile_id"] == "single-pro-condo-commute-value"
+        and row["estate"] == "QUEENSTOWN"
+        and row["tenure"] == "condo"
+    )
+    assert queenstown["eligible"] is True
+    assert queenstown["borderline_flags"] == "value_borderline:C"
+    script = SCRIPT.read_text(encoding="utf-8")
+    assert "borderline_flags" in script
+    assert "reason-borderline" in script
+
+
 def test_profile_summary_explains_scenarios_without_cross_profile_winners() -> None:
     rows = builder.load_rows(OUTPUT)
     definitions = builder.load_profile_definitions(DEFINITIONS)

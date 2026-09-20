@@ -162,6 +162,9 @@ def load_rows(path: Path) -> list[dict[str, Any]]:
                 else None
             ),
             "filter_reasons": clean_text(source["filter_reasons"]),
+            # Optional: hard filters passed only within the model's
+            # BORDERLINE_TOLERANCE of a band edge.
+            "borderline_flags": clean_text(source.get("borderline_flags", "")),
             "persona": clean_text(source["persona"]),
             "horizon": clean_text(source["horizon"]).upper(),
             "life_path": clean_text(source["life_path"]),

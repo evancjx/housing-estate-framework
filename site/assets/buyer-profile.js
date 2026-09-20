@@ -174,7 +174,13 @@
     }
     const reasons = String(row.filter_reasons || "").split(";").filter(Boolean);
     if (!reasons.length) {
-      return '<span class="reason-list"><span class="reason-badge reason-pass">All hard filters passed</span></span>';
+      // Passes that only clear a band edge within the model's tolerance.
+      const borderline = String(row.borderline_flags || "").split(";").filter(Boolean).map((flag) => {
+        const [name, band = ""] = flag.split(":", 2);
+        const label = name.replace(/_borderline$/, "").replace(/^\w/, (c) => c.toUpperCase());
+        return `<span class="reason-badge reason-borderline">${esc(`${label} within 0.05 of the ${band} band edge`)}</span>`;
+      });
+      return `<span class="reason-list"><span class="reason-badge reason-pass">All hard filters passed</span>${borderline.join("")}</span>`;
     }
     return `<span class="reason-list">${reasons.map((reason) => `<span class="reason-badge">${esc(humanReason(reason))}</span>`).join("")}</span>`;
   }

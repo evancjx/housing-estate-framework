@@ -203,3 +203,89 @@ def test_multi_profile_payload_keeps_profile_local_ranks():
     assert set(top_by_profile["rank"]) == {1}
     central = out[out["estate"] == "CENTRAL AREA"]
     assert (central["filter_reasons"].str.contains("excluded_archetype:X")).all()
+
+
+def _hdb_profile(**hard_filters):
+    return {"profile_id": "edge", "tenure": "hdb", "persona": "YoungFam", "horizon": "T5",
+            "hard_filters": {"exclude_archetypes": [], **hard_filters}}
+
+
+def _alpha(out):
+    return out[out["estate"] == "ALPHA"].iloc[0]
+
+
+def test_score_just_below_the_band_edge_passes_as_borderline():
+    master = _master()
+    master.loc[0, ["value_hdb_score", "value_hdb_band"]] = [2.9972, "D"]
+
+    alpha = _alpha(bpm.run(master, None, _hdb_profile(min_value_band="C")))
+
+    assert bool(alpha["eligible"]) is True
+    assert alpha["filter_reasons"] == ""
+    assert alpha["borderline_flags"] == "value_borderline:C"
+
+
+def test_score_beyond_the_tolerance_is_still_filtered():
+    master = _master()
+    master.loc[0, ["value_hdb_score", "value_hdb_band"]] = [2.94, "D"]
+
+    alpha = _alpha(bpm.run(master, None, _hdb_profile(min_value_band="C")))
+
+    assert bool(alpha["eligible"]) is False
+    assert alpha["filter_reasons"] == "value_below:C"
+    assert alpha["borderline_flags"] == ""
+
+
+def test_clear_pass_carries_no_borderline_flag():
+    alpha = _alpha(bpm.run(_master(), None, _hdb_profile(min_value_band="C")))
+
+    assert bool(alpha["eligible"]) is True
+    assert alpha["borderline_flags"] == ""
+
+
+def test_only_value_gets_the_tolerance_not_the_deterministic_components():
+    # Liveability, Employment and Provision are deterministic composites, so a
+    # near-edge score there is a real result rather than estimation noise.
+    master = _master()
+    master.loc[0, ["yf_T5", "yf_T5_band"]] = [3.46, "C"]
+    master.loc[0, ["emp_score", "emp_band"]] = [3.98, "B"]
+    master.loc[0, ["provision_score", "provision_band"]] = [3.47, "C"]
+
+    alpha = _alpha(bpm.run(master, None, _hdb_profile(
+        min_liveability_band="B", min_employment_band="B+", min_provision_band="B")))
+
+    assert bool(alpha["eligible"]) is False
+    assert alpha["filter_reasons"] == "liveability_below:B;employment_below:B+;provision_below:B"
+    assert alpha["borderline_flags"] == ""
+
+
+def test_lease_band_is_not_score_derived_so_gets_no_tolerance():
+    master = _master()
+    master.loc[0, ["lease_score", "lease_band"]] = [3.99, "C"]
+
+    alpha = _alpha(bpm.run(master, None, _hdb_profile(min_lease_band="B")))
+
+    assert bool(alpha["eligible"]) is False
+    assert alpha["filter_reasons"] == "lease_below:B"
+    assert alpha["borderline_flags"] == ""
+
+
+def test_non_residential_band_is_never_borderline():
+    out = bpm.run(_master(), None, _hdb_profile(min_provision_band="C"))
+    central = out[out["estate"] == "CENTRAL AREA"].iloc[0]
+
+    assert "provision_below:C" in central["filter_reasons"]
+    assert central["borderline_flags"] == ""
+
+
+def test_score_only_private_provision_stays_a_hard_filter():
+    master = _master()
+    master.loc[0, "provision_private"] = 2.97
+    profile = {"profile_id": "condo", "tenure": "condo", "persona": "YoungFam", "horizon": "T5",
+               "hard_filters": {"exclude_archetypes": [], "min_provision_band": "C"}}
+
+    alpha = _alpha(bpm.run(master, None, profile, private_values=_private_values()))
+
+    assert bool(alpha["eligible"]) is False
+    assert alpha["filter_reasons"] == "provision_below:C"
+    assert alpha["borderline_flags"] == ""

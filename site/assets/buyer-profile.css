@@ -303,6 +303,11 @@
   color: #17645a;
 }
 
+.reason-borderline {
+  background: var(--explorer-warm-soft);
+  color: var(--explorer-warm);
+}
+
 .band-only {
   color: var(--explorer-warm);
   font-weight: 850;
