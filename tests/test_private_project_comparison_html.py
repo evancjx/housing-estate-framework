@@ -294,8 +294,8 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
     assert isinstance(rows, list)
     assert isinstance(config, dict)
     counts = config["counts"]
-    assert len(rows) == counts["projects"] == 2_400
-    assert sum(row["n"] for row in rows) == counts["transactions"] == 107_221
+    assert len(rows) == counts["projects"] == 2_413
+    assert sum(row["n"] for row in rows) == counts["transactions"] == 110_781
     assert len({row["district"] for row in rows}) == counts["districts"] == 28
     assert len({row["station_key"] for row in rows}) == counts["stations"]
     assert (
@@ -303,10 +303,13 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
         == counts["project_geocodes"]
         == 2_397
     )
+    # 13 projects first seen in the 2025-2026 district refresh have no
+    # geocode yet; they fall back to the estate centroid until
+    # `make private-project-locations` runs with a valid ONEMAP_TOKEN.
     assert (
         sum(row["location_source"] == "centroid_proxy" for row in rows)
         == counts["centroid_fallbacks"]
-        == 3
+        == 16
     )
     assert (
         sum(row["school_metrics_source"] == "project_geocode" for row in rows)
