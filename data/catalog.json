@@ -34,6 +34,7 @@
     "mrt_layer.csv": {"zone": "ingested", "producer": "models/ingest_lta_rail.py", "authority": "LTA DataMall + reviewed LTA status + URA planned geometry"},
     "mrt_layer_names.csv": {"zone": "ingested", "producer": "models/ingest_lta_rail.py", "authority": "LTA DataMall + reviewed LTA status"},
     "mrt_network_status.csv": {"zone": "curated", "producer": "human reconciliation against dated official sources", "authority": "LTA system map and rail project pages"},
+    "mixed_use.csv": {"zone": "ingested", "producer": "models/ingest_ura_landuse.py", "authority": "URA Master Plan 2019 / data.gov.sg"},
     "mrt_source_registry.json": {"zone": "curated", "producer": "human review", "authority": "LTA DataMall / LTA / URA / data.gov.sg"},
     "parks.csv": {"zone": "ingested", "producer": "models/data_ingest.py", "authority": "NParks / data.gov.sg"},
     "pipeline_data.json": {"zone": "curated", "producer": "network ingesters + human review", "authority": "reviewed public announcements"},
