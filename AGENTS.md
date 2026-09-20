@@ -98,6 +98,11 @@ python3 -m pytest -m snapshot
 
 `pyproject.toml` deselects `snapshot` by default via `addopts = -m "not snapshot"`.
 
+> **`-m snapshot` rewrites baselines — it is a capture tool, not a check.** Running it
+> overwrites `tests/snapshots/before/` with current output, so a regression it should have
+> caught is silently recorded as the new expectation. Use it only when you intend to
+> re-baseline, and inspect `git diff tests/snapshots/` afterwards.
+
 For scraper setup, see `scrapers/README.md`; Playwright and external credentials are outside the
 default test path.
 
