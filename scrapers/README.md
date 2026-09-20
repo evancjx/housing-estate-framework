@@ -194,6 +194,26 @@ replacing the stored rows for that identity in place. Identities the export
 does not report are untouched, so rolling-window history and caveats URA has
 withdrawn survive. Re-merging an unchanged export is byte-identical.
 
+### Rental medians
+
+`--rental_medians REFPERIOD` fetches `PMI_Resi_Rental_Median`: median, 25th and
+75th percentile rents in **$ psf per month** for leases commenced in each
+quarter, per project, with the project's SVY21 coordinates.
+
+```bash
+python scrapers/ura_pmi_api.py --rental_medians 2q26 --out_dir data/raw/ura/rental
+```
+
+The service ignores the reference quarter for filtering — it returns every
+quarter it holds (about three years) for each project — so one call is a full
+refresh rather than an increment. `--districts` filters the output.
+`data/raw/ura/rental/pmi_api_rental_median_2q26.csv` (captured 2026-09-20) holds
+7,111 project-quarter rows for 921 projects across 2023Q3–2026Q2.
+
+This is the only rental evidence committed to the repository; property analyses
+previously had to fall back on aggregator rent figures. Uncompleted projects do
+not appear, since they have no commenced leases.
+
 ### Developer sales
 
 `--developer_sales START END` fetches `PMI_Resi_Developer_Sales` for each month
