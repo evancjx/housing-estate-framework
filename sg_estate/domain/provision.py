@@ -33,6 +33,17 @@ Every component output carries a provenance tag. A future reviewer can see at a
 glance which numbers are measurement and which are opinion. The model NEVER
 pretends momentum was computed.
 
+SUB-METRIC COMPOSITION — changed in v2.1 (see frameworks/1 §1.1b; keep in sync):
+  conn = 0.55 MRT + 0.25 bus + 0.12 covered linkway + 0.08 park-connector metres
+         (0.60/0.25/0.15 when cycling_paths.csv is absent; 0.70/0.30 when the
+          covered-linkway layer is absent too)
+  amen = 0.34 market + 0.30 supermarket + 0.21 clinic + 0.15 mixed-use share
+         (0.40/0.35/0.25 when mixed_use.csv is absent)
+  hlth = 0.40 polyclinic + 0.35 GP + 0.25 acute-hospital distance
+         (0.55/0.45 when hospitals.csv is absent)
+  Top-level weights in W are unchanged. A blank cell in a generated layer falls
+  back to the previous composition; it is never scored as a measured zero.
+
 METHOD per measured component:
   Score(1-5) = distance/count features -> normalised -> mapped to 1-5 via
   documented anchor thresholds (see ANCHORS). Distances use a decay so "MRT 200m
@@ -94,6 +105,28 @@ def _safe_round_dist(d):
     """Return round(d) as int, or None when d is infinite (no POI in layer)."""
     return round(d) if math.isfinite(d) else None
 
+def _measured_value(row, key):
+    """Return a finite float from an estate-keyed row, or None when absent/blank.
+
+    The generated layers leave unmeasured cells empty on purpose, so a blank must
+    fall back to the previous sub-metric composition rather than score as a real 0.
+    """
+    if not row: return None
+    v = row.get(key)
+    if v is None: return None
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return f if math.isfinite(f) else None
+
+def _acute_hospital_rows(hospitals):
+    """Rows of the acute tier only; community hospitals have no A&E and don't count."""
+    if hospitals is None or len(hospitals) == 0: return None
+    if 'tier' not in hospitals.columns: return hospitals
+    acute = hospitals[hospitals['tier'].astype(str).str.strip().str.lower() == 'acute']
+    return acute if len(acute) else None
+
 # ----------------------------------------------------------------------
 # ANCHORS — distance/count -> 1..5. Documented & challengeable thresholds.
 # nearer/more = higher. These encode the rubric anchors from Document 1.
@@ -145,6 +178,15 @@ C_BUS_ROUTES = [(300,5),(220,4),(140,3),(70,2),(0,1)]  # total route-passes with
 # Bukit Batok 145), near-zero for new towns (Tengah 0, Punggol 0, Canberra 4).
 C_SHELTER  = [(100,5),(50,4),(30,3),(15,2),(0,1)]
 C_CHILDCARE= [(4,5),(2,4),(1,3),(0,1)]   # within 500m
+# Park-connector metres within 800m (cycling_paths.csv). Round thresholds set to
+# approximate quintiles of the observed 35-estate range (0m .. 4410m).
+C_PCN      = [(3500,5),(2500,4),(1500,3),(500,2),(0,1)]
+# Mixed-use land share within 2km (mixed_use.csv), observed range 0.0002 .. 0.1181.
+# Centred so the national median estate scores 3: a new sub-metric must re-rank
+# estates, not deflate every score. C_PCN above already satisfies the same rule.
+C_MIXED    = [(0.050,5),(0.025,4),(0.008,3),(0.003,2),(0.0,1)]
+# Nearest acute public hospital (hospitals.csv, tier == "acute").
+A_HOSP     = [(2000,5),(4000,4),(6000,3),(9000,2),(99999,1)]
 
 # ----------------------------------------------------------------------
 # Component scorers
@@ -156,7 +198,8 @@ def _operational_mrt_rows(mrt):
     operational = mrt['operational'].astype(str).str.strip().str.lower()
     return mrt[operational.isin(['1', 'true', 'yes', 'y'])]
 
-def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None):
+def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None,
+                       cycling_row=None):
     # ``mrt_operational`` is retained for compatibility with the original scorer
     # signature. The canonical caller passes None, so filter the code-row layer.
     current_mrt = mrt_operational if mrt_operational is not None else mrt
@@ -171,14 +214,24 @@ def score_connectivity(lat, lon, mrt, bus, mrt_operational, covered_linkway=None
     if covered_linkway is not None:
         n_shelter = count_within(lat, lon, pts_of(covered_linkway), 800)
         s_shelter = score_by_count(n_shelter, C_SHELTER)
-        return round(0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter, 2), {
-            'nearest_mrt_m': _safe_round_dist(d_mrt), 'covered_linkways_800m': n_shelter}
+        meta = {'nearest_mrt_m': _safe_round_dist(d_mrt), 'covered_linkways_800m': n_shelter}
+        pcn_m = _measured_value(cycling_row, 'pcn_continuous_m')
+        if pcn_m is not None:
+            meta['pcn_continuous_m'] = pcn_m
+            return round(0.55*s_mrt + 0.25*s_bus + 0.12*s_shelter
+                         + 0.08*score_by_count(pcn_m, C_PCN), 2), meta
+        return round(0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter, 2), meta
     return round(0.7*s_mrt + 0.3*s_bus, 2), {'nearest_mrt_m': _safe_round_dist(d_mrt)}
 
-def score_amenities(lat, lon, markets, supers, clinics):
+def score_amenities(lat, lon, markets, supers, clinics, mixed_use_row=None):
     s_mkt = score_by_count(count_within(lat, lon, pts_of(markets), 800), C_MARKET)
     s_sup = score_by_count(count_within(lat, lon, pts_of(supers), 800), C_SUPER)
     s_cli = score_by_count(count_within(lat, lon, pts_of(clinics), 800), C_CLINIC)
+    share = _measured_value(mixed_use_row, 'mixed_use_share')
+    if share is not None:
+        # The three original sub-metrics keep their relative shares (scaled by 0.85).
+        return round(0.34*s_mkt + 0.30*s_sup + 0.21*s_cli
+                     + 0.15*score_by_count(share, C_MIXED), 2), {'mixed_use_share': share}
     return round(0.4*s_mkt + 0.35*s_sup + 0.25*s_cli, 2), {}
 
 def score_green(lat, lon, parks, coastal_row=None):
@@ -196,9 +249,16 @@ def score_schools(lat, lon, schools):
     s_cnt = score_by_count(n, [(6,5),(4,4),(2,3),(1,2),(0,1)])
     return round(0.6*s_near + 0.4*s_cnt, 2), {'schools_within_2km': n}
 
-def score_healthcare(lat, lon, clinics, poly):
+def score_healthcare(lat, lon, clinics, poly, hospitals=None):
     s_poly = score_by_distance(nearest_m(lat, lon, pts_of(poly)), A_POLY)
     s_gp = score_by_count(count_within(lat, lon, pts_of(clinics), 800), C_CLINIC)
+    acute = _acute_hospital_rows(hospitals)
+    if acute is not None:
+        d_hosp = nearest_m(lat, lon, pts_of(acute))
+        if math.isfinite(d_hosp):
+            return round(0.40*s_poly + 0.35*s_gp
+                         + 0.25*score_by_distance(d_hosp, A_HOSP), 2), {
+                'nearest_acute_hospital_m': round(d_hosp)}
     return round(0.55*s_poly + 0.45*s_gp, 2), {}
 
 def score_eldercare(lat, lon, eldercare):
@@ -373,20 +433,31 @@ def run(estates, layers, judged, tcmr_json=None):
     if layers.get('coastal') is not None:
         for _, r in layers['coastal'].iterrows():
             coastal_lkp[str(r['estate']).upper()] = r.to_dict()
+    mixed_use_lkp = {}
+    if layers.get('mixed_use') is not None:
+        for _, r in layers['mixed_use'].iterrows():
+            mixed_use_lkp[str(r['estate']).upper()] = r.to_dict()
+    cycling_lkp = {}
+    if layers.get('cycling_paths') is not None:
+        for _, r in layers['cycling_paths'].iterrows():
+            cycling_lkp[str(r['estate']).upper()] = r.to_dict()
 
     rows = []
     for _, e in estates.iterrows():
         lat, lon = float(e['lat']), float(e['lon']); name = e['estate']
         s = {}
         s['conn'],_      = score_connectivity(lat, lon, layers['mrt'], layers['bus'], None,
-                                             layers.get('covered_linkway'))
-        s['amen'],_      = score_amenities(lat, lon, layers['markets'], layers['supermarkets'], layers['clinics'])
+                                             layers.get('covered_linkway'),
+                                             cycling_row=cycling_lkp.get(name.upper()))
+        s['amen'],_      = score_amenities(lat, lon, layers['markets'], layers['supermarkets'], layers['clinics'],
+                                           mixed_use_row=mixed_use_lkp.get(name.upper()))
 
         coastal_row = coastal_lkp.get(name.upper()) if layers.get('coastal') is not None else None
         s['green'],_     = score_green(lat, lon, layers['parks'], coastal_row=coastal_row)
 
         s['sch'],_       = score_schools(lat, lon, layers['schools'])
-        s['hlth'],_      = score_healthcare(lat, lon, layers['clinics'], layers['polyclinics'])
+        s['hlth'],_      = score_healthcare(lat, lon, layers['clinics'], layers['polyclinics'],
+                                            layers.get('hospitals'))
         s['eldercare'],_ = score_eldercare(lat, lon, layers['eldercare'])
         s['infra'],_     = score_infra(lat, lon, layers['mrt'], None)
         s['childcare'],_ = score_childcare(lat, lon, layers['childcare'])
@@ -477,6 +548,7 @@ def main():
     for L in ['mrt','bus','clinics','polyclinics','schools','parks','markets',
               'supermarkets','childcare','community','sport','flood','noise',
               'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality',
+               'mixed_use','cycling_paths','hospitals',
               'tree_canopy','hdb_density','hawker_v2','coastal']:
         ap.add_argument(f'--{L}')
     ap.add_argument('--tcmr', help='JSON path: town_council_kpi.json (for stewardship score)')
@@ -497,6 +569,7 @@ def main():
               ['mrt','bus','clinics','polyclinics','schools','parks','markets',
                'supermarkets','childcare','community','sport','flood','noise',
                'air_noise','eldercare','covered_linkway','jtc_industrial','air_quality',
+               'mixed_use','cycling_paths','hospitals',
                'tree_canopy','hdb_density','hawker_v2','coastal']}
     judged = load(a.judged)
     tcmr_json = None
@@ -559,6 +632,19 @@ if __name__ == '__main__':
 #                              0.7*s_mrt + 0.3*s_bus. If present, sub-weights become
 #                              0.60*s_mrt + 0.25*s_bus + 0.15*s_shelter; top-level
 #                              conn weight (0.14) is unchanged. MEASURED provenance.)
+#   --cycling_paths cycling_paths.csv  columns: estate,pcn_continuous_m,...
+#                              (NParks Park Connector Loop metres within 800 m.
+#                              OPTIONAL — needs covered_linkway too. When both are
+#                              present conn sub-weights become 0.55/0.25/0.12/0.08.
+#                              A blank pcn_continuous_m falls back, never scores 0.)
+#   --mixed_use mixed_use.csv  columns: estate,mixed_use_share,...
+#                              (URA land-use mixed/commercial/white share within
+#                              2 km. OPTIONAL — if present amen sub-weights become
+#                              0.34/0.30/0.21/0.15. MEASURED provenance.)
+#   --hospitals hospitals.csv  columns: name,lat,lon,has_ae,tier
+#                              (MOH public hospitals. OPTIONAL — if present hlth
+#                              sub-weights become 0.40/0.35/0.25 on the nearest
+#                              tier=="acute" row; community hospitals are ignored.)
 #
 # PER-ESTATE ENRICHMENT LAYERS:
 #   --tree_canopy tree_canopy.csv  columns: estate,canopy_cover_pct,uhi_delta_c

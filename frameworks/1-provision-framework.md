@@ -48,14 +48,14 @@ Sourced verbatim from `sg_estate/domain/framework.py:PROVISION_WEIGHTS`. Do not 
 
 | # | Key | Weight | Provenance | Notes |
 |---|-----|------:|:----------:|-------|
-| 1 | `conn` | 0.14 | MEASURED | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter |
+| 1 | `conn` | 0.14 | MEASURED | Walk-time to rail/interchange, feeder freq, transfer penalty, redundancy, multi-node commute, first/last-mile shelter, park-connector metres (active mobility, v2.1) |
 | 2 | `infra` | 0.14 | MEASURED | Trunk infra *operational now* (LiveNow horizon). Distinct from conn: conn = quality-when-present; infra = operational-at-horizon. |
-| 3 | `amen` | 0.09 | MEASURED | Basics (wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail. Shops-not-yet-open = desolation signal. |
-| 4 | `green` | 0.08 | MEASURED | *Usable* greenery: 400/800m network-walk, shade, size/facilities, PCN continuity, overcrowding |
+| 3 | `amen` | 0.09 | MEASURED | Basics (wet market, supermarket, GP, pharmacy, library/CC) above lifestyle retail, plus mixed-use land share (v2.1). Shops-not-yet-open = desolation signal. |
+| 4 | `green` | 0.08 | MEASURED | *Usable* greenery: 400/800m network-walk, shade, size/facilities, overcrowding. PCN continuity moved to `conn` in v2.1 — see §1.1b. |
 | 5 | `dens` | 0.08 | PARTLY_MEASURED | Dwelling density yes; "feel" (block spacing, pavement quality) no |
 | 6 | `sch` | 0.07 | MEASURED | Practical access (within 1/2km per MOE P1 distance), balloting pressure, preschool→JC reach |
 | 7 | `childcare` | 0.05 | MEASURED | Licensed childcare / infant care centres within 800m |
-| 8 | `hlth` | 0.04 | MEASURED | Primary-care-first: GP/CHAS/pharmacy + polyclinic access, THEN A&E time |
+| 8 | `hlth` | 0.04 | MEASURED | Primary-care-first: GP/CHAS/pharmacy + polyclinic access, THEN A&E time (acute-hospital distance wired in v2.1) |
 | 9 | `mom` | 0.04 | PARTLY_MEASURED | Confirmed *additions* only, time-discounted. HDB-side ingested from data.gov.sg NRP+LUP+SERS; private-side en-bloc / new-launch pipeline still JUDGED |
 | 10 | `hawker` | 0.04 | PARTLY_MEASURED | Count, distance, stall-capacity and redundancy from `hawker_v2.csv`; fame/reputation remains approximate |
 | 11 | `noise` | 0.03 | MEASURED | Expressway exposure: distance-weighted proximity to major expressways |
@@ -68,6 +68,36 @@ Sourced verbatim from `sg_estate/domain/framework.py:PROVISION_WEIGHTS`. Do not 
 | 18 | `jtc_industrial` | 0.02 | MEASURED | Inverse-distance to JTC heavy-industrial zones; penalty for close proximity |
 | 19 | `env` | 0.01 | PARTLY_MEASURED | Heat/shade only; air_noise + expressway noise split out as siblings (audit §2d) |
 | 20 | `flood` | 0.01 | MEASURED | Flood-prone routes / PUB drainage risk overlay |
+
+### 1.1b Sub-metric composition — changed components (v2.1)
+
+Top-level weights in §1.1 are **unchanged**. v2.1 only changes what three components are
+built from. Sourced verbatim from `sg_estate/domain/provision.py`; do not edit here without
+updating that file.
+
+| Component | Before (v2.0) | After (v2.1) |
+|---|---|---|
+| `conn` | 0.60 MRT + 0.25 bus + 0.15 covered linkway | 0.55 MRT + 0.25 bus + 0.12 covered linkway + **0.08 park-connector metres** |
+| `amen` | 0.40 market + 0.35 supermarket + 0.25 clinic | 0.34 market + 0.30 supermarket + 0.21 clinic + **0.15 mixed-use share** |
+| `hlth` | 0.55 polyclinic + 0.45 GP | 0.40 polyclinic + 0.35 GP + **0.25 acute-hospital distance** |
+
+In `amen` the three original sub-metrics keep their relative shares (scaled by 0.85).
+
+**Anchor tables.** `C_PCN` = 3500/2500/1500/500 m → 5/4/3/2, else 1.
+`C_MIXED` = 0.050/0.025/0.008/0.003 share → 5/4/3/2, else 1.
+`A_HOSP` = 2000/4000/6000/9000 m → 5/4/3/2, else 1.
+
+Both new count tables are **centred so the national median estate scores 3**. A new sub-metric
+must re-rank estates, not deflate every score; `tests/test_provision_new_submetrics.py` guards
+this against the real input CSVs.
+
+**Fallback rule.** Each new sub-metric applies only when its layer is present *and* the value is
+a finite number. A blank cell falls back to the previous composition — it is never read as a
+measured zero. This keeps `hlth` on 0.55/0.45 until `hospitals.csv` exists.
+
+**Spec change to note.** `green` previously claimed "PCN continuity". Park-connector metres now
+live in `conn` as an active-mobility signal; `green` keeps park *access* quality. `sport` continues
+to count park connectors with fitness infrastructure separately.
 
 #### New component specs (v2.0)
 
