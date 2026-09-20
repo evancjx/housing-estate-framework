@@ -24,7 +24,7 @@ For a buyer entering today at the captured residual asks, the capital-only break
 | Best current format | **1,216 sq ft 4BR Standard, conditionally** | It is the format actually clearing, at S$1,947–S$2,021 psf asks versus up to S$2,136 psf for the 990 sq ft. Only about five or six remain. |
 | 990 sq ft 3BR Premium | **Weakened screen** | No caveat since June; 14–15 remain; upper-floor asks reach S$2,136 psf, above any achieved subject 990 sq ft sale. |
 | Previous best-arithmetic unit (1,216 sq ft PES, ~S$2.367m) | **Probably sold** | An August caveat records 1,216 sq ft, floors 01–05, S$2.38m / S$1,957 psf. URA does not publish unit numbers, so this is a strong inference, not a confirmation. |
-| Rental fallback | **Weak** | Captured peer rents imply about 2.5%–3.3% gross yield at residual asks, and tenant-side headwinds arrive near completion. |
+| Rental fallback | **Weak** | URA 2026Q2 medians for the closest peer imply about 2.7%–2.8% gross yield at residual asks (3.45% only on North Park's MRT-side rents), and tenant-side headwinds arrive near completion. |
 | Quick flip | **No** | A September 2026 purchase is inside the four-year SSD period until September 2030, five months after expected vacant possession. |
 
 ## What changed since the 13 August capture
@@ -187,16 +187,29 @@ To reach the S$500,000 target, the required exit PSF implies about **6.0%–7.2%
 
 ## Rental fallback
 
-There are still no subject rents; the project is uncompleted.
+There are still no subject rents; the project is uncompleted, so it does not
+appear in URA's rental series at all.
 
-| Proxy | Monthly rent evidence | Gross yield at residual ask | Status |
-| --- | ---: | ---: | --- |
-| Watergardens 3BR (900–1,000 sq ft), 4 quarters to Dec 2025, URA-API-derived aggregator; Aug 2026 aggregator S$4,200–S$4,700 | S$4,100–S$4,700 | **2.5%–2.8%** on 990 sq ft at S$1.985m | ⚠️ aggregator |
-| North Park Residences 3BR, 2025–2026, two aggregators agree | S$5,000–S$5,400 | **3.0%–3.3%** on 990 sq ft (better location than subject) | ✅ two sources |
-| Watergardens 4BR (1,300–1,400 sq ft) median to Dec 2025 | S$5,650 | **2.8%** on 1,216 sq ft at S$2.41m | ⚠️ aggregator |
-| 13 Aug displayed-contract peer sample, May–Jun 2026 | S$4,000–S$4,400 (3BR) | ~2.6% at median | Retained from previous report |
+> **Rent update, 20 September 2026.** This section originally used aggregator
+> rent figures, most of them stale to about December 2025. URA's own quarterly
+> median rents are now committed
+> (`data/raw/ura/rental/pmi_api_rental_median_2q26.csv`, captured 2026-09-20),
+> so the peer proxies below are primary evidence. The conclusion is unchanged
+> and slightly firmed: the aggregator-based estimate of about 2.8% for a
+> 1,216 sq ft unit matches URA's median exactly (2.77%).
 
-OCR condominium rents were −0.4% month on month and +2.0% year on year in August 2026 (99.co/SRX). Maintenance, property tax, agent fees, vacancy and repairs reduce net yield.
+URA 2026Q2 medians, in $ psf per month for leases commenced in the quarter:
+
+| Peer | 25th pct | Median | 75th pct | Implied yield on the subject's residual ask |
+| --- | ---: | ---: | ---: | --- |
+| The Watergardens at Canberra (closest modern peer, nearer the MRT) | S$4.20 | **S$4.57** | S$4.67 | **2.74%** on 990 sq ft at S$1.985m; **2.77%** on 1,216 sq ft at S$2.41m; **2.74%** on 1,324 sq ft at S$2.653m |
+| The Commodore | S$4.69 | **S$5.05** | S$5.89 | 3.03% on 990 sq ft at S$1.985m |
+| North Park Residences (beside Yishun MRT and Northpoint) | S$5.43 | **S$5.77** | S$6.27 | **3.45%** on 990 sq ft — a location premium the subject does not have |
+| Symphony Suites / Skies Miltonia / The Nautical | S$3.63–S$4.30 | S$4.04–S$4.50 | S$4.61–S$5.32 | 2.4%–2.7% equivalent; older stock |
+
+**Watergardens rents are flat, not rising:** S$4.45 (2025Q3), S$4.44 (2025Q4), S$4.65 (2026Q1), S$4.57 psf (2026Q2). Its sub-sale prices fell over the same period, so the yield improved through price, not rent.
+
+So the subject's realistic fallback is **about 2.7%–2.8% gross** on the closest peer, reaching 3.45% only if it were to rent like North Park, which sits on an MRT and a mall. OCR condominium rents were −0.4% month on month and +2.0% year on year in August 2026 (99.co/SRX). Maintenance, property tax, agent fees, vacancy and repairs reduce net yield further.
 
 **Tenant-side headwinds cluster around the subject's completion:**
 
@@ -273,7 +286,7 @@ The 12-point checklist in the 13 August report still applies in full. Additions 
 3. Stress the exit at **S$1,720–S$1,906 psf** (The Watergardens/Commodore to North Park 2026 levels). Proceed only if a loss of S$0.2m–S$0.5m would not impair household finances.
 4. Model SSD explicitly if there is any chance of selling between April and September 2030.
 5. Check Chencharu Close's launch pricing before committing. If it launches materially above S$2,000 psf, the subject's relative value improves; if near it, the subject faces a newer, better-located alternative.
-6. Do not rely on an RTS-driven rental story; stress rent at the Watergardens 3BR level (about S$4,100 a month).
+6. Do not rely on an RTS-driven rental story; stress rent at URA's Watergardens 25th percentile (S$4.20 psf per month, about S$4,160 on a 990 sq ft home).
 
 ## Bottom line
 
@@ -302,6 +315,7 @@ Captured 20 September 2026, 01:22:57 SGT. The URA export was downloaded on 19 Se
 
 1. [URA residential transaction search](https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch) and [REALIS coverage/methodology](https://eservice.ura.gov.sg/reis/coverageandMethodology) — achieved caveats and their limits.
 2. [URA Data Service API](https://eservice.ura.gov.sg/maps/api/), `PMI_Resi_Developer_Sales`, August 2025–August 2026 — official monthly developer sales, fetched 20 September 2026.
+3. [URA Data Service API](https://eservice.ura.gov.sg/maps/api/), `PMI_Resi_Rental_Median` — quarterly median, 25th and 75th percentile rents in $ psf per month per project, fetched 20 September 2026 and committed as `data/raw/ura/rental/pmi_api_rental_median_2q26.csv`.
 2. [Official brochure](https://www.canberra-crescent.com/assets/pdf/Canberra%20Crescent%20Residences%20eBrochure.pdf) — tenure, expected possession, mix and layouts.
 3. [URA tender award](https://www.ura.gov.sg/news/media/pr24-40/) — S$279.0m, about S$793 psf ppr.
 4. [URA Q2 2026 statistics](https://www.ura.gov.sg/news/media/pr26-57/) (24 Jul 2026) and [2H2026 GLS programme](https://www.ura.gov.sg/news/media/pr26-41/) (3 Jun 2026).
