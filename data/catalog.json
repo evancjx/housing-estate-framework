@@ -46,6 +46,8 @@
     "supermarkets.csv": {"zone": "ingested", "producer": "reviewed static conversion", "authority": "SFA / data.gov.sg"},
     "town_council_kpi.json": {"zone": "ingested", "producer": "models/ingest_tcmr.py", "authority": "MND Town Council Management Report"},
     "tree_canopy.csv": {"zone": "derived", "producer": "models/ingest_tree_canopy.py", "authority": "parks.csv + MSS"},
+    "walking_routes.csv": {"zone": "derived", "producer": "models/ingest_pedestrian_paths.py", "authority": "covered_linkway.csv (LTA sheltered linkways)"},
+    "cycling_paths.csv": {"zone": "ingested", "producer": "models/ingest_pedestrian_paths.py", "authority": "NParks Park Connector Loop / data.gov.sg"},
     "ura_private.csv": {"zone": "ingested", "producer": "scrapers/ingest_ura_raw.py", "authority": "URA PMI"}
   }
 }
