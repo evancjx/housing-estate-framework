@@ -511,6 +511,79 @@ def test_merge_takes_revised_values_from_the_newer_export(tmp_path):
     assert written.loc[0, "tenure"] == "99 yrs lease commencing from 2020"
 
 
+def test_merge_replaces_a_row_the_export_has_revised(tmp_path):
+    # URA revised SKIES MILTONIA 2023-06 from 100 to 96 sqm. Area is in the
+    # dedup key, so without revision authority --merge kept both copies.
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d27, "27", 1_268_888)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27], out, merge=False)
+    revised = pd.read_csv(d27, dtype=str)
+    revised["Area (SQM)"] = "96"
+    revised["Unit Price ($ PSF)"] = "1,228"
+    revised.to_csv(d27, index=False)
+
+    _ingest([d27], out, merge=True)
+
+    written = pd.read_csv(out)
+    assert written["area_sqm"].tolist() == [96.0]
+    assert written["unit_price_psf"].tolist() == [1228.0]
+
+
+def test_replacement_keeps_units_that_share_one_transaction_identity(tmp_path):
+    # Two units can share month, price, floor band and sale type. Replacement
+    # must keep both, in their stored order, not collapse them to the first.
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    pair = pd.read_csv(d27, dtype=str)
+    pair = pd.concat([pair.assign(**{"Area (SQM)": "90"}), pair.assign(**{"Area (SQM)": "92"})])
+    pair.to_csv(d27, index=False)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27], out, merge=False)
+    before = out.read_text()
+
+    _ingest([d27], out, merge=True)
+
+    assert out.read_text() == before
+    assert pd.read_csv(out)["area_sqm"].tolist() == [90.0, 92.0]
+
+
+def test_merge_keeps_rows_the_export_does_not_cover(tmp_path):
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27], out, merge=False)
+    history = pd.read_csv(out, dtype=str, keep_default_na=False)
+    history = pd.concat([history.assign(sale_month="2021-07", project_name="OLD WINDOW"), history])
+    history.to_csv(out, index=False)
+
+    _ingest([d27], out, merge=True)
+
+    written = pd.read_csv(out, dtype=str)
+    assert sorted(written["project_name"]) == ["OLD WINDOW", "PROJECT D27"]
+
+
+def test_a_sale_type_filtered_export_only_replaces_its_own_sale_type(tmp_path):
+    d27 = tmp_path / "pmi_d27_2021-2026.csv"
+    _pmi_export(d27, "27", 1_200_000)
+    out = tmp_path / "ura_private.csv"
+    _ingest([d27], out, merge=False)
+    both = pd.read_csv(out, dtype=str, keep_default_na=False)
+    both = pd.concat([both, both.assign(type_of_sale="New Sale")])
+    both.to_csv(out, index=False)
+    revised = pd.read_csv(d27, dtype=str)
+    revised["Area (SQM)"] = "96"
+    revised.to_csv(d27, index=False)
+
+    _ingest([d27], out, merge=True)
+
+    written = pd.read_csv(out)
+    resale = written[written.type_of_sale == "Resale"]
+    new_sale = written[written.type_of_sale == "New Sale"]
+    assert resale["area_sqm"].tolist() == [96.0]
+    assert new_sale["area_sqm"].tolist() == [100.0]
+
+
 def test_merge_zero_pads_unpadded_existing_districts(tmp_path):
     d27 = tmp_path / "pmi_d27_2021-2026.csv"
     _pmi_export(d27, "27", 1_200_000)

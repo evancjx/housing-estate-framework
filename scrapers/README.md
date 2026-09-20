@@ -183,6 +183,17 @@ As of 2026-09-20 token generation and `invokeUraDS` calls succeeded with plain
 
 Access key must be set as `URA_ACCESS_KEY` environment variable — **never hardcode it**.
 
+### How `--merge` treats a re-exported transaction
+
+URA revises lodged caveats. Because a revised field can sit in the dedup key
+(area, for example), a revision would otherwise read as a separate transaction
+and leave the stale row beside it. `--merge` therefore treats an export as
+authoritative for every **transaction identity** it reports — planning area,
+project, street, property type, sale month, price, floor band and sale type —
+replacing the stored rows for that identity in place. Identities the export
+does not report are untouched, so rolling-window history and caveats URA has
+withdrawn survive. Re-merging an unchanged export is byte-identical.
+
 ### Developer sales
 
 `--developer_sales START END` fetches `PMI_Resi_Developer_Sales` for each month

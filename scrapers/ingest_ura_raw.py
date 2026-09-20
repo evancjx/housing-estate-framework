@@ -421,6 +421,65 @@ def write_csv_atomic(df: pd.DataFrame, out_path: Path) -> None:
         raise
 
 
+TRANSACTION_IDENTITY = [
+    "planning_area", "project_name", "street_name", "property_type",
+    "sale_month", "transacted_price", "floor_level", "type_of_sale",
+]
+
+
+def _identity_text(frame: pd.DataFrame, key: list[str]) -> list[tuple]:
+    return list(map(tuple, frame[key].astype(str).to_numpy()))
+
+
+def _identity_key(existing: pd.DataFrame, ingested: pd.DataFrame) -> list[str]:
+    return [c for c in TRANSACTION_IDENTITY if c in existing.columns and c in ingested.columns]
+
+
+def merge_order(existing: pd.DataFrame, ingested: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
+    """Positions that keep replacement rows where the rows they supersede sat.
+
+    A revised row would otherwise be appended, moving the transaction to the
+    end of the file and churning the diff.
+    """
+    key = _identity_key(existing, ingested)
+    existing_order = pd.Series(range(len(existing)), index=existing.index, dtype="float64")
+    if not key or existing.empty:
+        return existing_order, pd.Series(
+            range(len(existing), len(existing) + len(ingested)), index=ingested.index, dtype="float64"
+        )
+    # Distinct units can share an identity (same month, price and floor band),
+    # so the nth reported row takes the nth stored position; extra rows append.
+    positions: dict[tuple, list[int]] = {}
+    for position, identity in enumerate(_identity_text(existing, key)):
+        positions.setdefault(identity, []).append(position)
+    taken: dict[tuple, int] = {}
+    ingested_order = []
+    for offset, identity in enumerate(_identity_text(ingested, key)):
+        seen = taken.get(identity, 0)
+        stored = positions.get(identity, [])
+        ingested_order.append(float(stored[seen]) if seen < len(stored) else float(len(existing) + offset))
+        taken[identity] = seen + 1
+    return existing_order, pd.Series(ingested_order, index=ingested.index, dtype="float64")
+
+
+def drop_superseded_rows(existing: pd.DataFrame, ingested: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """Let a fresh export replace the stored rows for transactions it reports.
+
+    URA revises lodged caveats. A revised field that sits in the dedup key
+    (area, for example) otherwise reads as a separate transaction and --merge
+    keeps the stale row alongside the revision. Wherever an export reports a
+    transaction identity, its rows are authoritative for that identity.
+    Identities the export does not report are untouched, so rolling-window
+    history and caveats URA has withdrawn are kept.
+    """
+    key = _identity_key(existing, ingested)
+    if not key or existing.empty or ingested.empty:
+        return existing, 0
+    reported = set(_identity_text(ingested, key))
+    superseded = [identity in reported for identity in _identity_text(existing, key)]
+    return existing[[not s for s in superseded]], sum(superseded)
+
+
 def zero_pad_districts(df: pd.DataFrame) -> pd.DataFrame:
     """Write postal_district as two-digit text ("08"), leaving blanks alone.
 
@@ -470,8 +529,17 @@ def run(args):
 
     if args.merge and out_path.exists():
         existing = pd.read_csv(out_path, dtype={"postal_district": str}, low_memory=False)
-        combined = pd.concat([existing, combined], ignore_index=True)
+        existing_order, ingested_order = merge_order(existing, combined)
+        kept, superseded = drop_superseded_rows(existing, combined)
+        if superseded:
+            print(f"  Replaced {superseded} stored row(s) that the export(s) report again")
+        combined = pd.concat(
+            [kept.assign(_merge_order=existing_order.loc[kept.index]),
+             combined.assign(_merge_order=ingested_order)],
+            ignore_index=True,
+        )
         combined, dropped = dedupe_transactions(combined)
+        combined = combined.sort_values("_merge_order", kind="stable").drop(columns="_merge_order")
         print(f"Merged with existing ({len(existing)} rows) → {len(combined)} rows total (deduped {dropped} rows)")
     else:
         combined, dropped = dedupe_transactions(combined)
