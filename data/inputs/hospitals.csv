@@ -1,0 +1,18 @@
+name,lat,lon,has_ae,tier
+Alexandra Hospital,1.28548113063515,103.800180925291,False,acute
+Changi General Hospital,1.34082588540168,103.949465475853,True,acute
+KK Women's and Children's Hospital,1.31049007454297,103.846813321822,True,acute
+Khoo Teck Puat Hospital,1.42408101896777,103.838578888679,True,acute
+National University Hospital,1.29348864966996,103.782736313263,True,acute
+Ng Teng Fong General Hospital,1.33346311459265,103.74556686185,True,acute
+Sengkang General Hospital,1.39439308593707,103.893164085542,True,acute
+Singapore General Hospital,1.27964383975506,103.835541765111,True,acute
+Tan Tock Seng Hospital,1.3206307367432,103.848460300475,True,acute
+Woodlands Health,1.42468138279989,103.794743820418,True,acute
+Ang Mo Kio - Thye Hua Kwan Hospital,1.38403248453043,103.840356912641,False,community
+Jurong Community Hospital,1.33346311459265,103.74556686185,False,community
+Outram Community Hospital,1.27755741105351,103.835503652773,False,community
+Ren Ci Community Hospital,1.32288450061588,103.845973302303,False,community
+Sengkang Community Hospital,1.39602238851329,103.891834051681,False,community
+St Andrew's Community Hospital,1.34168650589195,103.948799458403,False,community
+Yishun Community Hospital,1.42376745698115,103.837242211619,False,community

@@ -47,6 +47,7 @@ def test_provision_reproduces(tmp_path):
           "--eldercare", f"{INPUTS}/eldercare.csv", "--covered_linkway", f"{INPUTS}/covered_linkway.csv",
           "--jtc_industrial", f"{INPUTS}/jtc_industrial.csv", "--air_quality", f"{INPUTS}/air_quality.csv",
           "--mixed_use", f"{INPUTS}/mixed_use.csv", "--cycling_paths", f"{INPUTS}/cycling_paths.csv",
+          "--hospitals", f"{INPUTS}/hospitals.csv",
           "--tree_canopy", f"{INPUTS}/tree_canopy.csv", "--hdb_density", f"{INPUTS}/hdb_density.csv",
           "--hawker_v2", f"{INPUTS}/hawker_v2.csv", "--coastal", f"{INPUTS}/coastal.csv",
           "--tcmr", f"{INPUTS}/town_council_kpi.json", "--judged", f"{INPUTS}/judged_inputs.csv",

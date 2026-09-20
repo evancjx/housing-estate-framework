@@ -2,22 +2,34 @@
 """
 MOH public-hospital ingester
 ============================
-Fetches Singapore public hospital records from MOH health-facilities data
-on data.gov.sg collection 521 where available, geocodes the retained
-hospital names through OneMap Search, and writes data/inputs/hospitals.csv.
+Fetches the Singapore hospital directory from the OneMap `moh_hospitals` theme
+(owner: MINISTRY OF HEALTH), keeps the public acute and community hospitals, and
+writes data/inputs/hospitals.csv.
 
-PROVENANCE: PARTLY_MEASURED.
-  Hospital names are sourced from MOH/data.gov.sg health-facilities data.
-  Coordinates are MEASURED by OneMap geocoding of those facility names.
-  The 24h A&E flag is a hand-curated allowlist because the public facility
-  directory does not expose a clean emergency-department boolean. Keeping the
-  allowlist explicit is more honest than inferring A&E from name/type strings.
+PROVENANCE: MEASURED names and coordinates.
+  Both the facility list and its coordinates come from the MOH-owned OneMap
+  theme, so no geocoding step is involved.
+  The 24h A&E flag remains a hand-curated allowlist because the theme exposes no
+  emergency-department boolean. Keeping the allowlist explicit is more honest
+  than inferring A&E from name/type strings.
 
-DATA SOURCE ASSUMPTION:
-  data.gov.sg collection 521 is expected to contain the MOH health-facilities
-  datasets. This script first tries the collection API, then falls back to the
-  public dataset search API for "MOH health facilities" candidates and the
-  standard poll-download flow.
+WHY NOT data.gov.sg (changed 2026-09-20):
+  The previous discovery path is dead — collection 521 and the public dataset
+  search API both return HTTP 403. The OneMap Search geocoder it fed is also
+  unsafe for this job: taking the first result returns "SGH BLK 4 (TAXI STAND)"
+  for Singapore General Hospital, a clinical department for Tan Tock Seng, and
+  an unrelated GP clinic for "Woodlands Health". The theme carries authoritative
+  per-facility coordinates, which removes that failure mode entirely.
+  `geocode_onemap` is retained only as an explicit opt-in fallback.
+
+WHAT IS EXCLUDED AND WHY:
+  The theme lists 31 facilities including private hospitals (Gleneagles, Mount
+  Elizabeth, Raffles, Farrer Park, Parkway East, Thomson, Mount Alvernia,
+  Crawfurd) and non-acute specialist sites (National Heart Centre, TTSH
+  Integrated Care Hub, IMH/Woodbridge). Only names in HOSPITAL_TIER_ALIASES are
+  retained, so the layer measures public-system access rather than total
+  hospital capacity. Revisit that choice if the framework ever wants to price
+  private healthcare access.
 
 OUTPUT (data/inputs/hospitals.csv):
   name, lat, lon, has_ae, tier
@@ -28,11 +40,19 @@ OUTPUT (data/inputs/hospitals.csv):
   layer this ingester is intended to support.
 
 INPUT CONTRACT:
-  --out        output CSV path (default: data/inputs/hospitals.csv)
-  --cache-dir  optional directory for fetched data.gov.sg payload bytes
+  --out         output CSV path (default: data/inputs/hospitals.csv)
+  --theme-json  optional path to a saved theme payload, for an offline rebuild
+                (data/raw/onemap/moh_hospitals.json is committed for this)
+  --cache-dir   optional directory for the fetched theme payload
+
+ENVIRONMENT:
+  ONEMAP_TOKEN  required unless --theme-json is given. OneMap tokens expire
+                every 3 days; the script fails loudly rather than writing a
+                short list.
 
 RUN:
   python3 models/ingest_moh_hospitals.py --out data/inputs/hospitals.csv
+  python3 models/ingest_moh_hospitals.py --theme-json data/raw/onemap/moh_hospitals.json
 """
 from __future__ import annotations
 
@@ -41,6 +61,7 @@ import csv
 import html
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -158,6 +179,71 @@ def classify_hospital(name: str) -> tuple[str, str] | None:
         if needle in n:
             return canonical, tier
     return None
+
+
+THEME_URL = (
+    "https://www.onemap.gov.sg/api/public/themesvc/retrieveTheme"
+    "?queryName=moh_hospitals"
+)
+
+
+def fetch_theme_payload(token: str | None = None, timeout: int = 60) -> dict:
+    """Fetch the MOH hospitals theme. Requires a live ONEMAP_TOKEN."""
+    token = token if token is not None else os.environ.get("ONEMAP_TOKEN", "")
+    if not token:
+        raise RuntimeError(
+            "ONEMAP_TOKEN is not set. The moh_hospitals theme requires a token "
+            "(they expire every 3 days). Refresh it, or pass --theme-json to "
+            "rebuild offline from the committed payload."
+        )
+    req = urllib.request.Request(
+        THEME_URL,
+        headers={"Authorization": token, "User-Agent": _UA, "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        if exc.code == 401:
+            raise RuntimeError(
+                "OneMap rejected ONEMAP_TOKEN (401). The token has expired; "
+                "refresh it or pass --theme-json."
+            ) from exc
+        raise RuntimeError(f"moh_hospitals theme fetch failed: {exc}") from exc
+    except Exception as exc:
+        raise RuntimeError(f"moh_hospitals theme fetch failed: {exc}") from exc
+
+
+def parse_theme_rows(payload: dict) -> list[dict]:
+    """Theme features as {name, address, lat, lon}, coordinates taken verbatim.
+
+    SrchResults[0] is a FeatCount/Theme_Name header rather than a facility, and a
+    feature whose LatLng is missing or unparseable is dropped rather than guessed.
+    """
+    results = (payload or {}).get("SrchResults") or []
+    rows = []
+    for feature in results[1:]:
+        if not isinstance(feature, dict):
+            continue
+        name = str(feature.get("NAME") or "").strip()
+        if not name:
+            continue
+        parts = str(feature.get("LatLng") or "").split(",")
+        if len(parts) != 2:
+            continue
+        try:
+            lat, lon = float(parts[0]), float(parts[1])
+        except ValueError:
+            continue
+        if not (math.isfinite(lat) and math.isfinite(lon)) or (lat == 0 and lon == 0):
+            continue
+        rows.append({
+            "name": name,
+            "address": str(feature.get("ADDRESSSTREETNAME") or "").strip(),
+            "lat": lat,
+            "lon": lon,
+        })
+    return rows
 
 
 def _http_json(url: str, timeout: int = 30) -> dict:
@@ -443,10 +529,15 @@ def build_hospital_rows(source_rows: list[dict], geocode_func=geocode_onemap) ->
         if canonical in seen:
             continue
         seen.add(canonical)
-        geocoded = geocode_func(canonical, source.get("address", ""))
-        if not geocoded:
-            continue
-        lat, lon = geocoded
+        if source.get("lat") is not None and source.get("lon") is not None:
+            # Theme-sourced rows already carry MOH coordinates; geocoding them
+            # would only reintroduce the OneMap Search mismatch problem.
+            lat, lon = float(source["lat"]), float(source["lon"])
+        else:
+            geocoded = geocode_func(canonical, source.get("address", ""))
+            if not geocoded:
+                continue
+            lat, lon = geocoded
         if lat == 0 and lon == 0:
             continue
         rows.append(
@@ -484,12 +575,33 @@ def write_rows(rows: list[dict], out_path: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default=OUT)
-    ap.add_argument("--cache-dir", help="cache fetched data.gov.sg payload bytes")
+    ap.add_argument(
+        "--theme-json",
+        help="rebuild offline from a saved moh_hospitals payload "
+             "(e.g. data/raw/onemap/moh_hospitals.json)",
+    )
+    ap.add_argument("--cache-dir", help="cache the fetched theme payload")
     args = ap.parse_args()
 
     try:
-        source_rows = fetch_health_facility_rows(args.cache_dir)
+        if args.theme_json:
+            with open(args.theme_json, encoding="utf-8") as fh:
+                payload = json.load(fh)
+        else:
+            payload = fetch_theme_payload()
+            if args.cache_dir:
+                os.makedirs(args.cache_dir, exist_ok=True)
+                cached = os.path.join(args.cache_dir, "moh_hospitals.json")
+                with open(cached, "w", encoding="utf-8") as fh:
+                    json.dump(payload, fh, indent=1, ensure_ascii=False, sort_keys=True)
+                    fh.write("\n")
+        source_rows = parse_theme_rows(payload)
+        if not source_rows:
+            sys.exit("ERROR: moh_hospitals theme returned no usable facilities")
+        print(f"Theme returned {len(source_rows)} facilities", file=sys.stderr)
         rows = build_hospital_rows(source_rows)
+    except OSError as exc:
+        sys.exit(f"ERROR: could not read {args.theme_json}: {exc}")
     except RuntimeError as exc:
         sys.exit(f"ERROR: {exc}")
 
