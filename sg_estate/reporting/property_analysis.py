@@ -37,7 +37,7 @@ REQUIRED_METADATA = {
     "Analysis type",
     "Status",
 }
-ALLOWED_MARKET_STAGES = {"future project", "new launch", "resale"}
+ALLOWED_MARKET_STAGES = {"future project", "new launch", "resale", "mixed market", "unverified", "historical project", "restricted ec"}
 IGNORED_MARKDOWN_FILES = {"README.md"}
 ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
 FORBIDDEN_TAGS = {"embed", "iframe", "object", "script", "style"}

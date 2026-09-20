@@ -37,4 +37,4 @@ jobs:
         run: python -m pytest -q
 
       - name: Validate static report catalog
-        run: python scripts/build_pages_site.py
+        run: python scripts/build_pages_site.py --out _site

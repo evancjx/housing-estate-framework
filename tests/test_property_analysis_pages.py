@@ -90,27 +90,23 @@ def test_real_property_analyses_are_discovered_newest_first():
         by_project["144A Lorong Sarina"].captured_iso
         == "2026-07-27T21:45:49+08:00"
     )
-    assert by_project["Arc at Tampines"].captured_iso == "2026-07-26T12:46:23+08:00"
     assert (
         by_project["Park Place Residences at PLQ"].captured_iso
         == "2026-07-26T12:25:08+08:00"
     )
     assert (
-        by_project["The LakeGarden Residences"].captured_iso
-        == "2026-08-08T01:30:38+08:00"
-    )
-    assert (
         by_project["Canberra Crescent Residences"].captured_iso
         == "2026-09-20T01:22:57+08:00"
     )
-    assert (
-        by_project["PARKTOWN Residence"].captured_iso
-        == "2026-08-08T02:25:47+08:00"
-    )
-    assert (
-        by_project["Pinery Residences"].captured_iso
-        == "2026-08-08T02:21:46+08:00"
-    )
+    for project, slug in {
+        "Arc at Tampines": "arc-at-tampines",
+        "The LakeGarden Residences": "the-lakegarden-residences",
+        "PARKTOWN Residence": "parktown-residence",
+        "Pinery Residences": "pinery-residences",
+    }.items():
+        expected_source = ANALYSIS_DIR / f"2026-09-20-{slug}.md"
+        assert by_project[project].source_path == expected_source.resolve()
+        assert by_project[project].captured_at.date().isoformat() == "2026-09-20"
     assert by_project["Canberra Crescent Residences"].market_stage == "new launch"
     assert by_project["PARKTOWN Residence"].market_stage == "new launch"
     assert by_project["Pinery Residences"].market_stage == "new launch"
@@ -119,6 +115,21 @@ def test_real_property_analyses_are_discovered_newest_first():
         (analysis.captured_at for analysis in analyses), reverse=True
     )
     assert all(analysis.summary for analysis in analyses)
+
+
+@pytest.mark.parametrize(
+    ("source_name", "captured_iso"),
+    [
+        ("2026-07-26-arc-at-tampines.md", "2026-07-26T12:46:23+08:00"),
+        ("2026-08-08-the-lakegarden-residences.md", "2026-08-08T01:30:38+08:00"),
+        ("2026-08-08-parktown-residence.md", "2026-08-08T02:25:47+08:00"),
+        ("2026-08-08-pinery-residences.md", "2026-08-08T02:21:46+08:00"),
+        ("2026-09-20-canberra-crescent-residences.md", "2026-09-20T01:22:57+08:00"),
+    ],
+)
+def test_individual_refresh_preserves_authored_capture_timestamps(source_name, captured_iso):
+    analysis = parse_property_analysis(ANALYSIS_DIR / source_name)
+    assert analysis.captured_iso == captured_iso
 
 
 def test_tanah_merah_property_analysis_portfolio_is_complete():
@@ -204,6 +215,37 @@ def test_new_launch_analysis_is_not_catalogued_as_resale_or_future(tmp_path):
     assert "new launch" in tags
     assert "resale" not in tags
     assert "future project" not in tags
+
+
+def test_regional_comparison_retains_mixed_market_stage(tmp_path):
+    source = _write_analysis(
+        tmp_path,
+        slug="regional-comparison",
+        project="Regional comparison",
+        metadata="Market stage: **mixed market**",
+    )
+    analysis = parse_property_analysis(source)
+    entry = analysis.catalog_entry(is_latest=True)
+
+    assert entry["market_stage"] == "mixed market"
+    assert "mixed market" in entry["tags"]
+    assert "resale" not in entry["tags"]
+    assert "<dd>mixed market</dd>" in render_property_analysis_page(analysis)
+    assert "Property analysis · Mixed Market" in build_pages_site._property_cards([analysis])
+
+
+@pytest.mark.parametrize("stage", ["unverified", "historical project", "restricted ec"])
+def test_individual_evidence_gaps_predecessors_and_restricted_ec_are_not_catalogued_as_resale(tmp_path, stage):
+    source = _write_analysis(
+        tmp_path,
+        metadata=f"Market stage: **{stage}**",
+    )
+    analysis = parse_property_analysis(source)
+    entry = analysis.catalog_entry(is_latest=True)
+    assert entry["market_stage"] == stage
+    assert stage in entry["tags"]
+    assert "resale" not in entry["tags"]
+    assert f"<dd>{stage}</dd>" in render_property_analysis_page(analysis)
 
 
 def test_real_lakegarden_card_and_page_show_new_launch_stage():

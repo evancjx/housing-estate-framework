@@ -26,6 +26,10 @@ from sg_estate.reporting.property_analysis import (
     property_catalog_entries,
     render_property_analysis_page,
 )
+from scripts.publish_property_research import (
+    publish_property_research,
+    validate_published_references,
+)
 
 DEFAULT_MANIFEST = ROOT / "site" / "reports.json"
 DEFAULT_ASSETS = ROOT / "site" / "assets"
@@ -219,6 +223,32 @@ def inject_research_shell(site_dir: Path) -> None:
             html_path.write_text(updated, encoding="utf-8")
 
 
+def add_report_projects(catalog: dict, analyses: list[PropertyAnalysis]) -> dict:
+    """Make individually researched new projects searchable before source lists catch up.
+
+    Multi-project reports are library entries, not physical developments. No
+    district is inferred from a regional label or missing transaction history.
+    """
+    projects = [dict(project) for project in catalog["projects"]]
+    names = {" ".join(p["name"].split()).upper() for p in projects}
+    slugs = {p["slug"] for p in projects}
+    for analysis in latest_property_analyses(analyses):
+        name = " ".join(analysis.project_name.split()).upper()
+        if analysis.market_stage == "mixed market" or name in names:
+            continue
+        slug = analysis.project_slug
+        if slug in slugs:
+            # A directory can explicitly name an old development at the same
+            # slug. Preserve that entry and expose the report's distinct name.
+            slug = "analysis-" + slug
+        if slug in slugs:
+            raise ValueError(f"Ambiguous project-finder slug for {analysis.project_name}")
+        projects.append({"name": analysis.project_name, "slug": slug})
+        names.add(name)
+        slugs.add(slug)
+    return {**catalog, "projects": projects}
+
+
 def validate_site_links(site_dir: Path) -> None:
     """Reject broken local HTML, script, stylesheet and image references."""
     broken: list[str] = []
@@ -358,7 +388,7 @@ def build_site(
         catalog,
         property_analysis_dir=property_analysis_dir,
     )
-    project_catalog = build_project_catalog()
+    project_catalog = add_report_projects(build_project_catalog(), analyses)
     output_dir = output_dir.resolve()
     if output_dir == ROOT or ROOT not in output_dir.parents:
         raise ValueError(f"Output must be a directory inside the repository: {output_dir}")
@@ -389,13 +419,16 @@ def build_site(
             assets_dir,
             output_dir / "assets",
             dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("research-data.html"),
         )
+    publish_property_research(output_dir)
     inject_property_library(output_dir / "index.html", analyses)
     inject_research_shell(output_dir)
     (output_dir / ".nojekyll").touch()
     if not (output_dir / "index.html").is_file():
         raise ValueError("Built site is missing index.html")
     validate_site_links(output_dir)
+    validate_published_references(output_dir)
     return len(merged_catalog["reports"])
 
 
