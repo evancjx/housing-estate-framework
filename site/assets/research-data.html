@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Research data · Estate research hub</title>
+  <meta name="description" content="Explore the source rows behind the property research. Search, sort and download the published CSV data.">
+  <link rel="stylesheet" href="assets/research-shell.css">
+  <link rel="stylesheet" href="assets/property-analysis.css">
+  <link rel="stylesheet" href="assets/research-data.css">
+  <script src="assets/research-shell.js" defer></script>
+  <script src="assets/research-data.js" defer></script>
+</head>
+<body class="property-analysis-page research-data-page">
+  <main id="research-content">
+    <header class="pa-hero data-hero">
+      <a class="pa-kicker" href="index.html">Estate research hub</a>
+      <h1>Research data</h1>
+      <p class="pa-property" id="data-filename">Published CSV explorer</p>
+      <p class="pa-summary">Inspect the rows behind the analysis. Search across every column, select a column to sort, or download the data.</p>
+      <p class="data-source" id="data-source"></p>
+    </header>
+
+    <p id="data-status" class="data-status" role="status" aria-live="polite">Loading research data…</p>
+    <noscript><p class="pa-caution">Enable JavaScript to explore this table. Original CSV downloads remain available from the report that linked here.</p></noscript>
+
+    <section id="data-explorer" class="data-explorer" aria-label="CSV explorer" hidden>
+      <div class="data-controls">
+        <label class="data-search" for="data-search">Search all columns
+          <input id="data-search" type="search" placeholder="Project, date, sale type, value…" autocomplete="off">
+        </label>
+        <label for="data-page-size">Rows per page
+          <select id="data-page-size">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+          </select>
+        </label>
+        <div class="data-downloads">
+          <a id="data-original" class="data-button" download>Download original</a>
+          <button id="data-filtered" class="data-button" type="button">Download filtered</button>
+        </div>
+      </div>
+      <p class="data-note">Blank cells and repeated rows are retained. Download filtered includes every matching row in the current sort order, across all pages.</p>
+      <div class="data-table-wrap tbl-wrap" role="region" aria-label="Research data table; scroll horizontally for more columns" tabindex="0">
+        <table id="data-table">
+          <caption class="data-sr-only" id="data-caption">Published research data</caption>
+          <thead id="data-head"></thead>
+          <tbody id="data-body"></tbody>
+        </table>
+      </div>
+      <nav class="data-pagination" aria-label="Table pagination">
+        <span id="data-page-info" aria-live="polite"></span>
+        <div>
+          <button id="data-first" type="button" aria-label="First page">First</button>
+          <button id="data-previous" type="button" aria-label="Previous page">Previous</button>
+          <button id="data-next" type="button" aria-label="Next page">Next</button>
+          <button id="data-last" type="button" aria-label="Last page">Last</button>
+        </div>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>

@@ -46,6 +46,18 @@ Resale is the default market stage when this optional line is absent. Market
 stage describes the project at the research timestamp; keep developer sales,
 subsales and completed-project resales separated inside the analysis.
 
+For a regional or multi-project comparison spanning different market stages,
+use `Market stage: **mixed market**`. This describes the report's coverage;
+keep each project's stage, EC eligibility, tenure and sale types distinct in
+the evidence and conclusions.
+
+Use `unverified` when the available evidence cannot establish a project's
+current market stage, and `historical project` for a redevelopment predecessor
+whose records must not be presented as current purchasable stock.
+Use `restricted EC` for an EC whose verified project/block dates still place
+it within the applicable minimum occupation period; an exceptional transaction
+does not establish general resale or whole-unit rental availability.
+
 Publication rules:
 
 - Keep advertised inventory, achieved transactions and scenario assumptions

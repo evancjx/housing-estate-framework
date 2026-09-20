@@ -9,6 +9,8 @@ on:
       - "property_analysis/**"
       - "site/**"
       - "scripts/build_pages_site.py"
+      - "scripts/publish_property_research.py"
+      - "data/raw/property_research/**"
       - "sg_estate/reporting/**"
       - "models/gen_project_exit_comparison_html.py"
       - "models/gen_condo_framework_comparison_html.py"

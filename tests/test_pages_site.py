@@ -1,6 +1,7 @@
 """Checks for the static GitHub Pages report bundle."""
 
 from html.parser import HTMLParser
+from copy import deepcopy
 import json
 import os
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from scripts import build_pages_site
+from sg_estate.reporting.property_analysis import parse_property_analysis
 
 
 ROOT = Path(__file__).parent.parent
@@ -165,19 +167,34 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
         assert build_pages_site.PROPERTY_ROUTES_MARKER not in landing
         assert (
             '"ARC AT TAMPINES": '
-            '"property-analysis-2026-07-26-arc-at-tampines.html"'
+            '"property-analysis-2026-09-20-arc-at-tampines.html"'
         ) in landing
+        for project, slug in (
+            ("PARKTOWN RESIDENCE", "parktown-residence"),
+            ("PINERY RESIDENCES", "pinery-residences"),
+            ("THE LAKEGARDEN RESIDENCES", "the-lakegarden-residences"),
+            ("CANBERRA CRESCENT RESIDENCES", "canberra-crescent-residences"),
+        ):
+            assert (
+                f'"{project}": "property-analysis-2026-09-20-{slug}.html"'
+            ) in landing
+        entries_by_id = {entry["id"]: entry for entry in property_entries}
+        assert not entries_by_id["property-analysis-2026-07-26-arc-at-tampines"]["is_latest"]
+        assert entries_by_id["property-analysis-2026-09-20-arc-at-tampines"]["is_latest"]
+        assert entries_by_id["property-analysis-2026-09-20-canberra-crescent-residences"]["is_latest"]
         assert landing.index('"ONE AMBER"') < landing.index('"ARC AT TAMPINES"')
         assert "data-kind=\"analysis project\"" in landing
+        latest_future = next(
+            report for report in property_entries
+            if report["project_slug"] == "bedok-rise-gls-future-condominium"
+            and report["is_latest"]
+        )
         future_card = next(
             line
             for line in landing.splitlines()
-            if (
-                'href="property-analysis-2026-07-30-bedok-rise-gls-'
-                'future-condominium.html"'
-            )
-            in line
+            if f'href="{latest_future["path"]}"' in line
         )
+        assert latest_future["market_stage"] == "future project"
         assert "future project" in future_card
         assert " resale " not in future_card
         report = (output / "comparison_table.html").read_text(encoding="utf-8")
@@ -224,6 +241,107 @@ def test_generated_project_catalog_is_compact_and_routes_known_project():
         "district": "18",
     }
     assert all(set(project) <= {"name", "slug", "district"} for project in projects)
+
+
+@pytest.fixture
+def parsed_report(tmp_path):
+    def create(project, slug, *, stage="future project", date="2026-09-20"):
+        source = tmp_path / f"{date}-{slug}.md"
+        source.write_text(
+            f"# {project} — property analysis\n\n"
+            f"Research captured: **{date} 12:00:00 SGT (UTC+08:00)**  \n"
+            f"Property: **{project}, Singapore**  \n"
+            "Analysis type: **individual project evidence**  \n"
+            "Status: **point-in-time market snapshot**  \n"
+            f"Market stage: **{stage}**\n\n"
+            "## Decision\n\nNo executable offer has been verified.\n",
+            encoding="utf-8",
+        )
+        return parse_property_analysis(source)
+
+    return create
+
+
+def test_project_finder_adds_researched_projects_without_inventing_districts(parsed_report):
+    reports = [
+        parsed_report("Lucerne Grand", "lucerne-grand"),
+        parsed_report("Canberra Drive EC GLS", "canberra-drive-ec-gls"),
+    ]
+    catalog = {
+        "schema_version": 1,
+        "projects": [{"name": "EXISTING PROJECT", "slug": "existing-project", "district": "18"}],
+    }
+    original = deepcopy(catalog)
+
+    updated = build_pages_site.add_report_projects(catalog, reports)
+
+    assert updated["projects"] == [
+        original["projects"][0],
+        {"name": "Lucerne Grand", "slug": "lucerne-grand"},
+        {"name": "Canberra Drive EC GLS", "slug": "canberra-drive-ec-gls"},
+    ]
+    assert updated["schema_version"] == 1
+    assert catalog == original
+    assert updated["projects"][0] is not catalog["projects"][0]
+
+
+def test_project_finder_keeps_existing_identity_and_adds_only_one_capture(parsed_report):
+    catalog = {
+        "projects": [{"name": "  LUCERNE   GRAND ", "slug": "directory-lucerne", "district": "18"}],
+    }
+    newest = parsed_report("Sample Project", "sample-project")
+    older = parsed_report("Sample Project", "sample-project", date="2026-08-08")
+    reports = [newest, parsed_report("Lucerne Grand", "lucerne-grand"), older]
+    original_reports = list(reports)
+
+    updated = build_pages_site.add_report_projects(catalog, reports)
+
+    assert updated["projects"] == [
+        catalog["projects"][0],
+        {"name": "Sample Project", "slug": "sample-project"},
+    ]
+    assert reports == original_reports
+
+
+def test_project_finder_does_not_treat_regional_reports_or_indexes_as_projects(parsed_report):
+    catalog = {"schema_version": 1, "projects": []}
+    reports = [
+        parsed_report("Regional condo comparison", "regional-condo-comparison", stage="mixed market"),
+        parsed_report("Individual project analyses", "individual-project-analyses", stage="mixed market"),
+    ]
+
+    assert build_pages_site.add_report_projects(catalog, reports) == catalog
+
+
+def test_project_finder_preserves_old_named_project_when_report_slug_collides(parsed_report):
+    catalog = {
+        "projects": [{"name": "FLAMINGO VALLEY (OLD)", "slug": "flamingo-valley", "district": "15"}],
+    }
+    report = parsed_report("Flamingo Valley", "flamingo-valley", stage="resale")
+
+    updated = build_pages_site.add_report_projects(catalog, [report])
+
+    assert updated["projects"] == [
+        catalog["projects"][0],
+        {"name": "Flamingo Valley", "slug": "analysis-flamingo-valley"},
+    ]
+    assert report.project_slug == "flamingo-valley"
+    assert (
+        '"FLAMINGO VALLEY": "property-analysis-2026-09-20-flamingo-valley.html"'
+    ) in build_pages_site._property_routes([report])
+
+
+def test_project_finder_rejects_ambiguous_fallback_slug_without_mutating_catalog(parsed_report):
+    catalog = {"projects": [
+        {"name": "OLD SAMPLE", "slug": "sample-project"},
+        {"name": "UNRELATED SAMPLE", "slug": "analysis-sample-project"},
+    ]}
+    original = deepcopy(catalog)
+    report = parsed_report("Sample Project", "sample-project")
+
+    with pytest.raises(ValueError, match="Ambiguous project-finder slug"):
+        build_pages_site.add_report_projects(catalog, [report])
+    assert catalog == original
 
 
 def test_pages_builder_rejects_output_outside_repository(tmp_path):
