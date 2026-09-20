@@ -301,15 +301,12 @@ def test_committed_artifact_preserves_current_project_evidence_anchors() -> None
     assert (
         sum(row["location_source"] == "project_geocode" for row in rows)
         == counts["project_geocodes"]
-        == 2_397
+        == 2_413
     )
-    # 13 projects first seen in the 2025-2026 district refresh have no
-    # geocode yet; they fall back to the estate centroid until
-    # `make private-project-locations` runs with a valid ONEMAP_TOKEN.
     assert (
         sum(row["location_source"] == "centroid_proxy" for row in rows)
         == counts["centroid_fallbacks"]
-        == 16
+        == 0
     )
     assert (
         sum(row["school_metrics_source"] == "project_geocode" for row in rows)
