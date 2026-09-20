@@ -45,6 +45,9 @@ INPUT CONTRACT
       min_lease_band: A|B+|B|C|D|F (applies to HDB unless
         require_lease_for_private=true)
       min_provision_band: A|B+|B|C|D|F
+        min_value_band passes a Value score up to BORDERLINE_TOLERANCE (0.05)
+        below the band edge and records it in borderline_flags. The other band
+        minimums are hard cut-offs.
       min_value_n: number
       require_direct_value: bool
       require_value_basis: list[str], for example ["direct"]
@@ -68,7 +71,8 @@ INPUT CONTRACT
 
 OUTPUT CSV:
   One row per estate x requested tenure segment, with eligibility status,
-  filter reasons, profile score, rank, and the component values used.
+  filter reasons, borderline flags (e.g. "value_borderline:C"), profile
+  score, rank, and the component values used.
 """
 
 from __future__ import annotations
@@ -81,7 +85,17 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import pandas as pd
 
-from framework_config import BAND_NUMERIC
+from framework_config import BAND_EDGES, BAND_NUMERIC
+
+# A Value score up to this far below the minimum band's edge still passes the
+# hard filter and is flagged as borderline. Bands are hard cut-offs, and
+# routine data corrections have moved the regression-estimated Value score
+# across an edge by less than this (Queenstown condo 3.0012 -> 2.9972).
+# Only Value gets the tolerance: Liveability, Employment and Provision are
+# deterministic composites, and Lease bands come from lease years rather than
+# lease_score, so a score tolerance would not mean the same thing there.
+BORDERLINE_TOLERANCE = 0.05
+BAND_EDGE = {label: edge for edge, label in BAND_EDGES}
 
 
 PERSONA_PREFIX = {
@@ -130,6 +144,7 @@ OUTPUT_COLUMNS = [
     "profile_score",
     "soft_weight_covered",
     "filter_reasons",
+    "borderline_flags",
     "persona",
     "horizon",
     "life_path",
@@ -219,6 +234,16 @@ def _score_pass(score: Optional[float], minimum_band: Any) -> bool:
     actual_value = _score_to_band_value(score)
     minimum_value = _band_value(minimum_band)
     return actual_value is not None and minimum_value is not None and actual_value >= minimum_value
+
+
+def _gate(passed: bool, score: Optional[float], minimum_band: Any, has_real_band: bool = True) -> str:
+    """Return "pass", "borderline" or "fail" for a score-derived band filter."""
+    if passed:
+        return "pass"
+    edge = BAND_EDGE.get(_clean_text(minimum_band).upper())
+    if has_real_band and score is not None and edge is not None and score >= edge - BORDERLINE_TOLERANCE:
+        return "borderline"
+    return "fail"
 
 
 def _normalise_tenures(profile: Dict[str, Any]) -> List[str]:
@@ -380,10 +405,22 @@ def _filter_reasons(
     value: Dict[str, Any],
     provision_score: Optional[float],
     provision_band: str,
-) -> List[str]:
+    liveability_score: Optional[float] = None,
+    employment_score: Optional[float] = None,
+) -> Tuple[List[str], List[str]]:
+    """Return (filter reasons, borderline flags) for one estate/tenure row."""
     hard = profile.get("hard_filters", {}) or {}
     reasons: List[str] = []
+    borderline: List[str] = []
     archetype = _clean_text(row.get("archetype", "")).upper()
+
+    def value_band_filter(band: Any, score: Optional[float]) -> None:
+        minimum = hard["min_value_band"]
+        status = _gate(_band_pass(band, minimum), score, minimum, _band_value(band) is not None)
+        if status == "fail":
+            reasons.append(f"value_below:{minimum}")
+        elif status == "borderline":
+            borderline.append(f"value_borderline:{minimum}")
 
     excluded = _upper_set(hard.get("exclude_archetypes", ["X"]))
     if archetype in excluded:
@@ -400,8 +437,8 @@ def _filter_reasons(
     if hard.get("min_liveability_band") and not _band_pass(live_band, hard["min_liveability_band"]):
         reasons.append(f"liveability_below:{hard['min_liveability_band']}")
 
-    if hard.get("min_value_band") and not _band_pass(value["band"], hard["min_value_band"]):
-        reasons.append(f"value_below:{hard['min_value_band']}")
+    if hard.get("min_value_band"):
+        value_band_filter(value["band"], value["score"])
 
     if hard.get("min_employment_band") and not _band_pass(row.get("emp_band"), hard["min_employment_band"]):
         reasons.append(f"employment_below:{hard['min_employment_band']}")
@@ -437,7 +474,7 @@ def _filter_reasons(
             if minimum is not None and (actual is None or actual < minimum):
                 reasons.append(f"{d_col}_below:{minimum:g}")
 
-    return reasons
+    return reasons, borderline
 
 
 def _soft_score(
@@ -522,7 +559,7 @@ def run(
             life_path_score = _number(row.get("_life_path_end_score"))
             life_path_delta = _number(row.get("_life_path_delta"))
 
-            reasons = _filter_reasons(
+            reasons, borderline = _filter_reasons(
                 row=row,
                 profile=profile,
                 tenure=tenure,
@@ -531,6 +568,8 @@ def run(
                 value=value,
                 provision_score=provision_score,
                 provision_band=provision_band,
+                liveability_score=liveability_score,
+                employment_score=employment_score,
             )
             profile_score, weight_covered = _soft_score(
                 profile=profile,
@@ -551,6 +590,7 @@ def run(
                 "profile_score": profile_score,
                 "soft_weight_covered": weight_covered,
                 "filter_reasons": ";".join(reasons),
+                "borderline_flags": ";".join(borderline),
                 "persona": PREFIX_LABEL[persona_prefix],
                 "horizon": horizon,
                 "life_path": life_path,
