@@ -144,7 +144,11 @@ def load_district_transactions(
     raw_path: pathlib.Path,
     edgeprop_path: pathlib.Path,
 ) -> pd.DataFrame:
-    raw = pd.read_csv(raw_path, low_memory=False)
+    # URA PMI exports are not always UTF-8: D11's ENCHANTÉ rows are Latin-1.
+    try:
+        raw = pd.read_csv(raw_path, low_memory=False)
+    except UnicodeDecodeError:
+        raw = pd.read_csv(raw_path, low_memory=False, encoding="latin-1")
     missing = sorted(RAW_COLUMNS - set(raw.columns))
     if missing:
         raise SystemExit(f"{raw_path} missing required columns: {missing}")
