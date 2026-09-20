@@ -1,0 +1,85 @@
+{
+  "research_date_sgt": "2026-09-20",
+  "status": "isolated_noncanonical_research",
+  "sources": {
+    "propertynoob": "https://propertynoob.com/condo/canberra-crescent-residences/sales",
+    "isaacyee": "https://canberracrescent.isaacyee.com/units",
+    "huttons": "https://portal.huttonsgroup.com/public/pricelist/R070030E?pid=697564dce09a4511a8d56e739ecdaabd",
+    "propertystory": "https://propertystory.sg/canberra-crescent-residences/",
+    "edgeprop": "https://www.edgeprop.sg/condo-apartment/canberra-crescent-residences",
+    "user_recent_sales": "https://www.canberra-crescentresidences.com.sg/balance-units-chart/"
+  },
+  "source_html_sha256": {
+    "propertynoob": "af2b58de4a150f7dba90a2262f187489440e4b1e807e68448598bb9ca631a05a",
+    "isaacyee": "acfb17f905813b2da482584b91fb1b750199dd6e456f34a20d8d451f51a908d9",
+    "huttons": "588bc015ba15cf091ba5047ffca71301e6a853766257cb7adf9653aea548bdad",
+    "propertystory": "47cbc36495dbbe9a3873c775d8b328e1e172726396804eba472cbc04ee0fba67"
+  },
+  "counts": {
+    "chart_units": 376,
+    "chart_status": {
+      "sold": 348,
+      "available": 28
+    },
+    "huttons_status": {
+      "sold": 349,
+      "available": 27
+    },
+    "status_conflict_units": [
+      "#04-23"
+    ],
+    "direct_transaction_records": 330,
+    "direct_distinct_units": 324,
+    "masked_transaction_records": 73,
+    "observation_link_status": {
+      "published_full_unit": 330,
+      "inferred_unique_within_7_days": 73
+    },
+    "inventory_price_status": {
+      "published_full_unit_price": 318,
+      "multiple_historical_prices_review": 5,
+      "inferred_unit_price": 22,
+      "published_price_unreconciled": 1,
+      "chart_available": 27,
+      "sold_price_not_found": 3
+    },
+    "units_with_any_price_observation": 346,
+    "units_with_single_price_value": 340
+  },
+  "local_ura_snapshot": {
+    "file": "data/raw/ura/pmi_d27_2021-2026.csv",
+    "sha256": "c55f3789d06609b21cc1a21caa3e8cee375be1b7a4e5fc744ada1e84b693fd8f",
+    "project_records": 340,
+    "latest_sale_month": "2026-07",
+    "fresh_fetch": false,
+    "project_extract_file": "ura_project_snapshot.csv",
+    "project_extract_sha256": "fbc24fc21c382b5e374d59b2d1ff09cb55b31eb443b1a354bc8980c6892da1e7",
+    "dependency_note": "Rebuild uses this frozen 340-record project extract. The original source file path and hash identify the collection input, not a dependency on the evolving main dataset."
+  },
+  "matching_policy": {
+    "direct_unit": "Copy publicly printed full unit; block obtained from chart. Not independent URA proof.",
+    "masked_unit": "Unique sold-chart candidate on block, exact floor, rounded sqft and date within seven days; inferred.",
+    "multiple_prices": "Preserve every dated observation; leave single-price field blank when amounts differ.",
+    "sale_dates": "Preserve source transaction date and agent reported sold date separately.",
+    "available_asking_prices": "Only retained in explicitly labelled huttons asking_price_sgd column, never assigned as achieved sale price."
+  },
+  "edgeprop_coverage": {
+    "advertised": 346,
+    "captured_occurrences": 346,
+    "distinct_masked_signatures": 340,
+    "warning": "Six adjacent-page duplicate pairs coincide with six older-snapshot signatures absent from current fetch. Same-date pagination appears unstable; current capture is not proven complete. The normalized masked table only uses 23 recent April-August rows, where this overlap was not observed."
+  },
+  "file_sha256": {
+    "agent_unit_chart.csv": "a28c97fae23cf9dfc1266990ae8df762fddb8ca7006624ffbd65aba6ed346429",
+    "edgeprop_current_occurrences.csv": "ca8a73ec62823c16df067e71bf24df9332155fe07109cf2d7d6db2caf3f2ae1e",
+    "edgeprop_current_transactions.csv": "99ee600a79fe6f6f011a228ddb184e0e3286577880de0f103553bec2ea01b933",
+    "huttons_unit_status.csv": "1066082222bd6832f12ce7d05715fb0846e7703eb872260874c1fad75b77da98",
+    "masked_transactions.csv": "2ec0588c460d4895489936ecb9578ceb0ce9ba6fccfd26cea5780aee4ef165e1",
+    "price_observations.csv": "ba46c59c93395ff1d30c5bf274b01448b5a931367e18f21687c8055ae0893ad4",
+    "published_unit_transactions.csv": "c20b1685c67973098cf7283877cdde7e727e7584430d23b48bfa13a0b2bdce64",
+    "unit_price_inventory.csv": "e3551d1dfaa10ba58415b097337265338a8b6b0c182c84ad6cc52b1c0fef689b",
+    "ura_project_snapshot.csv": "fbc24fc21c382b5e374d59b2d1ff09cb55b31eb443b1a354bc8980c6892da1e7"
+  },
+  "validation": "376 unique units;349 Huttons sold;340 single-price values;all73 masked observations unique within7days;one status conflict;six review rows;three missing prices. Build script successfully rerun.",
+  "csv_serialization": "LF line endings; normalized from downloaded/parser CRLF without changing parsed fields."
+}

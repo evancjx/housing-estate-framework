@@ -1,0 +1,31 @@
+{
+  "chart_units": 376,
+  "chart_status": {
+    "sold": 348,
+    "available": 28
+  },
+  "huttons_status": {
+    "sold": 349,
+    "available": 27
+  },
+  "status_conflict_units": [
+    "#04-23"
+  ],
+  "direct_transaction_records": 330,
+  "direct_distinct_units": 324,
+  "masked_transaction_records": 73,
+  "observation_link_status": {
+    "published_full_unit": 330,
+    "inferred_unique_within_7_days": 73
+  },
+  "inventory_price_status": {
+    "published_full_unit_price": 318,
+    "multiple_historical_prices_review": 5,
+    "inferred_unit_price": 22,
+    "published_price_unreconciled": 1,
+    "chart_available": 27,
+    "sold_price_not_found": 3
+  },
+  "units_with_any_price_observation": 346,
+  "units_with_single_price_value": 340
+}
