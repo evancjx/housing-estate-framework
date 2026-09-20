@@ -1,39 +1,39 @@
 profile_id,estate,tenure,eligible,rank,profile_score,soft_weight_covered,filter_reasons,borderline_flags,persona,horizon,life_path,liveability_score,liveability_band,life_path_end_score,life_path_delta,value_score,value_band,value_basis,value_n,employment_score,employment_band,lease_score,lease_band,provision_score,provision_band,archetype,measured_only
-forming-family-hdb-balanced,BUKIT PANJANG,hdb,True,1,4.101,1.0,,,YoungFam,T5,forming_family,4.07,B+,4.07,0.286,4.512906208180713,A,direct,8343.0,3.35,C,4.0,B+,4.06,B+,B,False
-forming-family-hdb-balanced,TOA PAYOH,hdb,True,2,4.004,1.0,,,YoungFam,T5,forming_family,4.337,B+,4.337,0.689,3.8478462474593567,B,direct,7674.0,3.62,B,3.0,B,4.24,B+,B,False
-forming-family-hdb-balanced,HOUGANG,hdb,True,3,3.948,1.0,,,YoungFam,T5,forming_family,4.135,B+,4.135,0.171,4.166601488353807,B+,direct,11824.0,3.35,C,3.0,B,4.08,B+,B,False
-forming-family-hdb-balanced,PASIR RIS,hdb,True,4,3.923,1.0,,,YoungFam,T5,forming_family,4.212,B+,4.212,0.339,4.204073521590675,B+,direct,6756.0,2.65,D,3.0,B,4.02,B+,C,False
-forming-family-hdb-balanced,CHOA CHU KANG,hdb,True,5,3.917,1.0,,,YoungFam,T5,forming_family,3.853,B,3.853,0.351,4.289545642104364,B+,direct,10526.0,3.35,C,4.0,B+,3.66,B,B,False
-forming-family-hdb-balanced,BEDOK,hdb,True,6,3.906,1.0,,,YoungFam,T5,forming_family,4.203,B+,4.203,0.707,4.05132481826231,B+,direct,12159.0,3.83,B,2.0,C,4.18,B+,B,False
-forming-family-hdb-balanced,SENGKANG,hdb,True,7,3.877,1.0,,,YoungFam,T5,forming_family,3.809,B,3.809,1.113,3.936464691141724,B,direct,18988.0,3.05,C,5.0,A,3.66,B,B,False
-forming-family-hdb-balanced,YISHUN,hdb,True,8,3.872,1.0,,,YoungFam,T5,forming_family,4.108,B+,4.108,0.336,4.279604121889958,B+,direct,15892.0,2.5,D,3.0,B,3.96,B,B,False
-forming-family-hdb-balanced,BUKIT BATOK,hdb,True,9,3.811,1.0,,,YoungFam,T5,forming_family,3.881,B,3.881,0.28,3.913526714607233,B,direct,9914.0,4.08,B+,3.0,B,3.69,B,B,False
-forming-family-hdb-balanced,JURONG WEST,hdb,True,10,3.809,1.0,,,YoungFam,T5,forming_family,3.876,B,3.876,1.444,4.022806542040608,B+,direct,15397.0,3.88,B,3.0,B,3.54,B,B,False
-forming-family-hdb-balanced,BUKIT MERAH,hdb,True,11,3.794,1.0,,,YoungFam,T5,forming_family,4.116,B+,4.116,0.109,3.250155245762158,C,direct,8942.0,4.22,B+,3.0,B,4.03,B+,B,False
-forming-family-hdb-balanced,BOON KENG,hdb,True,12,3.694,1.0,,,YoungFam,T5,forming_family,3.954,B,3.954,0.117,3.3191640264905,C,proxy_from:KALLANG/WHAMPOA,7136.0,3.92,B,3.0,B,3.9,B,F,False
-forming-family-hdb-balanced,WOODLEIGH,hdb,True,13,3.692,1.0,,,YoungFam,T5,forming_family,3.68,B,3.68,0.081,3.257964157636578,C,proxy_from:TOA PAYOH,7674.0,3.58,B,5.0,A,3.59,B,E,False
-forming-family-hdb-balanced,ANG MO KIO,hdb,True,14,3.687,1.0,,,YoungFam,T5,forming_family,4.153,B+,4.153,0.559,3.6008736757680433,B,direct,9503.0,3.25,C,2.0,C,3.7,B,B,False
-forming-family-hdb-balanced,JURONG EAST,hdb,True,15,3.686,1.0,,,YoungFam,T5,forming_family,3.71,B,3.71,1.144,3.849329551352906,B,direct,4751.0,3.88,B,3.0,B,3.62,B,A,False
-forming-family-hdb-balanced,TAMPINES WEST,hdb,True,16,3.655,1.0,,,YoungFam,T5,forming_family,3.879,B,3.879,0.237,3.5909432299897865,B,proxy_from:TAMPINES,16107.0,3.3,C,3.0,B,3.75,B,A,False
-forming-family-hdb-balanced,TAMPINES,hdb,True,17,3.653,1.0,,,YoungFam,T5,forming_family,3.849,B,3.849,1.2,3.6196707758297046,B,direct,16107.0,3.35,C,3.0,B,3.78,B,A,False
-forming-family-hdb-balanced,CLEMENTI,hdb,True,18,3.65,1.0,,,YoungFam,T5,forming_family,3.806,B,3.806,1.287,3.337257380271606,C,direct,5194.0,4.28,B+,3.0,B,3.7,B,B,False
-forming-family-hdb-balanced,KALLANG,hdb,True,19,3.592,1.0,,,YoungFam,T5,forming_family,3.829,B,3.829,0.087,3.191503871625481,C,proxy_from:KALLANG/WHAMPOA,7136.0,3.92,B,3.0,B,3.75,B,B,False
-forming-family-hdb-balanced,GEYLANG,hdb,True,20,3.565,1.0,,,YoungFam,T5,forming_family,3.842,B,3.842,0.923,3.3779772761162055,C,direct,5825.0,4.12,B+,2.0,C,3.76,B,B,False
-forming-family-hdb-balanced,TAMPINES EAST,hdb,True,21,3.207,1.0,,value_borderline:C,YoungFam,T5,forming_family,3.363,C,3.363,0.456,2.997240615964808,D,proxy_from:TAMPINES,16107.0,3.2,C,3.0,B,3.13,C,A,False
+forming-family-hdb-balanced,BUKIT PANJANG,hdb,True,1,4.102,1.0,,,YoungFam,T5,forming_family,4.07,B+,4.07,0.286,4.515886878881718,A,direct,8552.0,3.35,C,4.0,B+,4.06,B+,B,False
+forming-family-hdb-balanced,TOA PAYOH,hdb,True,2,4.002,1.0,,,YoungFam,T5,forming_family,4.337,B+,4.337,0.689,3.836578799924177,B,direct,7933.0,3.62,B,3.0,B,4.24,B+,B,False
+forming-family-hdb-balanced,HOUGANG,hdb,True,3,3.947,1.0,,,YoungFam,T5,forming_family,4.135,B+,4.135,0.171,4.163571547615928,B+,direct,12162.0,3.35,C,3.0,B,4.08,B+,B,False
+forming-family-hdb-balanced,PASIR RIS,hdb,True,4,3.922,1.0,,,YoungFam,T5,forming_family,4.212,B+,4.212,0.339,4.200395120658407,B+,direct,6971.0,2.65,D,3.0,B,4.02,B+,C,False
+forming-family-hdb-balanced,CHOA CHU KANG,hdb,True,5,3.917,1.0,,,YoungFam,T5,forming_family,3.853,B,3.853,0.351,4.289905178225992,B+,direct,10805.0,3.35,C,4.0,B+,3.66,B,B,False
+forming-family-hdb-balanced,BEDOK,hdb,True,6,3.906,1.0,,,YoungFam,T5,forming_family,4.203,B+,4.203,0.707,4.048899915773152,B+,direct,12563.0,3.83,B,2.0,C,4.18,B+,B,False
+forming-family-hdb-balanced,SENGKANG,hdb,True,7,3.877,1.0,,,YoungFam,T5,forming_family,3.809,B,3.809,1.113,3.937813938525291,B,direct,19482.0,3.05,C,5.0,A,3.66,B,B,False
+forming-family-hdb-balanced,YISHUN,hdb,True,8,3.873,1.0,,,YoungFam,T5,forming_family,4.108,B+,4.108,0.336,4.282719320998373,B+,direct,16343.0,2.5,D,3.0,B,3.96,B,B,False
+forming-family-hdb-balanced,BUKIT BATOK,hdb,True,9,3.812,1.0,,,YoungFam,T5,forming_family,3.881,B,3.881,0.28,3.915264957947881,B,direct,10304.0,4.08,B+,3.0,B,3.69,B,B,False
+forming-family-hdb-balanced,JURONG WEST,hdb,True,10,3.81,1.0,,,YoungFam,T5,forming_family,3.876,B,3.876,1.444,4.026514512442811,B+,direct,15765.0,3.88,B,3.0,B,3.54,B,B,False
+forming-family-hdb-balanced,BUKIT MERAH,hdb,True,11,3.795,1.0,,,YoungFam,T5,forming_family,4.116,B+,4.116,0.109,3.252098474521236,C,direct,9161.0,4.22,B+,3.0,B,4.03,B+,B,False
+forming-family-hdb-balanced,BOON KENG,hdb,True,12,3.693,1.0,,,YoungFam,T5,forming_family,3.954,B,3.954,0.117,3.3175393368394337,C,proxy_from:KALLANG/WHAMPOA,7345.0,3.92,B,3.0,B,3.9,B,F,False
+forming-family-hdb-balanced,WOODLEIGH,hdb,True,13,3.69,1.0,,,YoungFam,T5,forming_family,3.68,B,3.68,0.081,3.248424031067876,C,proxy_from:TOA PAYOH,7933.0,3.58,B,5.0,A,3.59,B,E,False
+forming-family-hdb-balanced,JURONG EAST,hdb,True,14,3.687,1.0,,,YoungFam,T5,forming_family,3.71,B,3.71,1.144,3.850548181932123,B,direct,4869.0,3.88,B,3.0,B,3.62,B,A,False
+forming-family-hdb-balanced,ANG MO KIO,hdb,True,15,3.686,1.0,,,YoungFam,T5,forming_family,4.153,B+,4.153,0.559,3.598929717990214,B,direct,9710.0,3.25,C,2.0,C,3.7,B,B,False
+forming-family-hdb-balanced,TAMPINES WEST,hdb,True,16,3.654,1.0,,,YoungFam,T5,forming_family,3.879,B,3.879,0.237,3.5868007119817507,B,proxy_from:TAMPINES,16707.0,3.3,C,3.0,B,3.75,B,A,False
+forming-family-hdb-balanced,TAMPINES,hdb,True,17,3.652,1.0,,,YoungFam,T5,forming_family,3.849,B,3.849,1.2,3.615495117677604,B,direct,16707.0,3.35,C,3.0,B,3.78,B,A,False
+forming-family-hdb-balanced,CLEMENTI,hdb,True,18,3.65,1.0,,,YoungFam,T5,forming_family,3.806,B,3.806,1.287,3.3370832966690767,C,direct,5316.0,4.28,B+,3.0,B,3.7,B,B,False
+forming-family-hdb-balanced,KALLANG,hdb,True,19,3.591,1.0,,,YoungFam,T5,forming_family,3.829,B,3.829,0.087,3.1899416700379173,C,proxy_from:KALLANG/WHAMPOA,7345.0,3.92,B,3.0,B,3.75,B,B,False
+forming-family-hdb-balanced,GEYLANG,hdb,True,20,3.565,1.0,,,YoungFam,T5,forming_family,3.842,B,3.842,0.923,3.374133619605826,C,direct,5976.0,4.12,B+,2.0,C,3.76,B,B,False
+forming-family-hdb-balanced,TAMPINES EAST,hdb,True,21,3.206,1.0,,value_borderline:C,YoungFam,T5,forming_family,3.363,C,3.363,0.456,2.9937829942674345,D,proxy_from:TAMPINES,16707.0,3.2,C,3.0,B,3.13,C,A,False
 forming-family-hdb-balanced,CENTRAL AREA,hdb,False,,4.26,0.05,excluded_archetype:X;liveability_below:C;value_below:C;employment_below:D;lease_below:C;value_n_below:100,,YoungFam,T5,forming_family,,N/R,,,,N/R,N/R,,,N/R,,N/R,4.26,N/R,X,False
-forming-family-hdb-balanced,SEMBAWANG,hdb,False,,4.01,1.0,employment_below:D,,YoungFam,T5,forming_family,4.124,B+,4.124,1.379,4.4246830206781755,B+,direct,7129.0,2.45,F,4.0,B+,3.93,B,B,False
+forming-family-hdb-balanced,SEMBAWANG,hdb,False,,4.01,1.0,employment_below:D,,YoungFam,T5,forming_family,4.124,B+,4.124,1.379,4.426663416436825,B+,direct,7347.0,2.45,F,4.0,B+,3.93,B,B,False
 forming-family-hdb-balanced,HOLLAND VILLAGE,hdb,False,,3.909,0.75,value_below:C;value_n_below:100,,YoungFam,T5,forming_family,4.04,B+,4.04,0.19,,no_data,no_hdb_segment,0.0,4.17,B+,3.0,B,3.89,B,D,True
-forming-family-hdb-balanced,CANBERRA,hdb,False,,3.792,1.0,employment_below:D,,YoungFam,T5,forming_family,3.728,B,3.728,1.246,4.019368545501548,B+,proxy_from:SEMBAWANG,7129.0,2.45,F,5.0,A,3.57,B,B,False
+forming-family-hdb-balanced,CANBERRA,hdb,False,,3.793,1.0,employment_below:D,,YoungFam,T5,forming_family,3.728,B,3.728,1.246,4.021167530961696,B+,proxy_from:SEMBAWANG,7347.0,2.45,F,5.0,A,3.57,B,B,False
 forming-family-hdb-balanced,LENTOR,hdb,False,,3.617,0.75,value_below:C;value_n_below:100,,YoungFam,T5,forming_family,3.414,C,3.414,0.849,,no_data,no_hdb_segment,0.0,3.3,C,5.0,A,3.52,B,F,False
-forming-family-hdb-balanced,WOODLANDS,hdb,False,,3.484,1.0,employment_below:D,,YoungFam,T5,forming_family,3.454,C,3.454,1.195,3.790852540181932,B,direct,16663.0,2.45,F,4.0,B+,3.29,C,A,False
-forming-family-hdb-balanced,QUEENSTOWN,hdb,False,,3.48,1.0,value_below:C,,YoungFam,T5,forming_family,3.697,B,3.697,0.407,2.858679993115775,D,direct,6375.0,4.4,B+,3.0,B,3.53,B,B,False
-forming-family-hdb-balanced,BUKIT TIMAH,hdb,False,,3.473,1.0,value_below:C,,YoungFam,T5,forming_family,3.907,B,3.907,1.156,2.94,D,direct,573.0,3.88,B,2.0,C,3.92,B,D,False
-forming-family-hdb-balanced,PUNGGOL,hdb,False,,3.47,1.0,employment_below:D,,YoungFam,T5,forming_family,3.372,C,3.372,0.635,3.4737449254171207,C,direct,16949.0,2.45,F,5.0,A,3.41,C,E,False
-forming-family-hdb-balanced,BISHAN,hdb,False,,3.425,1.0,value_below:C,,YoungFam,T5,forming_family,3.764,B,3.764,0.253,2.758689823120658,D,direct,4082.0,3.73,B,3.0,B,3.61,B,B,False
-forming-family-hdb-balanced,SERANGOON,hdb,False,,3.403,1.0,value_below:C,,YoungFam,T5,forming_family,3.713,B,3.713,1.581,2.857719364159913,D,direct,4118.0,3.73,B,3.0,B,3.18,C,B,False
-forming-family-hdb-balanced,DOVER,hdb,False,,3.364,1.0,value_below:C,,YoungFam,T5,forming_family,3.501,B,3.501,0.436,2.801992287869853,D,proxy_from:QUEENSTOWN,6375.0,4.4,B+,3.0,B,3.46,C,F,False
+forming-family-hdb-balanced,WOODLANDS,hdb,False,,3.484,1.0,employment_below:D,,YoungFam,T5,forming_family,3.454,C,3.454,1.195,3.789962714392243,B,direct,17154.0,2.45,F,4.0,B+,3.29,C,A,False
+forming-family-hdb-balanced,QUEENSTOWN,hdb,False,,3.479,1.0,value_below:C,,YoungFam,T5,forming_family,3.697,B,3.697,0.407,2.8578011359215134,D,direct,6591.0,4.4,B+,3.0,B,3.53,B,B,False
+forming-family-hdb-balanced,BUKIT TIMAH,hdb,False,,3.473,1.0,value_below:C,,YoungFam,T5,forming_family,3.907,B,3.907,1.156,2.94,D,direct,586.0,3.88,B,2.0,C,3.92,B,D,False
+forming-family-hdb-balanced,PUNGGOL,hdb,False,,3.471,1.0,employment_below:D,,YoungFam,T5,forming_family,3.372,C,3.372,0.635,3.4780183952090113,C,direct,17417.0,2.45,F,5.0,A,3.41,C,E,False
+forming-family-hdb-balanced,BISHAN,hdb,False,,3.425,1.0,value_below:C,,YoungFam,T5,forming_family,3.764,B,3.764,0.253,2.759611387296174,D,direct,4192.0,3.73,B,3.0,B,3.61,B,B,False
+forming-family-hdb-balanced,SERANGOON,hdb,False,,3.402,1.0,value_below:C,,YoungFam,T5,forming_family,3.713,B,3.713,1.581,2.8535296640892605,D,direct,4226.0,3.73,B,3.0,B,3.18,C,B,False
+forming-family-hdb-balanced,DOVER,hdb,False,,3.364,1.0,value_below:C,,YoungFam,T5,forming_family,3.501,B,3.501,0.436,2.8011308584386505,D,proxy_from:QUEENSTOWN,6591.0,4.4,B+,3.0,B,3.46,C,F,False
 forming-family-hdb-balanced,TENGAH,hdb,False,,3.044,0.75,liveability_below:C;value_below:C;employment_below:D;value_n_below:100,,YoungFam,T5,forming_family,2.928,D,2.928,1.27,,no_data,no_data,,2.0,F,5.0,A,2.38,F,G,False
-forming-family-hdb-balanced,MARINE PARADE,hdb,False,,2.806,1.0,value_below:C;lease_below:C,,YoungFam,T5,forming_family,3.175,C,3.175,0.461,2.3354796578587105,F,direct,1423.0,3.83,B,1.0,D,3.03,C,D,False
+forming-family-hdb-balanced,MARINE PARADE,hdb,False,,2.807,1.0,value_below:C;lease_below:C,,YoungFam,T5,forming_family,3.175,C,3.175,0.461,2.339019051878408,F,direct,1461.0,3.83,B,1.0,D,3.03,C,D,False
 single-pro-condo-commute-value,BUKIT MERAH,condo,True,1,3.986,0.909,,,SinglePro,T0,settling_single,4.007,B+,4.015,0.211,3.7888235976018514,B,direct,1684.0,4.22,B+,,,4.03,,B,False
 single-pro-condo-commute-value,BOON KENG,condo,True,2,3.928,0.909,,,SinglePro,T0,settling_single,3.837,B,3.837,0.199,4.07303991649435,B+,direct,1478.0,3.92,B,,,3.9,,F,False
 single-pro-condo-commute-value,TOA PAYOH,condo,True,3,3.873,0.909,,,SinglePro,T0,settling_single,3.648,B,4.275,0.801,4.222131677844313,B+,direct,3143.0,3.62,B,,,4.18,,B,False
@@ -139,38 +139,38 @@ landed-family-amenity-upside,PUNGGOL,landed,False,,3.337,0.636,value_below:D;val
 landed-family-amenity-upside,TAMPINES EAST,landed,False,,3.106,0.909,liveability_below:C,,Lifestyle,T5,upgrader,2.973,D,2.973,0.066,3.2638535268106077,C,proxy_from:TAMPINES,95.0,3.2,C,,,3.2,,A,False
 landed-family-amenity-upside,MARINE PARADE,landed,False,,2.931,0.909,liveability_below:C,,Lifestyle,T5,upgrader,2.788,D,2.788,0.074,2.822663164691371,D,direct,1260.0,3.83,B,,,3.07,,D,False
 landed-family-amenity-upside,TENGAH,landed,False,,2.82,0.636,value_below:D;value_n_below:30,,Lifestyle,T5,upgrader,3.048,C,3.048,1.39,,no_data,no_data,,2.0,F,,,2.5,,G,False
-ageing-in-place-hdb-care-lease,BUKIT PANJANG,hdb,True,1,4.045,1.0,,,Retiree,T5,ageing_in_place,4.017,B+,4.017,0.305,4.512906208180713,A,direct,8343.0,3.35,C,4.0,B+,4.06,B+,B,False
-ageing-in-place-hdb-care-lease,TOA PAYOH,hdb,True,2,3.944,1.0,,,Retiree,T5,ageing_in_place,4.354,B+,4.354,0.701,3.8478462474593567,B,direct,7674.0,3.62,B,3.0,B,4.24,B+,B,False
-ageing-in-place-hdb-care-lease,CHOA CHU KANG,hdb,True,3,3.835,1.0,,,Retiree,T5,ageing_in_place,3.714,B,3.714,0.193,4.289545642104364,B+,direct,10526.0,3.35,C,4.0,B+,3.66,B,B,False
-ageing-in-place-hdb-care-lease,HOUGANG,hdb,True,4,3.81,1.0,,,Retiree,T5,ageing_in_place,4.034,B+,4.034,0.114,4.166601488353807,B+,direct,11824.0,3.35,C,3.0,B,4.08,B+,B,False
-ageing-in-place-hdb-care-lease,PASIR RIS,hdb,True,5,3.797,1.0,,,Retiree,T5,ageing_in_place,4.128,B+,4.128,0.105,4.204073521590675,B+,direct,6756.0,2.65,D,3.0,B,4.02,B+,C,False
-ageing-in-place-hdb-care-lease,WOODLEIGH,hdb,True,6,3.764,1.0,,,Retiree,T5,ageing_in_place,3.547,B,3.547,0.045,3.257964157636578,C,proxy_from:TOA PAYOH,7674.0,3.58,B,5.0,A,3.59,B,E,False
-ageing-in-place-hdb-care-lease,BEDOK,hdb,True,7,3.757,1.0,,,Retiree,T5,ageing_in_place,4.237,B+,4.237,0.725,4.05132481826231,B+,direct,12159.0,3.83,B,2.0,C,4.18,B+,B,False
-ageing-in-place-hdb-care-lease,YISHUN,hdb,True,8,3.722,1.0,,,Retiree,T5,ageing_in_place,3.982,B,3.982,0.191,4.279604121889958,B+,direct,15892.0,2.5,D,3.0,B,3.96,B,B,False
-ageing-in-place-hdb-care-lease,BUKIT MERAH,hdb,True,9,3.711,1.0,,,Retiree,T5,ageing_in_place,4.015,B+,4.015,0.014,3.250155245762158,C,direct,8942.0,4.22,B+,3.0,B,4.03,B+,B,False
-ageing-in-place-hdb-care-lease,BUKIT BATOK,hdb,True,10,3.639,1.0,,,Retiree,T5,ageing_in_place,3.686,B,3.686,0.098,3.913526714607233,B,direct,9914.0,4.08,B+,3.0,B,3.69,B,B,False
-ageing-in-place-hdb-care-lease,BOON KENG,hdb,True,11,3.633,1.0,,,Retiree,T5,ageing_in_place,3.901,B,3.901,0.0,3.3191640264905,C,proxy_from:KALLANG/WHAMPOA,7136.0,3.92,B,3.0,B,3.9,B,F,False
-ageing-in-place-hdb-care-lease,ANG MO KIO,hdb,True,12,3.55,1.0,,,Retiree,T5,ageing_in_place,4.137,B+,4.137,0.403,3.6008736757680433,B,direct,9503.0,3.25,C,2.0,C,3.7,B,B,False
-ageing-in-place-hdb-care-lease,KALLANG,hdb,True,13,3.549,1.0,,,Retiree,T5,ageing_in_place,3.793,B,3.793,0.02,3.191503871625481,C,proxy_from:KALLANG/WHAMPOA,7136.0,3.92,B,3.0,B,3.75,B,B,False
-ageing-in-place-hdb-care-lease,TAMPINES WEST,hdb,True,14,3.541,1.0,,,Retiree,T5,ageing_in_place,3.745,B,3.745,0.0,3.5909432299897865,B,proxy_from:TAMPINES,16107.0,3.3,C,3.0,B,3.75,B,A,False
-ageing-in-place-hdb-care-lease,QUEENSTOWN,hdb,True,15,3.402,1.0,,,Retiree,T5,ageing_in_place,3.552,B,3.552,0.196,2.858679993115775,D,direct,6375.0,4.4,B+,3.0,B,3.53,B,B,False
-ageing-in-place-hdb-care-lease,BISHAN,hdb,True,16,3.36,1.0,,,Retiree,T5,ageing_in_place,3.62,B,3.62,0.074,2.758689823120658,D,direct,4082.0,3.73,B,3.0,B,3.61,B,B,False
-ageing-in-place-hdb-care-lease,DOVER,hdb,True,17,3.273,1.0,,,Retiree,T5,ageing_in_place,3.322,C,3.322,0.372,2.801992287869853,D,proxy_from:QUEENSTOWN,6375.0,4.4,B+,3.0,B,3.46,C,F,False
-ageing-in-place-hdb-care-lease,TAMPINES EAST,hdb,True,18,3.1,1.0,,,Retiree,T5,ageing_in_place,3.153,C,3.153,0.111,2.997240615964808,D,proxy_from:TAMPINES,16107.0,3.2,C,3.0,B,3.13,C,A,False
+ageing-in-place-hdb-care-lease,BUKIT PANJANG,hdb,True,1,4.046,1.0,,,Retiree,T5,ageing_in_place,4.017,B+,4.017,0.305,4.515886878881718,A,direct,8552.0,3.35,C,4.0,B+,4.06,B+,B,False
+ageing-in-place-hdb-care-lease,TOA PAYOH,hdb,True,2,3.942,1.0,,,Retiree,T5,ageing_in_place,4.354,B+,4.354,0.701,3.836578799924177,B,direct,7933.0,3.62,B,3.0,B,4.24,B+,B,False
+ageing-in-place-hdb-care-lease,CHOA CHU KANG,hdb,True,3,3.835,1.0,,,Retiree,T5,ageing_in_place,3.714,B,3.714,0.193,4.289905178225992,B+,direct,10805.0,3.35,C,4.0,B+,3.66,B,B,False
+ageing-in-place-hdb-care-lease,HOUGANG,hdb,True,4,3.809,1.0,,,Retiree,T5,ageing_in_place,4.034,B+,4.034,0.114,4.163571547615928,B+,direct,12162.0,3.35,C,3.0,B,4.08,B+,B,False
+ageing-in-place-hdb-care-lease,PASIR RIS,hdb,True,5,3.797,1.0,,,Retiree,T5,ageing_in_place,4.128,B+,4.128,0.105,4.200395120658407,B+,direct,6971.0,2.65,D,3.0,B,4.02,B+,C,False
+ageing-in-place-hdb-care-lease,WOODLEIGH,hdb,True,6,3.762,1.0,,,Retiree,T5,ageing_in_place,3.547,B,3.547,0.045,3.248424031067876,C,proxy_from:TOA PAYOH,7933.0,3.58,B,5.0,A,3.59,B,E,False
+ageing-in-place-hdb-care-lease,BEDOK,hdb,True,7,3.756,1.0,,,Retiree,T5,ageing_in_place,4.237,B+,4.237,0.725,4.048899915773152,B+,direct,12563.0,3.83,B,2.0,C,4.18,B+,B,False
+ageing-in-place-hdb-care-lease,YISHUN,hdb,True,8,3.722,1.0,,,Retiree,T5,ageing_in_place,3.982,B,3.982,0.191,4.282719320998373,B+,direct,16343.0,2.5,D,3.0,B,3.96,B,B,False
+ageing-in-place-hdb-care-lease,BUKIT MERAH,hdb,True,9,3.711,1.0,,,Retiree,T5,ageing_in_place,4.015,B+,4.015,0.014,3.252098474521236,C,direct,9161.0,4.22,B+,3.0,B,4.03,B+,B,False
+ageing-in-place-hdb-care-lease,BUKIT BATOK,hdb,True,10,3.639,1.0,,,Retiree,T5,ageing_in_place,3.686,B,3.686,0.098,3.915264957947881,B,direct,10304.0,4.08,B+,3.0,B,3.69,B,B,False
+ageing-in-place-hdb-care-lease,BOON KENG,hdb,True,11,3.633,1.0,,,Retiree,T5,ageing_in_place,3.901,B,3.901,0.0,3.3175393368394337,C,proxy_from:KALLANG/WHAMPOA,7345.0,3.92,B,3.0,B,3.9,B,F,False
+ageing-in-place-hdb-care-lease,ANG MO KIO,hdb,True,12,3.55,1.0,,,Retiree,T5,ageing_in_place,4.137,B+,4.137,0.403,3.598929717990214,B,direct,9710.0,3.25,C,2.0,C,3.7,B,B,False
+ageing-in-place-hdb-care-lease,KALLANG,hdb,True,13,3.549,1.0,,,Retiree,T5,ageing_in_place,3.793,B,3.793,0.02,3.1899416700379173,C,proxy_from:KALLANG/WHAMPOA,7345.0,3.92,B,3.0,B,3.75,B,B,False
+ageing-in-place-hdb-care-lease,TAMPINES WEST,hdb,True,14,3.541,1.0,,,Retiree,T5,ageing_in_place,3.745,B,3.745,0.0,3.5868007119817507,B,proxy_from:TAMPINES,16707.0,3.3,C,3.0,B,3.75,B,A,False
+ageing-in-place-hdb-care-lease,QUEENSTOWN,hdb,True,15,3.402,1.0,,,Retiree,T5,ageing_in_place,3.552,B,3.552,0.196,2.8578011359215134,D,direct,6591.0,4.4,B+,3.0,B,3.53,B,B,False
+ageing-in-place-hdb-care-lease,BISHAN,hdb,True,16,3.36,1.0,,,Retiree,T5,ageing_in_place,3.62,B,3.62,0.074,2.759611387296174,D,direct,4192.0,3.73,B,3.0,B,3.61,B,B,False
+ageing-in-place-hdb-care-lease,DOVER,hdb,True,17,3.273,1.0,,,Retiree,T5,ageing_in_place,3.322,C,3.322,0.372,2.8011308584386505,D,proxy_from:QUEENSTOWN,6591.0,4.4,B+,3.0,B,3.46,C,F,False
+ageing-in-place-hdb-care-lease,TAMPINES EAST,hdb,True,18,3.099,1.0,,,Retiree,T5,ageing_in_place,3.153,C,3.153,0.111,2.9937829942674345,D,proxy_from:TAMPINES,16707.0,3.2,C,3.0,B,3.13,C,A,False
 ageing-in-place-hdb-care-lease,CENTRAL AREA,hdb,False,,4.26,0.045,excluded_archetype:X;liveability_below:C;value_below:D;lease_below:C;value_n_below:100,,Retiree,T5,ageing_in_place,,N/R,,,,N/R,N/R,,,N/R,,N/R,4.26,N/R,X,False
-ageing-in-place-hdb-care-lease,SENGKANG,hdb,False,,3.931,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.725,B,3.725,0.948,3.936464691141724,B,direct,18988.0,3.05,C,5.0,A,3.66,B,B,False
-ageing-in-place-hdb-care-lease,SEMBAWANG,hdb,False,,3.892,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.918,B,3.918,1.27,4.4246830206781755,B+,direct,7129.0,2.45,F,4.0,B+,3.93,B,B,False
+ageing-in-place-hdb-care-lease,SENGKANG,hdb,False,,3.931,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.725,B,3.725,0.948,3.937813938525291,B,direct,19482.0,3.05,C,5.0,A,3.66,B,B,False
+ageing-in-place-hdb-care-lease,SEMBAWANG,hdb,False,,3.892,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.918,B,3.918,1.27,4.426663416436825,B+,direct,7347.0,2.45,F,4.0,B+,3.93,B,B,False
 ageing-in-place-hdb-care-lease,LENTOR,hdb,False,,3.813,0.818,value_below:D;value_n_below:100;D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.501,B,3.501,1.07,,no_data,no_hdb_segment,0.0,3.3,C,5.0,A,3.52,B,F,False
-ageing-in-place-hdb-care-lease,CANBERRA,hdb,False,,3.799,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.548,B,3.548,1.102,4.019368545501548,B+,proxy_from:SEMBAWANG,7129.0,2.45,F,5.0,A,3.57,B,B,False
+ageing-in-place-hdb-care-lease,CANBERRA,hdb,False,,3.799,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.548,B,3.548,1.102,4.021167530961696,B+,proxy_from:SEMBAWANG,7347.0,2.45,F,5.0,A,3.57,B,B,False
 ageing-in-place-hdb-care-lease,HOLLAND VILLAGE,hdb,False,,3.78,0.818,value_below:D;value_n_below:100,,Retiree,T5,ageing_in_place,3.983,B,3.983,0.0,,no_data,no_hdb_segment,0.0,4.17,B+,3.0,B,3.89,B,D,True
-ageing-in-place-hdb-care-lease,JURONG WEST,hdb,False,,3.645,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.708,B,3.708,1.306,4.022806542040608,B+,direct,15397.0,3.88,B,3.0,B,3.54,B,B,False
-ageing-in-place-hdb-care-lease,JURONG EAST,hdb,False,,3.597,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.669,B,3.669,1.244,3.849329551352906,B,direct,4751.0,3.88,B,3.0,B,3.62,B,A,False
-ageing-in-place-hdb-care-lease,CLEMENTI,hdb,False,,3.568,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.716,B,3.716,1.132,3.337257380271606,C,direct,5194.0,4.28,B+,3.0,B,3.7,B,B,False
-ageing-in-place-hdb-care-lease,TAMPINES,hdb,False,,3.567,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.774,B,3.774,1.151,3.6196707758297046,B,direct,16107.0,3.35,C,3.0,B,3.78,B,A,False
-ageing-in-place-hdb-care-lease,PUNGGOL,hdb,False,,3.528,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.219,C,3.219,0.799,3.4737449254171207,C,direct,16949.0,2.45,F,5.0,A,3.41,C,E,False
-ageing-in-place-hdb-care-lease,GEYLANG,hdb,False,,3.414,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.781,B,3.781,0.771,3.3779772761162055,C,direct,5825.0,4.12,B+,2.0,C,3.76,B,B,False
-ageing-in-place-hdb-care-lease,WOODLANDS,hdb,False,,3.391,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.204,C,3.204,1.038,3.790852540181932,B,direct,16663.0,2.45,F,4.0,B+,3.29,C,A,False
-ageing-in-place-hdb-care-lease,BUKIT TIMAH,hdb,False,,3.315,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.772,B,3.772,1.141,2.94,D,direct,573.0,3.88,B,2.0,C,3.92,B,D,False
+ageing-in-place-hdb-care-lease,JURONG WEST,hdb,False,,3.645,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.708,B,3.708,1.306,4.026514512442811,B+,direct,15765.0,3.88,B,3.0,B,3.54,B,B,False
+ageing-in-place-hdb-care-lease,JURONG EAST,hdb,False,,3.597,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.669,B,3.669,1.244,3.850548181932123,B,direct,4869.0,3.88,B,3.0,B,3.62,B,A,False
+ageing-in-place-hdb-care-lease,CLEMENTI,hdb,False,,3.567,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.716,B,3.716,1.132,3.3370832966690767,C,direct,5316.0,4.28,B+,3.0,B,3.7,B,B,False
+ageing-in-place-hdb-care-lease,TAMPINES,hdb,False,,3.566,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.774,B,3.774,1.151,3.615495117677604,B,direct,16707.0,3.35,C,3.0,B,3.78,B,A,False
+ageing-in-place-hdb-care-lease,PUNGGOL,hdb,False,,3.529,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.219,C,3.219,0.799,3.4780183952090113,C,direct,17417.0,2.45,F,5.0,A,3.41,C,E,False
+ageing-in-place-hdb-care-lease,GEYLANG,hdb,False,,3.413,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.781,B,3.781,0.771,3.374133619605826,C,direct,5976.0,4.12,B+,2.0,C,3.76,B,B,False
+ageing-in-place-hdb-care-lease,WOODLANDS,hdb,False,,3.391,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.204,C,3.204,1.038,3.789962714392243,B,direct,17154.0,2.45,F,4.0,B+,3.29,C,A,False
+ageing-in-place-hdb-care-lease,BUKIT TIMAH,hdb,False,,3.315,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.772,B,3.772,1.141,2.94,D,direct,586.0,3.88,B,2.0,C,3.92,B,D,False
 ageing-in-place-hdb-care-lease,TENGAH,hdb,False,,3.244,0.818,liveability_below:C;value_below:D;value_n_below:100;D_T0_below:0.8,,Retiree,T5,ageing_in_place,2.911,D,2.911,1.305,,no_data,no_data,,2.0,F,5.0,A,2.38,F,G,False
-ageing-in-place-hdb-care-lease,SERANGOON,hdb,False,,3.243,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.388,C,3.388,1.345,2.857719364159913,D,direct,4118.0,3.73,B,3.0,B,3.18,C,B,False
-ageing-in-place-hdb-care-lease,MARINE PARADE,hdb,False,,2.623,1.0,value_below:D;lease_below:C,,Retiree,T5,ageing_in_place,3.061,C,3.061,0.221,2.3354796578587105,F,direct,1423.0,3.83,B,1.0,D,3.03,C,D,False
+ageing-in-place-hdb-care-lease,SERANGOON,hdb,False,,3.242,1.0,D_T0_below:0.8,,Retiree,T5,ageing_in_place,3.388,C,3.388,1.345,2.8535296640892605,D,direct,4226.0,3.73,B,3.0,B,3.18,C,B,False
+ageing-in-place-hdb-care-lease,MARINE PARADE,hdb,False,,2.624,1.0,value_below:D;lease_below:C,,Retiree,T5,ageing_in_place,3.061,C,3.061,0.221,2.339019051878408,F,direct,1461.0,3.83,B,1.0,D,3.03,C,D,False

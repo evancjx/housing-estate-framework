@@ -43,10 +43,10 @@
     "sg_estate/reporting/templates/project_exit_comparison.html": "f96084e30458e11219823d0d451d3414868cb9aa973e50e54bfa431d4bd75647",
     "sg_estate/reporting/templates/property_analysis.html": "864e77cb2f36d4703d355a9167c921e4973bc6ce60c06f4d80a4e7130d2dabe1"
   },
-  "completed_at": "2026-09-20T01:45:46.877364+00:00",
+  "completed_at": "2026-09-20T02:44:23.262934+00:00",
   "data_catalog_sha256": "c46c19a894ac3a340c3812ea81a2ce23a68d3929546b97be840bde329a37416a",
   "git": {
-    "commit": "5a297b5f6ad7c68f94600fec679ea69105714ccd",
+    "commit": "41e17f2910cdc24ecf2a0818de8ec6866ceb756b",
     "dirty": true
   },
   "inputs": {
@@ -66,7 +66,7 @@
     "flood_risk.csv": "f8b9f0d6b7a508541ef1a32305c8be9198202b0372172f7ccb5987225fdefa47",
     "hawker_v2.csv": "0448b6205ae5b9a95c3085b95b321b37db3984adc2b839aa27ea98332a48723d",
     "hdb_density.csv": "3317f32c91b31b51c3426ebdfc73937ed968ddc16630e9bf647185a1ff002387",
-    "hdb_resale.csv": "91c3a65c07e6ea9ae52776ba18a8e43edc0d54c57ace7491543dc3b5570f55e3",
+    "hdb_resale.csv": "a49fffb616c80d1771ef8b6d3f0eb885f1b4a1f721297209ec45c59d75385856",
     "jtc_industrial.csv": "7a61581282be825f30b95d6f39ee547231e1cd19b3b7947a379b05e20e40fe98",
     "judged_inputs.csv": "e5cdd0bb41dd501888eb59854ec3d7a14efc3a0951f2221a15d647541593b3ec",
     "markets.csv": "40203a4e350ef52ef0ae642d04cbe41f7782d23140dfbce5f5bbdfb5fa61cdb6",
@@ -74,7 +74,7 @@
     "parks.csv": "407891641b5cd748e9d96022b04d6f11a55bdc89e7704a2e9b90383b881fd34d",
     "pipeline_data.json": "4ce92cc1dfa3215aa11a99aff9c22e8194d49faae2a59f67b3539d7c3bc34f2c",
     "polyclinics.csv": "1ddb1b456a3ab58b7c875b04c3e4ed285b1020883a3e7f6d4f7fd2dee495dc76",
-    "schools.csv": "9f594c50b64fb6fd3c6427b2c150ea347fd148d9371fd0a6f8b7ace54bf6cef0",
+    "schools.csv": "c1889e2c551a4e2c7094d4efd6c4b177a58d50e1439bf7c78511ff434194c99d",
     "sport.csv": "71a7e2065d6596492f70466532881b7ea2dade9377dc76fe9efb25eee32eb4bc",
     "supermarkets.csv": "07db7680db87a1987008b3c06c6ca640865c7598fe70c227d34b49a736634112",
     "town_council_kpi.json": "7f5ff8582244b97f68c83c70bad002bf80840ea1ae20d3dedac16c962f3ecc24",
@@ -87,76 +87,76 @@
     "employment_scores_T15.csv": "251f52b0d1376bb9a1a21fdfdc3916dc20a50de8833f5877599cfc6d1ac42a11",
     "employment_scores_T5.csv": "f86d6b45af12384c4f3b2e6ef00df59d089dd3f164dcbb62b2352b0081041248",
     "employment_trajectory.csv": "1ef4d45365c4b0b6d118d5c8a58595c3d715244369cf61860447b436855d0673",
-    "lease_risk.csv": "d8d1b7b0fb1d5c8e9541460504af51b0cf93cdb2bed0fb47e0f523eb1cff98f5",
+    "lease_risk.csv": "e85d64410b3b7d840ed2e5a5fb21d4bb313f840abe35eea40138a1190b817ed7",
     "life_paths.csv": "c9dcbaa6bacd6bc21283bb2af8c78c2a7ab2a02ec900c20dab5b946d434f723a",
     "liveability_matrix.csv": "db2f42e2e7a1e19aff95bcef9c8ef0501814df27c0cb53c586adaed887c74f21",
-    "master_output.csv": "0f3408ed8102d7893088169545e4810866a8255148b4c1424b3cde4de3c845f5",
+    "master_output.csv": "631238c27c037a2c9428f90ebb0d6fb13daa7e95f38199b632a2439944085ae3",
     "provision_scores.csv": "737d5c106a12bb5af42bc2cdea032c7e6d7f0bbc14fc4908db6e15e24cc1d31e",
-    "value_output.csv": "cab4cbb9744597da199cdcb1e2d56e331c8ebf2f4fb81b59e7d0568f611a743b",
-    "value_output_private.csv": "a663ea751bbb23a3a23fa3e2f050a0abde605e62d2dee137fd554110a97bc6fc"
+    "value_output.csv": "c2b3e89e2864d7b03f7ffb4dba894ab4ca0910686bc90f532667d7accb30303d",
+    "value_output_private.csv": "2ad02d06f39f12231363bf05afa400865dc83b83c01922233fb24f658a6137b7"
   },
   "python_version": "3.13.7",
   "refresh_derived": false,
-  "run_id": "20260920T014523.302333Z-v2.1.0",
+  "run_id": "20260920T024342.244547Z-v2.1.0",
   "schema_version": 2,
   "stages": [
     {
-      "command": "python -m sg_estate.domain.provision --estates ./data/inputs/estates.csv --mrt ./data/inputs/mrt_layer.csv --bus ./data/inputs/bus_routes.csv --clinics ./data/inputs/chas.csv --polyclinics ./data/inputs/polyclinics.csv --schools ./data/inputs/schools.csv --parks ./data/inputs/parks.csv --markets ./data/inputs/markets.csv --supermarkets ./data/inputs/supermarkets.csv --childcare ./data/inputs/childcare.csv --community ./data/inputs/community.csv --sport ./data/inputs/sport.csv --flood ./data/inputs/flood_risk.csv --noise ./data/inputs/expressways.csv --air_noise ./data/inputs/air_noise_corridors.csv --eldercare ./data/inputs/eldercare.csv --covered_linkway ./data/inputs/covered_linkway.csv --jtc_industrial ./data/inputs/jtc_industrial.csv --air_quality ./data/inputs/air_quality.csv --tcmr ./data/inputs/town_council_kpi.json --tree_canopy ./data/runs/20260920T014523.302333Z-v2.1.0/inputs/tree_canopy.csv --hdb_density ./data/runs/20260920T014523.302333Z-v2.1.0/inputs/hdb_density.csv --hawker_v2 ./data/runs/20260920T014523.302333Z-v2.1.0/inputs/hawker_v2.csv --coastal ./data/runs/20260920T014523.302333Z-v2.1.0/inputs/coastal.csv --judged ./data/inputs/judged_inputs.csv --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/provision_scores.csv",
-      "duration_seconds": 1.314,
+      "command": "python -m sg_estate.domain.provision --estates ./data/inputs/estates.csv --mrt ./data/inputs/mrt_layer.csv --bus ./data/inputs/bus_routes.csv --clinics ./data/inputs/chas.csv --polyclinics ./data/inputs/polyclinics.csv --schools ./data/inputs/schools.csv --parks ./data/inputs/parks.csv --markets ./data/inputs/markets.csv --supermarkets ./data/inputs/supermarkets.csv --childcare ./data/inputs/childcare.csv --community ./data/inputs/community.csv --sport ./data/inputs/sport.csv --flood ./data/inputs/flood_risk.csv --noise ./data/inputs/expressways.csv --air_noise ./data/inputs/air_noise_corridors.csv --eldercare ./data/inputs/eldercare.csv --covered_linkway ./data/inputs/covered_linkway.csv --jtc_industrial ./data/inputs/jtc_industrial.csv --air_quality ./data/inputs/air_quality.csv --tcmr ./data/inputs/town_council_kpi.json --tree_canopy ./data/runs/20260920T024342.244547Z-v2.1.0/inputs/tree_canopy.csv --hdb_density ./data/runs/20260920T024342.244547Z-v2.1.0/inputs/hdb_density.csv --hawker_v2 ./data/runs/20260920T024342.244547Z-v2.1.0/inputs/hawker_v2.csv --coastal ./data/runs/20260920T024342.244547Z-v2.1.0/inputs/coastal.csv --judged ./data/inputs/judged_inputs.csv --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/provision_scores.csv",
+      "duration_seconds": 1.8,
       "log": "logs/provision.log",
       "name": "provision",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.domain.liveability --scores ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/provision_scores.csv --pipeline ./data/inputs/pipeline_data.json --archetypes ./data/inputs/archetype_assignments.csv --bca ./data/runs/20260920T014523.302333Z-v2.1.0/inputs/bca_permits.csv --year 2026 --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/liveability_matrix.csv",
-      "duration_seconds": 0.538,
+      "command": "python -m sg_estate.domain.liveability --scores ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/provision_scores.csv --pipeline ./data/inputs/pipeline_data.json --archetypes ./data/inputs/archetype_assignments.csv --bca ./data/runs/20260920T024342.244547Z-v2.1.0/inputs/bca_permits.csv --year 2026 --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/liveability_matrix.csv",
+      "duration_seconds": 0.655,
       "log": "logs/liveability.log",
       "name": "liveability",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.domain.value --scores ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/provision_scores.csv --hdb ./data/inputs/hdb_resale.csv --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/value_output.csv",
-      "duration_seconds": 7.8,
+      "command": "python -m sg_estate.domain.value --scores ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/provision_scores.csv --hdb ./data/inputs/hdb_resale.csv --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/value_output.csv",
+      "duration_seconds": 15.302,
       "log": "logs/value_hdb.log",
       "name": "value_hdb",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.domain.value --scores ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/provision_scores.csv --hdb ./data/inputs/hdb_resale.csv --private ./data/inputs/ura_private.csv --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/value_output_private.csv",
-      "duration_seconds": 11.05,
+      "command": "python -m sg_estate.domain.value --scores ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/provision_scores.csv --hdb ./data/inputs/hdb_resale.csv --private ./data/inputs/ura_private.csv --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/value_output_private.csv",
+      "duration_seconds": 18.551,
       "log": "logs/value_private.log",
       "name": "value_private",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.domain.lease_risk --hdb ./data/inputs/hdb_resale.csv --estates ./data/inputs/estates.csv --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/lease_risk.csv",
-      "duration_seconds": 0.801,
+      "command": "python -m sg_estate.domain.lease_risk --hdb ./data/inputs/hdb_resale.csv --estates ./data/inputs/estates.csv --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/lease_risk.csv",
+      "duration_seconds": 1.203,
       "log": "logs/lease_risk.log",
       "name": "lease_risk",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.domain.employment --out-dir ./data/runs/20260920T014523.302333Z-v2.1.0/outputs",
-      "duration_seconds": 0.537,
+      "command": "python -m sg_estate.domain.employment --out-dir ./data/runs/20260920T024342.244547Z-v2.1.0/outputs",
+      "duration_seconds": 1.02,
       "log": "logs/employment.log",
       "name": "employment",
       "returncode": 0,
       "status": "complete"
     },
     {
-      "command": "python -m sg_estate.application.master --liveability ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/liveability_matrix.csv --provision ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/provision_scores.csv --value_hdb ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/value_output.csv --employment ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/employment_scores_T0.csv --lease ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/lease_risk.csv --archetypes ./data/inputs/archetype_assignments.csv --value_private ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/value_output_private.csv --life_paths ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/life_paths.csv --out ./data/runs/20260920T014523.302333Z-v2.1.0/outputs/master_output.csv",
-      "duration_seconds": 0.571,
+      "command": "python -m sg_estate.application.master --liveability ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/liveability_matrix.csv --provision ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/provision_scores.csv --value_hdb ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/value_output.csv --employment ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/employment_scores_T0.csv --lease ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/lease_risk.csv --archetypes ./data/inputs/archetype_assignments.csv --value_private ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/value_output_private.csv --life_paths ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/life_paths.csv --out ./data/runs/20260920T024342.244547Z-v2.1.0/outputs/master_output.csv",
+      "duration_seconds": 1.417,
       "log": "logs/master.log",
       "name": "master",
       "returncode": 0,
       "status": "complete"
     }
   ],
-  "started_at": "2026-09-20T01:45:23.302767+00:00",
+  "started_at": "2026-09-20T02:43:42.244975+00:00",
   "status": "complete"
 }
