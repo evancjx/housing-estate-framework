@@ -93,7 +93,16 @@ this against the real input CSVs.
 
 **Fallback rule.** Each new sub-metric applies only when its layer is present *and* the value is
 a finite number. A blank cell falls back to the previous composition — it is never read as a
-measured zero. This keeps `hlth` on 0.55/0.45 until `hospitals.csv` exists.
+measured zero.
+
+**Hospital scope.** `hospitals.csv` comes from the OneMap `moh_hospitals` theme (owner: Ministry
+of Health). Of the 31 listed facilities, 17 are retained: 10 public acute and 7 community. Private
+hospitals (Gleneagles, Mount Elizabeth, Raffles, Farrer Park, Parkway East, Thomson, Mount
+Alvernia, Crawfurd) and non-acute specialist sites (National Heart Centre, TTSH Integrated Care
+Hub, IMH/Woodbridge) are excluded, so the component measures **public-system** access rather than
+total hospital capacity. Only the `acute` tier feeds the sub-metric — a community hospital next
+door does not improve it, because it has no A&E. Revisit this if the framework ever wants to price
+private healthcare access.
 
 **Spec change to note.** `green` previously claimed "PCN continuity". Park-connector metres now
 live in `conn` as an active-mobility signal; `green` keeps park *access* quality. `sport` continues
