@@ -466,3 +466,15 @@ def test_finder_tolerates_projects_without_analysis():
     assert "project.analysis ?" in source
     assert "project && project.analysis && project.analysis.path === " in source
     assert "p.analysis && " in source
+
+
+def test_tampines_area_guide_is_an_ordinary_library_card():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    tag = next(line for line in source.splitlines()
+               if 'href="tampines_condo_school_mrt_area_guide_2026-08-08.html"' in line)
+    assert 'class="card"' in tag and "featured" not in tag
+    last_featured = source.rindex('class="card featured"')
+    assert source.index('href="tampines_condo_school_mrt_area_guide_2026-08-08.html"') > last_featured
+    catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
+    entry = next(r for r in catalog["reports"] if r["path"].startswith("tampines_condo"))
+    assert not entry.get("featured")
