@@ -84,7 +84,8 @@ python3 -m scrapers.unit_ledger run --project "<URA project name>" \
 python3 -m scrapers.unit_ledger rebuild <run_dir>      # offline, from raw/ only
 
 data/runs/unit-ledger/<project-slug>/<YYYY-MM-DD>/
-├── raw/             ura.json, edgeprop.csv, propertynoob.html, chart.html, recent_sales.csv
+├── raw/             fetch.json, ura.json, edgeprop*.csv, propertynoob.html, chart.html, recent_sales.csv
+├── logs/            EdgeProp scraper attempt logs and discovery output (never read by rebuild)
 ├── transactions.csv one row per transaction (schema below)
 ├── units.csv        one row per physical unit (schema below)
 ├── provenance.json  source URLs, capture UTC times, SHA-256 of each raw file, counts, warnings
@@ -95,6 +96,14 @@ data/runs/unit-ledger/<project-slug>/<YYYY-MM-DD>/
 `data/runs/` is ignored by Git, so unit-level third-party records are never committed. This follows
 `docs/DATA_GOVERNANCE.md`, which says not to commit licensed exact-unit records. Running `run` twice
 on the same day replaces that day's directory only after the new run completes successfully.
+
+`raw/fetch.json` records the project name, capture time, the URL and status of each source, and any
+fetch warnings. `rebuild` reads it, so a run can be rebuilt with no network access.
+
+`raw/` may hold several EdgeProp captures (`edgeprop.csv`, `edgeprop_<label>.csv`). They are combined
+as a **multiset union**: a row value seen k times in one capture and j times in another counts
+max(k, j) times. This is needed because EdgeProp pagination drops different rows on different passes.
+For Canberra, the three available captures (341, 340 and 336 rows) combine to exactly URA's 348.
 
 `--recent-sales` is a CSV with the columns `date,unit`. It holds a developer's recently sold list
 that the user pasted. It carries dates and unit numbers only, never prices.
@@ -151,14 +160,21 @@ in this order. Each row records the rule that resolved it.
    - A date mismatch of up to 3 days between EdgeProp and PropertyNoob is allowed only when price,
      sqft and floor all agree exactly and the result is unique. Such rows are labelled
      `Published (date ±N days)`.
-3. **Leftovers**, applied repeatedly until no further progress:
-   - **Identical sales, matched as a set.** N rows identical on date, price, sqft and floor share
-     exactly N free candidate units.
-   - **Recent-sales list + EdgeProp block/floor.** Match on month, sqft and floor band, narrowed to the
-     block and floor that EdgeProp gives.
-   - **By elimination.** Only for `New Sale` rows, only when a chart exists, and only when exactly one
-     chart-sold unit of that size and floor band is still unmatched for a New Sale. Never used for
-     resales or sub-sales.
+   Within step 2, **identical sales are matched as a set**: N rows identical on date, price, sqft,
+   floor and block share exactly N free PropertyNoob candidates.
+3. **Leftovers.** The rules below are applied repeatedly until no further progress. Elimination runs
+   only when no stronger rule makes progress.
+   - **Determined by block, floor and size** (chart only, any sale type). Only one chart unit on
+     EdgeProp's block and floor has this size. This is the strongest leftover rule because it rests
+     on URA's own record.
+   - **Unit chart sold date + EdgeProp block/floor** (chart only, New Sale). Exactly one chart-sold
+     unit on that block and floor, of that size, has a chart sold date within 7 days of the sale date
+     and no New Sale matched yet. This generalises the 2026-09-20 masked-listing inference.
+   - **Recent-sales list + EdgeProp block/floor** (New Sale). Match on month, sqft, block and floor.
+     The block comes from the layout. A unit token that exists in more than one block is skipped.
+   - **By elimination.** Only for `New Sale` rows, and only when a chart exists. Exactly one
+     chart-sold unit of that size is still without a New Sale: on the same block and floor when
+     EdgeProp gave them, otherwise in the same floor band. Never used for resales or sub-sales.
 4. **Unresolved.** The row is labelled `Ambiguous: <candidates>` or `Not found`.
 
 The 2026-09-20 PropertyStory "masked listing" inference is **not** carried over. If the Canberra
@@ -216,7 +232,7 @@ the following.
 | EdgeProp, PropertyNoob or chart fetch fails | Continue; record a warning in `provenance.json`, the README and the page banner |
 | `--chart-url` returns a page that is not the supported template | Exit non-zero with a message saying the template is unsupported |
 | A parser meets an unexpected schema | Exit non-zero; parsers never return partial data |
-| URA and chart sizes do not map one-to-one | Exit non-zero with the conflicting values |
+| A URA row has no EdgeProp size, and its sqm maps to several chart sizes | Exit non-zero with the conflicting values |
 
 Secrets: the URA key is read only from the environment and is never printed or written to the run
 directory. Captured HTML contains no credentials, and no EdgeProp login state is used.
@@ -238,7 +254,8 @@ All tests in the default `make smoke` gate run without network access.
    normalisers, using minimal synthetic HTML and CSV that contain no real unit records.
 3. The existing PropertyNoob parser tests move with the module to `tests/test_propertynoob_sales.py`.
 4. `tests/test_unit_ledger_canberra_regression.py` rebuilds from
-   `data/runs/unit-ledger/canberra-crescent-residences/2026-09-26/raw/`. It asserts that the 348
+   `data/runs/unit-ledger-regression/canberra-crescent-residences/raw/`, a location that a live `run`
+   can never overwrite. It asserts that the 348
    (unit, sale_date, price) triples equal a golden CSV stored next to the raw captures. The test
    **skips** when those local files are absent, as they will be in CI, so the regression runs only
    on the user's machine.
