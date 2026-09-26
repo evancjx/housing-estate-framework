@@ -478,3 +478,14 @@ def test_tampines_area_guide_is_an_ordinary_library_card():
     catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
     entry = next(r for r in catalog["reports"] if r["path"].startswith("tampines_condo"))
     assert not entry.get("featured")
+
+
+def test_katong_comparison_is_an_ordinary_library_card():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    tag = next(line for line in source.splitlines()
+               if '<a class="card' in line and 'href="katong_condo_comparison.html"' in line)
+    assert 'class="card"' in tag and "featured" not in tag
+    assert source.index(tag) > source.rindex('class="card featured"')
+    catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
+    entry = next(r for r in catalog["reports"] if r["path"] == "katong_condo_comparison.html")
+    assert not entry.get("featured")

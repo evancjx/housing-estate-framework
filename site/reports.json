@@ -105,7 +105,7 @@
       "kind": "research",
       "summary": "Compare eight reviewed Katong projects by sale state, bedroom, floor, size, growth, liquidity and exact-unit evidence coverage.",
       "tags": ["katong", "condominium", "transaction", "unit", "sale state"],
-      "featured": true
+      "featured": false
     },
     {
       "id": "poiz-east-comparison",
