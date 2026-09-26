@@ -173,3 +173,25 @@ def test_summary_marks_pending_available_and_unknown_units():
     assert "developer site sold 2026-09-24" in units.at["#04-30", "note"]
     assert units.at["#10-30", "status"] == "sold_pending_ura"
     assert units.at["#03-30", "status"] == "available"
+
+
+def test_propertynoob_dates_and_places_sales_that_edgeprop_missed():
+    grid = chart(("811", "#05-01", 990, "sold", "2025-08-15"), ("813", "#05-02", 990, "sold", "2025-08-15"))
+    r = match.match_all(ura(("0825", 2000000, 92, "01-05", "1"), ("0825", 2000000, 92, "01-05", "1")), ep(),
+                        pn(("2025-08-15", 2000000, "#05-01", 990, "New Sale"),
+                           ("2025-08-15", 2000000, "#05-02", 990, "New Sale")), grid, NO_RECENT)
+    got = sorted(zip(r.ledger.block, r.ledger.unit, r.ledger.sale_date, r.ledger.floor))
+    assert got == [("811", "#05-01", "2025-08-15", 5), ("813", "#05-02", "2025-08-15", 5)]
+    assert set(r.ledger.date_source) == {"PropertyNoob (no EdgeProp record)"}
+    assert set(r.ledger.unit_source) == {"Published (PropertyNoob; no EdgeProp record, identical sales matched as a set)"}
+    assert r.unmatched_propertynoob == 0
+
+
+def test_propertynoob_fallback_refuses_when_candidates_outnumber_sales():
+    grid = chart(("811", "#05-01", 990, "sold", "2025-08-15"), ("813", "#05-02", 990, "sold", "2025-08-15"))
+    r = match.match_all(ura(("0825", 2000000, 92, "01-05", "1")), ep(),
+                        pn(("2025-08-15", 2000000, "#05-01", 990, "New Sale"),
+                           ("2025-08-20", 2000000, "#05-02", 990, "New Sale")), grid, NO_RECENT)
+    row = r.ledger.iloc[0]
+    assert (row.unit, row.sale_date) == ("", "")
+    assert row.unit_source == "Ambiguous: 811 #05-01 / 813 #05-02"

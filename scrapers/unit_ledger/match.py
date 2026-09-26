@@ -203,6 +203,35 @@ def attach_propertynoob(ledger, pn, stack_blocks):
     return ledger, pn[pn.pn_id.isin(free)].reset_index(drop=True), stack_blocks
 
 
+def attach_propertynoob_without_edgeprop(ledger, unused_pn, stack_blocks):
+    """Date and place URA rows EdgeProp missed, straight from PropertyNoob.
+
+    EdgeProp pagination drops rows on busy launch days. A URA row with no EdgeProp record takes
+    PropertyNoob's unit and date when month, price, sqft and floor band agree, the stack belongs to
+    exactly one block, and the group of identical URA rows has exactly as many candidates.
+    """
+    ledger = ledger.copy()
+    placeable = unused_pn[unused_pn["stack"].map(lambda s: len(stack_blocks.get(s, ())) == 1).astype(bool)]
+    by_key = {key: group for key, group in placeable.assign(
+        month=placeable.sale_date.str[:7], band=placeable.floor.map(floor_band)
+    ).groupby(["month", "price", "area_sqft", "band"])}
+    open_rows = ledger[(ledger.unit == "") & (ledger.sale_date == "") & ledger.area_sqft.notna()]
+    used = set()
+    for key, group in open_rows.groupby(["sale_month", "price", "area_sqft", "floor_level"]):
+        candidates = by_key.get(key)
+        if candidates is None or len(candidates) != len(group):
+            continue
+        label = "Published (PropertyNoob; no EdgeProp record"
+        label += ", identical sales matched as a set)" if len(group) > 1 else ")"
+        for i, p in zip(group.index, candidates.sort_values("unit").itertuples()):
+            ledger.at[i, "sale_date"] = p.sale_date
+            ledger.at[i, "floor"] = p.floor
+            ledger.at[i, "date_source"] = "PropertyNoob (no EdgeProp record)"
+            _set_unit(ledger, i, next(iter(stack_blocks[p.stack])), p.unit, label)
+            used.add(p.pn_id)
+    return ledger, unused_pn[~unused_pn.pn_id.isin(used)].reset_index(drop=True)
+
+
 def propertynoob_pre_window_rows(unused_pn, earliest_month, stack_blocks) -> pd.DataFrame:
     """PropertyNoob-only sales older than the URA pull, flagged as not verified."""
     rows = []
@@ -345,6 +374,7 @@ def match_all(ura, ep, pn, chart, recent) -> MatchResult:
         ledger = pd.concat([ledger, pre], ignore_index=True)
     ledger = fill_sizes(ledger, chart)
     ledger, unused_pn, stack_map = attach_propertynoob(ledger, pn, layout.stack_blocks(chart) if has_chart else None)
+    ledger, unused_pn = attach_propertynoob_without_edgeprop(ledger, unused_pn, stack_map)
     pn_pre = propertynoob_pre_window_rows(unused_pn, earliest, stack_map)
     if not pn_pre.empty:
         ledger = pd.concat([ledger, pn_pre], ignore_index=True)

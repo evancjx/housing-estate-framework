@@ -162,6 +162,12 @@ in this order. Each row records the rule that resolved it.
      `Published (date ±N days)`.
    Within step 2, **identical sales are matched as a set**: N rows identical on date, price, sqft,
    floor and block share exactly N free PropertyNoob candidates.
+   **Rows EdgeProp missed.** EdgeProp pagination drops rows on busy launch days: Springleaf
+   Residence lost 213 of its 876 launch-month sales. A URA row with no EdgeProp record takes
+   PropertyNoob's unit and exact date when month, price, sqft and floor band agree, the stack exists
+   in exactly one block, and the group of identical URA rows has exactly as many PropertyNoob
+   candidates. It is labelled `Published (PropertyNoob; no EdgeProp record…)` with date source
+   `PropertyNoob (no EdgeProp record)`. Groups with more candidates than sales stay unresolved.
 3. **Leftovers.** The rules below are applied repeatedly until no further progress. Elimination runs
    only when no stronger rule makes progress.
    - **Determined by block, floor and size** (chart only, any sale type). Only one chart unit on
