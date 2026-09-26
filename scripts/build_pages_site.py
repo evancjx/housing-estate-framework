@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import csv
 from collections import Counter, defaultdict
-from html import escape
 from html.parser import HTMLParser
 import json
 import shutil
@@ -25,6 +24,14 @@ from sg_estate.reporting.property_analysis import (
     latest_property_analyses,
     property_catalog_entries,
     render_property_analysis_page,
+)
+from sg_estate.reporting.property_directory import (
+    DIRECTORY_PATH,
+    directory_catalog_entry,
+    directory_entries,
+    normalize_name,
+    render_directory_page,
+    summary_card,
 )
 from scripts.publish_property_research import (
     publish_property_research,
@@ -249,6 +256,19 @@ def add_report_projects(catalog: dict, analyses: list[PropertyAnalysis]) -> dict
     return {**catalog, "projects": projects}
 
 
+def add_analysis_links(catalog: dict, analyses: list[PropertyAnalysis]) -> dict:
+    """Give each finder project with a latest analysis a direct link and its capture date."""
+    latest = {normalize_name(a.project_name): a for a in latest_property_analyses(analyses)}
+    projects = []
+    for project in catalog["projects"]:
+        project = dict(project)
+        analysis = latest.get(normalize_name(project["name"]))
+        if analysis is not None:
+            project["analysis"] = {"path": analysis.output_path, "date": analysis.date_label}
+        projects.append(project)
+    return {**catalog, "projects": projects}
+
+
 def validate_site_links(site_dir: Path) -> None:
     """Reject broken local HTML, script, stylesheet and image references."""
     broken: list[str] = []
@@ -293,6 +313,10 @@ def _prepare_property_publication(
     analyses = discover_property_analyses(property_analysis_dir)
     existing_ids = {report["id"] for report in catalog["reports"]}
     existing_paths = {report["path"] for report in catalog["reports"]}
+    if DIRECTORY_PATH in existing_paths or (ROOT / DIRECTORY_PATH).exists():
+        raise ValueError(
+            f"Property analysis directory collides with an authored report: {DIRECTORY_PATH}"
+        )
     rendered_pages: dict[str, str] = {}
     for analysis in analyses:
         if analysis.report_id in existing_ids:
@@ -310,43 +334,10 @@ def _prepare_property_publication(
     merged_catalog = dict(catalog)
     merged_catalog["reports"] = [
         *property_catalog_entries(analyses),
+        directory_catalog_entry(),
         *catalog["reports"],
     ]
     return analyses, rendered_pages, merged_catalog
-
-
-def _property_cards(analyses: list[PropertyAnalysis]) -> str:
-    cards: list[str] = []
-    for analysis in latest_property_analyses(analyses):
-        catalog_tags = analysis.catalog_entry(is_latest=True)["tags"]
-        search_text = " ".join(
-            (
-                analysis.project_name,
-                analysis.title,
-                analysis.property_description,
-                analysis.summary,
-                *catalog_tags,
-                "quantum",
-            )
-        )
-        cards.append(
-            "\n".join(
-                (
-                    '      <a class="card property-analysis-card" '
-                    'data-kind="analysis project" '
-                    f'data-search="{escape(search_text, quote=True)}" '
-                    f'href="{escape(analysis.output_path, quote=True)}">',
-                    f'        <span class="tag">Property analysis · '
-                    f"{escape(analysis.market_stage.title())} · "
-                    f"{escape(analysis.date_label)}</span>"
-                    f"<h3>{escape(analysis.project_name)}</h3>",
-                    f"        <p>{escape(analysis.summary)}</p>",
-                    '        <span class="open">Read the dated analysis →</span>',
-                    "      </a>",
-                )
-            )
-        )
-    return "\n".join(cards)
 
 
 def _property_routes(analyses: list[PropertyAnalysis]) -> str:
@@ -362,7 +353,7 @@ def _property_routes(analyses: list[PropertyAnalysis]) -> str:
 
 
 def inject_property_library(index_path: Path, analyses: list[PropertyAnalysis]) -> None:
-    """Inject indexable newest-report cards and exact project-finder routes."""
+    """Inject the single property-analysis summary card and exact project-finder routes."""
 
     source = index_path.read_text(encoding="utf-8")
     for marker in (PROPERTY_CARDS_MARKER, PROPERTY_ROUTES_MARKER):
@@ -370,7 +361,8 @@ def inject_property_library(index_path: Path, analyses: list[PropertyAnalysis]) 
             raise ValueError(
                 f"{index_path.name} must contain exactly one publication marker {marker}"
             )
-    updated = source.replace(PROPERTY_CARDS_MARKER, _property_cards(analyses))
+    card = summary_card(directory_entries(analyses, {"projects": []}))
+    updated = source.replace(PROPERTY_CARDS_MARKER, card)
     updated = updated.replace(PROPERTY_ROUTES_MARKER, _property_routes(analyses))
     index_path.write_text(updated, encoding="utf-8")
 
@@ -388,7 +380,9 @@ def build_site(
         catalog,
         property_analysis_dir=property_analysis_dir,
     )
-    project_catalog = add_report_projects(build_project_catalog(), analyses)
+    project_catalog = add_analysis_links(
+        add_report_projects(build_project_catalog(), analyses), analyses
+    )
     output_dir = output_dir.resolve()
     if output_dir == ROOT or ROOT not in output_dir.parents:
         raise ValueError(f"Output must be a directory inside the repository: {output_dir}")
@@ -405,6 +399,10 @@ def build_site(
         shutil.copy2(html_path, output_dir / html_path.name)
     for relative_path, page in rendered_pages.items():
         (output_dir / relative_path).write_text(page, encoding="utf-8")
+    (output_dir / DIRECTORY_PATH).write_text(
+        render_directory_page(directory_entries(analyses, project_catalog)),
+        encoding="utf-8",
+    )
     (output_dir / "reports.json").write_text(
         json.dumps(merged_catalog, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
