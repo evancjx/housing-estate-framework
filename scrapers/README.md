@@ -266,3 +266,23 @@ make private-bedrooms
 
 Zero-row slugs that never appear in `ura_private.csv` are acceptable: they are
 pre-2019-sales or rental-only projects with no transactions to recover.
+
+## Unit ledger (per-project transactions by unit)
+
+`python3 -m scrapers.unit_ledger run --project "<name exactly as URA publishes it>"` fetches the
+project's URA transactions (last five years; needs `URA_ACCESS_KEY`), its full EdgeProp history, and
+its PropertyNoob sales page. It then writes
+`data/runs/unit-ledger/<slug>/<YYYY-MM-DD>/index.html`: a sortable transaction table and a site sales
+view.
+
+- `--chart-url` adds a singmap agent-site unit chart (for example `https://<project>.isaacyee.com/units`)
+  for new launches.
+- `--recent-sales FILE.csv` (columns `date,unit`) adds a developer's recently sold list.
+- `python3 -m scrapers.unit_ledger rebuild <run dir>` rebuilds offline from the run's `raw/`.
+
+On busy launch days EdgeProp's pages repeat and skip rows, so some URA sales have no EdgeProp record.
+Those rows take PropertyNoob's unit and date only when the match is exact and unambiguous. The README
+in each run folder reports how many rows every rule resolved, and lists what stayed ambiguous.
+
+Outputs stay in the Git-ignored `data/runs/` because they hold third-party unit-level records
+(`docs/DATA_GOVERNANCE.md`). Design: `docs/superpowers/specs/2026-09-26-unit-ledger-design.md`.

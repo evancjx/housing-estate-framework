@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit Ledger</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1b1f24; --muted: #5b6470; --line: #d9dee4;
+  --head: #f3f5f7; --hover: #eef3fb; --accent: #1f5fbf; --chip: #eef1f4;
+  --pre: #eceffa; --pending: #fdf1d6; --pending-fg: #8a5a00; --avail: #e3f4e8; --avail-fg: #1d6b35;
+  --empty: #f7f8f9; --warn: #fff4e5; --warn-line: #e8b765;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181c; --fg: #e6e9ed; --muted: #9aa4b0; --line: #2c3239;
+    --head: #1d2126; --hover: #1f2a38; --accent: #7fb0ff; --chip: #232830;
+    --pre: #22263a; --pending: #3a2f16; --pending-fg: #f0c46a; --avail: #173222; --avail-fg: #7fd69a;
+    --empty: #1a1d21; --warn: #33291a; --warn-line: #8a6a2e;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 20px 16px 40px; background: var(--bg); color: var(--fg);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1300px; margin: 0 auto; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 17px; margin: 36px 0 4px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.jump { margin: -8px 0 16px; font-size: 13px; }
+.jump a { color: var(--accent); }
+.banner { background: var(--warn); border: 1px solid var(--warn-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; }
+.banner ul { margin: 4px 0 0; padding-left: 18px; }
+fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0 0 12px; }
+legend { color: var(--muted); padding: 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.opts label { white-space: nowrap; cursor: pointer; }
+.n { color: var(--muted); font-size: 12px; }
+.actions { display: flex; gap: 8px; margin-top: 8px; }
+button { font: inherit; font-size: 12px; background: var(--chip); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 4px 0 12px; color: var(--muted); }
+.stats b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+#ledger th, #ledger td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+#ledger th { background: var(--head); position: sticky; top: 0; cursor: pointer; user-select: none; font-weight: 600; }
+#ledger .num { text-align: right; }
+#ledger th[aria-sort="ascending"]::after { content: " ▲"; color: var(--accent); }
+#ledger th[aria-sort="descending"]::after { content: " ▼"; color: var(--accent); }
+#ledger td.wrap-cell { white-space: normal; min-width: 200px; color: var(--muted); font-size: 12px; }
+#ledger tbody tr:hover { background: var(--hover); }
+#ledger tr.pre td { background: var(--pre); }
+.notes { color: var(--muted); font-size: 12px; margin-top: 16px; }
+.notes li { margin-bottom: 4px; }
+.site-controls { display: flex; flex-wrap: wrap; gap: 16px; margin: 8px 0; font-size: 13px; }
+.site-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 14px; font-size: 12px; color: var(--muted); }
+.site-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px;
+  margin-right: 6px; vertical-align: -2px; border: 1px solid var(--line); background: var(--sw); }
+.blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(560px, 100%), 1fr)); gap: 20px; }
+.block h3 { font-size: 15px; margin: 0 0 6px; }
+table.site { min-width: 560px; table-layout: fixed; font-size: 11px; line-height: 1.3; }
+table.site th, table.site td { border: 1px solid var(--line); padding: 4px 3px; text-align: center; }
+table.site th { background: var(--head); font-weight: 600; }
+table.site th.floor { width: 30px; }
+table.site .t { font-weight: 600; }
+table.site .a, table.site .s { color: var(--muted); }
+table.site .p { font-weight: 600; margin-top: 2px; }
+table.site .x { font-weight: 400; color: var(--muted); font-size: 10px; }
+table.site td.pre { background: var(--pre); }
+table.site td.pending { background: var(--pending); color: var(--pending-fg); }
+table.site td.available { background: var(--avail); color: var(--avail-fg); }
+table.site td.none { background: var(--empty); color: var(--muted); }
+table.site td.unknown { color: var(--muted);
+  background: repeating-linear-gradient(45deg, var(--empty), var(--empty) 4px, var(--bg) 4px, var(--bg) 8px); }
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"></h1>
+<p class="sub" id="subtitle"></p>
+<div class="banner" id="banner" hidden></div>
+<p class="jump"><a href="#site">Jump to the site sales view</a></p>
+
+<fieldset><legend>Sale type</legend><div class="opts" id="f-sale"></div></fieldset>
+<fieldset><legend>Bedrooms</legend><div class="opts" id="f-beds"></div></fieldset>
+<fieldset>
+  <legend>Unit size (sqft)</legend>
+  <div class="opts" id="f-size"></div>
+  <div class="actions"><button type="button" data-all="f-size">Select all</button><button type="button" data-none="f-size">Clear all</button></div>
+</fieldset>
+
+<div class="stats" id="stats"></div>
+<div class="wrap"><table id="ledger"><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div>
+
+<ul class="notes">
+  <li>Prices, months, floor bands and sqm come from URA's transaction API, which covers the last five years. Shaded rows are older sales from EdgeProp or PropertyNoob and are not verified against that API.</li>
+  <li>URA's API gives only the month. Exact dates, blocks and floors come from EdgeProp, which republishes URA's dated record with the stack number hidden.</li>
+  <li>Unit numbers are not official. <b>Published</b>: PropertyNoob printed the unit with this price, size, floor and date. <b>Determined by block, floor and size</b>: only one unit on that block and floor has this size. <b>Inferred</b>: the unit chart's sold date, or the developer's recent-sales list, picks one unit on that block and floor. <b>By elimination</b>: New Sales only; the last sold unit of that size and floor without a New Sale. <b>Ambiguous</b>: more than one unit fits, and the candidates are listed.</li>
+  <li>$psf = price ÷ sqft. Prices are gross; URA publishes no nett price. Recent months may be incomplete because URA registers transactions with a lag.</li>
+</ul>
+
+<h2 id="site">Site sales view</h2>
+<p class="sub">Each unit's achieved price, by block, floor and stack. Hover over a unit to see every sale.</p>
+<div class="site-controls">
+  <span>Show:</span>
+  <label><input type="radio" name="mode" value="latest" checked> Latest sale</label>
+  <label><input type="radio" name="mode" value="first"> First sale</label>
+</div>
+<div class="site-legend" id="legend"></div>
+<div class="blocks" id="blocks"></div>
+</main>
+
+<script>
+const META = __META__;
+const TXNS = __TRANSACTIONS__;
+const UNITS = __UNITS__;
+
+const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
+const num = v => v == null ? "—" : Number(v).toLocaleString();
+const when = t => t.sale_date || t.sale_month;
+const SHORT = {"New Sale": "New", "Sub Sale": "Sub", "Resale": "Resale"};
+const c = META.counts;
+
+document.title = `${META.project} unit ledger`;
+document.getElementById("title").textContent = `${META.project}: transactions`;
+document.getElementById("subtitle").textContent =
+  `Fetched ${META.fetched_at_utc}. ${c.transactions} transactions: ${c.ura} from the URA API (last five years) and ` +
+  `${c.pre_window} older ones not verified against it. ${c.dated} have an exact date and ${c.with_unit} a unit number` +
+  (c.uniquely_located == null ? "" : `; for ${c.uniquely_located} URA rows, block, floor and size alone fix the unit`) +
+  `. Click a column header to sort.`;
+if (META.warnings.length) {
+  const banner = document.getElementById("banner");
+  banner.hidden = false;
+  banner.innerHTML = "<b>Some sources were incomplete</b><ul>" + META.warnings.map(w => `<li>${esc(w)}</li>`).join("") + "</ul>";
+}
+
+const COLS = [
+  { key: "sale_date", label: "Sale date", sort: when, fmt: (v, r) => esc(v || `${r.sale_month} (month only)`) },
+  { key: "unit", label: "Unit", sort: r => r.unit ? `${r.block} ${r.unit}` : "", fmt: (v, r) => v ? `${esc(r.block)} ${esc(v)}` : "—" },
+  { key: "origin", label: "Origin" },
+  { key: "type_of_sale", label: "Sale type" },
+  { key: "floor_level", label: "Floor band" },
+  { key: "bedrooms", label: "Bedrooms", num: true, fmt: v => esc(v ?? "—") },
+  { key: "area_sqft", label: "Size (sqft)", num: true, fmt: num },
+  { key: "area_sqm", label: "Size (sqm)", num: true, fmt: v => esc(v ?? "—") },
+  { key: "price", label: "Price (S$)", num: true, fmt: num },
+  { key: "psf", label: "$psf", num: true, fmt: num },
+  { key: "tenure", label: "Tenure" },
+  { key: "unit_source", label: "Unit match", wrap: true },
+  { key: "date_source", label: "Date source", wrap: true },
+  { key: "conflict", label: "Conflicts", wrap: true },
+];
+let sortKey = "sale_date", sortDir = -1;
+const keyOf = (r, k) => String(r[k] ?? "Unknown");
+
+function buildChecks(id, key, labelFn) {
+  const counts = new Map();
+  TXNS.forEach(r => counts.set(keyOf(r, key), (counts.get(keyOf(r, key)) || 0) + 1));
+  const keys = [...counts.keys()].sort((a, b) => (Number(a) - Number(b)) || a.localeCompare(b));
+  document.getElementById(id).innerHTML = keys.map(k =>
+    `<label><input type="checkbox" data-key="${key}" value="${esc(k)}" checked> ${labelFn(k)} <span class="n">(${counts.get(k)})</span></label>`).join("");
+}
+buildChecks("f-sale", "type_of_sale", k => esc(k));
+buildChecks("f-beds", "bedrooms", k => k === "Unknown" ? "Unknown" : `${esc(k)} BR`);
+buildChecks("f-size", "area_sqft", k => k === "Unknown" ? "Unknown" : Number(k).toLocaleString());
+
+const checked = key => new Set([...document.querySelectorAll(`input[data-key="${key}"]:checked`)].map(i => i.value));
+function median(xs) {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b), mid = s.length >> 1;
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+const head = document.getElementById("head");
+COLS.forEach(col => {
+  const th = document.createElement("th");
+  th.textContent = col.label;
+  th.dataset.key = col.key;
+  if (col.num) th.className = "num";
+  th.addEventListener("click", () => {
+    sortDir = sortKey === col.key ? -sortDir : (col.num ? -1 : 1);
+    sortKey = col.key;
+    render();
+  });
+  head.appendChild(th);
+});
+
+function render() {
+  const sale = checked("type_of_sale"), beds = checked("bedrooms"), size = checked("area_sqft");
+  const rows = TXNS.filter(r => sale.has(keyOf(r, "type_of_sale")) && beds.has(keyOf(r, "bedrooms")) && size.has(keyOf(r, "area_sqft")));
+  const col = COLS.find(x => x.key === sortKey);
+  const val = col.sort || (r => r[col.key]);
+  rows.sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x == null || y == null) return (x == null) - (y == null);
+    const d = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
+    return d * sortDir || when(b).localeCompare(when(a));
+  });
+  head.querySelectorAll("th").forEach(th =>
+    th.setAttribute("aria-sort", th.dataset.key === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none"));
+  document.getElementById("body").innerHTML = rows.map(r =>
+    `<tr class="${r.origin === "URA" ? "" : "pre"}">` + COLS.map(col =>
+      `<td class="${col.num ? "num" : col.wrap ? "wrap-cell" : ""}">${col.fmt ? col.fmt(r[col.key], r) : esc(r[col.key])}</td>`
+    ).join("") + "</tr>").join("");
+  const mp = median(rows.map(r => r.price)), mpsf = median(rows.map(r => r.psf).filter(v => v != null));
+  document.getElementById("stats").innerHTML =
+    `<div>Showing <b>${rows.length}</b> of ${TXNS.length}</div>` +
+    `<div>Median price <b>${mp == null ? "–" : "S$" + Math.round(mp).toLocaleString()}</b></div>` +
+    `<div>Median $psf <b>${mpsf == null ? "–" : Math.round(mpsf).toLocaleString()}</b></div>`;
+}
+
+const salesByUnit = new Map();
+TXNS.forEach(t => {
+  if (!t.unit) return;
+  const k = `${t.block}|${t.unit}`;
+  if (!salesByUnit.has(k)) salesByUnit.set(k, []);
+  salesByUnit.get(k).push(t);
+});
+salesByUnit.forEach(list => list.sort((a, b) => when(a).localeCompare(when(b))));
+
+const LEGEND = [
+  ["var(--bg)", "Sold (URA price)"],
+  ["var(--pre)", "Sold, older than the URA window (not verified)"],
+  ["var(--pending)", "Sold, not yet in URA (no price)"],
+  ...(META.has_chart ? [["var(--avail)", "Available"], ["var(--empty)", "No residential unit"]]
+                     : [["var(--empty)", "Never seen in any sale"]]),
+];
+document.getElementById("legend").innerHTML = LEGEND.map(([sw, label]) => `<span style="--sw: ${sw}">${label}</span>`).join("");
+
+function renderSite(mode) {
+  const host = document.getElementById("blocks");
+  if (!UNITS.length) {
+    host.innerHTML = `<p class="sub">No unit numbers were resolved, so there is no site view.</p>`;
+    return;
+  }
+  const allFloors = UNITS.map(u => u.floor);
+  const blocks = [...new Set(UNITS.map(u => u.block))].sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+  host.innerHTML = blocks.map(b => {
+    const units = UNITS.filter(u => u.block === b);
+    const stacks = [...new Set(units.map(u => u.stack))].sort((x, y) => x.localeCompare(y, undefined, {numeric: true}));
+    const floors = META.has_chart ? allFloors : units.map(u => u.floor);
+    const lo = Math.min(...floors), hi = Math.max(...floors);
+    const at = new Map(units.map(u => [`${u.floor}|${u.stack}`, u]));
+    let body = "";
+    for (let f = hi; f >= lo; f--) {
+      body += `<tr><th class="floor">${f}</th>` + stacks.map(st => {
+        const u = at.get(`${f}|${st}`);
+        if (!u) return META.has_chart ? `<td class="none">—</td>` : `<td class="unknown">?</td>`;
+        const sales = salesByUnit.get(`${u.block}|${u.unit}`) || [];
+        const shown = mode === "first" ? sales[0] : sales[sales.length - 1];
+        const tip = [`${u.block} ${u.unit}`, u.unit_type, u.area_sqft ? `${num(u.area_sqft)} sqft` : null,
+          ...sales.map(s => `${when(s)} ${s.type_of_sale} S$${num(s.price)}${s.origin === "URA" ? "" : " (not verified against URA)"}`),
+          u.note].filter(Boolean).join("\n");
+        const top = (u.unit_type ? `<div class="t">${esc(u.unit_type)}</div>` : "") +
+          `<div class="a">${u.area_sqft ? num(u.area_sqft) : ""}${u.bedrooms != null ? ` · ${u.bedrooms}BR` : ""}</div>`;
+        let cls, value;
+        if (shown) {
+          cls = shown.origin === "URA" ? "sold" : "pre";
+          value = `<div class="p">${num(shown.price)}${sales.length > 1 ? ` <span class="x">x${sales.length}</span>` : ""}</div>` +
+            `<div class="s">${shown.psf != null ? `$${num(shown.psf)} psf` : ""}</div>` +
+            `<div class="s">${esc(SHORT[shown.type_of_sale] || shown.type_of_sale)} ${esc(when(shown).slice(0, 4))}</div>`;
+        } else if (u.status === "sold_pending_ura") {
+          cls = "pending"; value = `<div class="p">Sold</div><div class="s">not yet in URA</div>`;
+        } else if (u.status === "available") {
+          cls = "available"; value = `<div class="p">Available</div>`;
+        } else {
+          cls = "unknown"; value = `<div class="p">—</div>`;
+        }
+        return `<td class="${cls}" title="${esc(tip)}">${top}${value}</td>`;
+      }).join("") + "</tr>";
+    }
+    const headRow = `<tr><th class="floor"></th>${stacks.map(st => `<th>${esc(st)}</th>`).join("")}</tr>`;
+    return `<div class="block"><h3>Blk ${esc(b)}</h3><div class="wrap"><table class="site"><thead>${headRow}</thead><tbody>${body}</tbody></table></div></div>`;
+  }).join("");
+}
+
+document.addEventListener("change", e => {
+  if (e.target.matches("input[data-key]")) render();
+  if (e.target.name === "mode") renderSite(e.target.value);
+});
+document.querySelectorAll("[data-all], [data-none]").forEach(button => button.addEventListener("click", () => {
+  const id = button.dataset.all || button.dataset.none;
+  document.querySelectorAll(`#${id} input`).forEach(i => { i.checked = Boolean(button.dataset.all); });
+  render();
+}));
+render();
+renderSite("latest");
+</script>
+</body>
+</html>
