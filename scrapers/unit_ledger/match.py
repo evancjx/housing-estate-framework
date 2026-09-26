@@ -7,7 +7,7 @@ docs/superpowers/specs/2026-09-26-unit-ledger-design.md, "Matching rules".
 from __future__ import annotations
 
 from collections import Counter
-from datetime import date
+from datetime import date, timedelta
 from typing import NamedTuple
 
 import pandas as pd
@@ -46,6 +46,18 @@ def _set_unit(ledger, i, block, unit, label):
     ledger.at[i, "block"] = block
     ledger.at[i, "unit"] = unit
     ledger.at[i, "unit_source"] = label
+    if pd.isna(ledger.at[i, "floor"]):
+        ledger.at[i, "floor"] = int(unit[1:unit.index("-")])
+
+
+def _chart_date_gap(chart_sold_date: str, sale_date: str, sale_month: str) -> int:
+    """Days between the chart's sold date and the sale (its month window when the date is unknown)."""
+    sold = date.fromisoformat(chart_sold_date)
+    if sale_date:
+        return abs((sold - date.fromisoformat(sale_date)).days)
+    first = date.fromisoformat(f"{sale_month}-01")
+    last = date(first.year + first.month // 12, first.month % 12 + 1, 1) - timedelta(days=1)
+    return 0 if first <= sold <= last else min(abs((sold - first).days), abs((sold - last).days))
 
 
 def _na(n):
@@ -145,7 +157,12 @@ def learn_stack_blocks(ledger: pd.DataFrame, pn: pd.DataFrame) -> dict[str, set[
     return learned
 
 
-def attach_propertynoob(ledger, pn, stack_blocks):
+def _on_chart(chart_sizes, block, unit, sqft) -> bool:
+    """With a chart, a unit counts only if the chart has it at this block with this size."""
+    return chart_sizes is None or chart_sizes.get((block, unit)) == sqft
+
+
+def attach_propertynoob(ledger, pn, stack_blocks, chart_sizes=None):
     """Take the stack from PropertyNoob. Returns (ledger, unused PropertyNoob rows, stack map used)."""
     ledger = ledger.copy()
     if stack_blocks is None:
@@ -153,8 +170,9 @@ def attach_propertynoob(ledger, pn, stack_blocks):
     by_id = pn.set_index("pn_id")
     free = set(pn.pn_id)
 
-    def fits(block, candidates):
-        return [p for p in candidates if p in free and block in stack_blocks.get(by_id.at[p, "stack"], ())]
+    def fits(block, sqft, candidates):
+        return [p for p in candidates if p in free and block in stack_blocks.get(by_id.at[p, "stack"], ())
+                and _on_chart(chart_sizes, block, by_id.at[p, "unit"], sqft)]
 
     pn_groups = {key: list(group.pn_id) for key, group in pn.groupby(PN_KEY)}
     for key, group in ledger[_located(ledger)].groupby(PN_KEY):
@@ -164,7 +182,7 @@ def attach_propertynoob(ledger, pn, stack_blocks):
         while progress and rows:
             progress = False
             for i in list(rows):
-                options = fits(ledger.at[i, "block"], candidates)
+                options = fits(ledger.at[i, "block"], ledger.at[i, "area_sqft"], candidates)
                 if len(options) == 1:
                     _set_unit(ledger, i, ledger.at[i, "block"], by_id.at[options[0], "unit"], "Published")
                     free.discard(options[0])
@@ -172,7 +190,8 @@ def attach_propertynoob(ledger, pn, stack_blocks):
                     progress = True
             for block in sorted({ledger.at[i, "block"] for i in rows}):
                 same = [i for i in rows if ledger.at[i, "block"] == block]
-                options = sorted(fits(block, candidates), key=lambda p: by_id.at[p, "unit"])
+                options = sorted(fits(block, ledger.at[same[0], "area_sqft"], candidates),
+                                 key=lambda p: by_id.at[p, "unit"])
                 if len(same) > 1 and len(options) == len(same):
                     for i, p in zip(same, options):
                         _set_unit(ledger, i, block, by_id.at[p, "unit"], "Published (identical sales, matched as a set)")
@@ -189,6 +208,7 @@ def attach_propertynoob(ledger, pn, stack_blocks):
             if p.price == r.price and p.area_sqft == r.area_sqft and p.floor == r.floor
             and 0 < _days(p.sale_date, r.sale_date) <= TOLERANCE_DAYS
             and r.block in stack_blocks.get(p.stack, ())
+            and _on_chart(chart_sizes, r.block, p.unit, r.area_sqft)
         ]
         proposals.append((i, options))
     claimed = Counter(p for _, options in proposals for p in options)
@@ -203,49 +223,98 @@ def attach_propertynoob(ledger, pn, stack_blocks):
     return ledger, pn[pn.pn_id.isin(free)].reset_index(drop=True), stack_blocks
 
 
-def attach_propertynoob_without_edgeprop(ledger, unused_pn, stack_blocks):
+MIN_STACK_EVIDENCE = 3
+
+
+def block_placements(ledger, chart) -> dict[str, tuple[str, int | None]]:
+    """Stack -> (block, evidence count) where a PropertyNoob unit's block may be placed.
+
+    With a chart the chart is authoritative (count None). Without one, a stack is placed only when
+    at least MIN_STACK_EVIDENCE EdgeProp-located sales put it in exactly one block: a stack seen once
+    may simply not have been seen in its other blocks yet.
+    """
+    if chart is not None:
+        return {s: (next(iter(b)), None) for s, b in layout.stack_blocks(chart).items() if len(b) == 1}
+    seen = ledger[ledger.date_source.str.startswith("EdgeProp") & (ledger.unit != "") & (ledger.block != "")]
+    counts: dict[str, Counter] = {}
+    for block, unit in zip(seen.block, seen.unit):
+        counts.setdefault(unit.split("-", 1)[1], Counter())[block] += 1
+    return {s: next(iter(c.items())) for s, c in counts.items()
+            if len(c) == 1 and next(iter(c.values())) >= MIN_STACK_EVIDENCE}
+
+
+def _placed_label(base: str, evidence: int | None) -> str:
+    if evidence is None:
+        return base
+    return f"Inferred (PropertyNoob unit; block from {evidence} other sales in this stack)"
+
+
+def attach_propertynoob_without_edgeprop(ledger, unused_pn, placements, chart_sizes=None):
     """Date and place URA rows EdgeProp missed, straight from PropertyNoob.
 
     EdgeProp pagination drops rows on busy launch days. A URA row with no EdgeProp record takes
-    PropertyNoob's unit and date when month, price, sqft and floor band agree, the stack belongs to
-    exactly one block, and the group of identical URA rows has exactly as many candidates.
+    PropertyNoob's unit and date when month, sale type, price, sqft and floor band agree, the unit's
+    block is established (see block_placements), and the group of identical URA rows has exactly as
+    many candidates.
     """
     ledger = ledger.copy()
-    placeable = unused_pn[unused_pn["stack"].map(lambda s: len(stack_blocks.get(s, ())) == 1).astype(bool)]
-    by_key = {key: group for key, group in placeable.assign(
-        month=placeable.sale_date.str[:7], band=placeable.floor.map(floor_band)
-    ).groupby(["month", "price", "area_sqft", "band"])}
+    keyed = unused_pn.assign(month=unused_pn.sale_date.str[:7], band=unused_pn.floor.map(floor_band))
+    placeable = keyed[[
+        s in placements and _on_chart(chart_sizes, placements[s][0], u, a)
+        for s, u, a in zip(keyed["stack"], keyed.unit, keyed.area_sqft)
+    ]] if len(keyed) else keyed
+    key = ["month", "type_of_sale", "price", "area_sqft", "band"]
+    by_key = {k: g for k, g in placeable.groupby(key)}
+    all_by_key = {k: g for k, g in keyed.groupby(key)}
     open_rows = ledger[(ledger.unit == "") & (ledger.sale_date == "") & ledger.area_sqft.notna()]
     used = set()
-    for key, group in open_rows.groupby(["sale_month", "price", "area_sqft", "floor_level"]):
-        candidates = by_key.get(key)
-        if candidates is None or len(candidates) != len(group):
+    for k, group in open_rows.groupby(["sale_month", "type_of_sale", "price", "area_sqft", "floor_level"]):
+        candidates = by_key.get(k)
+        if candidates is None or len(candidates) != len(group) or len(candidates) != len(all_by_key[k]):
+            listed = all_by_key.get(k)
+            if listed is not None and len(listed) == len(group):
+                for i in group.index:
+                    ledger.at[i, "conflict"] = _note(
+                        ledger.at[i, "conflict"],
+                        f"PropertyNoob lists {', '.join(sorted(listed.unit))} (block not established)")
             continue
-        label = "Published (PropertyNoob; no EdgeProp record"
-        label += ", identical sales matched as a set)" if len(group) > 1 else ")"
         for i, p in zip(group.index, candidates.sort_values("unit").itertuples()):
+            block, evidence = placements[p.stack]
+            label = _placed_label("Published (PropertyNoob; no EdgeProp record)", evidence)
+            if len(group) > 1:
+                label = label[:-1] + ("; " if evidence is not None else ", ") + "identical sales matched as a set)"
             ledger.at[i, "sale_date"] = p.sale_date
             ledger.at[i, "floor"] = p.floor
             ledger.at[i, "date_source"] = "PropertyNoob (no EdgeProp record)"
-            _set_unit(ledger, i, next(iter(stack_blocks[p.stack])), p.unit, label)
+            _set_unit(ledger, i, block, p.unit, label)
             used.add(p.pn_id)
     return ledger, unused_pn[~unused_pn.pn_id.isin(used)].reset_index(drop=True)
 
 
-def propertynoob_pre_window_rows(unused_pn, earliest_month, stack_blocks) -> pd.DataFrame:
+def _already_listed(ledger, p) -> bool:
+    """An older PropertyNoob sale that EdgeProp already supplied (sizes can differ by a sqft or two)."""
+    same = ledger[(ledger.price == p.price) & (ledger.floor == p.floor) & (ledger.sale_date != "")]
+    return any(_days(d, p.sale_date) <= TOLERANCE_DAYS and abs(int(a) - p.area_sqft) <= 2
+               for d, a in zip(same.sale_date, same.area_sqft) if pd.notna(a))
+
+
+def propertynoob_pre_window_rows(unused_pn, earliest_month, placements, chart_sizes=None, ledger=None) -> pd.DataFrame:
     """PropertyNoob-only sales older than the URA pull, flagged as not verified."""
     rows = []
     for p in unused_pn[unused_pn.sale_date.str[:7] < earliest_month].itertuples():
-        blocks = stack_blocks.get(p.stack, set())
-        block = next(iter(blocks)) if len(blocks) == 1 else ""
+        if ledger is not None and _already_listed(ledger, p):
+            continue
+        block, evidence = placements.get(p.stack, ("", None))
+        if block and not _on_chart(chart_sizes, block, p.unit, p.area_sqft):
+            block = ""
         rows.append({
             "txn_id": p.pn_id, "origin": "Pre-window", "sale_date": p.sale_date, "sale_month": p.sale_date[:7],
             "block": block, "unit": p.unit if block else "", "floor": p.floor, "floor_level": floor_band(p.floor),
             "area_sqm": round(p.area_sqft / SQFT_PER_SQM, 2), "area_sqft": p.area_sqft, "bedrooms": pd.NA,
             "unit_type": "", "price": p.price, "psf": pd.NA, "type_of_sale": p.type_of_sale, "tenure": "",
-            "unit_source": "Published (PropertyNoob only)" if block else "",
+            "unit_source": _placed_label("Published (PropertyNoob only)", evidence) if block else "",
             "date_source": "PropertyNoob (not verified against URA API)",
-            "conflict": "" if block else f"PropertyNoob unit {p.unit}; its stack is not tied to one block",
+            "conflict": "" if block else f"PropertyNoob unit {p.unit}; block not established",
         })
     frame = pd.DataFrame(rows, columns=LEDGER_COLUMNS)
     return frame.astype({"floor": "Int64", "area_sqft": "Int64", "bedrooms": "Int64", "psf": "Int64"})
@@ -285,14 +354,16 @@ def _strong_rule(r, units, recent, taken, has_chart):
     return None, ""
 
 
-def _elimination(r, units, taken):
+def _elimination_pool(r, units, taken):
+    """Chart-sold units this New Sale could be: same size and floor, no New Sale yet, chart date agrees."""
     pool = units[(units.chart_status == "sold") & (units.area_sqft == r.area_sqft)]
     if r.block != "" and pd.notna(r.floor):
         pool = pool[(pool.block == r.block) & (pool.floor == r.floor)]
     else:
         pool = pool[pool.floor.map(floor_band) == r.floor_level]
-    free = [(u.block, u.unit) for u in pool.itertuples() if (u.block, u.unit) not in taken]
-    return free[0] if len(free) == 1 else None
+    return [(u.block, u.unit) for u in pool.itertuples()
+            if (u.block, u.unit) not in taken
+            and _chart_date_gap(u.chart_sold_date, r.sale_date, r.sale_month) <= CHART_DATE_DAYS]
 
 
 def _unresolved_label(r, units):
@@ -329,10 +400,12 @@ def resolve_leftovers(ledger, units, recent, has_chart):
         if progress:
             continue
         if has_chart:
-            for i in ledger.index[(ledger.unit == "") & (ledger.type_of_sale == "New Sale")]:
-                spot = _elimination(ledger.loc[i], units, taken)
-                if spot:
-                    _set_unit(ledger, i, spot[0], spot[1], ELIMINATION)
+            open_new = ledger.index[(ledger.unit == "") & (ledger.type_of_sale == "New Sale")]
+            pools = {i: _elimination_pool(ledger.loc[i], units, taken) for i in open_new}
+            for i, pool in pools.items():
+                # Only when exactly one unresolved sale competes for that last unit.
+                if len(pool) == 1 and not any(pool[0] in other for j, other in pools.items() if j != i):
+                    _set_unit(ledger, i, pool[0][0], pool[0][1], ELIMINATION)
                     progress = True
                     break  # re-run the stronger rules before eliminating again
         if not progress:
@@ -353,9 +426,20 @@ def finalise(ledger, units, has_chart) -> pd.DataFrame:
         for i in ledger.index:
             key = (ledger.at[i, "block"], ledger.at[i, "unit"])
             if key in info.index:
-                ledger.at[i, "area_sqft"] = info.at[key, "area_sqft"]
+                chart_sqft = info.at[key, "area_sqft"]
+                if pd.isna(ledger.at[i, "area_sqft"]):
+                    ledger.at[i, "area_sqft"] = chart_sqft
+                elif int(ledger.at[i, "area_sqft"]) != chart_sqft:  # URA/EdgeProp size wins; show the gap
+                    ledger.at[i, "conflict"] = _note(ledger.at[i, "conflict"],
+                                                     f"unit chart gives {chart_sqft} sqft for this unit")
                 ledger.at[i, "bedrooms"] = info.at[key, "bedrooms"]
                 ledger.at[i, "unit_type"] = info.at[key, "unit_type"]
+                sold = info.at[key, "chart_sold_date"]
+                if ledger.at[i, "type_of_sale"] == "New Sale" and sold:
+                    gap = _chart_date_gap(sold, ledger.at[i, "sale_date"], ledger.at[i, "sale_month"])
+                    if gap > CHART_DATE_DAYS:
+                        ledger.at[i, "conflict"] = _note(ledger.at[i, "conflict"],
+                                                         f"unit chart says it sold {sold} ({gap} days from this sale)")
             elif pd.isna(ledger.at[i, "bedrooms"]):
                 beds = by_size.get(ledger.at[i, "area_sqft"])
                 if beds is not None and len(beds) == 1:
@@ -373,9 +457,12 @@ def match_all(ura, ep, pn, chart, recent) -> MatchResult:
     if not pre.empty:
         ledger = pd.concat([ledger, pre], ignore_index=True)
     ledger = fill_sizes(ledger, chart)
-    ledger, unused_pn, stack_map = attach_propertynoob(ledger, pn, layout.stack_blocks(chart) if has_chart else None)
-    ledger, unused_pn = attach_propertynoob_without_edgeprop(ledger, unused_pn, stack_map)
-    pn_pre = propertynoob_pre_window_rows(unused_pn, earliest, stack_map)
+    chart_sizes = dict(zip(zip(chart.block, chart.unit), chart.area_sqft)) if has_chart else None
+    ledger, unused_pn, _ = attach_propertynoob(ledger, pn, layout.stack_blocks(chart) if has_chart else None,
+                                               chart_sizes)
+    placements = block_placements(ledger, chart)
+    ledger, unused_pn = attach_propertynoob_without_edgeprop(ledger, unused_pn, placements, chart_sizes)
+    pn_pre = propertynoob_pre_window_rows(unused_pn, earliest, placements, chart_sizes, ledger)
     if not pn_pre.empty:
         ledger = pd.concat([ledger, pn_pre], ignore_index=True)
     units = chart if has_chart else layout.derived_units(ledger)

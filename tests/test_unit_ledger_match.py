@@ -141,7 +141,7 @@ def test_recent_sales_list_picks_the_unit_when_the_chart_is_silent():
 
 
 def test_elimination_applies_to_new_sales_only():
-    grid = chart(("51", "#10-04", 667, "sold", "2025-08-30"), ("51", "#10-05", 797, "sold", "2025-08-01"))
+    grid = chart(("51", "#10-04", 667, "sold", "2025-10-01"), ("51", "#10-05", 797, "sold", "2025-08-01"))
     new = match.match_all(ura(("1025", 1359400, 62, "06-10", "1")), ep(), pn(), grid, NO_RECENT)
     assert (new.ledger.iloc[0].block, new.ledger.iloc[0].unit) == ("51", "#10-04")
     assert new.ledger.iloc[0].unit_source.startswith("By elimination")
@@ -195,3 +195,87 @@ def test_propertynoob_fallback_refuses_when_candidates_outnumber_sales():
     row = r.ledger.iloc[0]
     assert (row.unit, row.sale_date) == ("", "")
     assert row.unit_source == "Ambiguous: 811 #05-01 / 813 #05-02"
+
+
+# --- Final-review fixes ------------------------------------------------------------------
+
+def test_propertynoob_unit_must_exist_on_the_chart_with_the_same_size():
+    grid = chart(("51", "#07-05", 1076, "sold", "2025-08-15"), ("51", "#07-06", 1200, "sold", "2025-08-15"))
+    r = match.match_all(ura(("0825", 1500000, 111, "06-10", "1")),
+                        ep(("15 Aug 2025", "51", 7, 1500000, 111.48, 1200, "New Sale")),
+                        pn(("2025-08-15", 1500000, "#07-05", 1200, "New Sale")), grid, NO_RECENT)
+    row = r.ledger.iloc[0]
+    assert (row.unit, row.area_sqft, row.unit_source) == ("#07-06", 1200, "Determined by block, floor and size")
+    assert r.unmatched_propertynoob == 1
+
+
+def test_propertynoob_unit_missing_from_the_chart_is_not_published():
+    grid = chart(("51", "#07-05", 1200, "sold", "2025-08-15"), ("51", "#08-05", 1200, "sold", "2025-08-15"))
+    r = match.match_all(ura(("0825", 1500000, 111, "06-10", "1")),
+                        ep(("15 Aug 2025", "51", 9, 1500000, 111.48, 1200, "New Sale")),
+                        pn(("2025-08-15", 1500000, "#09-05", 1200, "New Sale")), grid, NO_RECENT)
+    row = r.ledger.iloc[0]
+    assert (row.unit, row.unit_source) == ("", "Not found")
+
+
+def test_chart_sold_date_far_from_the_sale_is_flagged():
+    grid = chart(("55", "#04-23", 990, "sold", "2026-04-01"))
+    r = match.match_all(ura(("0926", 2050906, 92, "01-05", "1")),
+                        ep(("17 Sep 2026", "55", 4, 2050906, 91.97, 990, "New Sale")), pn(), grid, NO_RECENT)
+    row = r.ledger.iloc[0]
+    assert row.unit == "#04-23"
+    assert "unit chart says it sold 2026-04-01" in row.conflict
+
+
+def test_elimination_refuses_a_unit_the_chart_dates_to_another_month():
+    grid = chart(("51", "#10-04", 667, "sold", "2025-04-01"), ("51", "#10-05", 797, "sold", "2025-08-01"))
+    r = match.match_all(ura(("1025", 1359400, 62, "06-10", "1")), ep(), pn(), grid, NO_RECENT)
+    assert r.ledger.iloc[0].unit == ""
+
+
+def test_elimination_refuses_when_two_sales_compete_for_one_unit():
+    grid = chart(("51", "#10-04", 667, "sold", "2025-10-01"), ("51", "#09-04", 667, "available", ""))
+    r = match.match_all(ura(("1025", 1359400, 62, "06-10", "1"), ("1025", 1360000, 62, "06-10", "1")),
+                        ep(), pn(), grid, NO_RECENT)
+    assert set(r.ledger.unit) == {""}
+
+
+def test_without_a_chart_one_sighting_does_not_fix_a_stacks_block():
+    r = match.match_all(ura(("0825", 1000000, 92, "01-05", "1"), ("0825", 1100000, 92, "01-05", "1")),
+                        ep(("2 Aug 2025", "1", 3, 1000000, 91.97, 990, "New Sale")),
+                        pn(("2025-08-02", 1000000, "#03-05", 990, "New Sale"),
+                           ("2025-08-09", 1100000, "#04-05", 990, "New Sale")), None, NO_RECENT)
+    missed = r.ledger[r.ledger.price == 1100000].iloc[0]
+    assert (missed.block, missed.unit) == ("", "")
+    assert "PropertyNoob lists #04-05" in missed.conflict
+
+
+def test_without_a_chart_repeated_sightings_place_the_block_with_an_inferred_label():
+    r = match.match_all(
+        ura(("0825", 1000000, 92, "01-05", "1"), ("0825", 1010000, 92, "01-05", "1"),
+            ("0825", 1020000, 92, "01-05", "1"), ("0825", 1100000, 92, "01-05", "1")),
+        ep(("2 Aug 2025", "1", 1, 1000000, 91.97, 990, "New Sale"), ("2 Aug 2025", "1", 2, 1010000, 91.97, 990, "New Sale"),
+           ("2 Aug 2025", "1", 3, 1020000, 91.97, 990, "New Sale")),
+        pn(("2025-08-02", 1000000, "#01-05", 990, "New Sale"), ("2025-08-02", 1010000, "#02-05", 990, "New Sale"),
+           ("2025-08-02", 1020000, "#03-05", 990, "New Sale"), ("2025-08-09", 1100000, "#04-05", 990, "New Sale")),
+        None, NO_RECENT)
+    missed = r.ledger[r.ledger.price == 1100000].iloc[0]
+    assert (missed.block, missed.unit, missed.sale_date) == ("1", "#04-05", "2025-08-09")
+    assert missed.unit_source == "Inferred (PropertyNoob unit; block from 3 other sales in this stack)"
+
+
+def test_an_older_sale_in_both_edgeprop_and_propertynoob_is_counted_once():
+    r = match.match_all(ura(("1021", 1500000, 92, "01-05", "3")),
+                        ep(("15 Oct 2021", "51", 3, 1500000, 91.97, 990, "Resale"),
+                           ("2 Aug 2016", "51", 3, 1100000, 91.97, 990, "New Sale")),
+                        pn(("2021-10-15", 1500000, "#03-07", 990, "Resale"),
+                           ("2016-08-02", 1100000, "#03-07", 991, "New Sale")), None, NO_RECENT)
+    assert len(r.ledger) == 2
+
+
+def test_propertynoob_fallback_keeps_sale_types_apart():
+    grid = chart(("811", "#05-01", 990, "sold", "2025-08-20"), ("813", "#05-02", 990, "sold", "2025-08-15"))
+    r = match.match_all(ura(("0825", 2000000, 92, "01-05", "1"), ("0825", 2000000, 92, "01-05", "2")), ep(),
+                        pn(("2025-08-15", 2000000, "#05-02", 990, "New Sale"),
+                           ("2025-08-20", 2000000, "#05-01", 990, "Sub Sale")), grid, NO_RECENT)
+    assert set(zip(r.ledger.type_of_sale, r.ledger.unit)) == {("New Sale", "#05-02"), ("Sub Sale", "#05-01")}
