@@ -57,13 +57,11 @@ def directory_entries(analyses: list[PropertyAnalysis], project_catalog: dict) -
 
 def _row(entry: dict) -> str:
     district = entry["district"]
-    search = " ".join(filter(None, (
-        entry["name"],
-        f"d{district} {district} {DISTRICT_NAMES[district]}" if district else "",
-        entry["stage_label"],
-    ))).lower()
+    # Name and district name only: stages have chips, and codes match whole (data-district).
+    search = " ".join(filter(None, (entry["name"], DISTRICT_NAMES.get(district, "")))).lower()
     return (
-        f'<li data-stage="{escape(entry["stage"], quote=True)}" data-search="{escape(search, quote=True)}">'
+        f'<li data-stage="{escape(entry["stage"], quote=True)}" data-district="{escape(district, quote=True)}" '
+        f'data-search="{escape(search, quote=True)}">'
         f'<a href="{escape(entry["path"], quote=True)}">{escape(entry["name"])}</a>'
         f'<span class="stage">{escape(entry["stage_label"])}</span>'
         f'<time datetime="{escape(entry["captured_iso"], quote=True)}">{escape(entry["date_label"])}</time>'
@@ -112,7 +110,11 @@ h1 { font-size:24px; margin:0 0 4px; }
 #directory-status { color:var(--muted); font-size:13px; margin:0 0 12px; }
 details.district { border:1px solid var(--line); border-radius:10px; margin:0 0 8px; }
 details.district summary { display:flex; justify-content:space-between; gap:12px; padding:10px 14px;
-  cursor:pointer; font-weight:600; }
+  cursor:pointer; font-weight:600; list-style:none; }
+details.district summary::-webkit-details-marker { display:none; }
+details.district summary::before { content:"▸"; color:var(--muted); }
+details.district[open] > summary::before { content:"▾"; }
+details.district summary .title { flex:1; }
 details.district .count { color:var(--muted); font-weight:400; }
 details.district ul { list-style:none; margin:0; padding:0 14px 10px; }
 details.district li { display:grid; grid-template-columns:1fr auto auto; gap:4px 14px; padding:7px 0;
@@ -145,11 +147,14 @@ __SECTIONS__
   let stage = "";
   function apply() {
     const query = input.value.trim().toLowerCase();
+    const code = /^d?\s*(\d{1,2})$/.exec(query);
+    const want = code ? code[1].padStart(2, "0") : "";
     let shown = 0, last = null;
     sections.forEach(section => {
       let visible = 0;
       section.querySelectorAll("li").forEach(row => {
-        const ok = (!query || row.dataset.search.includes(query)) && (!stage || row.dataset.stage === stage);
+        const matches = code ? row.dataset.district === want : row.dataset.search.includes(query);
+        const ok = (!query || matches) && (!stage || row.dataset.stage === stage);
         row.hidden = !ok;
         if (ok) { visible += 1; last = row; }
       });

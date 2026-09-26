@@ -147,3 +147,31 @@ def test_python_district_names_match_index_html():
     block = re.search(r"const DISTRICT_NAMES = \{(.*?)\};", source, re.S).group(1)
     js = dict(re.findall(r'"(\d{2})":"([^"]*)"', block))
     assert js == DISTRICT_NAMES
+
+
+# --- Final-review fixes ------------------------------------------------------------------
+
+def _entry(name, district, stage="resale"):
+    return {"name": name, "path": f"property-analysis-2026-09-20-{name.lower().replace(' ', '-')}.html",
+            "stage": stage, "stage_label": stage_label(stage), "date_label": "20 Sep 2026",
+            "captured_iso": "2026-09-20T12:00:00+08:00", "district": district}
+
+
+def test_search_text_is_name_and_district_name_only():
+    page = render_directory_page([_entry("Parc Vista", "27", stage="new launch")])
+    search = re.search(r'data-search="([^"]*)"', page).group(1)
+    assert search == "parc vista sembawang · yishun"
+
+
+def test_district_codes_match_whole_codes_not_substrings():
+    page = render_directory_page([_entry("Alpha", "01"), _entry("Beta", "15")])
+    assert 'data-district="01"' in page and 'data-district="15"' in page
+    assert "row.dataset.district === want" in page
+    assert 'code[1].padStart(2, "0")' in page
+
+
+def test_district_sections_show_a_disclosure_marker():
+    page = render_directory_page([_entry("Alpha", "01")])
+    assert "details.district summary::before" in page
+    assert "details.district[open] > summary::before" in page
+    assert "list-style:none" in page
