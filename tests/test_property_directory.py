@@ -175,3 +175,30 @@ def test_district_sections_show_a_disclosure_marker():
     assert "details.district summary::before" in page
     assert "details.district[open] > summary::before" in page
     assert "list-style:none" in page
+
+
+def test_directory_uses_the_shared_property_analysis_theme():
+    page = render_directory_page([_entry("Alpha", "01")])
+    assert '<link rel="stylesheet" href="assets/property-analysis.css">' in page
+    assert '<body class="property-analysis-page">' in page
+    assert '<header class="pa-hero">' in page and 'class="pa-kicker" href="index.html#reports"' in page
+    assert "var(--pa-teal" in page
+    assert "prefers-color-scheme" not in page  # the site theme has no separate dark palette
+    assert "--bg:" not in page
+
+
+def test_analysis_pages_link_back_to_the_directory(tmp_path):
+    source = tmp_path / "2026-09-20-alpha.md"
+    source.write_text(
+        "# Alpha — property analysis\n\n"
+        "Research captured: **2026-09-20 12:00:00 SGT (UTC+08:00)**  \n"
+        "Property: **Alpha, Singapore**  \n"
+        "Analysis type: **individual project evidence**  \n"
+        "Status: **point-in-time market snapshot**  \n"
+        "Market stage: **resale**\n\n"
+        "## Decision\n\nNo executable offer has been verified.\n",
+        encoding="utf-8",
+    )
+    from sg_estate.reporting.property_analysis import render_property_analysis_page
+    page = render_property_analysis_page(parse_property_analysis(source))
+    assert f'class="pa-kicker" href="{DIRECTORY_PATH}"' in page

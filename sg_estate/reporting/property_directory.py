@@ -82,60 +82,64 @@ def _latest(entries: list[dict]) -> dict | None:
     return max(entries, key=lambda e: e["captured_iso"]) if entries else None
 
 
-PAGE = """<!doctype html>
+PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every dated property analysis, searchable by project name and grouped by postal district.">
 <title>Property analyses by district</title>
+<link rel="stylesheet" href="assets/research-shell.css">
+<link rel="stylesheet" href="assets/property-analysis.css">
 <style>
-:root { --bg:#fff; --fg:#1b1f24; --muted:#5b6470; --line:#d9dee4; --soft:#f3f5f7; --accent:#1f5fbf; }
-@media (prefers-color-scheme: dark) {
-  :root { --bg:#15181c; --fg:#e6e9ed; --muted:#9aa4b0; --line:#2c3239; --soft:#1d2126; --accent:#7fb0ff; }
-}
-* { box-sizing:border-box; }
-body { margin:0; padding:24px 16px 48px; background:var(--bg); color:var(--fg);
-  font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-main { max-width:860px; margin:0 auto; }
-h1 { font-size:24px; margin:0 0 4px; }
-.lead { color:var(--muted); margin:0 0 18px; }
-.lead a { color:var(--accent); }
-.controls { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 8px; }
-#directory-search { flex:1 1 260px; font:inherit; padding:9px 12px; border:1px solid var(--line);
-  border-radius:8px; background:var(--bg); color:var(--fg); }
-.chip { font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--line); border-radius:999px;
-  background:var(--soft); color:var(--fg); cursor:pointer; }
-.chip[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
-.chip span { color:var(--muted); }
-#directory-status { color:var(--muted); font-size:13px; margin:0 0 12px; }
-details.district { border:1px solid var(--line); border-radius:10px; margin:0 0 8px; }
-details.district summary { display:flex; justify-content:space-between; gap:12px; padding:10px 14px;
-  cursor:pointer; font-weight:600; list-style:none; }
+.pd-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:28px 0 10px; }
+#directory-search { flex:1 1 280px; padding:12px 15px; border:1px solid var(--pa-line); border-radius:12px;
+  background:#fff; color:var(--pa-ink); font:inherit; font-size:14px; }
+#directory-search:focus { outline:3px solid var(--pa-teal-soft); border-color:var(--pa-teal); }
+.chip { padding:7px 11px; border:1px solid var(--pa-line); border-radius:999px; background:#fff;
+  color:var(--pa-muted); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+.chip:hover { color:var(--pa-teal-dark); }
+.chip[aria-pressed="true"] { border-color:var(--pa-teal); background:var(--pa-teal-soft); color:var(--pa-teal-dark); }
+.chip span { color:var(--pa-muted); font-weight:700; }
+#directory-status { margin:0; color:var(--pa-muted); font-size:12px; }
+.pd-sections { margin-top:24px; }
+details.district { margin:0 0 10px; border:1px solid var(--pa-line); border-radius:16px; background:#fff;
+  box-shadow:0 10px 30px rgba(23,50,40,.05); }
+details.district summary { display:flex; gap:12px; align-items:center; padding:15px 18px; cursor:pointer;
+  font-weight:800; list-style:none; }
 details.district summary::-webkit-details-marker { display:none; }
-details.district summary::before { content:"▸"; color:var(--muted); }
+details.district summary::before { content:"▸"; color:var(--pa-teal); }
 details.district[open] > summary::before { content:"▾"; }
 details.district summary .title { flex:1; }
-details.district .count { color:var(--muted); font-weight:400; }
-details.district ul { list-style:none; margin:0; padding:0 14px 10px; }
-details.district li { display:grid; grid-template-columns:1fr auto auto; gap:4px 14px; padding:7px 0;
-  border-top:1px solid var(--line); font-size:14px; }
-details.district li a { color:var(--accent); }
-details.district .stage, details.district time { color:var(--muted); font-size:13px; }
-@media (max-width:520px) { details.district li { grid-template-columns:1fr auto; }
+details.district .count { padding:3px 9px; border-radius:999px; background:var(--pa-teal-soft);
+  color:var(--pa-teal-dark); font-size:11px; }
+details.district ul { list-style:none; margin:0; padding:0 18px 12px; }
+details.district li { display:grid; grid-template-columns:1fr auto auto; gap:4px 16px; align-items:baseline;
+  padding:9px 0; border-top:1px solid var(--pa-line); font-size:14px; }
+details.district li a { color:var(--pa-teal-dark); font-weight:700; text-decoration:none; }
+details.district li a:hover { text-decoration:underline; }
+details.district .stage, details.district time { color:var(--pa-muted); font-size:11px; font-weight:700; }
+@media (max-width:560px) { details.district li { grid-template-columns:1fr auto; }
   details.district li a { grid-column:1 / -1; } }
-.empty-state { color:var(--muted); }
+.empty-state { color:var(--pa-muted); }
 </style>
 </head>
-<body>
-<main>
+<body class="property-analysis-page">
+<main id="research-content">
+<header class="pa-hero">
+<a class="pa-kicker" href="index.html#reports">Research library</a>
+<div class="pa-badges"><span>Point-in-time research</span><span>Grouped by postal district</span></div>
 <h1>__HEADING__</h1>
-<p class="lead">__LEAD__ <a href="index.html">Back to the research library</a>.</p>
-<div class="controls">
+<p class="pa-summary">__LEAD__</p>
+<div class="pd-controls">
 <input id="directory-search" type="search" placeholder="Project name or district, e.g. poiz, d27, sembawang" aria-label="Filter property analyses">
 __CHIPS__
 </div>
 <p id="directory-status" aria-live="polite"></p>
+</header>
+<section class="pd-sections" aria-label="Property analyses by postal district">
 __SECTIONS__
+</section>
 </main>
 <script>
 (() => {
