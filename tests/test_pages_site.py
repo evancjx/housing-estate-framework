@@ -447,3 +447,22 @@ def test_directory_path_collision_with_catalog_is_rejected():
     with pytest.raises(ValueError, match="property-analyses.html"):
         build_pages_site._prepare_property_publication(
             catalog, property_analysis_dir=ROOT / "property_analysis")
+
+
+def test_library_has_no_property_analysis_chip():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'data-filter="analysis"' not in source
+
+
+def test_finder_offers_the_dated_analysis_and_district_directory():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Analysis · ${escapeMarkup(project.analysis.date)}" in source
+    assert "Open the ${escapeMarkup(analysis.date)} analysis" in source
+    assert 'property-analyses.html#d${district}' in source
+
+
+def test_finder_tolerates_projects_without_analysis():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "project.analysis ?" in source
+    assert "project && project.analysis && project.analysis.path === " in source
+    assert "p.analysis && " in source
