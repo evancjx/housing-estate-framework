@@ -42,16 +42,8 @@ def test_pages_landing_page_links_only_to_existing_html_reports():
     assert "condo_loan_timeline_planner.html" in report_links
     assert "project_exit_comparison.html" in report_links
     assert "tampines_condo_school_mrt_area_guide_2026-08-08.html" in report_links
-    for number, slug in (
-        (1, "micro_location"),
-        (2, "newness"),
-        (3, "integration"),
-        (4, "unit_matching"),
-        (5, "sale_state"),
-        (6, "planning_context"),
-    ):
-        assert f"canberra_strategy_{number}_{slug}.html" in report_links
-    assert len(report_links) == 26
+    assert "canberra_strategy_1_micro_location.html" in report_links
+    assert len(report_links) == 21
     assert all((ROOT / href).is_file() for href in report_links)
 
 
@@ -472,7 +464,7 @@ def test_tampines_area_guide_is_an_ordinary_library_card():
     source = (ROOT / "index.html").read_text(encoding="utf-8")
     tag = next(line for line in source.splitlines()
                if 'href="tampines_condo_school_mrt_area_guide_2026-08-08.html"' in line)
-    assert 'class="card"' in tag and "featured" not in tag
+    assert 'class="card case-study"' in tag and "featured" not in tag
     last_featured = source.rindex('class="card featured"')
     assert source.index('href="tampines_condo_school_mrt_area_guide_2026-08-08.html"') > last_featured
     catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
@@ -484,8 +476,122 @@ def test_katong_comparison_is_an_ordinary_library_card():
     source = (ROOT / "index.html").read_text(encoding="utf-8")
     tag = next(line for line in source.splitlines()
                if '<a class="card' in line and 'href="katong_condo_comparison.html"' in line)
-    assert 'class="card"' in tag and "featured" not in tag
+    assert 'class="card case-study"' in tag and "featured" not in tag
     assert source.index(tag) > source.rindex('class="card featured"')
     catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
     entry = next(r for r in catalog["reports"] if r["path"] == "katong_condo_comparison.html")
     assert not entry.get("featured")
+
+
+LIBRARY_TIERS = {
+    "tools": {
+        "home_loan_planner.html",
+        "condo_loan_timeline_planner.html",
+        "project_exit_comparison.html",
+    },
+    "explorers": {
+        "private_project_comparison_table.html",
+        "comparison_table.html",
+        "multi_condo_framework_comparison.html",
+        "condo_framework_comparison.html",
+        "buyer_profile_table.html",
+        "mrt_comparison_table.html",
+        "landed_growth_dashboard.html",
+    },
+    "case-studies": {
+        "tampines_condo_school_mrt_area_guide_2026-08-08.html",
+        "katong_condo_comparison.html",
+        "poiz_east_resale_comparison.html",
+        "poiz_east_unit_growth_transactions.html",
+        "canberra_crescent_d27_deep_analysis.html",
+        "private_project_comparison_D17.html",
+        "private_project_comparison_D18.html",
+        "private_project_comparison_D27.html",
+        "district_pair_comparison_D18_D26.html",
+    },
+    "method": {
+        "framework_diagram.html",
+        "canberra_strategy_1_micro_location.html",
+    },
+}
+SNAPSHOT_MONTHS = {
+    "tampines_condo_school_mrt_area_guide_2026-08-08.html": "Aug 2026",
+    "katong_condo_comparison.html": "Aug 2026",
+    "poiz_east_resale_comparison.html": "Aug 2026",
+    "poiz_east_unit_growth_transactions.html": "Jul 2026",
+    "canberra_crescent_d27_deep_analysis.html": "Sep 2026",
+    "private_project_comparison_D17.html": "Jul 2026",
+    "private_project_comparison_D18.html": "Jul 2026",
+    "private_project_comparison_D27.html": "Sep 2026",
+    "district_pair_comparison_D18_D26.html": "Aug 2026",
+}
+
+
+def _library_tiers(source: str) -> dict[str, str]:
+    import re
+
+    return {
+        match.group(1): match.group(2)
+        for match in re.finditer(
+            r'<section class="library-tier" data-tier="([a-z-]+)"[^>]*>(.*?)</section>',
+            source,
+            re.DOTALL,
+        )
+    }
+
+
+def test_library_cards_sit_in_their_tiers_in_order():
+    import re
+
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    tiers = _library_tiers(source)
+
+    assert list(tiers) == ["tools", "explorers", "case-studies", "method"]
+    for tier, expected in LIBRARY_TIERS.items():
+        hrefs = set(re.findall(r'<a class="card[^"]*"[^>]*href="([^"]+)"', tiers[tier]))
+        assert hrefs == expected, tier
+    assert build_pages_site.PROPERTY_CARDS_MARKER in tiers["explorers"]
+    assert source.count(build_pages_site.PROPERTY_CARDS_MARKER) == 1
+
+
+def test_case_study_cards_show_a_dated_snapshot_badge():
+    import re
+
+    tier = _library_tiers((ROOT / "index.html").read_text(encoding="utf-8"))["case-studies"]
+    cards = re.findall(r'(<a class="card[^"]*"[^>]*href="([^"]+)".*?</a>)', tier, re.DOTALL)
+
+    assert {href for _, href in cards} == set(SNAPSHOT_MONTHS)
+    for card, href in cards:
+        assert "case-study" in card.split('"')[1], href
+        assert f'<span class="snapshot">Snapshot · {SNAPSHOT_MONTHS[href]}</span>' in card, href
+
+
+def test_only_tools_and_explorers_are_featured():
+    tiers = _library_tiers((ROOT / "index.html").read_text(encoding="utf-8"))
+
+    assert "featured" in tiers["tools"] and "featured" in tiers["explorers"]
+    assert "featured" not in tiers["case-studies"]
+    assert "featured" not in tiers["method"]
+
+
+def test_canberra_lessons_share_one_card_and_stay_reachable():
+    parser = _LinkParser()
+    parser.feed((ROOT / "index.html").read_text(encoding="utf-8"))
+    lessons = sorted(ROOT.glob("canberra_strategy_*.html"))
+
+    assert len(lessons) == 6
+    assert [h for h in parser.hrefs if h.startswith("canberra_strategy_")] == [
+        "canberra_strategy_1_micro_location.html"
+    ]
+    for lesson in lessons:
+        nav = _LinkParser()
+        nav.feed(lesson.read_text(encoding="utf-8"))
+        assert {path.name for path in lessons} <= set(nav.hrefs), lesson.name
+
+
+def test_tier_css_is_declared_after_featured():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    featured = source.index("  .featured {")
+
+    for rule in ("  .library-tier {", "  .card.case-study {", "  .snapshot {"):
+        assert source.index(rule) > featured, rule

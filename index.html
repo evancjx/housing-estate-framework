@@ -103,6 +103,15 @@
   .featured .tag { background:#274963; color:#a9e5d9; }
   .featured p { color:#bdcbd6; }
   .featured .open { color:#8cddd0; }
+  .library-tier { margin-top:26px; }
+  .library-tier:first-child { margin-top:0; }
+  .library-tier[hidden] { display:none; }
+  .tier-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin:0 0 11px; }
+  .tier-head h3 { margin:0; font-size:15px; letter-spacing:-.02em; }
+  .tier-head p { margin:0; color:var(--muted); font-size:11px; }
+  .card.case-study { background:#fbfcfb; box-shadow:none; }
+  .snapshot { align-self:flex-start; margin-top:7px; padding:3px 7px; border-radius:6px; background:var(--warm-soft);
+    color:#704b16; font-size:9px; font-weight:800; letter-spacing:.02em; }
   .property-analysis-card { border-top:3px solid var(--warm); }
   .property-analysis-card .tag { background:var(--warm-soft); color:#76511f; }
   .method { display:grid; grid-template-columns:1fr 1fr 1fr; gap:13px; margin-top:16px; }
@@ -225,8 +234,10 @@
       <input class="report-search" id="report-search" type="search" placeholder="Filter this report library…" aria-label="Filter report library">
     </div>
 
-    <div class="grid" id="report-grid">
-      <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->
+    <div id="report-grid">
+    <section class="library-tier" data-tier="tools" aria-labelledby="tier-tools-title">
+      <div class="tier-head"><h3 id="tier-tools-title">Tools</h3><p>Interactive calculators. Enter your own loan, funding and exit assumptions.</p></div>
+      <div class="grid">
       <a class="card featured" data-kind="tool" data-search="new home loan mortgage calculator repayment refinance repricing break even fees schedule stress" href="home_loan_planner.html">
         <span class="tag">Interactive · Home finance</span><h3>Home loan planner</h3>
         <p>Calculate a new loan or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.</p>
@@ -242,16 +253,11 @@
         <p>Compare user-defined sale scenarios with achieved, size-matched project transactions while keeping assumptions, evidence coverage and selling costs visible.</p>
         <span class="open">Compare exit scenarios →</span>
       </a>
-      <a class="card featured" data-kind="project" data-search="compare multiple up to five condo condominium framework provision liveability value employment risk matrix" href="multi_condo_framework_comparison.html">
-        <span class="tag">Interactive · Up to five</span><h3>Compare multiple condominiums</h3>
-        <p>Compare five complete years of transactions, annual medians, detailed analysis and full ledgers for two to five projects, with A as reference.</p>
-        <span class="open">Build a comparison set →</span>
-      </a>
-      <a class="card featured" data-kind="project" data-search="compare two condo condominium framework provision liveability value employment risk side by side" href="condo_framework_comparison.html">
-        <span class="tag">Interactive · Two projects</span><h3>Compare two condominiums</h3>
-        <p>Enter any two named projects and inspect achieved evidence beside the same estate-context factor families.</p>
-        <span class="open">Start a comparison →</span>
-      </a>
+      </div>
+    </section>
+    <section class="library-tier" data-tier="explorers" aria-labelledby="tier-explorers-title">
+      <div class="tier-head"><h3 id="tier-explorers-title">Explorers</h3><p>Browse across every project, estate and station from the latest data refresh.</p></div>
+      <div class="grid">
       <a class="card featured" data-kind="project" data-search="all private condominium project comparison mrt schools price transactions" href="private_project_comparison_table.html">
         <span class="tag">Start here · All projects</span><h3>Private condominium explorer</h3>
         <p>Search projects across 28 districts, then filter transaction evidence, MRT access, schools and estate context.</p>
@@ -262,51 +268,17 @@
         <p>Compare objective Provision, person-relative Liveability and tenure-segmented Value without blending the views.</p>
         <span class="open">Open estate explorer →</span>
       </a>
-      <a class="card" data-kind="district project" data-search="tampines planning area simei upper changi condo condominium executive condominium ec primary school within 1km mrt five minute walk" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
-        <span class="tag">Tampines · Dated area guide</span><h3>Condos, schools and five-minute MRT access</h3>
-        <p>Thirty-four projects checked against the Tampines planning boundary, primary-school proximity and usable walks to operational MRT entrances.</p>
-        <span class="open">Open Tampines guide →</span>
+      <a class="card featured" data-kind="project" data-search="compare multiple up to five condo condominium framework provision liveability value employment risk matrix" href="multi_condo_framework_comparison.html">
+        <span class="tag">Interactive · Up to five</span><h3>Compare multiple condominiums</h3>
+        <p>Compare five complete years of transactions, annual medians, detailed analysis and full ledgers for two to five projects, with A as reference.</p>
+        <span class="open">Build a comparison set →</span>
       </a>
-      <a class="card" data-kind="project district" data-search="katong district 15 emerald tembusu grand dunman continuum condo units sale state bedroom floor transactions" href="katong_condo_comparison.html">
-        <span class="tag">Katong · Reviewed comparison</span><h3>Katong condominium comparison</h3>
-        <p>Eight projects with like-for-like sale-state, bedroom, floor, size, growth, liquidity and exact-unit evidence controls.</p>
-        <span class="open">Compare Katong projects →</span>
+      <a class="card featured" data-kind="project" data-search="compare two condo condominium framework provision liveability value employment risk side by side" href="condo_framework_comparison.html">
+        <span class="tag">Interactive · Two projects</span><h3>Compare two condominiums</h3>
+        <p>Enter any two named projects and inspect achieved evidence beside the same estate-context factor families.</p>
+        <span class="open">Start a comparison →</span>
       </a>
-      <a class="card" data-kind="project" data-search="poiz east resale condominium comparison" href="poiz_east_resale_comparison.html">
-        <span class="tag">Project comparison</span><h3>Poiz versus East-side resale</h3>
-        <p>Nine-project comparison of achieved prices, liquidity, access, buyer fit and planning context.</p>
-        <span class="open">Open comparison →</span>
-      </a>
-      <a class="card" data-kind="project" data-search="poiz unit type growth every resale transaction history floor size" href="poiz_east_unit_growth_transactions.html">
-        <span class="tag">Transaction explorer</span><h3>Unit-type growth and transactions</h3>
-        <p>Rolling growth by bedroom type, annual PSF history and transaction records with floor, size and provenance.</p>
-        <span class="open">Open transaction history →</span>
-      </a>
-      <a class="card" data-kind="district project" data-search="canberra crescent d27 deep analysis launch bedroom peers" href="canberra_crescent_d27_deep_analysis.html">
-        <span class="tag">Canberra · D27</span><h3>Canberra Crescent deep analysis</h3>
-        <p>Launch audit, bedroom-matched peers and District 27 private transaction diagnostics.</p>
-        <span class="open">Open deep analysis →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 17 d17 private project comparison" href="private_project_comparison_D17.html">
-        <span class="tag">District 17</span><h3>D17 project comparison</h3>
-        <p>Private residential transaction evidence for Changi, Loyang and Pasir Ris.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 18 d18 private project comparison pasir ris tampines" href="private_project_comparison_D18.html">
-        <span class="tag">District 18</span><h3>D18 project comparison</h3>
-        <p>Private residential transaction evidence for Pasir Ris and Tampines.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district 27 d27 private project comparison yishun sembawang" href="private_project_comparison_D27.html">
-        <span class="tag">District 27</span><h3>D27 project comparison</h3>
-        <p>Private residential transaction evidence for Yishun and Sembawang.</p><span class="open">Open district →</span>
-      </a>
-      <a class="card" data-kind="district" data-search="district pair d18 d26 tampines lentor upper thomson" href="district_pair_comparison_D18_D26.html">
-        <span class="tag">District pair</span><h3>D18 versus D26</h3>
-        <p>A focused bedroom, size and MRT-distance comparison across two private districts.</p><span class="open">Open comparison →</span>
-      </a>
-      <a class="card" data-kind="project" data-search="landed growth dashboard transactions" href="landed_growth_dashboard.html">
-        <span class="tag">Landed</span><h3>Landed growth dashboard</h3>
-        <p>Interactive landed transaction and growth diagnostics, kept outside the condominium universe.</p><span class="open">Open dashboard →</span>
-      </a>
+      <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->
       <a class="card" data-kind="estate" data-search="buyer household personas liveability profile young family professional retiree lifestyle" href="buyer_profile_table.html">
         <span class="tag">Household fit</span><h3>Buyer profile explorer</h3>
         <p>Scenario-specific screening with hard constraints, persona horizons and tenure-separated Value.</p><span class="open">Build a shortlist →</span>
@@ -315,34 +287,71 @@
         <span class="tag">Transport context</span><h3>MRT and LRT explorer</h3>
         <p>Inspect audited code-line memberships, planned rail, derived geometry and controlled estate context without creating a station ranking.</p><span class="open">Explore the rail layer →</span>
       </a>
+      <a class="card" data-kind="project" data-search="landed growth dashboard transactions" href="landed_growth_dashboard.html">
+        <span class="tag">Landed</span><h3>Landed growth dashboard</h3>
+        <p>Interactive landed transaction and growth diagnostics, kept outside the condominium universe.</p><span class="open">Open dashboard →</span>
+      </a>
+      </div>
+    </section>
+    <section class="library-tier" data-tier="case-studies" aria-labelledby="tier-case-studies-title">
+      <div class="tier-head"><h3 id="tier-case-studies-title">Case studies</h3><p>Point-in-time reports. Read the snapshot date first; the market may have moved since.</p></div>
+      <div class="grid">
+      <a class="card case-study" data-kind="district project" data-search="tampines planning area simei upper changi condo condominium executive condominium ec primary school within 1km mrt five minute walk" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
+        <span class="tag">Tampines · Dated area guide</span><span class="snapshot">Snapshot · Aug 2026</span><h3>Condos, schools and five-minute MRT access</h3>
+        <p>Thirty-four projects checked against the Tampines planning boundary, primary-school proximity and usable walks to operational MRT entrances.</p>
+        <span class="open">Open Tampines guide →</span>
+      </a>
+      <a class="card case-study" data-kind="project district" data-search="katong district 15 emerald tembusu grand dunman continuum condo units sale state bedroom floor transactions" href="katong_condo_comparison.html">
+        <span class="tag">Katong · Reviewed comparison</span><span class="snapshot">Snapshot · Aug 2026</span><h3>Katong condominium comparison</h3>
+        <p>Eight projects with like-for-like sale-state, bedroom, floor, size, growth, liquidity and exact-unit evidence controls.</p>
+        <span class="open">Compare Katong projects →</span>
+      </a>
+      <a class="card case-study" data-kind="project" data-search="poiz east resale condominium comparison" href="poiz_east_resale_comparison.html">
+        <span class="tag">Project comparison</span><span class="snapshot">Snapshot · Aug 2026</span><h3>Poiz versus East-side resale</h3>
+        <p>Nine-project comparison of achieved prices, liquidity, access, buyer fit and planning context.</p>
+        <span class="open">Open comparison →</span>
+      </a>
+      <a class="card case-study" data-kind="project" data-search="poiz unit type growth every resale transaction history floor size" href="poiz_east_unit_growth_transactions.html">
+        <span class="tag">Transaction explorer</span><span class="snapshot">Snapshot · Jul 2026</span><h3>Unit-type growth and transactions</h3>
+        <p>Rolling growth by bedroom type, annual PSF history and transaction records with floor, size and provenance.</p>
+        <span class="open">Open transaction history →</span>
+      </a>
+      <a class="card case-study" data-kind="district project" data-search="canberra crescent d27 deep analysis launch bedroom peers" href="canberra_crescent_d27_deep_analysis.html">
+        <span class="tag">Canberra · D27</span><span class="snapshot">Snapshot · Sep 2026</span><h3>Canberra Crescent deep analysis</h3>
+        <p>Launch audit, bedroom-matched peers and District 27 private transaction diagnostics.</p>
+        <span class="open">Open deep analysis →</span>
+      </a>
+      <a class="card case-study" data-kind="district" data-search="district 17 d17 private project comparison" href="private_project_comparison_D17.html">
+        <span class="tag">District 17</span><span class="snapshot">Snapshot · Jul 2026</span><h3>D17 project comparison</h3>
+        <p>Private residential transaction evidence for Changi, Loyang and Pasir Ris.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card case-study" data-kind="district" data-search="district 18 d18 private project comparison pasir ris tampines" href="private_project_comparison_D18.html">
+        <span class="tag">District 18</span><span class="snapshot">Snapshot · Jul 2026</span><h3>D18 project comparison</h3>
+        <p>Private residential transaction evidence for Pasir Ris and Tampines.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card case-study" data-kind="district" data-search="district 27 d27 private project comparison yishun sembawang" href="private_project_comparison_D27.html">
+        <span class="tag">District 27</span><span class="snapshot">Snapshot · Sep 2026</span><h3>D27 project comparison</h3>
+        <p>Private residential transaction evidence for Yishun and Sembawang.</p><span class="open">Open district →</span>
+      </a>
+      <a class="card case-study" data-kind="district" data-search="district pair d18 d26 tampines lentor upper thomson" href="district_pair_comparison_D18_D26.html">
+        <span class="tag">District pair</span><span class="snapshot">Snapshot · Aug 2026</span><h3>D18 versus D26</h3>
+        <p>A focused bedroom, size and MRT-distance comparison across two private districts.</p><span class="open">Open comparison →</span>
+      </a>
+      </div>
+    </section>
+    <section class="library-tier" data-tier="method" aria-labelledby="tier-method-title">
+      <div class="tier-head"><h3 id="tier-method-title">Method &amp; practice</h3><p>How the framework reads evidence, plus a six-lesson comparison workbook.</p></div>
+      <div class="grid">
       <a class="card" data-kind="method" data-search="framework diagram method provision liveability value" href="framework_diagram.html">
         <span class="tag">Method</span><h3>How the framework works</h3>
         <p>A visual guide to the analytical structure, including the intentional split between views.</p><span class="open">Open method →</span>
       </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy micro location watergardens commodore" href="canberra_strategy_1_micro_location.html">
-        <span class="tag">Comparison practice · 01</span><h3>Start with micro-location</h3>
-        <p>Keep the subject active while choosing nearby peers, so location drift remains visible.</p><span class="open">Open workbook →</span>
+      <a class="card" data-kind="method project" data-search="canberra comparison practice workbook strategy lesson micro-location newness integration unit matching bedroom size floor sale state planning context" href="canberra_strategy_1_micro_location.html">
+        <span class="tag">Comparison practice · 6 lessons</span><h3>Canberra comparison practice</h3>
+        <p>Six short workbooks: micro-location, newness, price integration, unit matching, sale states and planning context. Each lesson links to the other five.</p><span class="open">Start lesson 01 →</span>
       </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy newness lease vintage age period" href="canberra_strategy_2_newness.html">
-        <span class="tag">Comparison practice · 02</span><h3>Control for newness</h3>
-        <p>Separate lease vintage, project age and transaction period before reading a premium.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy integration mrt rail retail town centre" href="canberra_strategy_3_integration.html">
-        <span class="tag">Comparison practice · 03</span><h3>Price integration separately</h3>
-        <p>Test rail, retail and town-centre convenience as distinct layers rather than one premium.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy workbooks unit matching sale state planning newness micro location integration" href="canberra_strategy_4_unit_matching.html">
-        <span class="tag">Comparison practice · 04</span><h3>Match bedroom, size and floor</h3>
-        <p>A Canberra workbook demonstrating strict cohorts, total quantum, PSF and thin-cell withholding.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy sale state new sale sub sale resale liquidity" href="canberra_strategy_5_sale_state.html">
-        <span class="tag">Comparison practice · 05</span><h3>Keep sale states apart</h3>
-        <p>Separate new sale, sub sale and resale evidence by the process that formed each price.</p><span class="open">Open workbook →</span>
-      </a>
-      <a class="card" data-kind="method project" data-search="canberra comparison strategy planning delivered committed conceptual" href="canberra_strategy_6_planning_context.html">
-        <span class="tag">Comparison practice · 06</span><h3>Treat plans as context</h3>
-        <p>Classify delivered, committed and conceptual infrastructure without booking future returns.</p><span class="open">Open workbook →</span>
-      </a>
+      </div>
+    </section>
     </div>
     <div class="empty" id="report-empty">No report title matches that filter. Try a project or district in the research finder above.</div>
   </section>
@@ -603,6 +612,9 @@
       const searchOk = !query || normalize(card.dataset.search + " " + card.textContent).includes(query);
       card.hidden = !(filterOk && searchOk);
       if (!card.hidden) shown += 1;
+    });
+    document.querySelectorAll("#report-grid .library-tier").forEach(tier => {
+      tier.hidden = !tier.querySelector(".card:not([hidden])");
     });
     document.getElementById("report-empty").style.display = shown ? "none" : "block";
   }
