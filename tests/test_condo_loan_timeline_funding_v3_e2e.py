@@ -1405,3 +1405,239 @@ def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
     assert page.locator(".cpf-table").evaluate(
         "element => element.scrollWidth > element.clientWidth"
     )
+
+
+def test_planner_applies_or_explains_a_registered_ledger_source(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    page_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    _load_clean(page, url)
+    timeline_status = page.locator("#timeline-ledger-status")
+    checkpoint_status = page.locator("#checkpoint-ledger-status")
+    playwright_api.expect(timeline_status).to_be_hidden()
+    playwright_api.expect(checkpoint_status).to_be_hidden()
+
+    register = """
+    source => {
+      window.CondoTimelinePlanner.setFundingLedgerSource(source);
+      document.getElementById('timeline-form')
+        .dispatchEvent(new CustomEvent('funding-ledger-change'));
+    }
+    """
+    page.evaluate(
+        f"({register})(() => ({{ reason: 'test reason' }}))"
+    )
+    expected = "Ledger edits not applied: test reason. Showing the standard payment schedule."
+    playwright_api.expect(timeline_status).to_have_text(expected)
+    playwright_api.expect(checkpoint_status).to_have_text(expected)
+    playwright_api.expect(timeline_status).to_have_class(re.compile("ledger-sync-warning"))
+
+    page.evaluate(
+        f"""({register})(projection => ({{ rows: [
+          ...projection.plan.stages.map(stage => ({{
+            date: stage.date, action: stage.name, category: 'consideration',
+            paymentAmount: stage.amount, loan: stage.loanDraw,
+          }})),
+          {{ date: projection.acquisitionDate, action: 'Keys ceremony',
+             category: 'note', paymentAmount: 0, loan: 0 }},
+        ] }}))"""
+    )
+    playwright_api.expect(timeline_status).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+    playwright_api.expect(timeline_status).not_to_have_class(re.compile("ledger-sync-warning"))
+    playwright_api.expect(
+        page.locator("#timeline-events b", has_text="Keys ceremony")
+    ).to_have_count(1)
+    playwright_api.expect(
+        page.locator("#timeline-events article", has_text="Keys ceremony")
+    ).to_contain_text("Timeline note")
+
+    page.evaluate(f"({register})(() => {{ throw new Error('source broke'); }})")
+    playwright_api.expect(timeline_status).to_have_text(
+        "Ledger edits not applied: source broke. Showing the standard payment schedule."
+    )
+
+    page.evaluate(f"({register})(null)")
+    playwright_api.expect(timeline_status).to_be_hidden()
+    playwright_api.expect(checkpoint_status).to_be_hidden()
+    assert page_errors == []
+
+
+def _sample_couple_ledger(page, playwright_api) -> None:
+    _fill_and_blur(page.locator("#purchase-price"), "1610000")
+    _fill_and_blur(page.locator("#loan-amount"), "1207404")
+    _open_details(page, "#advanced-cost-details")
+    _fill_and_blur(page.locator("#purchase-legal"), "2800")
+    page.locator("#acquisition-date").fill("2025-10-25")
+    page.locator("#buc-top-date").fill("2028-07-06")
+    page.locator("#sale-date").fill("2031-10-25")
+    playwright_api.expect(page.locator("#planner-errors")).to_be_hidden()
+    page.locator("#partner-enabled").check()
+    _apply_couple_setup(
+        page,
+        borrower="primary",
+        amounts={
+            "primary_cash": 86_796,
+            "primary_cpf": 141_500,
+            "partner_cash": 227_700,
+            "partner_cpf": 0,
+        },
+    )
+
+
+def _year_one_loan_drawn(page):
+    return page.locator("#checkpoint-body tr").nth(1).locator("td").nth(1)
+
+
+def test_ledger_edits_drive_timeline_and_checkpoints(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    page_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    applied = "Following your acquisition funding ledger."
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(applied)
+    playwright_api.expect(page.locator("#checkpoint-ledger-status")).to_have_text(applied)
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")
+
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+    playwright_api.expect(
+        page.locator("#timeline-events time[datetime='2026-11-25']")
+    ).to_have_count(1)
+    playwright_api.expect(
+        page.locator("#timeline-events time[datetime='2026-08-25']")
+    ).to_have_count(0)
+
+    page.reload(wait_until="load")
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(applied)
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+    assert page_errors == []
+
+
+def test_unusable_ledgers_fall_back_with_a_reason(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    status = page.locator("#timeline-ledger-status")
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    stage_cash = _money_number(
+        page.locator("#funding-ledger-body [data-row-key='stage-0'][data-field='primaryCash']")
+    )
+    _set_ledger_amount(page, "stage-0", "primaryCash", str(stage_cash - 100))
+    playwright_api.expect(status).to_have_text(
+        "Ledger edits not applied: the ledger does not reconcile — fix the flagged rows."
+        " Showing the standard payment schedule."
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")
+
+    _set_ledger_amount(page, "stage-0", "primaryCash", str(stage_cash))
+    playwright_api.expect(status).to_have_text("Following your acquisition funding ledger.")
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    _fill_and_blur(page.locator("#purchase-legal"), "3000")
+    playwright_api.expect(status).to_have_text(
+        "Ledger edits not applied: the main plan changed after you edited the ledger"
+        " — update the rows or rebuild the ledger. Showing the standard payment schedule."
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")
+
+    page.locator("#partner-enabled").uncheck()
+    playwright_api.expect(status).to_be_hidden()
+    playwright_api.expect(page.locator("#checkpoint-ledger-status")).to_be_hidden()
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")
+
+
+def test_engine_rejected_ledger_is_explained_and_not_used_for_owner_split(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    bsd_cash = _money_number(
+        page.locator("#funding-ledger-body [data-row-key='cost-bsd'][data-field='primaryCash']")
+    )
+    _set_ledger_amount(page, "cost-bsd", "primaryCash", str(bsd_cash - 100))
+    _set_ledger_amount(page, "cost-bsd", "loan", "100")
+    playwright_api.expect(page.locator("#ledger-overall-status")).to_have_text(
+        "All rows and totals reconcile"
+    )
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Ledger edits not applied: the bank loan can only fund purchase-price payments,"
+        " not costs or notes. Showing the standard payment schedule."
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
+        "Split unavailable"
+    )
+
+
+def test_owner_outcome_stays_on_the_ledger_projection_when_automatic_cpf_changes(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-primary-monthly"), "1000")
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+
+    # Move a loan draw so the ledger schedule (and the automatic CPF estimate,
+    # which walks the scheduled monthly payments) both change.
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    household_cash = _display_money_number(page.locator("#owner-outcome-household-cash"))
+    waterfall_total = _display_money_number(page.locator("#waterfall-total"))
+    # The waterfall figure is displayed rounded to the nearest whole dollar; the
+    # owner outcome figure is displayed to the cent. Reconcile at the coarser
+    # displayed rounding.
+    assert household_cash == pytest.approx(waterfall_total, abs=0.5)
+
+
+def test_partner_toggle_off_is_pinned_while_the_ledger_is_applied(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    page.locator("#partner-enabled").uncheck()
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_be_hidden()
+    playwright_api.expect(page.locator("#checkpoint-ledger-status")).to_be_hidden()
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")

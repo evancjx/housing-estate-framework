@@ -449,6 +449,57 @@
     return price * Math.pow(1 + growth / 100, years);
   }
 
+  const LEDGER_CATEGORIES = ["consideration", "cost", "note"];
+
+  function checkedLedgerRows(rows, purchasePrice, loanAmount) {
+    if (!Array.isArray(rows) || !rows.length) {
+      throw new RangeError("fundingLedger.rows must be a non-empty array");
+    }
+    const checked = rows.map((row, index) => {
+      const name = `fundingLedger.rows[${index}]`;
+      const date = String(row.date || "");
+      parseISODate(date, `${name}.date`);
+      if (!LEDGER_CATEGORIES.includes(row.category)) {
+        throw new RangeError(`${name}.category must be consideration, cost or note`);
+      }
+      const paymentAmount = nonNegative(row.paymentAmount || 0, `${name}.paymentAmount`);
+      const loan = nonNegative(row.loan || 0, `${name}.loan`);
+      if (loan > paymentAmount + EPSILON) {
+        throw new RangeError(`${name}.loan must not exceed its payment`);
+      }
+      return { date, action: String(row.action || ""), category: row.category, paymentAmount, loan };
+    });
+    if (checked.some(row => row.category !== "consideration" && row.loan > EPSILON)) {
+      throw new RangeError("the bank loan can only fund purchase-price payments, not costs or notes");
+    }
+    const loanTotal = checked.reduce((total, row) => total + row.loan, 0);
+    if (Math.abs(loanTotal - loanAmount) > 0.01) {
+      throw new RangeError(
+        `ledger loan rows total ${loanTotal.toFixed(2)}, not the loan amount ${loanAmount.toFixed(2)}`
+      );
+    }
+    const considerationTotal = ledgerConsiderationThrough(checked, null, row => row.paymentAmount);
+    if (Math.abs(considerationTotal - purchasePrice) > 0.01) {
+      throw new RangeError(
+        `ledger purchase-price payments total ${considerationTotal.toFixed(2)}, not the purchase price ${purchasePrice.toFixed(2)}`
+      );
+    }
+    return checked;
+  }
+
+  function ledgerConsiderationThrough(rows, date, amount) {
+    return rows
+      .filter(row => row.category === "consideration"
+        && (date == null || compareDates(row.date, date) <= 0))
+      .reduce((total, row) => total + amount(row), 0);
+  }
+
+  function ledgerDraws(rows) {
+    return rows
+      .filter(row => row.loan > EPSILON)
+      .map(row => ({ date: row.date, amount: row.loan, label: row.action }));
+  }
+
   function buildHoldingProjection(options) {
     const route = options.route;
     if (!['buc', 'resale'].includes(route)) throw new RangeError("route must be buc or resale");
@@ -484,6 +535,9 @@
       ? null : nonNegative(options.saleMarketValue, "saleMarketValue");
     if (sellingCostPct > 100) throw new RangeError("sellingCostPct must not exceed 100");
 
+    const ledgerRows = options.fundingLedger == null
+      ? null
+      : checkedLedgerRows(options.fundingLedger.rows, purchasePrice, loanAmount);
     let plan;
     let draws;
     let ownerPropertyPaid;
@@ -496,13 +550,23 @@
         acquisitionDate,
         topDate: options.topDate,
       });
-      draws = plan.draws;
-      const calledStages = plan.stages.filter(stage => compareDates(stage.date, saleDate) <= 0);
-      calledAmount = calledStages.reduce((total, stage) => total + stage.amount, 0);
-      ownerPropertyPaid = calledStages.reduce(
-        (total, stage) => total + stage.ownerContribution,
-        0
-      );
+      if (ledgerRows) {
+        draws = ledgerDraws(ledgerRows);
+        calledAmount = ledgerConsiderationThrough(ledgerRows, saleDate, row => row.paymentAmount);
+        ownerPropertyPaid = ledgerConsiderationThrough(
+          ledgerRows,
+          saleDate,
+          row => row.paymentAmount - row.loan
+        );
+      } else {
+        draws = plan.draws;
+        const calledStages = plan.stages.filter(stage => compareDates(stage.date, saleDate) <= 0);
+        calledAmount = calledStages.reduce((total, stage) => total + stage.amount, 0);
+        ownerPropertyPaid = calledStages.reduce(
+          (total, stage) => total + stage.ownerContribution,
+          0
+        );
+      }
       uncalledDeveloperBalance = Math.max(0, purchasePrice - calledAmount);
     } else {
       const completionDate = String(options.completionDate || "");
@@ -514,11 +578,23 @@
         throw new RangeError("saleDate must not be before completionDate for a resale loan");
       }
       plan = { completionDate };
-      draws = loanAmount > EPSILON
-        ? [{ date: completionDate, amount: loanAmount, label: "Full loan draw" }]
-        : [];
+      if (ledgerRows) {
+        if (ledgerRows.some(row => row.category === "consideration" && compareDates(row.date, saleDate) > 0)) {
+          throw new RangeError("a resale purchase payment cannot fall after the planned sale");
+        }
+        draws = ledgerDraws(ledgerRows);
+        ownerPropertyPaid = ledgerConsiderationThrough(
+          ledgerRows,
+          saleDate,
+          row => row.paymentAmount - row.loan
+        );
+      } else {
+        draws = loanAmount > EPSILON
+          ? [{ date: completionDate, amount: loanAmount, label: "Full loan draw" }]
+          : [];
+        ownerPropertyPaid = purchasePrice - loanAmount;
+      }
       calledAmount = purchasePrice;
-      ownerPropertyPaid = purchasePrice - loanAmount;
       uncalledDeveloperBalance = 0;
     }
 
@@ -612,6 +688,16 @@
       breakEvenGrowth = (Math.pow(breakEvenPrice / purchasePrice, 1 / holdingYears) - 1) * 100;
     }
 
+    const uncalledAt = date => {
+      if (route !== "buc") return 0;
+      const called = ledgerRows
+        ? ledgerConsiderationThrough(ledgerRows, date, row => row.paymentAmount)
+        : plan.stages
+          .filter(stage => compareDates(stage.date, date) <= 0)
+          .reduce((total, stage) => total + stage.amount, 0);
+      return Math.max(0, purchasePrice - called);
+    };
+
     const checkpoints = [{ label: "Acquisition", date: acquisitionDate }];
     for (let year = 1; ; year += 1) {
       const date = addYearsISO(acquisitionDate, year);
@@ -621,13 +707,7 @@
     checkpoints.push({ label: "Planned sale", date: saleDate });
     const checkpointRows = checkpoints.map(checkpoint => {
       const snapshot = loanSnapshot(schedule, checkpoint.date);
-      let uncalled = 0;
-      if (route === "buc") {
-        const called = plan.stages
-          .filter(stage => compareDates(stage.date, checkpoint.date) <= 0)
-          .reduce((total, stage) => total + stage.amount, 0);
-        uncalled = Math.max(0, purchasePrice - called);
-      }
+      const uncalled = uncalledAt(checkpoint.date);
       const value = projectedValue(
         purchasePrice,
         annualGrowthPct,
@@ -649,13 +729,7 @@
     for (let month = 0; month < totalMonths; month += chartStep) {
       const date = addMonthsISO(acquisitionDate, month);
       const snapshot = loanSnapshot(schedule, date);
-      let uncalled = 0;
-      if (route === "buc") {
-        const called = plan.stages
-          .filter(stage => compareDates(stage.date, date) <= 0)
-          .reduce((total, stage) => total + stage.amount, 0);
-        uncalled = Math.max(0, purchasePrice - called);
-      }
+      const uncalled = uncalledAt(date);
       chartRows.push({
         date,
         value: projectedValue(purchasePrice, annualGrowthPct, acquisitionDate, date),
@@ -668,19 +742,27 @@
       obligations: loanAtSale.balance + uncalledDeveloperBalance,
     });
 
-    const events = route === "buc"
-      ? plan.stages.map(stage => ({
-        type: "stage",
-        date: stage.date,
-        title: stage.name,
-        detail: `${stage.percent}% due · owner ${stage.ownerContribution} · bank ${stage.loanDraw}`,
-        afterSale: compareDates(stage.date, saleDate) > 0,
-        stage,
+    const events = ledgerRows
+      ? ledgerRows.map(row => ({
+        type: "ledger",
+        date: row.date,
+        title: row.action,
+        afterSale: compareDates(row.date, saleDate) > 0,
+        row,
       }))
-      : [
-        { type: "purchase", date: acquisitionDate, title: "Legal acquisition", detail: "SSD and growth clock starts" },
-        { type: "draw", date: plan.completionDate, title: "Completion / full loan draw", detail: `Bank draw ${loanAmount}` },
-      ];
+      : route === "buc"
+        ? plan.stages.map(stage => ({
+          type: "stage",
+          date: stage.date,
+          title: stage.name,
+          detail: `${stage.percent}% due · owner ${stage.ownerContribution} · bank ${stage.loanDraw}`,
+          afterSale: compareDates(stage.date, saleDate) > 0,
+          stage,
+        }))
+        : [
+          { type: "purchase", date: acquisitionDate, title: "Legal acquisition", detail: "SSD and growth clock starts" },
+          { type: "draw", date: plan.completionDate, title: "Completion / full loan draw", detail: `Bank draw ${loanAmount}` },
+        ];
     events.push({
       type: "ssd-zero",
       date: ssdZeroDate,
@@ -695,7 +777,8 @@
       detail: `Projected price ${base.salePrice}`,
       afterSale: false,
     });
-    events.sort((a, b) => compareDates(a.date, b.date) || (a.type === "sale" ? 1 : -1));
+    events.sort((a, b) => compareDates(a.date, b.date)
+      || Number(a.type === "sale") - Number(b.type === "sale"));
 
     const warnings = [];
     if (loanAmount / purchasePrice > 0.75 + EPSILON) {
@@ -724,6 +807,7 @@
       annualRate,
       termMonths,
       plan,
+      fundingLedgerApplied: Boolean(ledgerRows),
       schedule,
       loanAtSale,
       calledAmount,
@@ -753,6 +837,15 @@
       events,
       warnings,
     };
+  }
+
+  let fundingLedgerSource = null;
+
+  function setFundingLedgerSource(source) {
+    if (source != null && typeof source !== "function") {
+      throw new TypeError("funding ledger source must be a function or null");
+    }
+    fundingLedgerSource = source || null;
   }
 
   function init(document) {
@@ -957,6 +1050,12 @@
     }
 
     function eventDetail(result, event) {
+      if (event.type === "ledger") {
+        const row = event.row;
+        if (row.category === "note") return "Timeline note";
+        if (row.category === "cost") return `Cost ${money(row.paymentAmount)}`;
+        return `Pay ${money(row.paymentAmount)} · owner ${money(row.paymentAmount - row.loan)} · bank ${money(row.loan)}`;
+      }
       if (event.type === "stage") {
         const stage = event.stage;
         return `${stage.percent}% due · owner ${money(stage.ownerContribution)} · bank ${money(stage.loanDraw)}`;
@@ -1130,14 +1229,55 @@
       }
     }
 
+    function applyFundingLedger(options, standard) {
+      if (!fundingLedgerSource) return { result: standard, notice: null };
+      let ledger;
+      try {
+        ledger = fundingLedgerSource(standard);
+      } catch (error) {
+        return { result: standard, notice: { applied: false, reason: error.message } };
+      }
+      if (!ledger) return { result: standard, notice: null };
+      if (!ledger.rows) {
+        return {
+          result: standard,
+          notice: { applied: false, reason: ledger.reason || "the ledger is unavailable" },
+        };
+      }
+      try {
+        return {
+          result: buildHoldingProjection({ ...options, fundingLedger: { rows: ledger.rows } }),
+          notice: { applied: true },
+        };
+      } catch (error) {
+        return { result: standard, notice: { applied: false, reason: error.message } };
+      }
+    }
+
+    function renderLedgerSync(notice) {
+      const text = !notice
+        ? ""
+        : notice.applied
+          ? "Following your acquisition funding ledger."
+          : `Ledger edits not applied: ${notice.reason}. Showing the standard payment schedule.`;
+      ["timeline-ledger-status", "checkpoint-ledger-status"].forEach(id => {
+        const element = byId(id);
+        element.textContent = text;
+        element.hidden = !notice;
+        element.classList.toggle("ledger-sync-warning", Boolean(notice && !notice.applied));
+      });
+    }
+
     function calculate({ focusResults = false, announce = false } = {}) {
       const data = collect();
       renderErrors(data.errors);
       if (data.errors.length) return false;
       try {
-        const result = buildHoldingProjection(data.options);
+        const standard = buildHoldingProjection(data.options);
+        const { result, notice } = applyFundingLedger(data.options, standard);
         latest = { data, result };
         render(data.projectName, result, { announce });
+        renderLedgerSync(notice);
         if (focusResults) {
           byId("result-heading").focus({ preventScroll: true });
           byId("results-panel").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1163,6 +1303,7 @@
       calculate();
     });
     form.addEventListener("cpf-effective-change", () => calculate());
+    form.addEventListener("funding-ledger-change", () => calculate());
     form.querySelectorAll("[data-currency-input]").forEach(input => {
       input.addEventListener("blur", () => {
         try {
@@ -1208,6 +1349,7 @@
     projectedValue,
     sellerStampDutyRate,
     sellerStampDutyZeroDate,
+    setFundingLedgerSource,
     yearFraction,
   };
 });
