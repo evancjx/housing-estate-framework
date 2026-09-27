@@ -579,6 +579,9 @@
       }
       plan = { completionDate };
       if (ledgerRows) {
+        if (ledgerRows.some(row => row.category === "consideration" && compareDates(row.date, saleDate) > 0)) {
+          throw new RangeError("a resale purchase payment cannot fall after the planned sale");
+        }
         draws = ledgerDraws(ledgerRows);
         ownerPropertyPaid = ledgerConsiderationThrough(
           ledgerRows,

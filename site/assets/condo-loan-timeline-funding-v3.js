@@ -2547,7 +2547,11 @@
         && !automaticReliable
         && reliableAutomatic != null;
       const effectiveChanged = setEffectiveCpfRefund(resolved.activeRefund);
-      if (effectiveChanged) projection = collectProjection();
+      if (effectiveChanged) {
+        projection = projection.fundingLedgerApplied
+          ? planner.buildHoldingProjection({ ...projectionOptions(), fundingLedger: { rows: ledgerRows } })
+          : collectProjection();
+      }
 
       const estimatedRequired = roundMoney(estimate.household.refundRequired);
       const availableTotal = roundMoney(Math.min(
