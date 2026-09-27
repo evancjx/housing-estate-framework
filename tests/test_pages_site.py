@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from scripts import build_pages_site
-from sg_estate.reporting.property_analysis import parse_property_analysis
+from sg_estate.reporting.property_analysis import latest_property_analyses, parse_property_analysis
 
 
 ROOT = Path(__file__).parent.parent
@@ -115,7 +115,7 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
 
         source_count = len(build_pages_site.load_catalog()["reports"])
         analyses = build_pages_site.discover_property_analyses()
-        assert count == source_count + len(analyses)
+        assert count == source_count + len(analyses) + 1
         assert (output / "index.html").is_file()
         assert (output / "reports.json").is_file()
         assert (output / "projects.json").is_file()
@@ -189,14 +189,22 @@ def test_pages_builder_packages_reports_catalog_and_assets(tmp_path):
             if report["project_slug"] == "bedok-rise-gls-future-condominium"
             and report["is_latest"]
         )
-        future_card = next(
+        directory = (output / "property-analyses.html").read_text(encoding="utf-8")
+        future_row = next(
             line
-            for line in landing.splitlines()
+            for line in directory.split("<li ")
             if f'href="{latest_future["path"]}"' in line
         )
         assert latest_future["market_stage"] == "future project"
-        assert "future project" in future_card
-        assert " resale " not in future_card
+        assert 'data-stage="future project"' in future_row
+        assert 'data-stage="resale"' not in future_row
+        assert landing.count('class="card property-analysis-card"') == 1
+        assert directory.count('href="property-analysis-') == len(
+            latest_property_analyses(analyses)
+        )
+        assert any(r["kind"] == "property-analysis-directory" for r in merged_catalog["reports"])
+        projects = json.loads((output / "projects.json").read_text(encoding="utf-8"))["projects"]
+        assert any("analysis" in p for p in projects)
         report = (output / "comparison_table.html").read_text(encoding="utf-8")
         assert report.count("assets/research-shell.css") == 1
         assert report.count("assets/research-shell.js") == 1
@@ -400,3 +408,84 @@ def test_root_reports_have_no_broken_internal_html_links():
                     broken.append(f"{report.name} -> {target}")
 
     assert broken == []
+
+
+def test_analysis_links_are_added_to_matching_projects_only(parsed_report):
+    catalog = {"projects": [
+        {"name": "LUCERNE  GRAND", "slug": "lucerne-grand", "district": "18"},
+        {"name": "OTHER", "slug": "other"},
+    ]}
+    older = parsed_report("Lucerne Grand", "lucerne-grand", date="2026-08-08")
+    newest = parsed_report("Lucerne Grand", "lucerne-grand", date="2026-09-20")
+
+    # Discovery order is newest first; latest_property_analyses keeps the first per slug.
+    updated = build_pages_site.add_analysis_links(catalog, [newest, older])
+
+    assert updated["projects"][0]["analysis"] == {
+        "path": "property-analysis-2026-09-20-lucerne-grand.html", "date": "20 Sep 2026"}
+    assert "analysis" not in updated["projects"][1]
+    assert "analysis" not in catalog["projects"][0]
+
+
+def test_home_library_gets_one_summary_card_not_one_card_per_analysis(parsed_report, tmp_path):
+    index_copy = tmp_path / "index.html"
+    index_copy.write_text((ROOT / "index.html").read_text(encoding="utf-8"), encoding="utf-8")
+    reports = [parsed_report("Alpha One", "alpha-one"), parsed_report("Beta Two", "beta-two")]
+
+    build_pages_site.inject_property_library(index_copy, reports)
+    landing = index_copy.read_text(encoding="utf-8")
+
+    assert landing.count('class="card property-analysis-card"') == 1
+    assert "Browse 2 project analyses by district" in landing
+    assert 'href="property-analyses.html"' in landing
+    assert 'href="property-analysis-2026-09-20-alpha-one.html"' not in landing
+    assert '"ALPHA ONE": "property-analysis-2026-09-20-alpha-one.html"' in landing
+
+
+def test_directory_path_collision_with_catalog_is_rejected():
+    catalog = {"reports": [{"id": "x", "path": "property-analyses.html"}]}
+    with pytest.raises(ValueError, match="property-analyses.html"):
+        build_pages_site._prepare_property_publication(
+            catalog, property_analysis_dir=ROOT / "property_analysis")
+
+
+def test_library_has_no_property_analysis_chip():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert 'data-filter="analysis"' not in source
+
+
+def test_finder_offers_the_dated_analysis_and_district_directory():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "Analysis · ${escapeMarkup(project.analysis.date)}" in source
+    assert "Open the ${escapeMarkup(analysis.date)} analysis" in source
+    assert 'property-analyses.html#d${district}' in source
+
+
+def test_finder_tolerates_projects_without_analysis():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "project.analysis ?" in source
+    assert "project && project.analysis && project.analysis.path === " in source
+    assert "p.analysis && " in source
+
+
+def test_tampines_area_guide_is_an_ordinary_library_card():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    tag = next(line for line in source.splitlines()
+               if 'href="tampines_condo_school_mrt_area_guide_2026-08-08.html"' in line)
+    assert 'class="card"' in tag and "featured" not in tag
+    last_featured = source.rindex('class="card featured"')
+    assert source.index('href="tampines_condo_school_mrt_area_guide_2026-08-08.html"') > last_featured
+    catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
+    entry = next(r for r in catalog["reports"] if r["path"].startswith("tampines_condo"))
+    assert not entry.get("featured")
+
+
+def test_katong_comparison_is_an_ordinary_library_card():
+    source = (ROOT / "index.html").read_text(encoding="utf-8")
+    tag = next(line for line in source.splitlines()
+               if '<a class="card' in line and 'href="katong_condo_comparison.html"' in line)
+    assert 'class="card"' in tag and "featured" not in tag
+    assert source.index(tag) > source.rindex('class="card featured"')
+    catalog = json.loads((ROOT / "site" / "reports.json").read_text(encoding="utf-8"))
+    entry = next(r for r in catalog["reports"] if r["path"] == "katong_condo_comparison.html")
+    assert not entry.get("featured")

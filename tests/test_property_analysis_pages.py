@@ -12,6 +12,7 @@ from sg_estate.reporting.property_analysis import (
     render_markdown,
     render_property_analysis_page,
 )
+from sg_estate.reporting.property_directory import directory_entries, render_directory_page
 
 
 ROOT = Path(__file__).parent.parent
@@ -231,7 +232,7 @@ def test_regional_comparison_retains_mixed_market_stage(tmp_path):
     assert "mixed market" in entry["tags"]
     assert "resale" not in entry["tags"]
     assert "<dd>mixed market</dd>" in render_property_analysis_page(analysis)
-    assert "Property analysis · Mixed Market" in build_pages_site._property_cards([analysis])
+    assert ">Mixed market<" in render_directory_page(directory_entries([analysis], {"projects": []}))
 
 
 @pytest.mark.parametrize("stage", ["unverified", "historical project", "restricted ec"])
@@ -253,13 +254,13 @@ def test_real_lakegarden_card_and_page_show_new_launch_stage():
         ANALYSIS_DIR / "2026-08-08-the-lakegarden-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert " new launch " in card
-    assert " resale " not in card
-    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert 'data-stage="new launch"' in card
+    assert 'data-stage="resale"' not in card
+    assert ">New launch<" in card and ">08 Aug 2026<" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
     assert 'id="gross-seller-premium"' in page
@@ -276,12 +277,12 @@ def test_real_canberra_card_and_page_show_new_launch_quantum_analysis():
         ANALYSIS_DIR / "2026-08-03-canberra-crescent-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert " new launch " in card
-    assert "Property analysis · New Launch · 03 Aug 2026" in card
+    assert 'data-stage="new launch"' in card
+    assert ">New launch<" in card and ">03 Aug 2026<" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
     assert 'id="capital-potential-model"' in page
@@ -295,11 +296,11 @@ def test_real_canberra_three_bedroom_exit_page_shows_cost_adjusted_result():
         ANALYSIS_DIR / "2026-08-08-canberra-crescent-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert ">New launch<" in card and ">08 Aug 2026<" in card
     assert 'id="three-percent-annualised-return-test"' in page
     assert 'id="longer-hold-alternative"' in page
     assert "S$2.497m / S$2,522 psf" in page
@@ -312,11 +313,11 @@ def test_real_canberra_comprehensive_page_preserves_all_three_analyses():
         ANALYSIS_DIR / "2026-08-13-canberra-crescent-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert "Property analysis · New Launch · 13 Aug 2026" in card
+    assert ">New launch<" in card and ">13 Aug 2026<" in card
 
     # The current publication is a synthesis, not a replacement for just the
     # latest price-list study. Each dated analysis retains a decision-useful
@@ -354,12 +355,12 @@ def test_real_parktown_card_and_page_show_new_launch_quantum_analysis():
         ANALYSIS_DIR / "2026-08-08-parktown-residence.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert " new launch " in card
-    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert 'data-stage="new launch"' in card
+    assert ">New launch<" in card and ">08 Aug 2026<" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
     assert 'id="live-asking-inventory"' in page
@@ -374,12 +375,12 @@ def test_real_pinery_card_and_page_show_new_launch_quantum_analysis():
         ANALYSIS_DIR / "2026-08-08-pinery-residences.md"
     )
     entry = analysis.catalog_entry(is_latest=True)
-    card = build_pages_site._property_cards([analysis])
+    card = render_directory_page(directory_entries([analysis], {"projects": []}))
     page = render_property_analysis_page(analysis)
 
     assert entry["market_stage"] == "new launch"
-    assert " new launch " in card
-    assert "Property analysis · New Launch · 08 Aug 2026" in card
+    assert 'data-stage="new launch"' in card
+    assert ">New launch<" in card and ">08 Aug 2026<" in card
     assert "<dt>Market stage</dt>" in page
     assert "<dd>new launch</dd>" in page
     assert 'id="advertised-developer-balance-and-portal-inventory"' in page

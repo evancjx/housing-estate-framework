@@ -222,17 +222,11 @@
       <button class="filter-chip" type="button" data-filter="estate" aria-pressed="false">Estates & households</button>
       <button class="filter-chip" type="button" data-filter="tool" aria-pressed="false">Tools</button>
       <button class="filter-chip" type="button" data-filter="method" aria-pressed="false">Method</button>
-      <button class="filter-chip" type="button" data-filter="analysis" aria-pressed="false">Property analyses</button>
       <input class="report-search" id="report-search" type="search" placeholder="Filter this report library…" aria-label="Filter report library">
     </div>
 
     <div class="grid" id="report-grid">
       <!-- GENERATED_PROPERTY_ANALYSIS_CARDS -->
-      <a class="card featured" data-kind="district project" data-search="tampines planning area simei upper changi condo condominium executive condominium ec primary school within 1km mrt five minute walk" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
-        <span class="tag">Tampines · Dated area guide</span><h3>Condos, schools and five-minute MRT access</h3>
-        <p>Thirty-four projects checked against the Tampines planning boundary, primary-school proximity and usable walks to operational MRT entrances.</p>
-        <span class="open">Open Tampines guide →</span>
-      </a>
       <a class="card featured" data-kind="tool" data-search="new home loan mortgage calculator repayment refinance repricing break even fees schedule stress" href="home_loan_planner.html">
         <span class="tag">Interactive · Home finance</span><h3>Home loan planner</h3>
         <p>Calculate a new loan or compare an existing loan with a new package, including tiered rates, construction drawdowns and partial repayments.</p>
@@ -263,15 +257,20 @@
         <p>Search projects across 28 districts, then filter transaction evidence, MRT access, schools and estate context.</p>
         <span class="open">Open project explorer →</span>
       </a>
-      <a class="card featured" data-kind="project district" data-search="katong district 15 emerald tembusu grand dunman continuum condo units sale state bedroom floor transactions" href="katong_condo_comparison.html">
-        <span class="tag">Katong · Reviewed comparison</span><h3>Katong condominium comparison</h3>
-        <p>Eight projects with like-for-like sale-state, bedroom, floor, size, growth, liquidity and exact-unit evidence controls.</p>
-        <span class="open">Compare Katong projects →</span>
-      </a>
       <a class="card featured" data-kind="estate" data-search="estate comparison provision liveability personas value" href="comparison_table.html">
         <span class="tag">Start here · Estate context</span><h3>Estate and household explorer</h3>
         <p>Compare objective Provision, person-relative Liveability and tenure-segmented Value without blending the views.</p>
         <span class="open">Open estate explorer →</span>
+      </a>
+      <a class="card" data-kind="district project" data-search="tampines planning area simei upper changi condo condominium executive condominium ec primary school within 1km mrt five minute walk" href="tampines_condo_school_mrt_area_guide_2026-08-08.html">
+        <span class="tag">Tampines · Dated area guide</span><h3>Condos, schools and five-minute MRT access</h3>
+        <p>Thirty-four projects checked against the Tampines planning boundary, primary-school proximity and usable walks to operational MRT entrances.</p>
+        <span class="open">Open Tampines guide →</span>
+      </a>
+      <a class="card" data-kind="project district" data-search="katong district 15 emerald tembusu grand dunman continuum condo units sale state bedroom floor transactions" href="katong_condo_comparison.html">
+        <span class="tag">Katong · Reviewed comparison</span><h3>Katong condominium comparison</h3>
+        <p>Eight projects with like-for-like sale-state, bedroom, floor, size, growth, liquidity and exact-unit evidence controls.</p>
+        <span class="open">Compare Katong projects →</span>
       </a>
       <a class="card" data-kind="project" data-search="poiz east resale condominium comparison" href="poiz_east_resale_comparison.html">
         <span class="tag">Project comparison</span><h3>Poiz versus East-side resale</h3>
@@ -453,6 +452,13 @@
     return projects.find(project => normalize(project.name) === value);
   }
 
+  function analysisLink(project, report) {
+    const analysis = project && project.analysis && project.analysis.path === report ? project.analysis : null;
+    return analysis
+      ? `<a href="${escapeMarkup(analysis.path)}">Open the ${escapeMarkup(analysis.date)} analysis</a>, or use the broader explorer.`
+      : `Dedicated project research is available. <a href="${report}">Open that report</a>, or use the broader explorer.`;
+  }
+
   function updateCondoRoute(project = exactProject()) {
     if (!condoInput.value.trim()) {
       condoRoute.textContent = "Searches open the all-project explorer. A dedicated project or district report is offered when one exists.";
@@ -460,7 +466,7 @@
     }
     const directReport = PROJECT_REPORTS[normalize(condoInput.value)];
     if (directReport) {
-      condoRoute.innerHTML = `Dedicated project research is available. <a href="${directReport}">Open that report</a>, or use the broader explorer.`;
+      condoRoute.innerHTML = analysisLink(project, directReport);
       return;
     }
     if (!project) {
@@ -470,7 +476,7 @@
     const report = PROJECT_REPORTS[normalize(project.name)];
     const district = String(project.district || "").padStart(2, "0");
     if (report) {
-      condoRoute.innerHTML = `Dedicated project research is available. <a href="${report}">Open that report</a>, or use the broader explorer.`;
+      condoRoute.innerHTML = analysisLink(project, report);
     } else if (DISTRICT_REPORTS[district]) {
       condoRoute.innerHTML = `No dedicated project report yet. The project explorer is the best route; <a href="${DISTRICT_REPORTS[district]}">D${district} research</a> is also available.`;
     } else {
@@ -496,7 +502,7 @@
       })
       .slice(0, 8);
     suggestions.innerHTML = matches.map((project, index) =>
-      `<li role="option"><button type="button" data-index="${index}" data-name="${escapeMarkup(project.name)}">${escapeMarkup(project.name)}<small>${project.district ? `District ${String(project.district).padStart(2, "0")}` : "Project explorer"}</small></button></li>`
+      `<li role="option"><button type="button" data-index="${index}" data-name="${escapeMarkup(project.name)}">${escapeMarkup(project.name)}<small>${project.district ? `District ${String(project.district).padStart(2, "0")}` : "Project explorer"}${project.analysis ? ` · Analysis · ${escapeMarkup(project.analysis.date)}` : ""}</small></button></li>`
     ).join("");
     suggestions.hidden = matches.length === 0;
     condoInput.setAttribute("aria-expanded", String(matches.length > 0));
@@ -566,6 +572,13 @@
       districtRoute.innerHTML = `A dedicated D${district} report is available and will open first. <a href="private_project_comparison_table.html?district=${district}">Use the all-project explorer instead</a>.`;
     } else {
       districtRoute.textContent = `No dedicated D${district} report yet. The all-project explorer will open with District ${district} applied.`;
+    }
+    const analysed = district
+      ? projects.filter(p => p.analysis && String(p.district || "").padStart(2, "0") === district).length
+      : 0;
+    if (analysed) {
+      districtRoute.insertAdjacentHTML("beforeend",
+        ` <a href="property-analyses.html#d${district}">${analysed} property ${analysed === 1 ? "analysis" : "analyses"} in D${district} →</a>`);
     }
   }
   districtSelect.addEventListener("change", updateDistrictRoute);
