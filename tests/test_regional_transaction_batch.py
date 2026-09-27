@@ -72,3 +72,30 @@ def test_source_rows_are_physical_lines_before_windowing(tmp_path, monkeypatch):
     assert list(raw.source_row) == [3]
     assert manifest[0]["rows"] == 1 and manifest[0]["rows_in_file"] == 3
     assert manifest[0]["month_window"] == ["2021-10", "2024-12"]
+
+
+from pathlib import Path
+from models import build_individual_project_profiles as profiles
+
+BATCH = Path(__file__).resolve().parents[1] / "data/runs/regional-property-analysis/2026-09-20"
+
+
+def test_pasir_ris_facts_are_wired_into_profiles():
+    assert profiles.REGIONAL_FACTS["Pasir Ris"] == ["PR-01", "PR-02", "PR-03"]
+    assert profiles.OWN_PROJECT_FACTS["PASIR RIS 8"] == "PR-02"
+
+
+@pytest.mark.skipif(not (BATCH / "scope_crosswalk.csv").exists(), reason="batch not restored locally")
+def test_pasir_ris_overrides_do_not_collide():
+    import json
+    overrides = pd.read_csv(BATCH / "scope_overrides.csv", keep_default_na=False, dtype=str)
+    assert overrides.project_name.map(batch.norm).is_unique
+    pasir = overrides[overrides.region == "Pasir Ris"]
+    crosswalk = pd.read_csv(BATCH / "scope_crosswalk.csv", keep_default_na=False, dtype=str)
+    expected = set(crosswalk[crosswalk.source_planning_area.str.upper() == "PASIR RIS"].project_name)
+    assert set(pasir.project_name) == expected and len(expected) == 56
+    assert set(pasir.scope_status) == {"main"}
+    context = json.loads((BATCH / "enrichment/regional_context.json").read_text())
+    region = next(r for r in context["regions"] if r["region"] == "Pasir Ris")
+    assert [f["id"] for f in region["facts"]] == ["PR-01", "PR-02", "PR-03"]
+    assert all(source in context["sources"] for f in region["facts"] for source in f["source_ids"])

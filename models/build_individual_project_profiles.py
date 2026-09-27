@@ -27,6 +27,7 @@ REGIONAL_FACTS = {
     "Canberra": ["CAN-02", "CAN-03"],
     "Lakeside/Jurong": ["JUR-02", "JUR-03"],
     "Bukit Timah": ["BT-02", "BT-03"],
+    "Pasir Ris": ["PR-01", "PR-02", "PR-03"],
 }
 # A comparison list is not an identity mapping. Only these facts disclose the
 # subject project's own count; other named projects must not inherit that count.
@@ -36,6 +37,7 @@ OWN_PROJECT_FACTS = {
     "VELA BAY": "BED-04", "LUCERNE GRAND": "JUR-04",
     "THE LAKEGARDEN RESIDENCES": "JUR-05", "DUNEARN HOUSE": "BT-04",
     "THE RESERVE RESIDENCES": "BT-05",
+    "PASIR RIS 8": "PR-02",
 }
 
 
