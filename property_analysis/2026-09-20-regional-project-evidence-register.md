@@ -1,7 +1,7 @@
 # Regional project evidence register — project-level conclusions and research coverage
 
 Research captured: **2026-09-20 16:29:58 SGT (UTC+08:00)**  
-Property: **Regional project evidence register, Tampines / Bedok / Canberra / Jurong / Bukit Timah, Singapore**  
+Property: **Regional project evidence register, Tampines / Bedok / Canberra / Jurong / Bukit Timah / Pasir Ris, Singapore**  
 Analysis type: **project evidence, market-state, rental and developer-inventory assessment register**  
 Status: **point-in-time market snapshot**  
 Market stage: **mixed market**
@@ -974,6 +974,124 @@ Private and EC-origin rows, sale types and source tenures remain labelled separa
 | THE MAYFAIR | Private | 0 / 0 / 12 | Thin or mixed owner evidence | No monthly return in this capture | S$4.06 psf/month | 2 | A price point is observable; the small sample does not establish a reliable exit band. |
 | WESTMERE | EC-origin | 0 / 0 / 4 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. Check the project's applicable MOP and purchaser eligibility. |
 | WESTWOOD RESIDENCES | EC-origin | 0 / 0 / 25 | Resale evidence; rental gap | No monthly return in this capture | Not published in snapshot | 0 | Own-stay price comparison is supported; rental fallback needs separate evidence. Check the project's applicable MOP and purchaser eligibility. |
+
+## Pasir Ris
+
+### Achieved prices and entry-cost hurdles
+
+Private and EC-origin rows, sale types and source tenures remain labelled separately. This is not a pooled ranking. Price ranges show the cohort's 25th–75th percentiles; small cells do not establish a reliable valuation band.
+
+| Project / category | Selected sale type / tenure / area | N | Median price / middle 50% | Median PSF | Capital-only break-even |
+| --- | --- | ---: | --- | ---: | ---: |
+| AVILA GARDENS · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 3 | S$1,530,000 / S$1,515,000–S$1,540,000 | S$1,171 | S$1,621,641 |
+| AZALEA PARK CONDOMINIUM · Private | Resale; 999 yrs lease commencing from 1885; >100–130 sqm (1,076–1,399 sqft) | 4 | S$1,510,000 / S$1,495,000–S$1,532,500 | S$1,131 | S$1,600,103 |
+| BALLOTA PARK CONDOMINIUM · Private | Resale; Freehold; >130 sqm (>1,399 sqft) | 8 | S$1,650,000 / S$1,626,250–S$1,751,250 | S$1,144 | S$1,750,872 |
+| BELYSA · EC-origin | Resale; 99 yrs lease commencing from 2011; >70–100 sqm (753–1,076 sqft) | 13 | S$1,470,000 / S$1,410,000–S$1,525,000 | S$1,422 | S$1,557,333 |
+| BLUWATERS · Private | Resale; 946 yrs lease commencing from 1938; >100–130 sqm (1,076–1,399 sqft) | 1 | S$1,530,000 / S$1,530,000–S$1,530,000 | S$1,304 | S$1,621,641 |
+| BLUWATERS 2 · Private | Resale; 946 yrs lease commencing from 1938; >70–100 sqm (753–1,076 sqft) | 1 | S$1,130,000 / S$1,130,000–S$1,130,000 | S$1,296 | S$1,194,667 |
+| CARISSA PARK CONDOMINIUM · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 11 | S$1,670,000 / S$1,607,500–S$1,685,000 | S$1,261 | S$1,772,410 |
+| CASA AL MARE · Private | Resale; Freehold; >70–100 sqm (753–1,076 sqft) | 1 | S$1,398,000 / S$1,398,000–S$1,398,000 | S$1,779 | S$1,480,533 |
+| COASTAL BREEZE RESIDENCES · Private | Resale; 99 yrs lease commencing from 2008; >100–130 sqm (1,076–1,399 sqft) | 3 | S$1,410,000 / S$1,405,000–S$1,417,500 | S$1,193 | S$1,493,333 |
+| COASTAL VIEW RESIDENCES · Private | Resale; 999 yrs lease commencing from 1885; >100–130 sqm (1,076–1,399 sqft) | 1 | S$1,430,000 / S$1,430,000–S$1,430,000 | S$1,253 | S$1,514,667 |
+| COCO PALMS · Private | Resale; 99 yrs lease commencing from 2008; >100–130 sqm (1,076–1,399 sqft) | 17 | S$2,200,000 / S$1,900,000–S$2,280,000 | S$1,650 | S$2,343,179 |
+| D'NEST · Private | Resale; 99 yrs lease commencing from 2010; >70–100 sqm (753–1,076 sqft) | 19 | S$1,400,000 / S$1,339,000–S$1,429,000 | S$1,484 | S$1,482,667 |
+| DAHLIA PARK CONDOMINIUM · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 4 | S$1,541,944 / S$1,475,416–S$1,560,000 | S$1,214 | S$1,634,504 |
+| EASTVALE · EC-origin | Resale; 99 yrs lease commencing from 1996; >100–130 sqm (1,076–1,399 sqft) | 10 | S$1,227,500 / S$1,182,500–S$1,300,000 | S$1,060 | S$1,298,667 |
+| EDELWEISS PARK CONDOMINIUM · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 6 | S$1,684,000 / S$1,617,000–S$1,730,000 | S$1,250 | S$1,787,487 |
+| ELIAS GREEN · Private | Resale; 99 yrs lease commencing from 1991; >130 sqm (>1,399 sqft) | 13 | S$1,480,000 / S$1,470,000–S$1,530,000 | S$968 | S$1,568,000 |
+| ESTELLA GARDENS · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 5 | S$1,468,000 / S$1,450,000–S$1,500,000 | S$1,183 | S$1,555,200 |
+| FERRARIA PARK CONDOMINIUM · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 8 | S$1,550,000 / S$1,534,925–S$1,559,000 | S$1,276 | S$1,643,179 |
+| HEDGES PARK CONDOMINIUM · Private | Resale; 99 yrs lease commencing from 2010; >70–100 sqm (753–1,076 sqft) | 25 | S$1,245,000 / S$980,000–S$1,293,000 | S$1,259 | S$1,317,333 |
+| KASSIA · Private | New Sale; Freehold; >50–70 sqm (538–753 sqft) | 8 | S$1,570,500 / S$1,565,250–S$1,586,500 | S$2,084 | S$1,665,256 |
+| LE LOYANG · Private | Resale; 999 yrs lease commencing from 1885; >100–130 sqm (1,076–1,399 sqft) | 1 | S$1,322,000 / S$1,322,000–S$1,322,000 | S$1,192 | S$1,399,467 |
+| LIVIA · Private | Resale; 99 yrs lease commencing from 2008; >100–130 sqm (1,076–1,399 sqft) | 16 | S$1,730,000 / S$1,582,500–S$1,781,250 | S$1,322 | S$1,837,026 |
+| LOYANG GARDENS · Private | Resale; 999 yrs lease commencing from 1885; >100–130 sqm (1,076–1,399 sqft) | 1 | S$1,400,000 / S$1,400,000–S$1,400,000 | S$1,016 | S$1,482,667 |
+| LOYANG VALLEY · Private | Resale; 99 yrs lease commencing from 1982; >130 sqm (>1,399 sqft) | 1 | S$1,545,800 / S$1,545,800–S$1,545,800 | S$977 | S$1,638,656 |
+| NV RESIDENCES · Private | Resale; 99 yrs lease commencing from 2008; >70–100 sqm (753–1,076 sqft) | 9 | S$1,105,000 / S$1,088,000–S$1,110,000 | S$1,391 | S$1,168,000 |
+| OASIS @ ELIAS · Private | Resale; 99 yrs lease commencing from 2008; >100–130 sqm (1,076–1,399 sqft) | 5 | S$1,500,000 / S$1,470,000–S$1,550,000 | S$1,233 | S$1,589,333 |
+| PALM ISLES · Private | Resale; 99 yrs lease commencing from 2011; >70–100 sqm (753–1,076 sqft) | 12 | S$974,000 / S$951,875–S$1,177,500 | S$1,212 | S$1,028,533 |
+| PARC KOMO · Private | Resale; Freehold; >130 sqm (>1,399 sqft) | 3 | S$2,468,000 / S$2,453,000–S$2,884,000 | S$1,750 | S$2,631,795 |
+| PARC OLYMPIA · Private | Resale; 99 yrs lease commencing from 2012; >70–100 sqm (753–1,076 sqft) | 11 | S$1,050,000 / S$1,025,400–S$1,180,000 | S$1,232 | S$1,109,333 |
+| PASIR RIS 8 · Private | Sub Sale; 99 yrs lease commencing from 2021; >70–100 sqm (753–1,076 sqft) | 17 | S$1,628,000 / S$1,600,000–S$1,660,000 | S$2,097 | S$1,727,179 |
+| RIPPLE BAY · Private | Resale; 99 yrs lease commencing from 2011; >70–100 sqm (753–1,076 sqft) | 22 | S$1,123,000 / S$1,067,000–S$1,301,250 | S$1,404 | S$1,187,200 |
+| RIS GRANDEUR · Private | Resale; Freehold; >100–130 sqm (1,076–1,399 sqft) | 4 | S$1,809,444 / S$1,700,000–S$1,826,666 | S$1,329 | S$1,922,581 |
+| SANDY PALM · Private | Resale; 99 yrs lease commencing from 1996; >100–130 sqm (1,076–1,399 sqft) | 1 | S$1,420,000 / S$1,420,000–S$1,420,000 | S$1,055 | S$1,504,000 |
+| SEA ESTA · Private | Resale; 99 yrs lease commencing from 2012; >70–100 sqm (753–1,076 sqft) | 11 | S$1,260,000 / S$1,067,500–S$1,345,000 | S$1,368 | S$1,333,333 |
+| SEA HORIZON · EC-origin | Resale; 99 yrs lease commencing from 2013; >100–130 sqm (1,076–1,399 sqft) | 24 | S$1,686,500 / S$1,561,875–S$1,741,750 | S$1,272 | S$1,790,179 |
+| SEASTRAND · Private | Resale; 99 yrs lease commencing from 2011; >70–100 sqm (753–1,076 sqft) | 8 | S$1,149,000 / S$1,129,500–S$1,257,250 | S$1,281 | S$1,214,933 |
+| STRATUM · Private | Resale; 99 yrs lease commencing from 2012; >100–130 sqm (1,076–1,399 sqft) | 4 | S$1,500,000 / S$1,497,500–S$1,504,722 | S$1,366 | S$1,589,333 |
+| THE EDGEWATER · Private | Resale; Freehold; >70–100 sqm (753–1,076 sqft) | 1 | S$1,248,000 / S$1,248,000–S$1,248,000 | S$1,348 | S$1,320,533 |
+| THE ESPARIS · EC-origin | Resale; 99 yrs lease commencing from 2002; >100–130 sqm (1,076–1,399 sqft) | 10 | S$1,376,000 / S$1,335,000–S$1,397,000 | S$1,128 | S$1,457,067 |
+| THE GALE · Private | Resale; Freehold; >70–100 sqm (753–1,076 sqft) | 8 | S$1,377,500 / S$1,331,250–S$1,405,000 | S$1,358 | S$1,458,667 |
+| THE INFLORA · Private | Resale; 99 yrs lease commencing from 2012; ≤50 sqm (≤538 sqft) | 11 | S$670,000 / S$660,000–S$680,000 | S$1,437 | S$707,385 |
+| THE JOVELL · Private | Resale; 99 yrs lease commencing from 2018; >50–70 sqm (538–753 sqft) | 11 | S$966,000 / S$930,000–S$1,060,000 | S$1,467 | S$1,020,082 |
+| THE PALETTE · Private | Resale; 99 yrs lease commencing from 2010; >70–100 sqm (753–1,076 sqft) | 20 | S$1,632,500 / S$1,548,750–S$1,652,500 | S$1,542 | S$1,732,026 |
+| THE SHOREFRONT · Private | New Sale; 946 yrs lease commencing from 1937; >70–100 sqm (753–1,076 sqft) | 6 | S$1,915,000 / S$1,632,500–S$1,923,750 | S$1,972 | S$2,036,256 |
+| VUE 8 RESIDENCE · Private | Resale; 99 yrs lease commencing from 2012; >100–130 sqm (1,076–1,399 sqft) | 6 | S$2,000,000 / S$1,912,500–S$2,050,000 | S$1,524 | S$2,127,795 |
+| WATERCOLOURS · EC-origin | Resale; 99 yrs lease commencing from 2012; >70–100 sqm (753–1,076 sqft) | 17 | S$1,150,000 / S$1,115,000–S$1,175,000 | S$1,227 | S$1,216,000 |
+| WATERCREST · Private | Resale; 999 yrs lease commencing from 1885; >100–130 sqm (1,076–1,399 sqft) | 4 | S$1,400,000 / S$1,355,000–S$1,435,000 | S$1,058 | S$1,482,667 |
+| WHITEWATER · EC-origin | Resale; 99 yrs lease commencing from 2002; >100–130 sqm (1,076–1,399 sqft) | 21 | S$1,300,000 / S$1,270,000–S$1,320,000 | S$1,115 | S$1,376,000 |
+
+### Evidence, stock and purchase limits
+
+| Project | Category | Recent New / Sub / Resale | Evidence assessment | Latest developer balance | 2026Q2 project rent | Anchor peer cells | Action / limit |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| AVILA GARDENS | Private | 0 / 0 / 7 | Thin or mixed owner evidence | No monthly return in this capture | S$3.28 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| AZALEA PARK CONDOMINIUM | Private | 0 / 0 / 6 | Thin or mixed owner evidence | No monthly return in this capture | S$3.10 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| BALLOTA PARK CONDOMINIUM | Private | 0 / 0 / 10 | Thin or mixed owner evidence | No monthly return in this capture | S$2.95 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| BELYSA | EC-origin | 0 / 0 / 22 | Resale evidence; rental gap | No monthly return in this capture | Not published in snapshot | 0 | Own-stay price comparison is supported; rental fallback needs separate evidence. Check the project's applicable MOP and purchaser eligibility. |
+| BLUWATERS | Private | 0 / 0 / 2 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| BLUWATERS 2 | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| CARISSA PARK CONDOMINIUM | Private | 0 / 0 / 27 | Resale and rental evidence available | No monthly return in this capture | S$3.25 psf/month | 1 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| CASA AL MARE | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| CASA PASIR RIS | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| CELADON VIEW | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| COASTAL BREEZE RESIDENCES | Private | 0 / 0 / 4 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| COASTAL CABANA | EC-origin | 0 / 0 / 0 | No achieved-price evidence in window | No monthly return in this capture | Not published in snapshot | 0 | No valuation or return conclusion; establish project identity and current offer first. Check the project's applicable MOP and purchaser eligibility. |
+| COASTAL VIEW RESIDENCES | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| COCO PALMS | Private | 0 / 0 / 49 | Resale and rental evidence available | No monthly return in this capture | S$4.65 psf/month | 0 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| D'NEST | Private | 0 / 0 / 57 | Resale and rental evidence available | No monthly return in this capture | S$4.33 psf/month | 3 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| DAHLIA PARK CONDOMINIUM | Private | 0 / 0 / 6 | Thin or mixed owner evidence | No monthly return in this capture | S$3.12 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| EASTVALE | EC-origin | 0 / 0 / 11 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 1 | A price point is observable; the small sample does not establish a reliable exit band. Check the project's applicable MOP and purchaser eligibility. |
+| EDELWEISS PARK CONDOMINIUM | Private | 0 / 0 / 14 | Thin or mixed owner evidence | No monthly return in this capture | S$3.37 psf/month | 1 | A price point is observable; the small sample does not establish a reliable exit band. |
+| ELIAS GREEN | Private | 0 / 0 / 13 | Thin or mixed owner evidence | No monthly return in this capture | S$2.94 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| ESTELLA GARDENS | Private | 0 / 0 / 10 | Thin or mixed owner evidence | No monthly return in this capture | S$3.57 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| FERRARIA PARK CONDOMINIUM | Private | 0 / 0 / 16 | Thin or mixed owner evidence | No monthly return in this capture | S$3.42 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| HEDGES PARK CONDOMINIUM | Private | 0 / 0 / 31 | Resale and rental evidence available | No monthly return in this capture | S$4.12 psf/month | 1 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| JLB RESIDENCES | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| KASSIA | Private | 21 / 0 / 0 | Developer-sale evidence; no recent owner resale | No monthly return in this capture | Not published in snapshot | 0 | Require an owner-exit comparison and stock check before paying the launch premium. |
+| LE LOYANG | Private | 0 / 0 / 2 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| LIGHTHOUSE | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| LIVIA | Private | 0 / 0 / 35 | Resale and rental evidence available | No monthly return in this capture | S$3.72 psf/month | 2 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| LOYANG GARDENS | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| LOYANG TOWNHOUSES | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| LOYANG VALLEY | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | S$2.40 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| NV RESIDENCES | Private | 0 / 0 / 22 | Resale and rental evidence available | No monthly return in this capture | S$4.00 psf/month | 2 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| OASIS @ ELIAS | Private | 0 / 0 / 8 | Thin or mixed owner evidence | No monthly return in this capture | S$3.52 psf/month | 3 | A price point is observable; the small sample does not establish a reliable exit band. |
+| OCEAN FRONT SUITES | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| PALM ISLES | Private | 0 / 0 / 25 | Resale and rental evidence available | No monthly return in this capture | S$3.95 psf/month | 2 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| PARC KOMO | Private | 0 / 0 / 7 | Thin or mixed owner evidence | No monthly return in this capture | S$4.81 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| PARC OLYMPIA | Private | 0 / 0 / 29 | Resale and rental evidence available | No monthly return in this capture | S$4.14 psf/month | 2 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| PASIR RIS 8 | Private | 0 / 27 / 0 | Thin or mixed owner evidence | No monthly return in this capture | S$5.29 psf/month | 2 | A price point is observable; the small sample does not establish a reliable exit band. |
+| RIPPLE BAY | Private | 0 / 0 / 40 | Resale and rental evidence available | No monthly return in this capture | S$4.29 psf/month | 2 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| RIS GRANDEUR | Private | 0 / 0 / 10 | Thin or mixed owner evidence | No monthly return in this capture | S$3.10 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| RIZ HAVEN | Private | 0 / 0 / 0 | No recent achieved-price evidence | No monthly return in this capture | Not published in snapshot | 0 | Use older evidence only with its date; no current price conclusion. |
+| SANDY PALM | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| SEA ESTA | Private | 0 / 0 / 24 | Resale and rental evidence available | No monthly return in this capture | S$4.28 psf/month | 0 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| SEA HORIZON | EC-origin | 0 / 0 / 34 | Resale evidence; rental gap | No monthly return in this capture | Not published in snapshot | 0 | Own-stay price comparison is supported; rental fallback needs separate evidence. Check the project's applicable MOP and purchaser eligibility. |
+| SEASTRAND | Private | 0 / 0 / 19 | Thin or mixed owner evidence | No monthly return in this capture | S$4.01 psf/month | 2 | A price point is observable; the small sample does not establish a reliable exit band. |
+| STRATUM | Private | 0 / 0 / 13 | Thin or mixed owner evidence | No monthly return in this capture | S$4.42 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| THE EDGEWATER | Private | 0 / 0 / 1 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| THE ESPARIS | EC-origin | 0 / 0 / 11 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 1 | A price point is observable; the small sample does not establish a reliable exit band. Check the project's applicable MOP and purchaser eligibility. |
+| THE GALE | Private | 0 / 0 / 11 | Thin or mixed owner evidence | No monthly return in this capture | S$3.50 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| THE INFLORA | Private | 0 / 0 / 24 | Resale and rental evidence available | No monthly return in this capture | S$5.23 psf/month | 0 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| THE JOVELL | Private | 0 / 0 / 26 | Resale and rental evidence available | No monthly return in this capture | S$4.88 psf/month | 1 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| THE PALETTE | Private | 0 / 0 / 40 | Resale and rental evidence available | No monthly return in this capture | S$4.27 psf/month | 0 | Compare the exact offered unit to its cohort, then test net carry and condition. |
+| THE SHOREFRONT | Private | 6 / 0 / 0 | Developer-sale evidence; no recent owner resale | No monthly return in this capture | Not published in snapshot | 0 | Require an owner-exit comparison and stock check before paying the launch premium. |
+| VUE 8 RESIDENCE | Private | 0 / 0 / 15 | Thin or mixed owner evidence | No monthly return in this capture | S$4.37 psf/month | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| WATERCOLOURS | EC-origin | 0 / 0 / 28 | Resale evidence; rental gap | No monthly return in this capture | Not published in snapshot | 0 | Own-stay price comparison is supported; rental fallback needs separate evidence. Check the project's applicable MOP and purchaser eligibility. |
+| WATERCREST | Private | 0 / 0 / 5 | Thin or mixed owner evidence | No monthly return in this capture | Not published in snapshot | 0 | A price point is observable; the small sample does not establish a reliable exit band. |
+| WHITEWATER | EC-origin | 0 / 0 / 21 | Resale evidence; rental gap | No monthly return in this capture | Not published in snapshot | 2 | Own-stay price comparison is supported; rental fallback needs separate evidence. Check the project's applicable MOP and purchaser eligibility. |
 
 ## Tampines
 

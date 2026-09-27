@@ -1,17 +1,17 @@
 # Individual property analyses — every project in the requested areas
 
 Research captured: **2026-09-20 16:57:23 SGT (UTC+08:00)**  
-Property: **Individual property analyses, Tampines / Bedok / Canberra / Lakeside-Jurong / Bukit Timah, Singapore**  
+Property: **Individual property analyses, Tampines / Bedok / Canberra / Lakeside-Jurong / Bukit Timah / Pasir Ris, Singapore**  
 Analysis type: **directory of separate project purchase, valuation, rental and exit analyses**  
 Status: **point-in-time market snapshot**  
 Market stage: **mixed market**  
-Summary: **Open a separate analysis for each of the 553 identified projects, including all 20 EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**
+Summary: **Open a separate analysis for each of the 609 identified projects, including all 27 EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**
 
 ## Decision
 
 **Choose a project below to open its individual property analysis.** These are separate reports using the existing property-analysis format. The earlier regional comparison is supporting context; it does not substitute for these project reports.
 
-The captured inventory has 553 identified project names, including 20 EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.
+The captured inventory has 609 identified project names, including 27 EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.
 
 
 ## Bedok: 302 individual reports
@@ -557,6 +557,68 @@ The captured inventory has 553 identified project names, including 20 EC-origin 
 | [Westwood Residences](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-westwood-residences.html) | EC-origin | 25 | Gap flagged | resale |
 
 
+## Pasir Ris: 56 individual reports
+
+| Project analysis | Category | Recent transactions | Current rent | Report stage |
+| --- | --- | --- | --- | --- |
+| [Avila Gardens](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-avila-gardens.html) | Private | 7 | 2026Q2 published | resale |
+| [Azalea Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-azalea-park-condominium.html) | Private | 6 | 2026Q2 published | resale |
+| [Ballota Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-ballota-park-condominium.html) | Private | 10 | 2026Q2 published | resale |
+| [Belysa](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-belysa.html) | EC-origin | 22 | Gap flagged | resale |
+| [Bluwaters](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-bluwaters.html) | Private | 2 | Gap flagged | resale |
+| [Bluwaters 2](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-bluwaters-2.html) | Private | 1 | Gap flagged | resale |
+| [Carissa Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-carissa-park-condominium.html) | Private | 27 | 2026Q2 published | resale |
+| [Casa Al Mare](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-casa-al-mare.html) | Private | 1 | Gap flagged | resale |
+| [Casa Pasir Ris](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-casa-pasir-ris.html) | Private | 0 | Gap flagged | unverified |
+| [Celadon View](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-celadon-view.html) | Private | 0 | Gap flagged | unverified |
+| [Coastal Breeze Residences](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-coastal-breeze-residences.html) | Private | 4 | Gap flagged | resale |
+| [Coastal Cabana](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-coastal-cabana.html) | EC-origin | 0 | Gap flagged | unverified |
+| [Coastal View Residences](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-coastal-view-residences.html) | Private | 1 | Gap flagged | resale |
+| [Coco Palms](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-coco-palms.html) | Private | 49 | 2026Q2 published | resale |
+| [D'Nest](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-dnest.html) | Private | 57 | 2026Q2 published | resale |
+| [Dahlia Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-dahlia-park-condominium.html) | Private | 6 | 2026Q2 published | resale |
+| [Eastvale](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-eastvale.html) | EC-origin | 11 | Gap flagged | resale |
+| [Edelweiss Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-edelweiss-park-condominium.html) | Private | 14 | 2026Q2 published | resale |
+| [Elias Green](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-elias-green.html) | Private | 13 | 2026Q2 published | resale |
+| [Estella Gardens](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-estella-gardens.html) | Private | 10 | 2026Q2 published | resale |
+| [Ferraria Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-ferraria-park-condominium.html) | Private | 16 | 2026Q2 published | resale |
+| [Hedges Park Condominium](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-hedges-park-condominium.html) | Private | 31 | 2026Q2 published | resale |
+| [Jlb Residences](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-jlb-residences.html) | Private | 0 | Gap flagged | unverified |
+| [Kassia](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-kassia.html) | Private | 21 | Gap flagged | new launch |
+| [Le Loyang](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-le-loyang.html) | Private | 2 | Gap flagged | resale |
+| [Lighthouse](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-lighthouse.html) | Private | 0 | Gap flagged | unverified |
+| [Livia](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-livia.html) | Private | 35 | 2026Q2 published | resale |
+| [Loyang Gardens](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-loyang-gardens.html) | Private | 1 | Gap flagged | resale |
+| [Loyang Townhouses](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-loyang-townhouses.html) | Private | 0 | Gap flagged | unverified |
+| [Loyang Valley](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-loyang-valley.html) | Private | 1 | 2026Q2 published | resale |
+| [Nv Residences](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-nv-residences.html) | Private | 22 | 2026Q2 published | resale |
+| [Oasis @ Elias](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-oasis-elias.html) | Private | 8 | 2026Q2 published | resale |
+| [Ocean Front Suites](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-ocean-front-suites.html) | Private | 0 | Gap flagged | unverified |
+| [Palm Isles](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-palm-isles.html) | Private | 25 | 2026Q2 published | resale |
+| [Parc Komo](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-parc-komo.html) | Private | 7 | 2026Q2 published | resale |
+| [Parc Olympia](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-parc-olympia.html) | Private | 29 | 2026Q2 published | resale |
+| [Pasir Ris 8](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-pasir-ris-8.html) | Private | 27 | 2026Q2 published | new launch |
+| [Ripple Bay](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-ripple-bay.html) | Private | 40 | 2026Q2 published | resale |
+| [Ris Grandeur](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-ris-grandeur.html) | Private | 10 | 2026Q2 published | resale |
+| [Riz Haven](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-riz-haven.html) | Private | 0 | Gap flagged | unverified |
+| [Sandy Palm](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-sandy-palm.html) | Private | 1 | Gap flagged | resale |
+| [Sea Esta](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-sea-esta.html) | Private | 24 | 2026Q2 published | resale |
+| [Sea Horizon](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-sea-horizon.html) | EC-origin | 34 | Gap flagged | resale |
+| [Seastrand](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-seastrand.html) | Private | 19 | 2026Q2 published | resale |
+| [Stratum](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-stratum.html) | Private | 13 | 2026Q2 published | resale |
+| [The Edgewater](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-edgewater.html) | Private | 1 | Gap flagged | resale |
+| [The Esparis](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-esparis.html) | EC-origin | 11 | Gap flagged | resale |
+| [The Gale](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-gale.html) | Private | 11 | 2026Q2 published | resale |
+| [The Inflora](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-inflora.html) | Private | 24 | 2026Q2 published | resale |
+| [The Jovell](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-jovell.html) | Private | 26 | 2026Q2 published | resale |
+| [The Palette](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-palette.html) | Private | 40 | 2026Q2 published | resale |
+| [The Shorefront](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-the-shorefront.html) | Private | 6 | Gap flagged | new launch |
+| [Vue 8 Residence](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-vue-8-residence.html) | Private | 15 | 2026Q2 published | resale |
+| [Watercolours](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-watercolours.html) | EC-origin | 28 | Gap flagged | resale |
+| [Watercrest](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-watercrest.html) | Private | 5 | Gap flagged | resale |
+| [Whitewater](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-whitewater.html) | EC-origin | 21 | Gap flagged | resale |
+
+
 ## Tampines: 34 individual reports
 
 | Project analysis | Category | Recent transactions | Current rent | Report stage |
@@ -599,7 +661,7 @@ The captured inventory has 553 identified project names, including 20 EC-origin 
 
 ## Four additional future land sites
 
-These have separate individual site assessments and are excluded from the 553 named-project count. Their final names, licensed inventory, home prices and TOP are not invented.
+These have separate individual site assessments and are excluded from the 609 named-project count. Their final names, licensed inventory, home prices and TOP are not invented.
 
 | Individual future-site analysis | Area | Category |
 | --- | --- | --- |

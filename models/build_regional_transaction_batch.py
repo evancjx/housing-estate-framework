@@ -8,6 +8,7 @@ separate, audited project crosswalk; every price comes from fresh URA CSVs.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import re
@@ -23,6 +24,125 @@ LATEST_START, LATEST_END = "2025-09", "2026-08"
 PRIOR_START, PRIOR_END = "2024-09", "2025-08"
 EXPECTED = [f"pmi_d{d}_2021-2026.csv" for d in ("10", "11", "14", "15", "16", "18", "21", "22", "23", "27")]
 EXPECTED += [f"pmi_d{d}_executive_condo_2021-2026.csv" for d in ("18", "22", "27")]
+# Pasir Ris (added 2026-09-27) spans D17. Two D17 exports are stitched by month
+# so no sale month comes from two files; the older one is an earlier capture.
+EXPECTED += ["pmi_d17_2021-2026.csv", "pmi_d17_2025-2026.csv"]
+MONTH_WINDOWS = {
+    "pmi_d17_2021-2026.csv": ("2021-10", "2024-12"),
+    "pmi_d17_2025-2026.csv": ("2025-01", "2026-09"),
+}
+CAPTURE_NOTES = {
+    "pmi_d17_2021-2026.csv": ("2026-06-27",
+                              "Earlier URA PMI export captured 2026-06-27 (repository commit 61e79a5); used for 2021-10 to 2024-12 only"),
+    "pmi_d17_2025-2026.csv": ("2026-09-20", "Fresh public URA PMI browser CSV export (PR #39); used for 2025-01 to 2026-09"),
+}
+
+
+def apply_window(raw, dates, window):
+    """Keep only rows whose sale month lies inside an inclusive (start, end) YYYY-MM window."""
+    if window is None:
+        return raw, dates
+    months = dates.dt.strftime("%Y-%m")
+    keep = months.between(window[0], window[1])
+    return raw.loc[keep.values].copy(), dates.loc[keep.values]
+
+
+def check_window_overlap(names, windows=None):
+    """Reject two exports that could supply the same month for one district and property group."""
+    windows = MONTH_WINDOWS if windows is None else windows
+    groups = {}
+    for name in names:
+        district = re.search(r"pmi_d(\d+)", name).group(1)
+        group = "EC" if "executive" in name else "condo"
+        groups.setdefault((district, group), []).append((name, windows.get(name)))
+    for key, files in groups.items():
+        if len(files) < 2:
+            continue
+        if any(window is None for _, window in files):
+            raise ValueError(f"{key}: an unwindowed export would overlap another export: {[n for n, _ in files]}")
+        spans = sorted(window for _, window in files)
+        for (start_a, end_a), (start_b, end_b) in zip(spans, spans[1:]):
+            if start_b <= end_a:
+                raise ValueError(f"{key}: month windows overlap: {start_a}–{end_a} and {start_b}–{end_b}")
+def compare_captures(earlier, later):
+    """Rows of two exports' shared sale months that the later export revised, added or dropped."""
+    def months(frame):
+        return pd.to_datetime(frame["Sale Date"], format="%b-%y").dt.strftime("%Y-%m")
+
+    earlier_months, later_months = months(earlier), months(later)
+    start = max(earlier_months.min(), later_months.min())
+    end = min(earlier_months.max(), later_months.max())
+    shared_earlier = Counter(map(tuple, earlier.loc[earlier_months.between(start, end).values, RAW_COLUMNS].values))
+    shared_later = Counter(map(tuple, later.loc[later_months.between(start, end).values, RAW_COLUMNS].values))
+    earlier_only = sorted((shared_earlier - shared_later).elements())
+    later_only = sorted((shared_later - shared_earlier).elements())
+    name_at, date_at = RAW_COLUMNS.index("Project Name"), RAW_COLUMNS.index("Sale Date")
+    revisions, unmatched = {}, 0
+    for row in earlier_only:
+        candidates = [c for c in later_only if c[name_at] == row[name_at] and c[date_at] == row[date_at]]
+        if not candidates:
+            unmatched += 1
+            continue
+        match = min(candidates, key=lambda c: sum(a != b for a, b in zip(row, c)))
+        later_only.remove(match)
+        month = pd.to_datetime(row[date_at], format="%b-%y").strftime("%Y-%m")
+        for column, old, new in zip(RAW_COLUMNS, row, match):
+            if old != new:
+                entry = revisions.setdefault((row[name_at], column, old, new), {"rows": 0, "sale_months": set()})
+                entry["rows"] += 1
+                entry["sale_months"].add(month)
+    return {
+        "overlap_months": [start, end],
+        "revised_rows": len(earlier_only) - unmatched,
+        "unmatched_earlier_rows": unmatched,
+        "later_only_rows": len(later_only),
+        "revisions": [
+            {"project_name": name, "field": column, "earlier": old, "later": new,
+             "rows": entry["rows"], "sale_months": sorted(entry["sale_months"])}
+            for (name, column, old, new), entry in sorted(revisions.items())
+        ],
+    }
+
+
+def read_export(path):
+    try:
+        return pd.read_csv(path, encoding="utf-8-sig", dtype=str, keep_default_na=False), "utf-8-sig"
+    except UnicodeDecodeError:
+        return pd.read_csv(path, encoding="cp1252", dtype=str, keep_default_na=False), "cp1252"
+
+
+def capture_comparisons(names, windows=None):
+    """Compare consecutive month-windowed exports of one district and property group over their shared months."""
+    windows = MONTH_WINDOWS if windows is None else windows
+    groups = {}
+    for name in names:
+        if name in windows:
+            district = re.search(r"pmi_d(\d+)", name).group(1)
+            groups.setdefault((district, "executive" in name), []).append(name)
+    comparisons = []
+    for files in groups.values():
+        files = sorted(files, key=lambda name: windows[name])
+        for earlier, later in zip(files, files[1:]):
+            result = compare_captures(read_export(ROOT / "raw" / "ura" / earlier)[0],
+                                      read_export(ROOT / "raw" / "ura" / later)[0])
+            comparisons.append({"earlier": earlier, "later": later, **result})
+    return comparisons
+
+
+def zero_row_note(ec_origin, districts, names):
+    """Explain a project with no captured rows: an export that was never fetched is not an empty market."""
+    group = "executive" if ec_origin else "condo"
+    captured = {re.search(r"pmi_d(\d+)", name).group(1) for name in names
+                if ("executive" in name) == (group == "executive")}
+    wanted = {f"{int(d):02d}" for d in re.findall(r"\d+", str(districts))}
+    if wanted and not wanted & captured:
+        label = "executive condominium" if ec_origin else "apartment/condominium"
+        listed = ", ".join(f"D{int(d)}" for d in sorted(wanted))
+        return (f"The {listed} {label} export was not captured for this batch, so zero rows here mean "
+                "not fetched; not evidence of no sales, no development or no stock.")
+    return "No rows in the fetched 60-month URA exports; not evidence of no development or no stock."
+
+
 RAW_COLUMNS = ["Project Name", "Transacted Price ($)", "Area (SQFT)", "Unit Price ($ PSF)", "Sale Date", "Street Name", "Type of Sale", "Type of Area", "Area (SQM)", "Unit Price ($ PSM)", "Nett Price($)", "Property Type", "Number of Units", "Tenure", "Postal District", "Market Segment", "Floor Level"]
 COHORT_KEYS = ["project_name", "region", "subregion", "ec_origin", "tenure_group", "tenure", "sale_type", "size_band"]
 SIZE_LABELS = ["≤50 sqm (≤538 sqft)", ">50–70 sqm (538–753 sqft)", ">70–100 sqm (753–1,076 sqft)", ">100–130 sqm (1,076–1,399 sqft)", ">130 sqm (>1,399 sqft)"]
@@ -89,35 +209,40 @@ def load_scope(context):
 
 
 def load_raw():
+    check_window_overlap(EXPECTED)
     parts, manifest = [], []
     for name in EXPECTED:
         path = ROOT / "raw" / "ura" / name
-        encoding = "utf-8-sig"
-        try:
-            raw = pd.read_csv(path, encoding=encoding, dtype=str, keep_default_na=False)
-        except UnicodeDecodeError:
-            encoding = "cp1252"
-            raw = pd.read_csv(path, encoding=encoding, dtype=str, keep_default_na=False)
+        raw, encoding = read_export(path)
         assert list(raw.columns) == RAW_COLUMNS, (name, raw.columns.tolist())
-        assert len(raw) > 0
+        rows_in_file = len(raw)
+        raw["source_row"] = range(2, len(raw) + 2)  # CSV header is physical line 1; kept before windowing.
         dates = pd.to_datetime(raw["Sale Date"], format="%b-%y", errors="raise")
+        window = MONTH_WINDOWS.get(name)
+        raw, dates = apply_window(raw, dates, window)
+        assert len(raw) > 0
         assert dates.min() >= pd.Timestamp("2021-10-01")
         assert dates.max() <= pd.Timestamp("2026-09-01")
         expected_district = int(re.search(r"pmi_d(\d+)", name).group(1))
         assert set(numeric(raw["Postal District"])) == {expected_district}
         expected_types = {"Executive Condominium"} if "executive" in name else {"Apartment", "Condominium"}
         assert set(raw["Property Type"]) <= expected_types
+        captured_date, capture_note = CAPTURE_NOTES.get(name, (
+            "2026-09-20",
+            "Reused same-day full district export from local LakeGarden batch"
+            if expected_district == 22 and "executive" not in name else "Fresh public URA PMI browser CSV export"))
+        signatures = raw.drop(columns=["source_row"])
         manifest.append({
             "file": str(path.relative_to(ROOT)), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-            "encoding": encoding, "rows": len(raw), "distinct_public_signatures": len(raw.drop_duplicates()),
-            "repeated_signature_occurrences_retained": int(raw.duplicated().sum()),
+            "encoding": encoding, "rows": len(raw), "rows_in_file": rows_in_file,
+            "month_window": list(window) if window else None,
+            "distinct_public_signatures": len(signatures.drop_duplicates()),
+            "repeated_signature_occurrences_retained": int(signatures.duplicated().sum()),
             "district": expected_district, "property_group": "EC" if "executive" in name else "Apartments/condominiums",
             "first_sale_month": dates.min().strftime("%Y-%m"), "last_sale_month": dates.max().strftime("%Y-%m"),
-            "captured_date": "2026-09-20", "source_url": URL,
-            "capture_note": "Reused same-day full district export from local LakeGarden batch" if expected_district == 22 and "executive" not in name else "Fresh public URA PMI browser CSV export",
+            "captured_date": captured_date, "source_url": URL, "capture_note": capture_note,
         })
         raw["source_file"] = name
-        raw["source_row"] = range(2, len(raw) + 2)  # CSV header is physical line 1.
         raw["sale_month"] = dates.dt.strftime("%Y-%m")
         raw["key"] = raw["Project Name"].map(norm)
         parts.append(raw)
@@ -211,7 +336,7 @@ def main():
         ctx = context_map.get(norm(name), {})
         note = ctx.get("note", "")
         if not len(all_rows):
-            note = (note + " No rows in the fetched 60-month URA exports; not evidence of no development or no stock.").strip()
+            note = (note + " " + zero_row_note(str(item["ec_origin"]) == "True", item.get("source_districts", ""), EXPECTED)).strip()
         if name in {"LAKESIDE APARTMENTS", "PARK VIEW MANSION", "BAGNALL COURT", "WATTEN ESTATE CONDOMINIUM"}:
             note += " Historical redevelopment predecessor; not a current-stock recommendation."
         project_rows.append({
@@ -264,13 +389,13 @@ def main():
         "Counts measure recorded transactions, not availability, selling time or turnover rate. URA resale/subsale caveats are voluntary and the source can be revised.",
         "No rental yields, net returns, taxes, loan affordability or unified liveability/value ranking are inferred from sale prices. TOP, defects, unit facing and asking prices are not comprehensively verified.",
         "EC origin does not establish present buyer eligibility. Completed ECs may remain within MOP. Apply the correct HDB land-tender cohort and check the particular unit.",
-        "The wider Sembawang context is separate from the five requested regions. Bukit Timah includes 12 explicitly listed Upper Bukit Timah extensions; Lakeside/Jurong includes Jurong East and Jurong West.",
+        "The wider Sembawang context is separate from the six requested regions (Pasir Ris added 2026-09-27; its pre-2025 D17 rows come from an earlier capture). Bukit Timah includes 12 explicitly listed Upper Bukit Timah extensions; Lakeside/Jurong includes Jurong East and Jurong West.",
     ]
     metadata = {
         "captured_at": "2026-09-20 SGT", "source_url": URL, "source_updated": "2026-09-18",
         "history_start": "2021-10", "history_end": "2026-09",
         "latest_start": LATEST_START, "latest_end": LATEST_END, "prior_start": PRIOR_START, "prior_end": PRIOR_END,
-        "scope_note": "Tampines and Bedok recorded planning areas; Canberra precinct; Jurong East/West; Bukit Timah plus explicitly listed Upper Bukit Timah extensions. Wider Sembawang context is optional.",
+        "scope_note": "Tampines, Bedok and Pasir Ris recorded planning areas; Canberra precinct; Jurong East/West; Bukit Timah plus explicitly listed Upper Bukit Timah extensions. Wider Sembawang context is optional.",
         "limitations": limitations,
     }
     payload = {"metadata": metadata, "summary": summary, "projects": frame_records(projects), "cohorts": frame_records(cohorts), "transactions": frame_records(d), "regional_segments": frame_records(region_stats), "context": context}
@@ -283,7 +408,7 @@ def main():
         "recent_cohort_count_reconciliation": int(cohorts.n.sum()) == len(recent),
         "project_ledger_count_reconciliation": int(projects.total_n.sum()) == len(d),
         "raw_repeated_occurrences_retained": sum(x["repeated_signature_occurrences_retained"] for x in manifest),
-    }}
+    }, "capture_comparisons": capture_comparisons(EXPECTED)}
     assert all(v for k, v in provenance["validation"].items() if k.endswith("reconciliation") or k == "all_source_record_ids_unique")
     for filename in ("scope_crosswalk.csv", "scope_overrides.csv", "sourced_context.json"):
         path = ROOT / filename

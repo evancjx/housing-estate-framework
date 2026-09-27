@@ -7,8 +7,11 @@ import pandas as pd
 import pytest
 
 from models.build_individual_property_analyses import (
+    inventory_counts,
     market_stage,
     maximum_entry,
+    region_label,
+    render_future_site,
     render_project,
     slugify,
 )
@@ -147,7 +150,7 @@ def cohort_records(tmp_path, *, sale_type="Resale", ec_origin=False, n=2, rent=N
     return enrich_cohorts(base, path)
 
 
-def render_sample(*, project=None, transactions=None, cohorts=None, rental=None, developer=None, profile=None):
+def render_sample(*, project=None, transactions=None, cohorts=None, rental=None, developer=None, profile=None, provenance=None):
     return render_project(
         project_record() if project is None else project,
         pd.DataFrame() if transactions is None else transactions,
@@ -160,6 +163,7 @@ def render_sample(*, project=None, transactions=None, cohorts=None, rental=None,
         slug="sample-project",
         display_name="Sample Project",
         captured_at="2026-09-20 18:00:00",
+        provenance=provenance,
     )
 
 
@@ -320,3 +324,59 @@ def test_unpublished_developer_price_does_not_render_as_zero_psf():
 )
 def test_market_stage_preserves_project_evidence_and_history(project, profile, recent, expected):
     assert market_stage(project, profile, pd.DataFrame(), recent) == expected
+
+
+EARLIER_SOURCES = {"sources": [
+    {"file": "raw/ura/pmi_d17_2021-2026.csv", "captured_date": "2026-06-27", "month_window": ["2021-10", "2024-12"],
+     "capture_note": "Earlier URA PMI export captured 2026-06-27 (repository commit 61e79a5); used for 2021-10 to 2024-12 only"},
+    {"file": "raw/ura/pmi_d17_2025-2026.csv", "captured_date": "2026-09-20", "month_window": ["2025-01", "2026-09"],
+     "capture_note": "Fresh public URA PMI browser CSV export (PR #39); used for 2025-01 to 2026-09"},
+]}
+
+
+def test_rows_from_an_earlier_capture_are_named_in_the_evidence_register(tmp_path):
+    transactions = transaction_records(n=3)
+    transactions["source_file"] = ["pmi_d17_2021-2026.csv", "pmi_d17_2021-2026.csv", "pmi_d17_2025-2026.csv"]
+    markdown = render_sample(transactions=transactions, cohorts=cohort_records(tmp_path), provenance=EARLIER_SOURCES)
+    register = markdown.split("## Evidence register and downloads", 1)[1]
+    assert "| URA transactions, earlier capture |" in register
+    assert "2 of this project's rows (sale months 2021-10 to 2024-12)" in register
+    assert "captured 2026-06-27" in register and "61e79a5" in register
+    assert "Captured 20 Sep 2026; portal update 18 Sep; October 2021–partial September 2026" not in register
+
+    later_only = transaction_records(n=2)
+    later_only["source_file"] = "pmi_d17_2025-2026.csv"
+    plain = render_sample(transactions=later_only, cohorts=cohort_records(tmp_path), provenance=EARLIER_SOURCES)
+    assert "earlier capture" not in plain
+    assert "Captured 20 Sep 2026; portal update 18 Sep; October 2021–partial September 2026" in plain
+
+
+def test_capture_revisions_are_flagged_on_the_project_page():
+    provenance = {"capture_comparisons": [{
+        "earlier": "pmi_d17_2021-2026.csv", "later": "pmi_d17_2025-2026.csv", "overlap_months": ["2025-01", "2026-06"],
+        "revisions": [{"project_name": "SAMPLE PROJECT", "field": "Tenure",
+                       "earlier": "999 yrs lease commencing from 1937", "later": "946 yrs lease commencing from 1937",
+                       "rows": 6, "sale_months": ["2025-02", "2026-05"]}],
+    }]}
+    markdown = render_sample(provenance=provenance)
+    assert ("URA revised Tenure between captures for 6 sales (2025-02 to 2026-05): "
+            "the earlier export (captured before 2026-09-20) recorded 999 yrs lease commencing from 1937; "
+            "the later export records 946 yrs lease commencing from 1937.") in markdown
+    assert "The later capture is treated as current" in markdown
+    assert "URA revised" not in render_sample(project=project_record(project_name="OTHER"), provenance=provenance)
+
+
+def test_inventory_wording_is_derived_from_the_records():
+    records = [{"ec_origin": True, "region": "Pasir Ris"}, {"ec_origin": False, "region": "Bedok"},
+               {"ec_origin": False, "region": "Lakeside / Jurong"}]
+    assert inventory_counts(records) == (3, 1)
+    assert region_label(x["region"] for x in records) == "Bedok / Lakeside-Jurong / Pasir Ris"
+
+
+def test_future_site_count_is_not_hard_coded():
+    site = {"site_name": "Sample Site", "ec_origin": False, "region": "Bedok"}
+    markdown = render_future_site(site, pd.DataFrame(columns=["project_name", "sale_type", "n"]),
+                                  display_name="Sample Site GLS future condominium",
+                                  captured_at="2026-09-20 18:00:00", project_count=609)
+    assert "the 609 named-project transaction inventory" in markdown
+    assert "553" not in markdown

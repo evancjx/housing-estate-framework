@@ -148,7 +148,7 @@ def write_register(projects, destination, captured):
     lines = [
         "# Regional project evidence register — project-level conclusions and research coverage", "",
         f"Research captured: **{captured} SGT (UTC+08:00)**  ",
-        "Property: **Regional project evidence register, Tampines / Bedok / Canberra / Jurong / Bukit Timah, Singapore**  ",
+        "Property: **Regional project evidence register, Tampines / Bedok / Canberra / Jurong / Bukit Timah / Pasir Ris, Singapore**  ",
         "Analysis type: **project evidence, market-state, rental and developer-inventory assessment register**  ",
         "Status: **point-in-time market snapshot**  ", "Market stage: **mixed market**", "", "## Decision", "",
         "**Use this register to decide which evidence can support a purchase assessment, not to treat every observed project as a completed investment recommendation.** Every identified project remains visible. Developer inventory, owner transaction evidence, rental coverage and missing evidence are distinguished; the companion regional report makes the comparative decisions where the evidence supports them.", "",
