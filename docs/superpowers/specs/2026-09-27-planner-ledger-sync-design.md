@@ -83,7 +83,9 @@ For BUC:
 - `calledAmount`: Σ consideration `paymentAmount` dated on or before the sale;
 - `uncalledDeveloperBalance = max(0, purchasePrice − calledAmount)`.
 
-For resale, as today: `calledAmount = purchasePrice` and `uncalledDeveloperBalance = 0`.
+For resale, as today: `calledAmount = purchasePrice` and `uncalledDeveloperBalance = 0`. In ledger
+mode, a resale consideration row dated after the sale is rejected, because resale has no uncalled
+balance to hold it.
 
 **Checkpoints and chart rows**: the uncalled balance at a date comes from one helper. In ledger mode
 it is based on consideration rows dated on or before that date; otherwise on stages. It is always 0

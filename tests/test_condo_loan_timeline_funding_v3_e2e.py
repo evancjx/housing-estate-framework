@@ -1585,3 +1585,59 @@ def test_engine_rejected_ledger_is_explained_and_not_used_for_owner_split(
     playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
         "Split unavailable"
     )
+
+
+def test_owner_outcome_stays_on_the_ledger_projection_when_automatic_cpf_changes(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+
+    _open_details(page, "#cpf-assumptions-details")
+    _fill_and_blur(page.locator("#cpf-primary-monthly"), "1000")
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+
+    # Move a loan draw so the ledger schedule (and the automatic CPF estimate,
+    # which walks the scheduled monthly payments) both change.
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    household_cash = _display_money_number(page.locator("#owner-outcome-household-cash"))
+    waterfall_total = _display_money_number(page.locator("#waterfall-total"))
+    # The waterfall figure is displayed rounded to the nearest whole dollar; the
+    # owner outcome figure is displayed to the cent. Reconcile at the coarser
+    # displayed rounding.
+    assert household_cash == pytest.approx(waterfall_total, abs=0.5)
+
+
+def test_partner_toggle_off_is_pinned_while_the_ledger_is_applied(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+
+    _open_details(page, "#funding-ledger-editor")
+    _fill_and_blur(
+        page.locator("#funding-ledger-body [data-row-key='stage-3'][data-field='date']"),
+        "2026-11-25",
+    )
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$80,404")
+
+    page.locator("#partner-enabled").uncheck()
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_be_hidden()
+    playwright_api.expect(page.locator("#checkpoint-ledger-status")).to_be_hidden()
+    playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")

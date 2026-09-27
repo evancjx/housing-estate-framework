@@ -182,6 +182,15 @@ def test_resale_ledger_moves_the_completion_draw_without_uncalled_balance() -> N
     assert result["owner"] == pytest.approx(300_000, abs=0.01)
 
 
+def test_resale_payment_after_the_sale_is_rejected() -> None:
+    result = _run_node(
+        f"const options={RESALE};const rows=ledgerFor(options);"
+        "return rejection(()=>project(options,edit(rows,'resale-completion',{date:'2030-06-01'})));"
+    )
+
+    assert result == "a resale purchase payment cannot fall after the planned sale"
+
+
 def test_ledger_source_must_be_a_function_or_null() -> None:
     result = _run_node(
         "return {bad:rejection(()=>planner.setFundingLedgerSource('rows')),"
