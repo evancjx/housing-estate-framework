@@ -1561,3 +1561,27 @@ def test_unusable_ledgers_fall_back_with_a_reason(chromium_page) -> None:
     playwright_api.expect(status).to_be_hidden()
     playwright_api.expect(page.locator("#checkpoint-ledger-status")).to_be_hidden()
     playwright_api.expect(_year_one_loan_drawn(page)).to_have_text("S$241,404")
+
+
+def test_engine_rejected_ledger_is_explained_and_not_used_for_owner_split(
+    chromium_page,
+) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    _load_clean(page, url)
+    _sample_couple_ledger(page, playwright_api)
+    bsd_cash = _money_number(
+        page.locator("#funding-ledger-body [data-row-key='cost-bsd'][data-field='primaryCash']")
+    )
+    _set_ledger_amount(page, "cost-bsd", "primaryCash", str(bsd_cash - 100))
+    _set_ledger_amount(page, "cost-bsd", "loan", "100")
+    playwright_api.expect(page.locator("#ledger-overall-status")).to_have_text(
+        "All rows and totals reconcile"
+    )
+    playwright_api.expect(page.locator("#timeline-ledger-status")).to_have_text(
+        "Ledger edits not applied: the bank loan can only fund purchase-price payments,"
+        " not costs or notes. Showing the standard payment schedule."
+    )
+    playwright_api.expect(page.locator("#owner-outcome-primary-cpf")).to_have_text(
+        "Split unavailable"
+    )

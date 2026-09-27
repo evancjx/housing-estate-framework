@@ -2095,11 +2095,14 @@
 
     function ledgerProjection(rows, fallback) {
       try {
-        return planner.buildHoldingProjection({ ...projectionOptions(), fundingLedger: { rows } });
+        return {
+          projection: planner.buildHoldingProjection({ ...projectionOptions(), fundingLedger: { rows } }),
+          applied: true,
+        };
       } catch {
         // The planner's ledger status line shows this rejection and falls back to the
         // standard projection, so the owner outcome follows the same fallback.
-        return fallback;
+        return { projection: fallback, applied: false };
       }
     }
 
@@ -2835,12 +2838,11 @@
         renderRows(validation, projection);
         renderFooter(validation);
         const ledgerApplies = validation.balanced && !state.stale;
+        const { projection: cpfProjection, applied } = ledgerApplies
+          ? ledgerProjection(state.rows, projection)
+          : { projection, applied: false };
         try {
-          renderCpfEstimate(
-            ledgerApplies ? ledgerProjection(state.rows, projection) : projection,
-            state.rows,
-            { cpfWeightsReliable: ledgerApplies }
-          );
+          renderCpfEstimate(cpfProjection, state.rows, { cpfWeightsReliable: applied });
         } catch (error) {
           renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
         }
