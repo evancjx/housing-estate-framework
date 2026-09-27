@@ -74,6 +74,52 @@ def test_source_rows_are_physical_lines_before_windowing(tmp_path, monkeypatch):
     assert manifest[0]["month_window"] == ["2021-10", "2024-12"]
 
 
+
+def test_earlier_capture_is_dated_and_cites_the_capture_commit():
+    captured_date, note = batch.CAPTURE_NOTES["pmi_d17_2021-2026.csv"]
+    assert captured_date == "2026-06-27"
+    assert "61e79a5" in note and "ad719b4" not in note
+
+
+def _export(*rows):
+    frame = pd.DataFrame([{column: "1" for column in batch.RAW_COLUMNS} | row for row in rows],
+                         columns=batch.RAW_COLUMNS)
+    return frame
+
+
+def test_capture_comparison_reports_revised_and_added_rows_in_shared_months():
+    old_tenure, new_tenure = "999 yrs lease commencing from 1937", "946 yrs lease commencing from 1937"
+    earlier = _export(
+        {"Project Name": "SHORE", "Sale Date": "Dec-24", "Tenure": old_tenure},
+        {"Project Name": "SHORE", "Sale Date": "Jan-25", "Tenure": old_tenure},
+        {"Project Name": "BAY", "Sale Date": "Feb-25", "Tenure": "Freehold"},
+    )
+    later = _export(
+        {"Project Name": "SHORE", "Sale Date": "Jan-25", "Tenure": new_tenure},
+        {"Project Name": "BAY", "Sale Date": "Feb-25", "Tenure": "Freehold"},
+        {"Project Name": "BAY", "Sale Date": "Feb-25", "Tenure": "Freehold", "Floor Level": "06 to 10"},
+        {"Project Name": "BAY", "Sale Date": "Mar-25", "Tenure": "Freehold"},
+    )
+    result = batch.compare_captures(earlier, later)
+    assert result["overlap_months"] == ["2025-01", "2025-02"]
+    assert result["revised_rows"] == 1
+    assert result["unmatched_earlier_rows"] == 0
+    assert result["later_only_rows"] == 1
+    assert result["revisions"] == [{
+        "project_name": "SHORE", "field": "Tenure", "earlier": old_tenure, "later": new_tenure,
+        "rows": 1, "sale_months": ["2025-01"],
+    }]
+
+
+def test_zero_row_note_says_when_the_export_was_never_captured():
+    missing = batch.zero_row_note(True, "17", batch.EXPECTED)
+    assert "D17 executive condominium export was not captured" in missing
+    assert "not evidence of no sales" in missing
+    fetched = "No rows in the fetched 60-month URA exports; not evidence of no development or no stock."
+    assert batch.zero_row_note(True, "18", batch.EXPECTED) == fetched
+    assert batch.zero_row_note(False, "17", batch.EXPECTED) == fetched
+
+
 from pathlib import Path
 from models import build_individual_project_profiles as profiles
 

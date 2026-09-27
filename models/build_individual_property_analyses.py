@@ -36,6 +36,48 @@ SSD = "https://www.iras.gov.sg/taxes/stamp-duty/for-property/selling-or-disposin
 EC_RULES = "https://www.hdb.gov.sg/buying-a-flat/executive-condominiums/conditions-after-buying-an-ec"
 
 
+REGION_ORDER = ["Tampines", "Bedok", "Canberra", "Lakeside / Jurong", "Bukit Timah"]
+
+
+def region_label(regions):
+    regions = set(regions)
+    ordered = [r for r in REGION_ORDER if r in regions] + sorted(regions - set(REGION_ORDER))
+    return " / ".join(r.replace(" / ", "-") for r in ordered)
+
+
+def inventory_counts(records):
+    return len(records), sum(bool(x["ec_origin"]) for x in records)
+
+
+def earlier_capture_rows(transactions, sources):
+    """Evidence-register rows for project transactions that come from an export captured before this batch."""
+    if not len(transactions) or "source_file" not in transactions:
+        return []
+    rows = []
+    for source in sources:
+        if source.get("captured_date") in (None, DATE):
+            continue
+        n = int(transactions.source_file.eq(Path(source["file"]).name).sum())
+        if n:
+            start, end = source.get("month_window") or ("?", "?")
+            rows.append(["URA transactions, earlier capture", f"[Public source]({URA})", f"{n:,} of this project's rows (sale months {start} to {end}) come from an earlier export: {source['capture_note']}. URA may have revised them since."])
+    return rows
+
+
+def revision_lines(project_name, comparisons):
+    """Flag fields URA changed between two captures of the same sales."""
+    lines = []
+    for comparison in comparisons:
+        for r in comparison.get("revisions", []):
+            if r["project_name"].strip().upper() != project_name.strip().upper():
+                continue
+            months = r["sale_months"]
+            span = months[0] if len(months) == 1 else f"{months[0]} to {months[-1]}"
+            sales = f"{r['rows']:,} sale{'' if r['rows'] == 1 else 's'}"
+            lines.extend([f"URA revised {r['field']} between captures for {sales} ({span}): the earlier export (captured before {DATE}) recorded {r['earlier']}; the later export records {r['later']}. The later capture is treated as current; rows sold before {comparison['overlap_months'][0]} come only from the earlier export and still carry its value.", ""])
+    return lines
+
+
 def slugify(name):
     value = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode().lower()
     value = re.sub(r"['’]", "", value)
@@ -160,7 +202,8 @@ def decision(project, recent, cohorts, peers, developer, editorial):
     return opening + f" This supports a conditional own-stay comparison at the required area. At a hypothetical purchase at that median, capital-only break-even is {money(anchor.break_even_sale)} before holding costs. Rental support and the offered unit's condition must justify the investment case separately."
 
 
-def render_project(project, transactions, cohorts, peers, rental, developer, profile, editorial, *, slug, display_name, captured_at, prior=None):
+def render_project(project, transactions, cohorts, peers, rental, developer, profile, editorial, *, slug, display_name, captured_at, prior=None, provenance=None):
+    provenance = provenance or {}
     eligible = transactions.loc[transactions.metric_eligible.eq(True)].copy() if len(transactions) else transactions.copy()
     recent = eligible.loc[eligible.sale_month.between(START, END)] if len(eligible) else eligible
     partial = eligible.loc[eligible.sale_month.eq("2026-09")] if len(eligible) else eligible
@@ -203,6 +246,7 @@ def render_project(project, transactions, cohorts, peers, rental, developer, pro
     section(lines, "Project identity and evidence", table(["Item", "Project evidence"], identity), "Market stage describes observed selling activity or a sourced development status. A resale classification is not an independent TOP certificate. A total-unit figure is not live inventory. Registered area is not a bedroom count or a measure of usable internal space.")
     if project.get("coverage_note") and not pd.isna(project["coverage_note"]):
         lines.extend([text(project["coverage_note"]), ""])
+    lines.extend(revision_lines(name, provenance.get("capture_comparisons", [])))
     if profile.get("source_note"):
         lines.extend([text(profile["source_note"]), ""])
     if prior:
@@ -340,7 +384,9 @@ def render_project(project, transactions, cohorts, peers, rental, developer, pro
     lines.extend(["\n".join(f"{i}. {x}" for i, x in enumerate(conditions, 1)), ""])
 
     section(lines, "Evidence register and downloads", f"This is a separate analysis of **{display_name}**. [Browse every captured project transaction]({tx_url}) or [download its source-row-preserving normalized ledger]({PUBLISHED}/research/2026-09-20/individual/{slug}/transactions.csv?download=1). The public data reports transaction months and floor bands, not full unit numbers. Every repeated source occurrence is retained. [All original URA fields]({PUBLISHED}/research-data.html?path=research/2026-09-20/transactions_original_fields.csv) remain separately available in the full capture.", f"[Project cohort and cost evidence]({PUBLISHED}/research-data.html?path=research/2026-09-20/individual/{slug}/cohorts.csv), [project owner comparisons]({PUBLISHED}/research-data.html?path=research/2026-09-20/individual/{slug}/peers.csv), [all individual reports]({PUBLISHED}/property-analysis-{DATE}-individual-project-analyses.html). The linked tables preserve the frozen source capture and do not refresh live offers.")
-    source_rows = [["URA transactions", f"[Public source]({URA})", "Captured 20 Sep 2026; portal update 18 Sep; October 2021–partial September 2026"], ["URA quarterly rent and monthly developer returns", f"[API definitions]({API})", "Requested current rental quarter 2026Q2; developer snapshots retain each reference month"], ["Project scope identity", f"[Scope metadata]({project['scope_source']})" if project.get("scope_source") else "Unresolved", "Secondary geography metadata; no secondary sale price used"]]
+    earlier_rows = earlier_capture_rows(transactions, provenance.get("sources", []))
+    ura_note = "Captured 20 Sep 2026 for the remaining rows; portal update 18 Sep; October 2021–partial September 2026 overall" if earlier_rows else "Captured 20 Sep 2026; portal update 18 Sep; October 2021–partial September 2026"
+    source_rows = [["URA transactions", f"[Public source]({URA})", ura_note], *earlier_rows, ["URA quarterly rent and monthly developer returns", f"[API definitions]({API})", "Requested current rental quarter 2026Q2; developer snapshots retain each reference month"], ["Project scope identity", f"[Scope metadata]({project['scope_source']})" if project.get("scope_source") else "Unresolved", "Secondary geography metadata; no secondary sale price used"]]
     for label, field in [("Project status", "status"), ("Actual TOP", "actual_top"), ("Expected milestone", "proposed_completion"), ("Official unit count", "unit_count")]:
         f = profile.get(field)
         if isinstance(f, dict) and f.get("source_url"):
@@ -355,7 +401,7 @@ def render_project(project, transactions, cohorts, peers, rental, developer, pro
     return "\n".join(lines)
 
 
-def render_future_site(site, cohorts, *, display_name, captured_at, prior=None):
+def render_future_site(site, cohorts, *, display_name, captured_at, project_count, prior=None):
     name = site["site_name"]
     is_ec = site["ec_origin"]
     verdict = (f"Wait for a licensed, unit-specific launch proposition at {name}. "
@@ -380,7 +426,7 @@ def render_future_site(site, cohorts, *, display_name, captured_at, prior=None):
     section(lines, "Competing supply and buyer-pool risk", f"The potential {text(fact_value(site.get('potential_units')), 'unverified number of')} homes are future supply, not available apartments today. The eventual effect depends on launch timing, release policy, completion, unit mix and competing projects. The buyer should not pay an assumed infrastructure or integration premium twice, first in the future launch price and again as automatic resale appreciation.")
     if is_ec:
         section(lines, "EC holding-period constraint", f"The Canberra Drive tender is scheduled to close after 8 May 2026, so the new EC policy cohort applies if that timetable proceeds: ten-year MOP and a longer citizenship-restricted period. The MOP is not ten years from this research capture or land award; applicable completion and HDB conditions matter. Existing older EC resale alternatives follow their own earlier cohorts. [HDB conditions]({EC_RULES}).")
-    section(lines, "Conditions for a purchase assessment", "1. Confirm the final developer-issued identity, licensed unit count, plans, sale conditions and expected possession.\n2. Obtain an executable quotation for a specific layout, floor and facing.\n3. Compare the required exit after BSD, selling costs and holding expenses with appropriately matched owner transactions.\n4. Verify actual routes and delivered amenities; separate future improvements from construction and competing stock.\n5. For ECs, confirm purchaser eligibility, the applicable MOP, rental restrictions and future buyer pool before assuming an exit.", f"[All individual project analyses]({PUBLISHED}/property-analysis-{DATE}-individual-project-analyses.html). This site is listed separately from the 553 named-project transaction inventory and is not counted as a launched condominium.")
+    section(lines, "Conditions for a purchase assessment", "1. Confirm the final developer-issued identity, licensed unit count, plans, sale conditions and expected possession.\n2. Obtain an executable quotation for a specific layout, floor and facing.\n3. Compare the required exit after BSD, selling costs and holding expenses with appropriately matched owner transactions.\n4. Verify actual routes and delivered amenities; separate future improvements from construction and competing stock.\n5. For ECs, confirm purchaser eligibility, the applicable MOP, rental restrictions and future buyer pool before assuming an exit.", f"[All individual project analyses]({PUBLISHED}/property-analysis-{DATE}-individual-project-analyses.html). This site is listed separately from the {project_count} named-project transaction inventory and is not counted as a launched condominium.")
     return "\n".join(lines)
 
 
@@ -409,6 +455,7 @@ def main():
     if "projects" in notes:
         notes = notes["projects"]
     notes = {key(name): value for name, value in notes.items()}
+    provenance = json.loads((batch / "provenance.json").read_text())
     analyses = discover_property_analyses()
     old_manifest = batch / "individual_report_manifest.json"
     previously_generated = {x["source"] for x in json.loads(old_manifest.read_text()).get("reports", []) if not x.get("reused")} if old_manifest.exists() else set()
@@ -438,7 +485,7 @@ def main():
         source = ROOT / "property_analysis" / f"{DATE}-{slug}.md"
         reuse = bool(prior and prior.source_path == source)
         if not reuse:
-            content = render_project(project, tx, c, p, r, d, profiles[name], notes.get(key(name), {}), slug=slug, display_name=display, captured_at=args.captured_at, prior=prior)
+            content = render_project(project, tx, c, p, r, d, profiles[name], notes.get(key(name), {}), slug=slug, display_name=display, captured_at=args.captured_at, prior=prior, provenance=provenance)
             source.write_text(content, encoding="utf-8")
         parsed = parse_property_analysis(source)
         records.append({"project_name": name, "display_name": display, "region": project["region"], "ec_origin": bool(project["ec_origin"]), "slug": slug, "source": str(source.relative_to(ROOT)), "url": f"{PUBLISHED}/{parsed.output_path}", "recent_n": int(project["recent_n"]), "total_n": int(project["total_n"]), "cohorts": len(c), "peer_pairs": len(p), "has_current_rent": bool(r.ref_quarter.eq("2026Q2").any()), "market_stage": parsed.market_stage, "reused": reuse, "sha256": hashlib.sha256(source.read_bytes()).hexdigest()})
@@ -451,18 +498,20 @@ def main():
         slug = prior.project_slug if prior else slugify(site["site_name"] + (" EC future site" if site["ec_origin"] else " GLS future condominium"))
         display = prior.project_name if prior else site["site_name"] + (" EC future site" if site["ec_origin"] else " GLS future condominium")
         path = ROOT / "property_analysis" / f"{DATE}-{slug}.md"
-        path.write_text(render_future_site(site, cohorts, display_name=display, captured_at=args.captured_at, prior=prior))
+        path.write_text(render_future_site(site, cohorts, display_name=display, captured_at=args.captured_at, project_count=len(records), prior=prior))
         parsed = parse_property_analysis(path)
         future_records.append({"project_name": site["project_name"], "display_name": display, "region": site["region"], "ec_origin": site["ec_origin"], "source": str(path.relative_to(ROOT)), "url": f"{PUBLISHED}/{parsed.output_path}", "market_stage": "future project", "reused": False})
     index_path = ROOT / "property_analysis" / f"{DATE}-individual-project-analyses.md"
     index_capture = saved.get("index_captured_at") or (parse_property_analysis(index_path).captured_at.strftime("%Y-%m-%d %H:%M:%S") if index_path.exists() else args.captured_at)
     manifest = {"captured_at": args.captured_at, "index_captured_at": index_capture, "projects": len(records), "reports": records, "future_site_reports": future_records, "future_sites": profile_document.get("future_sites", [])}
     old_manifest.write_text(json.dumps(manifest, indent=2))
-    index_lines = ["# Individual property analyses — every project in the requested areas", "", f"Research captured: **{args.captured_at} SGT (UTC+08:00)**  ", "Property: **Individual property analyses, Tampines / Bedok / Canberra / Lakeside-Jurong / Bukit Timah, Singapore**  ", "Analysis type: **directory of separate project purchase, valuation, rental and exit analyses**  ", "Status: **point-in-time market snapshot**  ", "Market stage: **mixed market**  ", "Summary: **Open a separate analysis for each of the 553 identified projects, including all 20 EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**", "", "## Decision", "", "**Choose a project below to open its individual property analysis.** These are separate reports using the existing property-analysis format. The earlier regional comparison is supporting context; it does not substitute for these project reports.", "", "The captured inventory has 553 identified project names, including 20 EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.", ""]
+    project_count, ec_count = inventory_counts(records)
+    regions = region_label(projects.region.unique())
+    index_lines = ["# Individual property analyses — every project in the requested areas", "", f"Research captured: **{args.captured_at} SGT (UTC+08:00)**  ", f"Property: **Individual property analyses, {regions}, Singapore**  ", "Analysis type: **directory of separate project purchase, valuation, rental and exit analyses**  ", "Status: **point-in-time market snapshot**  ", "Market stage: **mixed market**  ", f"Summary: **Open a separate analysis for each of the {project_count} identified projects, including all {ec_count} EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**", "", "## Decision", "", "**Choose a project below to open its individual property analysis.** These are separate reports using the existing property-analysis format. The earlier regional comparison is supporting context; it does not substitute for these project reports.", "", f"The captured inventory has {project_count} identified project names, including {ec_count} EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.", ""]
     for region in sorted(projects.region.unique()):
         selected = [x for x in records if x["region"] == region]
         section(index_lines, f"{region}: {len(selected)} individual reports", table(["Project analysis", "Category", "Recent transactions", "Current rent", "Report stage"], [[f"[{x['display_name']}]({x['url']})", "EC-origin" if x["ec_origin"] else "Private", x["recent_n"], "2026Q2 published" if x["has_current_rent"] else "Gap flagged", x["market_stage"]] for x in selected]))
-    section(index_lines, "Four additional future land sites", "These have separate individual site assessments and are excluded from the 553 named-project count. Their final names, licensed inventory, home prices and TOP are not invented.", table(["Individual future-site analysis", "Area", "Category"], [[f"[{x['display_name']}]({x['url']})", x["region"], "Future EC site" if x["ec_origin"] else "Future private site"] for x in future_records]))
+    section(index_lines, "Four additional future land sites", f"These have separate individual site assessments and are excluded from the {project_count} named-project count. Their final names, licensed inventory, home prices and TOP are not invented.", table(["Individual future-site analysis", "Area", "Category"], [[f"[{x['display_name']}]({x['url']})", x["region"], "Future EC site" if x["ec_origin"] else "Future private site"] for x in future_records]))
     index_lines[2] = f"Research captured: **{index_capture} SGT (UTC+08:00)**  "
     (ROOT / "property_analysis" / f"{DATE}-individual-project-analyses.md").write_text("\n".join(index_lines))
     print(json.dumps({"individual_projects": len(records), "new_reports": sum(not x["reused"] for x in records), "preserved_same_day_reports": sum(x["reused"] for x in records), "ec_reports": sum(x["ec_origin"] for x in records), "additional_future_sites": len(future_records)}, indent=2))
