@@ -65,4 +65,4 @@ The Canberra Drive tender is scheduled to close after 8 May 2026, so the new EC 
 4. Verify actual routes and delivered amenities; separate future improvements from construction and competing stock.
 5. For ECs, confirm purchaser eligibility, the applicable MOP, rental restrictions and future buyer pool before assuming an exit.
 
-[All individual project analyses](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-individual-project-analyses.html). This site is listed separately from the 553 named-project transaction inventory and is not counted as a launched condominium.
+[All individual project analyses](https://evancjx.github.io/housing-estate-framework/property-analysis-2026-09-20-individual-project-analyses.html). This site is listed separately from the 609 named-project transaction inventory and is not counted as a launched condominium.

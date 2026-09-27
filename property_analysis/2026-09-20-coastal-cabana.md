@@ -28,9 +28,9 @@ Summary: **No current entry-price recommendation is supported for COASTAL CABANA
 
 Market stage describes observed selling activity or a sourced development status. A resale classification is not an independent TOP certificate. A total-unit figure is not live inventory. Registered area is not a bedroom count or a measure of usable internal space.
 
-No rows in the fetched 60-month URA exports; not evidence of no development or no stock.
+The D17 executive condominium export was not captured for this batch, so zero rows here mean not fetched; not evidence of no sales, no development or no stock.
 
-No rows in the fetched 60-month URA exports; not evidence of no development or no stock.
+The D17 executive condominium export was not captured for this batch, so zero rows here mean not fetched; not evidence of no sales, no development or no stock.
 
 
 ## Achieved prices and format selection

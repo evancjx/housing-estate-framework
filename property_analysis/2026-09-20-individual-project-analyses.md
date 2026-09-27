@@ -1,17 +1,17 @@
 # Individual property analyses — every project in the requested areas
 
 Research captured: **2026-09-20 16:57:23 SGT (UTC+08:00)**  
-Property: **Individual property analyses, Tampines / Bedok / Canberra / Lakeside-Jurong / Bukit Timah, Singapore**  
+Property: **Individual property analyses, Tampines / Bedok / Canberra / Lakeside-Jurong / Bukit Timah / Pasir Ris, Singapore**  
 Analysis type: **directory of separate project purchase, valuation, rental and exit analyses**  
 Status: **point-in-time market snapshot**  
 Market stage: **mixed market**  
-Summary: **Open a separate analysis for each of the 553 identified projects, including all 20 EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**
+Summary: **Open a separate analysis for each of the 609 identified projects, including all 27 EC-origin developments. Each report has its own transactions, format choices, owner comparisons, rent, purchase costs, risks and conclusion; missing evidence stays explicit.**
 
 ## Decision
 
 **Choose a project below to open its individual property analysis.** These are separate reports using the existing property-analysis format. The earlier regional comparison is supporting context; it does not substitute for these project reports.
 
-The captured inventory has 553 identified project names, including 20 EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.
+The captured inventory has 609 identified project names, including 27 EC-origin developments. It is not a certified census of every physical development. Historical predecessors and names with no recent transactions receive individual evidence-limit assessments rather than invented live valuations. The existing same-day Canberra Crescent analysis is preserved; older dated project reports remain accessible from their refreshed individual pages.
 
 
 ## Bedok: 302 individual reports
@@ -661,7 +661,7 @@ The captured inventory has 553 identified project names, including 20 EC-origin 
 
 ## Four additional future land sites
 
-These have separate individual site assessments and are excluded from the 553 named-project count. Their final names, licensed inventory, home prices and TOP are not invented.
+These have separate individual site assessments and are excluded from the 609 named-project count. Their final names, licensed inventory, home prices and TOP are not invented.
 
 | Individual future-site analysis | Area | Category |
 | --- | --- | --- |

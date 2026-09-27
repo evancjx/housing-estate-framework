@@ -32,6 +32,8 @@ The captured official 2026Q2 rental series does not establish a current subject 
 
 Market stage describes observed selling activity or a sourced development status. A resale classification is not an independent TOP certificate. A total-unit figure is not live inventory. Registered area is not a bedroom count or a measure of usable internal space.
 
+URA revised Tenure between captures for 6 sales (2025-02 to 2026-05): the earlier export (captured before 2026-09-20) recorded 999 yrs lease commencing from 1937; the later export records 946 yrs lease commencing from 1937. The later capture is treated as current; rows sold before 2025-01 come only from the earlier export and still carry its value.
+
 
 ## Achieved prices and format selection
 
@@ -160,7 +162,8 @@ This is a separate analysis of **The Shorefront**. [Browse every captured projec
 
 | Evidence | Source | Date and limit |
 | --- | --- | --- |
-| URA transactions | [Public source](https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch) | Captured 20 Sep 2026; portal update 18 Sep; October 2021–partial September 2026 |
+| URA transactions | [Public source](https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch) | Captured 20 Sep 2026 for the remaining rows; portal update 18 Sep; October 2021–partial September 2026 overall |
+| URA transactions, earlier capture | [Public source](https://eservice.ura.gov.sg/property-market-information/pmiResidentialTransactionSearch) | 7 of this project's rows (sale months 2021-10 to 2024-12) come from an earlier export: Earlier URA PMI export captured 2026-06-27 (repository commit 61e79a5); used for 2021-10 to 2024-12 only. URA may have revised them since. |
 | URA quarterly rent and monthly developer returns | [API definitions](https://eservice.ura.gov.sg/maps/api/) | Requested current rental quarter 2026Q2; developer snapshots retain each reference month |
 | Project scope identity | [Scope metadata](https://www.edgeprop.sg/condo-apartment/the-shorefront) | Secondary geography metadata; no secondary sale price used |
 | Project status | [Source](https://www.edgeprop.sg/condo-apartment/the-shorefront) | 2026-09-20 |
