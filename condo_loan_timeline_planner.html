@@ -422,6 +422,8 @@
   .owner-outcome-note { margin:7px 0 0; color:var(--muted); font-size:9px; line-height:1.5; }
 
   .timeline-wrap { padding:22px 24px 25px; overflow-x:auto; }
+  .ledger-sync-status { margin:14px 24px 0; padding:9px 12px; border-radius:8px; background:var(--accent-soft); color:var(--accent-dark); font-size:13px; }
+  .ledger-sync-status.ledger-sync-warning { background:var(--warm-soft); color:#704b16; }
   .timeline { position:relative; display:flex; gap:0; min-width:max-content; padding:12px 5px 5px; }
   .timeline::before { content:""; position:absolute; top:28px; left:35px; right:35px; height:3px;
     background:#d8e2dd; }
@@ -900,6 +902,7 @@
 
   <section class="dashboard-card" aria-labelledby="timeline-title">
     <div class="dashboard-heading"><div><h2 id="timeline-title">Property and loan timeline</h2><p id="timeline-copy">BUC progress calls, owner contributions, bank draws and the selected sale date.</p></div><button id="print-plan" type="button">Print / save PDF</button></div>
+    <p class="ledger-sync-status" id="timeline-ledger-status" role="status" hidden></p>
     <div class="timeline-wrap" role="region" aria-label="Scrollable property and loan events" tabindex="0"><div class="timeline" id="timeline-events"></div></div>
   </section>
 
@@ -935,6 +938,7 @@
 
   <section class="dashboard-card" aria-labelledby="schedule-title">
     <div class="dashboard-heading"><div><h2 id="schedule-title">Annual holding checkpoints</h2><p>Each row estimates the property, loan and owner equity on that date.</p></div></div>
+    <p class="ledger-sync-status" id="checkpoint-ledger-status" role="status" hidden></p>
     <div class="table-scroll" role="region" aria-label="Scrollable annual condo loan timeline" tabindex="0">
       <table><thead><tr><th scope="col">Checkpoint</th><th scope="col">Property value</th><th scope="col">Loan drawn</th><th scope="col">Monthly instalment</th><th scope="col">Interest paid to date</th><th scope="col">Outstanding loan</th><th scope="col">Uncalled developer balance</th><th scope="col">Gross equity if sold</th></tr></thead><tbody id="checkpoint-body"></tbody></table>
     </div>
@@ -1035,7 +1039,7 @@
   </form>
 </dialog>
 
-<script src="assets/condo-loan-timeline-planner.js?v=20260809-4"></script>
+<script src="assets/condo-loan-timeline-planner.js?v=20260927-1"></script>
 <script src="assets/condo-loan-timeline-funding-v3.js?v=20260811-1"></script>
 <script src="assets/research-shell.js"></script>
 </body>

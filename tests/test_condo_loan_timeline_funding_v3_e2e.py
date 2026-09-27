@@ -1405,3 +1405,61 @@ def test_route_switch_custom_row_and_mobile_table_scroll(chromium_page) -> None:
     assert page.locator(".cpf-table").evaluate(
         "element => element.scrollWidth > element.clientWidth"
     )
+
+
+def test_planner_applies_or_explains_a_registered_ledger_source(chromium_page) -> None:
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    page, url = chromium_page
+    page_errors: list[str] = []
+    page.on("pageerror", lambda error: page_errors.append(str(error)))
+    _load_clean(page, url)
+    timeline_status = page.locator("#timeline-ledger-status")
+    checkpoint_status = page.locator("#checkpoint-ledger-status")
+    playwright_api.expect(timeline_status).to_be_hidden()
+    playwright_api.expect(checkpoint_status).to_be_hidden()
+
+    register = """
+    source => {
+      window.CondoTimelinePlanner.setFundingLedgerSource(source);
+      document.getElementById('timeline-form')
+        .dispatchEvent(new CustomEvent('funding-ledger-change'));
+    }
+    """
+    page.evaluate(
+        f"({register})(() => ({{ reason: 'test reason' }}))"
+    )
+    expected = "Ledger edits not applied: test reason. Showing the standard payment schedule."
+    playwright_api.expect(timeline_status).to_have_text(expected)
+    playwright_api.expect(checkpoint_status).to_have_text(expected)
+    playwright_api.expect(timeline_status).to_have_class(re.compile("ledger-sync-warning"))
+
+    page.evaluate(
+        f"""({register})(projection => ({{ rows: [
+          ...projection.plan.stages.map(stage => ({{
+            date: stage.date, action: stage.name, category: 'consideration',
+            paymentAmount: stage.amount, loan: stage.loanDraw,
+          }})),
+          {{ date: projection.acquisitionDate, action: 'Keys ceremony',
+             category: 'note', paymentAmount: 0, loan: 0 }},
+        ] }}))"""
+    )
+    playwright_api.expect(timeline_status).to_have_text(
+        "Following your acquisition funding ledger."
+    )
+    playwright_api.expect(timeline_status).not_to_have_class(re.compile("ledger-sync-warning"))
+    playwright_api.expect(
+        page.locator("#timeline-events b", has_text="Keys ceremony")
+    ).to_have_count(1)
+    playwright_api.expect(
+        page.locator("#timeline-events article", has_text="Keys ceremony")
+    ).to_contain_text("Timeline note")
+
+    page.evaluate(f"({register})(() => {{ throw new Error('source broke'); }})")
+    playwright_api.expect(timeline_status).to_have_text(
+        "Ledger edits not applied: source broke. Showing the standard payment schedule."
+    )
+
+    page.evaluate(f"({register})(null)")
+    playwright_api.expect(timeline_status).to_be_hidden()
+    playwright_api.expect(checkpoint_status).to_be_hidden()
+    assert page_errors == []

@@ -180,3 +180,17 @@ def test_resale_ledger_moves_the_completion_draw_without_uncalled_balance() -> N
     assert result["draws"] == [["2026-06-01", 900_000]]
     assert set(result["uncalled"]) == {0}
     assert result["owner"] == pytest.approx(300_000, abs=0.01)
+
+
+def test_ledger_source_must_be_a_function_or_null() -> None:
+    result = _run_node(
+        "return {bad:rejection(()=>planner.setFundingLedgerSource('rows')),"
+        "fn:rejection(()=>planner.setFundingLedgerSource(()=>null)),"
+        "clear:rejection(()=>planner.setFundingLedgerSource(null))};"
+    )
+
+    assert result == {
+        "bad": "funding ledger source must be a function or null",
+        "fn": None,
+        "clear": None,
+    }

@@ -836,6 +836,15 @@
     };
   }
 
+  let fundingLedgerSource = null;
+
+  function setFundingLedgerSource(source) {
+    if (source != null && typeof source !== "function") {
+      throw new TypeError("funding ledger source must be a function or null");
+    }
+    fundingLedgerSource = source || null;
+  }
+
   function init(document) {
     const form = document.getElementById("timeline-form");
     if (!form) return;
@@ -1038,6 +1047,12 @@
     }
 
     function eventDetail(result, event) {
+      if (event.type === "ledger") {
+        const row = event.row;
+        if (row.category === "note") return "Timeline note";
+        if (row.category === "cost") return `Cost ${money(row.paymentAmount)}`;
+        return `Pay ${money(row.paymentAmount)} · owner ${money(row.paymentAmount - row.loan)} · bank ${money(row.loan)}`;
+      }
       if (event.type === "stage") {
         const stage = event.stage;
         return `${stage.percent}% due · owner ${money(stage.ownerContribution)} · bank ${money(stage.loanDraw)}`;
@@ -1211,14 +1226,55 @@
       }
     }
 
+    function applyFundingLedger(options, standard) {
+      if (!fundingLedgerSource) return { result: standard, notice: null };
+      let ledger;
+      try {
+        ledger = fundingLedgerSource(standard);
+      } catch (error) {
+        return { result: standard, notice: { applied: false, reason: error.message } };
+      }
+      if (!ledger) return { result: standard, notice: null };
+      if (!ledger.rows) {
+        return {
+          result: standard,
+          notice: { applied: false, reason: ledger.reason || "the ledger is unavailable" },
+        };
+      }
+      try {
+        return {
+          result: buildHoldingProjection({ ...options, fundingLedger: { rows: ledger.rows } }),
+          notice: { applied: true },
+        };
+      } catch (error) {
+        return { result: standard, notice: { applied: false, reason: error.message } };
+      }
+    }
+
+    function renderLedgerSync(notice) {
+      const text = !notice
+        ? ""
+        : notice.applied
+          ? "Following your acquisition funding ledger."
+          : `Ledger edits not applied: ${notice.reason}. Showing the standard payment schedule.`;
+      ["timeline-ledger-status", "checkpoint-ledger-status"].forEach(id => {
+        const element = byId(id);
+        element.textContent = text;
+        element.hidden = !notice;
+        element.classList.toggle("ledger-sync-warning", Boolean(notice && !notice.applied));
+      });
+    }
+
     function calculate({ focusResults = false, announce = false } = {}) {
       const data = collect();
       renderErrors(data.errors);
       if (data.errors.length) return false;
       try {
-        const result = buildHoldingProjection(data.options);
+        const standard = buildHoldingProjection(data.options);
+        const { result, notice } = applyFundingLedger(data.options, standard);
         latest = { data, result };
         render(data.projectName, result, { announce });
+        renderLedgerSync(notice);
         if (focusResults) {
           byId("result-heading").focus({ preventScroll: true });
           byId("results-panel").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1244,6 +1300,7 @@
       calculate();
     });
     form.addEventListener("cpf-effective-change", () => calculate());
+    form.addEventListener("funding-ledger-change", () => calculate());
     form.querySelectorAll("[data-currency-input]").forEach(input => {
       input.addEventListener("blur", () => {
         try {
@@ -1289,6 +1346,7 @@
     projectedValue,
     sellerStampDutyRate,
     sellerStampDutyZeroDate,
+    setFundingLedgerSource,
     yearFraction,
   };
 });
