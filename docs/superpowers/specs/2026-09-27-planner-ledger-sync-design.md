@@ -98,7 +98,9 @@ ledger rows (for example exercising the S&P, BSD and the 15% payment) could be r
 **Everything else** — `plan`, BSD, mortgage duty, acquisition costs, scenarios, break-even — is
 unchanged. The result gains `fundingLedgerApplied: true | false`.
 
-**Without `fundingLedger`**, output is identical to today, apart from the stable sort (see Testing).
+**Without `fundingLedger`**, output is identical to today, with one exception. The old comparator was inconsistent:
+it listed the resale "Completion / full loan draw" before "Legal acquisition" when both fell on the same
+day. The stable sort restores acquisition, then draw. BUC order is unchanged.
 
 ### 2. Wiring
 
@@ -175,8 +177,8 @@ Script `?v=` query strings are bumped so cached pages load the new code.
 
 **Node unit tests** (pytest via `_run_node`), with the sample BUC plan:
 
-1. **No ledger**: output equals today's for the BUC and resale samples. The events snapshot proves
-   the stable sort does not reorder the existing events.
+1. **No ledger**: output equals today's for the BUC and resale samples. The events snapshot pins BUC
+   order unchanged and the resale same-day order as acquisition, then draw.
 2. **Unedited ledger**: the unedited standard ledger gives the same checkpoints and headline as no
    ledger, to the cent.
 3. **Moved draw**: moving one loan draw later lowers "loan drawn" and interest at the checkpoint in
