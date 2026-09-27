@@ -1,8 +1,11 @@
 # Individual project property analyses
 
 The requested deliverable is one analysis per project, not a regional report.
-The September 2026 publication contains 553 separate project targets, including
-20 EC-origin developments, plus four separate future land-site assessments.
+The September 2026 publication contains 609 separate project targets, including
+27 EC-origin developments, plus four separate future land-site assessments. The
+56 Pasir Ris planning-area projects (7 EC-origin) were added on 2026-09-27 from the
+same 20 September captures; their D17 rows before 2025 come from an earlier export
+(see `provenance.json`).
 The canonical directory is
 `property_analysis/2026-09-20-individual-project-analyses.md`.
 
@@ -48,7 +51,7 @@ qualifying peer evidence and source limitations. The generated narrative does
 not claim manual inspections, current executable quotations or personalized
 investment suitability.
 
-`individual_report_manifest.json` reconciles all 553 project names to unique
+`individual_report_manifest.json` reconciles all 609 project names to unique
 source files and permanent publication URLs. The report generator also exports each project's
 transactions, cohorts, owner comparisons, developer returns and rental series
 under `individual/<project-slug>/`. Generated rows preserve source occurrences.

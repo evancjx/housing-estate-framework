@@ -15,7 +15,7 @@ def test_packaging_preserves_csv_bytes_and_excludes_local_artifacts(tmp_path):
         path = batch / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"{}" if path.suffix == ".json" else b'"name","value"\r\n"same","1"\r\n"same","1"\r\n')
-    (batch / "individual_report_manifest.json").write_text(json.dumps({"reports": [{}] * 553, "future_site_reports": [{}] * 4}))
+    (batch / "individual_report_manifest.json").write_text(json.dumps({"reports": [{}] * 609, "future_site_reports": [{}] * 4}))
     for name in ["report.html", "report_data.json", "storage-state.json", "enrichment/credentials.json", "raw/storage_state.json", "reference/page.html", "program.py"]:
         path = batch / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -42,3 +42,18 @@ def test_incomplete_research_package_fails_before_writing(tmp_path):
     with pytest.raises(ValueError, match="Missing frozen evidence"):
         package(tmp_path, tmp_path / "invalid.zip")
     assert not (tmp_path / "invalid.zip").exists()
+
+
+def test_packaging_rejects_an_unexpected_inventory(tmp_path):
+    import pytest
+    batch = tmp_path / "batch"
+    batch.mkdir()
+    required = ["transactions.csv", "transactions_original_fields.csv", "projects.csv", "cohorts.csv", "provenance.json",
+                "enrichment/individual_editorial_notes.json", "enrichment/individual_project_profiles.json"]
+    for name in required:
+        path = batch / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"{}")
+    (batch / "individual_report_manifest.json").write_text(json.dumps({"reports": [{}] * 553, "future_site_reports": [{}] * 4}))
+    with pytest.raises(ValueError, match="Unexpected individual project inventory"):
+        package(batch, tmp_path / "out.zip")

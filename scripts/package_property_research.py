@@ -10,6 +10,8 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 DATE = "2026-09-20"
+# 553 original projects plus 56 Pasir Ris projects added 2026-09-27 (7 of them EC-origin).
+EXPECTED_PROJECTS, EXPECTED_EC_ORIGIN, EXPECTED_FUTURE_SITES = 609, 27, 4
 
 
 def selected_files(batch: Path) -> list[Path]:
@@ -42,9 +44,9 @@ def package(batch: Path, destination: Path) -> dict:
     if required - names:
         raise ValueError(f"Missing frozen evidence: {sorted(required - names)}")
     reports = json.loads((batch / "individual_report_manifest.json").read_text())
-    if len(reports["reports"]) != 553 or len(reports["future_site_reports"]) != 4:
+    if len(reports["reports"]) != EXPECTED_PROJECTS or len(reports["future_site_reports"]) != EXPECTED_FUTURE_SITES:
         raise ValueError("Unexpected individual project inventory")
-    provenance = {"research_date": DATE, "projects": 553, "ec_origin_projects": 20, "future_sites": 4,
+    provenance = {"research_date": DATE, "projects": EXPECTED_PROJECTS, "ec_origin_projects": EXPECTED_EC_ORIGIN, "future_sites": EXPECTED_FUTURE_SITES,
                   "note": "Frozen public-source evidence and derived research. Report sources and reproducible CLIs are committed separately in the repository.",
                   "files": [{"path": p.relative_to(batch).as_posix(), "bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in files]}
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -58,7 +60,7 @@ def package(batch: Path, destination: Path) -> dict:
             write(path.relative_to(batch).as_posix(), path.read_bytes())
         write("package_manifest.json", json.dumps(provenance, indent=2).encode())
         write("README.md", ("# Frozen individual-property evidence\n\n"
-                            "553 named projects, including 20 EC-origin developments, and four separately assessed future land sites.\n\n"
+                            f"{EXPECTED_PROJECTS} named projects, including {EXPECTED_EC_ORIGIN} EC-origin developments, and four separately assessed future land sites.\n\n"
                             "All source-row occurrences are preserved. New Sale, Sub Sale, Resale, tenure and EC/private groups remain separate. Missing price, rent or completion evidence is not filled with a regional estimate.\n\n"
                             "See `package_manifest.json` for every file hash. See `docs/individual-property-research.md` in the repository for the reproducible offline commands and evidence limits.\n").encode())
     return {"files": len(files) + 2, "archive_bytes": destination.stat().st_size, "sha256": hashlib.sha256(destination.read_bytes()).hexdigest()}
