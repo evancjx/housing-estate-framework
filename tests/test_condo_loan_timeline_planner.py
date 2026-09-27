@@ -262,7 +262,7 @@ def test_page_is_labelled_local_responsive_and_uses_official_sources() -> None:
     assert len(parser.ids) == len(set(parser.ids)), "HTML ids must be unique"
     assert set(parser.scripts) == {
         "assets/condo-loan-timeline-planner.js?v=20260927-1",
-        "assets/condo-loan-timeline-funding-v3.js?v=20260811-1",
+        "assets/condo-loan-timeline-funding-v3.js?v=20260927-1",
         "assets/research-shell.js",
     }
     for input_id in (

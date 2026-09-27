@@ -1995,9 +1995,9 @@
       versionStatus(`Exported “${name}”. Keep the JSON file private; it is not encrypted.`);
     }
 
-    function collectProjection() {
+    function projectionOptions() {
       const route = routeValue();
-      return planner.buildHoldingProjection({
+      return {
         route,
         purchasePrice: currency("purchase-price"),
         purchaseMarketValue: currency("purchase-market-value", true),
@@ -2020,7 +2020,11 @@
         holdingCosts: currency("holding-costs"),
         netRent: currency("net-rent"),
         cpfRefund: currency("cpf-refund"),
-      });
+      };
+    }
+
+    function collectProjection() {
+      return planner.buildHoldingProjection(projectionOptions());
     }
 
     function projectionSignature(projection) {
@@ -2073,6 +2077,30 @@
         state.stale = false;
       }
       return state;
+    }
+
+    function ledgerSyncState(projection) {
+      if (!enabledInput.checked || !coupleSetupComplete || !coupleFundingPlan) return null;
+      const state = currentLedger(projection);
+      if (state.stale) {
+        return {
+          reason: "the main plan changed after you edited the ledger — update the rows or rebuild the ledger",
+        };
+      }
+      if (!validateFundingLedger(state.rows, projection).balanced) {
+        return { reason: "the ledger does not reconcile — fix the flagged rows" };
+      }
+      return { rows: state.rows };
+    }
+
+    function ledgerProjection(rows, fallback) {
+      try {
+        return planner.buildHoldingProjection({ ...projectionOptions(), fundingLedger: { rows } });
+      } catch {
+        // The planner's ledger status line shows this rejection and falls back to the
+        // standard projection, so the owner outcome follows the same fallback.
+        return fallback;
+      }
     }
 
     function ownerNames() {
@@ -2763,7 +2791,7 @@
       byId("regenerate-funding-ledger").disabled = !coupleSetupComplete;
     }
 
-    function render({ regenerate = false } = {}) {
+    function renderLedger({ regenerate = false } = {}) {
       const enabled = enabledInput.checked;
       byId("partner-settings").hidden = !enabled;
       byId("funding-ledger-card").hidden = !enabled || !coupleSetupComplete;
@@ -2806,10 +2834,13 @@
         renderSummary(validation, projection, state);
         renderRows(validation, projection);
         renderFooter(validation);
+        const ledgerApplies = validation.balanced && !state.stale;
         try {
-          renderCpfEstimate(projection, state.rows, {
-            cpfWeightsReliable: validation.balanced && !state.stale,
-          });
+          renderCpfEstimate(
+            ledgerApplies ? ledgerProjection(state.rows, projection) : projection,
+            state.rows,
+            { cpfWeightsReliable: ledgerApplies }
+          );
         } catch (error) {
           renderCpfUnavailable(`CPF estimate unavailable: ${error.message}`);
         }
@@ -2818,10 +2849,17 @@
       }
     }
 
+    function render(options) {
+      renderLedger(options);
+      form.dispatchEvent(new view.CustomEvent("funding-ledger-change"));
+    }
+
     function scheduleRender() {
       view.clearTimeout(refreshTimer);
       refreshTimer = view.setTimeout(() => render(), 0);
     }
+
+    planner.setFundingLedgerSource(ledgerSyncState);
 
     const restoredDraft = restoreDraft();
     const handoffApplied = applyDecisionLabHandoff(restoredDraft);
